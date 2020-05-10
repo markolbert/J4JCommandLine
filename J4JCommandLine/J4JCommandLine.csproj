@@ -1,0 +1,16 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netcoreapp3.1</TargetFramework>
+    <Nullable>enable</Nullable>
+    <AssemblyName>J4JSoftware.CommandLine</AssemblyName>
+    <RootNamespace>J4JSoftware.CommandLine</RootNamespace>
+    <Version>0.1.0.0</Version>
+    <Authors>Mark A. Olbert</Authors>
+    <Company>Jump for Joy Software</Company>
+    <Product>J4JSoftware Command Line Processor</Product>
+    <Description>object-focused command line processing</Description>
+    <Copyright>© Mark A. Olbert all rights reserved</Copyright>
+  </PropertyGroup>
+
+</Project>
