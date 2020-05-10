@@ -13,4 +13,10 @@
     <Copyright>© Mark A. Olbert all rights reserved</Copyright>
   </PropertyGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\..\J4JLogging\ConsoleChannel\ConsoleChannel.csproj" />
+    <ProjectReference Include="..\..\J4JLogging\FileChannel\FileChannel.csproj" />
+    <ProjectReference Include="..\..\J4JLogging\J4JLogging\J4JLogging.csproj" />
+  </ItemGroup>
+
 </Project>
