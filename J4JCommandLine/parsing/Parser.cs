@@ -38,6 +38,8 @@ namespace J4JSoftware.CommandLine
                 if( option == null )
                     continue;
             }
+
+            return new List<IParseResult>();
         }
     }
 }

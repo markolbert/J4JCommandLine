@@ -5,7 +5,7 @@ namespace J4JSoftware.CommandLine
 {
     public interface IParseResult
     {
-        IOption Option { get; }
+        string Key { get; }
         List<string> Arguments { get; }
     }
 }

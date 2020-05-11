@@ -2,124 +2,174 @@
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Reflection;
 using System.Reflection.Metadata.Ecma335;
 using J4JSoftware.Logging;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace J4JSoftware.CommandLine
 {
-    public class BindingTarget<TTarget>
+    public class BindingTarget<TTarget> 
         where TTarget : class
     {
-        private readonly Dictionary<string, TargetableMember> _properties =
-            new Dictionary<string, TargetableMember>( StringComparer.Ordinal );
+        private readonly TargetableProperties _properties = new TargetableProperties();
+        private readonly ITargetingConfiguration _config;
+        private readonly IOptionFactory _optionFactory;
+        private readonly IJ4JLogger? _logger;
 
-        private readonly Dictionary<string, TargetableMethod> _methods =
-            new Dictionary<string, TargetableMethod>(StringComparer.Ordinal);
+        private TTarget _target;
 
         public BindingTarget(
-            ITargetingConfiguration targetingConfig,
+            TTarget target,
+            ITargetingConfiguration config,
+            IOptionFactory optionFactory,
             IJ4JLogger? logger = null
         )
         {
-            TargetingConfiguration = targetingConfig;
-            Logger = logger;
+            _target = target;
+            _config = config;
+            _optionFactory = optionFactory;
+            _logger = logger;
 
-            Logger?.SetLoggedType( this.GetType() );
+            _logger?.SetLoggedType(this.GetType());
+
+            Initialize( _target );
         }
 
-        protected IJ4JLogger? Logger { get; }
-        protected ITargetingConfiguration TargetingConfiguration { get; }
-
-        public bool Initialize( TTarget target )
+        public BindingTarget(
+            ITargetingConfiguration config,
+            IOptionFactory optionFactory,
+            IJ4JLogger? logger = null
+        )
         {
-            var type = target.GetType();
+            _config = config;
+            _optionFactory = optionFactory;
+            _logger = logger;
 
-            Logger?.Verbose<Type>( "Finding targetable properties and methods for {type}", type );
+            _logger?.SetLoggedType( this.GetType() );
 
-            // grab the targetable properties
-            ScanProperties( type.GetProperties() );
+            // if TTarget can't be created on the fly we have to abort
+            // first see if it has a parameterless constructor...
+            var ctor = typeof(TTarget).GetConstructor( Type.EmptyTypes );
 
-            // grab the root targetable methods
-            ScanMethods( type );
+            if( ctor != null )
+                _target = Activator.CreateInstance<TTarget>();
 
-            return true;
+            if( _target == null )
+            {
+                if( config.ServiceProvider == null )
+                    throw new ApplicationException(
+                        $"{typeof(TTarget)} has no parameterless constructor and no {nameof(IServiceProvider)} was defined" );
+
+                try
+                {
+                    _target = config.ServiceProvider.GetRequiredService<TTarget>();
+                }
+                catch( Exception e )
+                {
+                    throw new ApplicationException(
+                        $"Couldn't create and instance of {typeof(TTarget)} from {nameof(IServiceProvider)}, see inner exception for details",
+                        e );
+                }
+            }
+
+            Initialize( _target );
         }
 
-        protected void ScanProperties( IEnumerable<PropertyInfo> properties )
+        public TTarget Target => _target;
+
+        public IOption<TProp>? BindProperty<TProp>(
+            Expression<Func<TTarget, TProp>> propertySelector, 
+            params string[] keys)
+        {
+            var propPath = propertySelector.GetPropertyPath();
+
+            if (_properties.Contains(propPath))
+            {
+                var option = _optionFactory.CreateOption<TProp>( keys );
+
+                if( option == null )
+                    return null;
+
+                _properties[ propPath ].BoundOption = option;
+            }
+
+            _logger?.Error<string>("Property '{propPath}' is not bindable", propPath);
+
+            return null;
+        }
+
+        public bool Bind( List<IParseResult> parseResults )
+        {
+            var retVal = true;
+
+            foreach( var boundProp in _properties )
+            {
+                if( boundProp.BoundOption == null )
+                    continue;
+
+                var textElements = parseResults.FirstOrDefault( pr => boundProp.BoundOption.Keys.Any( k => string.Equals( k, pr.Key ) ) )
+                    ?.Arguments ?? null;
+
+                var convResult = boundProp.BoundOption.Convert( textElements, out var result, out var error );
+
+                switch( convResult )
+                {
+                    case TextConversionResult.Okay:
+                        boundProp.PropertyInfo.SetValue( Target, result );
+                        break;
+
+                    default:
+                        retVal = false;
+                        break;
+                }
+            }
+
+            return retVal;
+        }
+
+        private void Initialize(TTarget target)
+        {
+            var type = typeof(TTarget);
+
+            _logger?.Verbose<Type>("Finding targetable properties for {type}", type);
+
+            ScanProperties(type.GetProperties());
+        }
+
+        private void ScanProperties( IEnumerable<PropertyInfo> properties )
         {
             foreach( var property in properties )
             {
                 // we can't do anything with properties we can't create
-                if( !TargetingConfiguration.CanCreate( property.PropertyType ) )
+                if( !_config.CanCreate( property.PropertyType ) )
                 {
-                    Logger?.Verbose<string>( "Property {0} is not creatable and can't be targeted", property.Name );
+                    _logger?.Verbose<string>( "Property {0} is not creatable and can't be targeted", property.Name );
                     continue;
                 }
 
-                // grab the targetable methods
-                ScanMethods( property.PropertyType );
-
-                var canTarget = TargetingConfiguration.CanTarget( property.PropertyType );
-
-                if( canTarget  )
+                if( _config.CanTarget( property.PropertyType ) )
                 {
-                    if( !property.IsPublicReadWrite( Logger ) )
+                    if( !property.IsPublicReadWrite( _logger ) )
                     {
-                        Logger?.Verbose<string>("Property {0} is not publicly readable and writable and so can't be targeted", property.Name);
+                        _logger?.Verbose<string>(
+                            "Property {0} is not publicly readable and writable and so can't be targeted",
+                            property.Name );
                         continue;
                     }
 
-                    var newTP = new TargetableMember( property );
-                    _properties.Add( newTP.Path, newTP );
+                    _properties.Add( new TargetableProperty( property ) );
 
-                    Logger?.Information<string>("Found targetable property {0}", property.Name);
+                    _logger?.Information<string>( "Found targetable property {0}", property.Name );
                 }
                 else
                 {
                     // recurse over any child properties if we can't directly target the 
                     // current property
-                    Logger?.Verbose<Type>("Finding targetable properties and methods for {0}", property.PropertyType);
+                    _logger?.Verbose<Type>( "Finding targetable properties and methods for {0}", property.PropertyType );
 
                     ScanProperties( property.PropertyType.GetProperties() );
-                }
-            }
-        }
-
-        protected void ScanMethods( Type type )
-        {
-            foreach (var method in type.GetMethods())
-            {
-                Logger?.Verbose<string>( "Determining if {0}() is targetable", method.Name );
-
-                var parameters = method.GetParameters();
-                var allTargetable = true;
-
-                foreach (var parameter in parameters)
-                {
-                    // we can't do anything with parameters we can't create and target
-                    if( TargetingConfiguration.CanCreate( parameter.ParameterType )
-                        && TargetingConfiguration.CanTarget( parameter.ParameterType ) )
-                    {
-                        Logger?.Verbose<string>( "Parameter {0} is not creatable and targetable",
-                            parameter.Name ?? "**unnamed parameter**" );
-                        continue;
-                    }
-
-                    allTargetable = false;
-                    break;
-                }
-
-                if (allTargetable)
-                {
-                    var newMethod = new TargetableMethod(method)
-                    {
-                        Parameters = parameters.ToList()
-                    };
-
-                    _methods.Add(newMethod.Path, newMethod);
-
-                    Logger?.Information<string>( "Found targetable method {0}()", method.Name );
                 }
             }
         }

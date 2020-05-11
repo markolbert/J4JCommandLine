@@ -3,22 +3,23 @@ using System.Text;
 
 namespace J4JSoftware.CommandLine
 {
-    public class TargetableMember
+    public class TargetableProperty
     {
-        public TargetableMember( MemberInfo memberInfo )
+        public TargetableProperty( PropertyInfo propertyInfo )
         {
-            MemberInfo = memberInfo;
+            PropertyInfo = propertyInfo;
         }
 
-        public MemberInfo MemberInfo { get; }
+        public PropertyInfo PropertyInfo { get; }
+        public IOption? BoundOption { get; set; }
 
         public string Path
         {
             get
             {
-                var retVal = new StringBuilder(MemberInfo.Name);
+                var retVal = new StringBuilder(PropertyInfo.Name);
 
-                var curParent = MemberInfo.DeclaringType;
+                var curParent = PropertyInfo.DeclaringType;
 
                 while( curParent != null )
                 {
