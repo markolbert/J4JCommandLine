@@ -6,6 +6,7 @@ namespace J4JSoftware.CommandLine
     public interface IParseResult
     {
         string Key { get; }
-        List<string> Arguments { get; }
+        int NumParameters { get; }
+        List<string> Parameters { get; }
     }
 }

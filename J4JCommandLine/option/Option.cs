@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
+using System.Linq;
 using J4JSoftware.Logging;
 
 namespace J4JSoftware.CommandLine
@@ -10,15 +11,21 @@ namespace J4JSoftware.CommandLine
     {
         private readonly List<string> _keys = new List<string>();
         private readonly IOptionCollection _options;
+        private readonly CommandLineErrors _errors;
+        private readonly ITextConverter<TOption> _converter;
+
+        private IOptionValidator<TOption>? _validator;
 
         public Option( 
-            TOption initialDefault,
             IOptionCollection options,
+            ITextConverter<TOption> converter,
+            CommandLineErrors errors,
             IJ4JLogger? logger = null 
         )
         {
-            DefaultValue = initialDefault;
             _options = options;
+            _converter = converter;
+            _errors = errors;
             Logger = logger;
 
             Logger?.SetLoggedType( this.GetType() );
@@ -29,8 +36,6 @@ namespace J4JSoftware.CommandLine
         public ReadOnlyCollection<string> Keys => _keys.AsReadOnly();
 
         public TOption DefaultValue { get; private set; }
-
-        public Func<TOption, bool>? Validator { get; protected set; }
 
         public IOption<TOption> AddKey( string key )
         {
@@ -62,55 +67,86 @@ namespace J4JSoftware.CommandLine
             return this;
         }
 
-        public IOption<TOption> SetValidator( Func<TOption, bool> validator )
+        public IOption<TOption> SetValidator( IOptionValidator<TOption> validator )
         {
-            Validator = validator;
+            _validator = validator;
 
             Logger?.Verbose( "Set validator" );
 
             return this;
         }
 
-        public bool IsValid( TOption toCheck )
+        public TextConversionResult Convert(
+            IBindingTarget bindingTarget,
+            IParseResult parseResult,
+            out TOption result )
         {
-            if( Validator == null )
+            if (parseResult.NumParameters != 1)
             {
-                Logger?.Verbose<string>("No {0} defined, assuming value is valid", nameof(Validator));
-                return true;
+                result = DefaultValue;
+
+                bindingTarget.AddError(parseResult.Key, $"Incorrect number of parameters. Expected 1, got {parseResult.NumParameters}");
+                return TextConversionResult.FailedConversion;
             }
 
-            if( Validator( toCheck ) )
+            if( _converter.Convert( parseResult.Parameters[ 0 ], out var innerResult ) )
             {
-                Logger?.Verbose<string>( "Value {0} is valid", toCheck?.ToString() ?? "**value**" );
-                return true;
+                result = innerResult;
+                return TextConversionResult.Okay;
             }
 
-            Logger?.Information<string>("Value {0} is invalid", toCheck?.ToString() ?? "**value**");
-
-            return false;
-        }
-
-        public virtual TextConversionResult Convert( List<string>? textElements, out TOption result, out string? error )
-        {
             result = DefaultValue;
-            error = null;
 
-            return TextConversionResult.Okay;
+            bindingTarget.AddError(
+                parseResult.Key,
+                $"Couldn't convert '{parseResult.Parameters[0]}' to {typeof(TOption)}");
+
+            return TextConversionResult.FailedConversion;
         }
 
-        bool IOption.IsValid( object toCheck )
+        public TextConversionResult ConvertList(
+            IBindingTarget bindingTarget,
+            IParseResult parseResult,
+            out List<TOption> result )
         {
-            if( toCheck is TOption cast )
-                return IsValid( cast );
+            result = new List<TOption>();
 
-            Logger?.Warning<string, Type>( "{0} is not an instance of {1}", nameof(toCheck), typeof(TOption) );
+            var allOkay = true;
 
-            return false;
+            foreach( var parameter in parseResult.Parameters )
+            {
+                if( _converter.Convert( parameter, out var innerResult ) )
+                    result.Add( innerResult );
+                else
+                {
+                    bindingTarget.AddError(
+                        parseResult.Key,
+                        $"Couldn't convert '{parameter}' to {typeof(TOption)}" );
+
+                    allOkay = false;
+                }
+            }
+
+            return allOkay ? TextConversionResult.Okay : TextConversionResult.FailedConversion;
         }
 
-        TextConversionResult IOption.Convert( List<string>? textElements, out object result, out string? error )
+        public bool Validate( IBindingTarget bindingTarget, string key, TOption value )
+            => _validator?.Validate( bindingTarget, key, value ) ?? true;
+
+        bool IOption.Validate( IBindingTarget bindingTarget, string key, object value )
         {
-            var retVal = Convert( textElements, out TOption cast, out string? innerError );
+            if( value is TOption castValue )
+                return Validate( bindingTarget, key, castValue );
+
+            return true;
+        }
+
+        TextConversionResult IOption.Convert( 
+            IBindingTarget bindingTarget, 
+            IParseResult parseResult, 
+            out object result )
+        {
+            var retVal = Convert( bindingTarget, parseResult, out TOption cast );
 
             switch ( retVal )
             {
@@ -120,21 +156,57 @@ namespace J4JSoftware.CommandLine
                     {
                         result = new object();
 
-                        var elements = textElements == null ? "**null list**" : string.Join( ", ", textElements );
-                        error = $"'{string.Join(", ", elements)}' got converted to a null object";
+                        var elements = parseResult.NumParameters > 0
+                            ? string.Join( ", ", parseResult.Parameters )
+                            : "**null list**";
+
+                        var error = $"'{string.Join(", ", elements)}' got converted to a null object";
+                        _errors.AddError( bindingTarget, "", error );
 
                         return TextConversionResult.ResultIsNull;
                     }
 
                     result = cast;
-                    error = null;
 
                     return TextConversionResult.Okay;
 
                 default:
                     result = new object();
-                    error = innerError;
+                    return retVal;
+            }
+        }
 
+        TextConversionResult IOption.ConvertList(
+            IBindingTarget bindingTarget,
+            IParseResult parseResult,
+            out List<object> result)
+        {
+            var retVal = ConvertList(bindingTarget, parseResult, out List<TOption> castResult);
+
+            switch (retVal)
+            {
+                case TextConversionResult.Okay:
+                    // this should never happen...
+                    if (castResult == null)
+                    {
+                        result = new List<object>();
+
+                        var elements = parseResult.NumParameters > 0
+                            ? string.Join(", ", parseResult.Parameters)
+                            : "**null list**";
+
+                        var error = $"'{string.Join(", ", elements)}' got converted to a null object";
+                        _errors.AddError(bindingTarget, "", error);
+
+                        return TextConversionResult.ResultIsNull;
+                    }
+
+                    result = castResult.Cast<object>().ToList();
+
+                    return TextConversionResult.Okay;
+
+                default:
+                    result = new List<object>();
                     return retVal;
             }
         }

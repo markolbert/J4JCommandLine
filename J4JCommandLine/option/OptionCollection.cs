@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System.Collections;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
 using J4JSoftware.Logging;
@@ -30,12 +31,12 @@ namespace J4JSoftware.CommandLine
             {
                 _logger?.Verbose<string>( "Key '{0}' already in use", key );
 
-                return false;
+                return true;
             }
 
             _logger?.Verbose<string>("Key '{0}' not in use", key);
 
-            return true;
+            return false;
         }
 
         public IOption? this[ string key ] =>
@@ -66,6 +67,19 @@ namespace J4JSoftware.CommandLine
             _logger?.Verbose<string>( "Option '{0}' added", option.ToString() ?? "**option**" );
 
             return true;
+        }
+
+        public IEnumerator<IOption> GetEnumerator()
+        {
+            foreach( var option in _options )
+            {
+                yield return option;
+            }
+        }
+
+        IEnumerator IEnumerable.GetEnumerator()
+        {
+            return GetEnumerator();
         }
     }
 }

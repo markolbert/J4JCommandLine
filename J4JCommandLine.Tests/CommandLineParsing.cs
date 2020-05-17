@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
 using FluentAssertions;
@@ -24,18 +25,21 @@ namespace J4JCommandLine.Tests
 
             _options = new OptionCollection( parseConfig );
         }
+
         [ Theory ]
-        [ InlineData( new string[] {"-x", "hello"}, "x", new string[] { "hello" } ) ]
-        [ InlineData(new string[] { "-x", "hello", "goodbye" }, "x", new string[] { "hello", "goodbye" } ) ]
-        [InlineData(new string[] { "-x"}, "x", new string[] {"true"})]
+        [ InlineData( new string[] { "-x", "hello" }, "x", new string[] { "hello" } ) ]
+        [ InlineData( new string[] { "-x", "hello", "goodbye" }, "x", new string[] { "hello", "goodbye" } ) ]
+        [ InlineData( new string[] { "-x" }, "x", new string[] { "true" } ) ]
+        [ InlineData( new string[] { "-x:abc" }, "x", new string[] { "abc" } ) ]
+        [ InlineData( new string[] { "-x:\"abc\"" }, "x", new string[] { "abc" } ) ]
         public void parse_one_item( string[] toParse, string key, string[] args )
         {
             var parsed = _cmdLineParser.Parse( toParse );
 
             parsed.Count.Should().Be( 1 );
-            parsed.ContainsKey( key ).Should().BeTrue();
+            parsed.Contains( key ).Should().BeTrue();
 
-            parsed[ key ].Should().BeEquivalentTo( args );
+            parsed[ key ].Parameters.Should().BeEquivalentTo( args );
         }
 
         [ Theory ]
@@ -57,14 +61,9 @@ namespace J4JCommandLine.Tests
 
             for( var idx = 0; idx < keys.Length; idx++ )
             {
-                parsed.ContainsKey( keys[ idx ] ).Should().BeTrue();
-                parsed[ keys[ idx ] ].Should().BeEquivalentTo( results[ idx ] );
+                parsed.Contains( keys[ idx ] ).Should().BeTrue();
+                parsed[ keys[ idx ] ].Parameters.Should().BeEquivalentTo( results[ idx ] );
             }
-        }
-
-        public void parse_one_option( string[] toParse, string key )
-        {
-            _options.Clear();
         }
     }
 }

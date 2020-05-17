@@ -111,5 +111,29 @@ namespace J4JSoftware.CommandLine
                 }
             }
         }
+
+        public static bool HasPublicParameterlessConstructor( this PropertyInfo propertyInfo )
+        {
+            return propertyInfo.PropertyType.HasPublicParameterlessConstructor();
+        }
+
+        public static bool HasPublicParameterlessConstructor( this Type toCheck )
+        {
+            return toCheck.GetConstructor( Type.EmptyTypes ) != null;
+        }
+
+        public static StringComparer ToStringComparer( this StringComparison textComp )
+        {
+            return textComp switch
+            {
+                StringComparison.InvariantCulture => StringComparer.InvariantCulture,
+                StringComparison.CurrentCulture => StringComparer.CurrentCulture,
+                StringComparison.Ordinal => StringComparer.Ordinal,
+                StringComparison.InvariantCultureIgnoreCase => StringComparer.InvariantCultureIgnoreCase,
+                StringComparison.CurrentCultureIgnoreCase => StringComparer.CurrentCultureIgnoreCase,
+                StringComparison.OrdinalIgnoreCase => StringComparer.OrdinalIgnoreCase,
+                _ => throw new NotImplementedException()
+            };
+        }
     }
 }

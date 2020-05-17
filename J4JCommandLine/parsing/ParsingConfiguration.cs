@@ -8,28 +8,35 @@ namespace J4JSoftware.CommandLine
 {
     public class ParsingConfiguration : IParsingConfiguration
     {
+        public static string[] DefaultPrefixes = new[] { "-", "--", "/" };
+        public static string[] DefaultTextDelimiters = new[] { "'", "\"" };
+        public static string[] DefaultEnclosers = new[] { "=", ":" };
+
         private readonly List<string> _prefixes = new List<string>();
         private readonly List<string> _enclosers = new List<string>();
-        private readonly List<string> _forbidden = new List<string>();
         private readonly List<string> _delimiters = new List<string>();
 
-        public ParsingConfiguration( IJ4JLogger? logger = null )
+        public ParsingConfiguration(
+            IJ4JLogger? logger = null
+        )
         {
             Logger = logger;
 
-            Logger?.SetLoggedType(this.GetType());
+            _prefixes.AddRange( DefaultPrefixes );
+            _enclosers.AddRange( DefaultEnclosers );
+            _delimiters.AddRange( DefaultTextDelimiters );
+
+            Logger?.SetLoggedType( this.GetType() );
         }
 
         protected IJ4JLogger? Logger { get; }
 
-        public ReadOnlyCollection<string> ForbiddenText => _forbidden.AsReadOnly();
         public ReadOnlyCollection<string> Prefixes => _prefixes.AsReadOnly();
         public ReadOnlyCollection<string> ValueEnclosers => _enclosers.AsReadOnly();
         public ReadOnlyCollection<string> TextDelimiters => _delimiters.AsReadOnly();
 
         public StringComparison TextComparison { get; set; } = StringComparison.Ordinal;
 
-        public void AddForbiddenText( params string[] toAdd ) => AddText( _forbidden, toAdd, "forbidden" );
         public void AddPrefixes( params string[] toAdd ) => AddText( _prefixes, toAdd, "prefixes" );
         public void AddValueEnclosers( params string[] toAdd ) => AddText( _enclosers, toAdd, "value enclosers" );
         public void AddTextDelimiters(params string[] toAdd) => AddText(_delimiters, toAdd, "text delimiters");

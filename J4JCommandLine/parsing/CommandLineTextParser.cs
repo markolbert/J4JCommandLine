@@ -30,46 +30,22 @@ namespace J4JSoftware.CommandLine
 
             _logger?.SetLoggedType( this.GetType() );
 
-            if (parseConfig.Prefixes.Count == 0)
-                _logger?.Warning("No command line prefixes defined");
+            if( parseConfig.Prefixes.Count == 0 )
+            {
+                _logger?.Fatal("No command line prefixes defined");
+                throw new ApplicationException( "No command line prefixes defined" );
+            }
 
-            if (parseConfig.TextDelimiters.Count == 0)
-                _logger?.Warning("No command line text delimiters defined");
+            if( parseConfig.TextDelimiters.Count == 0 )
+            {
+                _logger?.Fatal("No command line text delimiters defined");
+                throw new ApplicationException("No command line text delimiters defined");
+            }
 
             if (parseConfig.ValueEnclosers.Count == 0)
                 _logger?.Warning("No command line value enclosers defined");
 
-            // create the regex splitter
-            var sbSplitter = new StringBuilder();
-
-            foreach( var prefix in parseConfig.Prefixes )
-            {
-                if( sbSplitter.Length > 0 )
-                    sbSplitter.Append( "|" );
-
-                sbSplitter.Append( $"^{prefix}" );
-            }
-
-            foreach( var encloser in parseConfig.ValueEnclosers )
-            {
-                if (sbSplitter.Length > 0)
-                    sbSplitter.Append("|");
-
-                sbSplitter.Append($"{encloser}");
-            }
-
             // create the regex remover
-            var sbRemover = new StringBuilder("^[");
-
-            foreach (var delimiter in parseConfig.TextDelimiters)
-            {
-                if (sbRemover.Length > 0)
-                    sbRemover.Append("|");
-
-                sbRemover.Append(delimiter);
-            }
-
-            sbRemover.Append( "]" );
 
             var regexOptions = RegexOptions.Compiled;
 
@@ -82,102 +58,161 @@ namespace J4JSoftware.CommandLine
                     break;
             }
 
-            _splitter = new Regex( sbSplitter.ToString(), regexOptions );
-            _remover = new Regex( @$"{sbRemover.ToString()}?(.*?){sbRemover.ToString()}?$",
-                RegexOptions.IgnoreCase | RegexOptions.Compiled );
+            _splitter = new Regex( GetRegexSplitter(parseConfig), regexOptions );
+
+            var rxRemover = GetRegexRemover( parseConfig );
+            _remover = new Regex( @$"{rxRemover}?(.*?){rxRemover}?$", regexOptions );
         }
 
-        public Dictionary<string, List<string>> Parse( string[] args )
+        public ParseResults Parse( string[] values )
         {
-            var retVal = new Dictionary<string, List<string>>();
+            var retVal = new ParseResults( _parseConfig );
 
-            var curTag = string.Empty;
-            var prevTag = string.Empty;
+            string? curKey = null;
+            var parameters = new List<string>();
 
             // Valid parameters forms:
-            // {prefix}param{encloser}({delimiter}}value{delimiter})
-            foreach( var arg in args )
+            // {prefix}key{encloser}({delimiter}}value{delimiter})*
+            // console apps appear to split the command line based on space characters into
+            // an array of arguments. An argument can be an option declaration (i.e., something
+            // introduced by a special declarator, like /, - or --), a value (i.e., just plain
+            // text without any declarator) or a combination (e.g., -x:abc) of a declarator and a
+            // value bound together with an enclosurer text (the : in the example above).
+            foreach( var value in values )
             {
-                var parts = _splitter.Split( arg, 3 );
+                var parts = _splitter.Split( value, 3 );
 
                 switch( parts.Length )
                 {
-                    // Found a value (for the last tag found (space separator))
+                    // a single part means "just a value", i.e., there was no declarator
+                    // present. So add the value to our list of parameters
                     case 1:
-                        if( !string.Equals(curTag, prevTag, _parseConfig.TextComparison) )
-                        {
-                            if( !retVal.ContainsKey( curTag ) )
-                            {
-                                create_entry(curTag, _remover.Replace(parts[0], "$1"));
-                            }
+                        // if there's no option pending (i.e., being processed) something
+                        // has gone wrong because we've encountered a "naked value", one
+                        // not following a declared option
+                        if( string.IsNullOrEmpty(curKey) )
+                            throw new ApplicationException(
+                                $"Found command line value '{parts[ 0 ]}' unassociated with an option" );
 
-                            prevTag = curTag;
-                        }
-                        else
-                        {
-                            retVal[ curTag ].Add( parts[ 0 ] );
-
-                            _logger?.Verbose<string>( "Added value '{0}' to parsed tag", parts[ 0 ] );
-                        }
+                        // clean up the value before caching it
+                        parameters.Add( _remover.Replace( parts[ 0 ], "$1" ) );
 
                         break;
 
-                    // Found just a parameter
+                    // two parts means we found something introduced by a declarator but
+                    // no value was present. So emit the result based on the previously
+                    // declared tag and any captured parameters.
                     case 2:
-                        // The last parameter is still waiting. With no value, set it to true.
-                        if (!string.Equals(curTag, prevTag, _parseConfig.TextComparison))
-                        {
-                            if( !retVal.ContainsKey( curTag ) )
-                            {
-                                create_entry(curTag, "true");
-                            }
-                        }
+                        // if we're currently processing a tag/option, emit it
+                        if( !string.IsNullOrEmpty( curKey ) )
+                            emit_option( curKey, parameters );
 
-                        curTag = parts[ 1 ];
+                        // update the key/option we're processing and reset the parameters
+                        // collection
+                        curKey = parts[ 1 ];
+                        parameters.Clear();
+
                         break;
 
-                    // Parameter with enclosed value
+                    // three parts means we found a combined declarator/value. So emit the
+                    // result based on the previously declared tag and any captured parameters.
                     case 3:
-                        // The last parameter is still waiting. With no value, set it to true.
-                        if (!string.Equals(curTag, prevTag, _parseConfig.TextComparison))
-                        {
-                            {
-                                create_entry(curTag, "true");
-                            }
-                        }
+                        // if we're currently processing a tag/option, emit it
+                        if( !string.IsNullOrEmpty( curKey ) )
+                            emit_option( curKey, parameters );
 
-                        curTag = parts[ 1 ];
+                        // update the key/option we're processing and reset the parameters
+                        // collection
+                        curKey = parts[ 1 ];
+                        parameters.Clear();
 
-                        // Remove possible enclosing characters (",')
-                        if( !retVal.ContainsKey( curTag ) )
-                        {
-                            create_entry( curTag, _remover.Replace( parts[ 2 ], "$1" ) );
-                        }
+                        // Remove possible enclosing characters from the value portion and store
+                        // it in the parameters collection
+                        parameters.Add( _remover.Replace( parts[ 2 ], "$1" ) );
 
-                        prevTag = curTag;
+                        // emit the option, since combined declarator/values are atomic (i.e., they
+                        // can't contain multiple parameters) and indicate we're no longer
+                        // currently processing an option
+                        emit_option( curKey, parameters );
+
+                        // since combined declarator/values are atomic (i.e., they can't contain
+                        // multiple parameters) indicate we're no longer processing an option
+                        curKey = null;
+                        parameters.Clear();
 
                         break;
                 }
             }
 
-            // In case a parameter is still waiting
-            if( string.Equals( curTag, prevTag, _parseConfig.TextComparison ) ) 
-                return retVal;
-            
-            if ( !retVal.ContainsKey( curTag ) )
-                create_entry(curTag, "true");
+            // In case an option is still waiting to be emitted
+            if( !string.IsNullOrEmpty( curKey ) )
+                emit_option( curKey, parameters );
 
             return retVal;
 
-            void create_entry( string tag, string text )
+            void emit_option( string key, List<string> keyValues )
             {
-                var values = new List<string>();
-                values.Add(text);
+                // retVal will never be null when this private function is called
+                if( retVal == null )
+                    throw new ApplicationException($"{nameof(ParseResults)} is undefined.");
 
-                retVal?.Add(tag, values);
+                // an empty keyValues list means this was a switch option so add
+                // the value "true" to keyValues
+                if ( keyValues.Count == 0 )
+                    keyValues.Add( "true" );
 
-                _logger?.Verbose<string, string>( "Created parsed tag '{0}' and added value '{1}' to it", tag, text );
+                // if retVal already contains an entry for key merge the current
+                // parameter list into the exiting parameter list
+                if ( retVal.Contains( key ) )
+                    retVal[key].Parameters.AddRange(keyValues);
+                else
+                {
+                    var entry = new ParseResult { Key = key };
+                    entry.Parameters.AddRange(keyValues);
+
+                    retVal.Add(entry);
+                }
             }
+        }
+
+        private string GetRegexRemover(IParsingConfiguration parseConfig)
+        {
+            var retVal = new StringBuilder("[");
+            
+            for( var idx = 0; idx < parseConfig.TextDelimiters.Count; idx++ )
+            {
+                if (idx > 0)
+                    retVal.Append("|");
+
+                retVal.Append( parseConfig.TextDelimiters[ idx ] );
+            }
+
+            retVal.Append("]");
+
+            return retVal.ToString();
+        }
+
+        private string GetRegexSplitter(IParsingConfiguration parseConfig)
+        {
+            var retVal = new StringBuilder();
+
+            foreach (var prefix in parseConfig.Prefixes)
+            {
+                if (retVal.Length > 0)
+                    retVal.Append("|");
+
+                retVal.Append($"^{prefix}");
+            }
+
+            foreach (var encloser in parseConfig.ValueEnclosers)
+            {
+                if (retVal.Length > 0)
+                    retVal.Append("|");
+
+                retVal.Append($"{encloser}");
+            }
+
+            return retVal.ToString();
         }
     }
 }

@@ -7,7 +7,6 @@ namespace J4JSoftware.CommandLine
 {
     public interface IParsingConfiguration
     {
-        ReadOnlyCollection<string> ForbiddenText { get; }
         ReadOnlyCollection<string> Prefixes { get; }
         ReadOnlyCollection<string> ValueEnclosers { get; }
         ReadOnlyCollection<string> TextDelimiters { get; }

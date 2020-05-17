@@ -15,6 +15,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ConsoleChannel", "..\J4JLog
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FileChannel", "..\J4JLogging\FileChannel\FileChannel.csproj", "{C33F0781-1F2A-43B8-B3C6-7B69EA196826}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AutoFacJ4JLogging", "..\J4JLogging\AutoFacJ4JLogging\AutoFacJ4JLogging.csproj", "{E1F16723-C6DE-4A47-BE00-DB5BD84FBCA9}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -41,6 +43,10 @@ Global
 		{C33F0781-1F2A-43B8-B3C6-7B69EA196826}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{C33F0781-1F2A-43B8-B3C6-7B69EA196826}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{C33F0781-1F2A-43B8-B3C6-7B69EA196826}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E1F16723-C6DE-4A47-BE00-DB5BD84FBCA9}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E1F16723-C6DE-4A47-BE00-DB5BD84FBCA9}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E1F16723-C6DE-4A47-BE00-DB5BD84FBCA9}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E1F16723-C6DE-4A47-BE00-DB5BD84FBCA9}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -49,6 +55,7 @@ Global
 		{AABAFC45-5BF3-4A55-8723-034039B4A068} = {49668F40-3271-4A21-A860-8C6496E00124}
 		{E8151AFD-9B85-4DA9-8651-F15DAEA5D962} = {49668F40-3271-4A21-A860-8C6496E00124}
 		{C33F0781-1F2A-43B8-B3C6-7B69EA196826} = {49668F40-3271-4A21-A860-8C6496E00124}
+		{E1F16723-C6DE-4A47-BE00-DB5BD84FBCA9} = {49668F40-3271-4A21-A860-8C6496E00124}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {F40695CC-CF6A-4293-81A1-04D389611E2D}

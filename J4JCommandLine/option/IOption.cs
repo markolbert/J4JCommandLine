@@ -6,31 +6,40 @@ using Microsoft.VisualBasic.CompilerServices;
 
 namespace J4JSoftware.CommandLine
 {
-    public enum TextConversionResult
-    {
-        Okay,
-        FailedConversion,
-        FailedValidation,
-        ResultIsNull
-    }
-
     public interface IOption
     {
         ReadOnlyCollection<string> Keys { get; }
-        bool IsValid( object toCheck );
-        TextConversionResult Convert( List<string>? textElements, out object result, out string? error );
+        bool Validate( IBindingTarget bindingTarget, string key, object value );
+
+        TextConversionResult Convert(
+            IBindingTarget bindingTarget,
+            IParseResult parseResult,
+            out object result );
+
+        TextConversionResult ConvertList(
+            IBindingTarget bindingTarget,
+            IParseResult parseResult,
+            out List<object> result);
     }
 
     public interface IOption<TOption> : IOption
     {
         TOption DefaultValue { get; }
-        Func<TOption, bool>? Validator { get; }
 
         IOption<TOption> AddKey( string key );
         IOption<TOption> AddKeys( IEnumerable<string> keys );
         IOption<TOption> SetDefaultValue( TOption defaultValue );
-        IOption<TOption> SetValidator( Func<TOption, bool> validator );
-        bool IsValid( TOption toCheck );
-        TextConversionResult Convert( List<string>? textElements, out TOption result, out string? error );
+        IOption<TOption> SetValidator( IOptionValidator<TOption> validator );
+        bool Validate( IBindingTarget bindingTarget, string key, TOption value );
+
+        TextConversionResult Convert(
+            IBindingTarget bindingTarget,
+            IParseResult parseResult,
+            out TOption result );
+
+        TextConversionResult ConvertList(
+            IBindingTarget bindingTarget,
+            IParseResult parseResult,
+            out List<TOption> result);
     }
 }
