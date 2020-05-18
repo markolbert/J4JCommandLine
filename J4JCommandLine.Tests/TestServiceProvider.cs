@@ -26,8 +26,7 @@ namespace J4JCommandLine.Tests
                 .SingleInstance();
 
             builder.RegisterType<CommandLineContext>()
-                .AsSelf()
-                .SingleInstance();
+                .AsSelf();
 
             builder.RegisterType<CommandLineTextParser>()
                 .As<ICommandLineTextParser>()

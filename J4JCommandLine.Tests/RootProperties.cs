@@ -4,7 +4,7 @@ using System.Text;
 
 namespace J4JCommandLine.Tests
 {
-    public class TestTarget
+    public class RootProperties
     {
         public string TextProperty { get; set; }
         public int IntProperty { get; set; }

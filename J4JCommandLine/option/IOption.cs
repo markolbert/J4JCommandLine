@@ -9,6 +9,8 @@ namespace J4JSoftware.CommandLine
     public interface IOption
     {
         ReadOnlyCollection<string> Keys { get; }
+        object DefaultValue { get; }
+        
         bool Validate( IBindingTarget bindingTarget, string key, object value );
 
         TextConversionResult Convert(
@@ -24,8 +26,6 @@ namespace J4JSoftware.CommandLine
 
     public interface IOption<TOption> : IOption
     {
-        TOption DefaultValue { get; }
-
         IOption<TOption> AddKey( string key );
         IOption<TOption> AddKeys( IEnumerable<string> keys );
         IOption<TOption> SetDefaultValue( TOption defaultValue );

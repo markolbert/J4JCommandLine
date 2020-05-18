@@ -87,7 +87,8 @@ namespace J4JSoftware.CommandLine
                     case ParameterExpression paramExpr:
                         // this is the root/anchor of the expression tree. we want 
                         // the simple type name, not the node's name
-                        propNames.Add(paramExpr.Type.Name);
+                        // commented out because we switched to relative property paths
+                        //propNames.Add(paramExpr.Type.Name);
 
                         // we're done
                         curExpr = null;
@@ -119,6 +120,11 @@ namespace J4JSoftware.CommandLine
 
         public static bool HasPublicParameterlessConstructor( this Type toCheck )
         {
+            // value types always have a public parameterless constructor
+            // strings essentially do...although not technically :)
+            if( toCheck.IsValueType || toCheck == typeof(string) )
+                return true;
+
             return toCheck.GetConstructor( Type.EmptyTypes ) != null;
         }
 

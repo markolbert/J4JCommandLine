@@ -9,13 +9,14 @@ namespace J4JSoftware.CommandLine
         string ID { get; }
 
         void AddError( string key, string error );
-        bool MapParseResults( ParseResults parseResults );
+        MappingResults MapParseResults( ParseResults parseResults );
+        object GetValue();
     }
 
     public interface IBindingTarget<TTarget> : IBindingTarget
         where TTarget : class
     {
-        TTarget Target { get; }
+        TTarget Value { get; }
 
         IOption<TProp>? BindProperty<TProp>(
             Expression<Func<TTarget, TProp>> propertySelector,

@@ -5,13 +5,14 @@ using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
 using System.Reflection.Metadata.Ecma335;
+using System.Text;
 using J4JSoftware.Logging;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace J4JSoftware.CommandLine
 {
-    public class BindingTarget<TTarget> : IBindingTarget<TTarget> 
-        where TTarget : class
+    public class BindingTarget<TValue> : IBindingTarget<TValue> 
+        where TValue : class
     {
         private readonly TargetableProperties _properties = new TargetableProperties();
         private readonly IJ4JLogger? _logger;
@@ -23,7 +24,7 @@ namespace J4JSoftware.CommandLine
 
         public BindingTarget(
             string targetID,
-            TTarget target,
+            TValue value,
             IEnumerable<ITextConverter> converters,
             IOptionCollection options,
             IParsingConfiguration parseConfig,
@@ -32,7 +33,7 @@ namespace J4JSoftware.CommandLine
         )
         {
             ID = targetID;
-            Target = target;
+            Value = value;
             _converters = converters;
             _options = options;
             _errors = errors;
@@ -65,21 +66,21 @@ namespace J4JSoftware.CommandLine
             _logger?.SetLoggedType( this.GetType() );
 
             // if TTarget can't be created we have to abort
-            if( !typeof(TTarget).HasPublicParameterlessConstructor() )
-                throw new ApplicationException( $"Couldn't create and instance of {typeof(TTarget)}" );
+            if( !typeof(TValue).HasPublicParameterlessConstructor() )
+                throw new ApplicationException( $"Couldn't create and instance of {typeof(TValue)}" );
 
-            Target = Activator.CreateInstance<TTarget>();
+            Value = Activator.CreateInstance<TValue>();
 
             _keyComp = parseConfig.TextComparison;
 
             Initialize();
         }
 
-        public TTarget Target { get; }
+        public TValue Value { get; }
         public string ID { get; }
 
         public IOption<TProp>? BindProperty<TProp>(
-            Expression<Func<TTarget, TProp>> propertySelector,
+            Expression<Func<TValue, TProp>> propertySelector,
             TProp defaultValue,
             params string[] keys )
         {
@@ -98,6 +99,7 @@ namespace J4JSoftware.CommandLine
 
                 var option = new Option<TProp>( _options, converter, _errors, _loggerFactory?.Invoke() );
                 option.AddKeys( keys );
+                option.SetDefaultValue( defaultValue );
                 
                 _properties[ propPath ].BoundOption = option;
 
@@ -109,32 +111,13 @@ namespace J4JSoftware.CommandLine
             return null;
         }
 
-        public bool MapParseResults( ParseResults parseResults )
+        public MappingResults MapParseResults( ParseResults parseResults )
         {
-            var retVal = true;
+            var retVal = MappingResults.Success;
 
-            foreach( var boundProp in _properties )
+            foreach( var boundProp in _properties.Where( p => p.BoundOption != null ) )
             {
-                if( boundProp.BoundOption == null )
-                    continue;
-
-                var parseResult = parseResults
-                    .FirstOrDefault( pr =>
-                        boundProp.BoundOption.Keys.Any( k => string.Equals( k, pr.Key, _keyComp ) ) );
-
-                if( boundProp.BoundOption.Convert( this, parseResult, out var result ) != TextConversionResult.Okay )
-                {
-                    retVal = false;
-                    continue;
-                }
-
-                if( !boundProp.BoundOption.Validate( this, parseResult.Key, result ) )
-                {
-                    retVal = false;
-                    continue;
-                }
-
-                boundProp.PropertyInfo.SetValue( Target, result );
+                retVal |= boundProp.MapParseResult( this, parseResults, _logger );
             }
 
             return retVal;
@@ -144,57 +127,61 @@ namespace J4JSoftware.CommandLine
 
         private void Initialize()
         {
-            var type = typeof(TTarget);
+            var type = typeof(TValue);
 
             _logger?.Verbose<Type>( "Finding targetable properties for {type}", type );
 
-            ScanProperties( type, Target );
+            ScanProperties( type, Value, new Stack<PropertyInfo>() );
         }
 
-        private void ScanProperties<TScan>( Type containerType, TScan container )
+        private void ScanProperties<TScan>( Type containerType, TScan container, Stack<PropertyInfo> pathToContainer )
         {
             foreach( var property in containerType.GetProperties() )
             {
-                // we can't do anything with properties which aren't defined and we can't create
-                var isDefined = property.GetValue( container ) != null;
-                var isCreatable = property.PropertyType.HasPublicParameterlessConstructor();
+                var curTP = TargetableProperty.Create( property, container, _keyComp, pathToContainer, _logger );
 
-                if ( !isDefined && !isCreatable )
+                if ( !curTP.IsTargetable )
                 {
-                    _logger?.Verbose<string>( "Property {0} is not defined and not creatable, and so can't be targeted",
-                        property.Name );
+                    _logger?.Verbose<string>( "Property {0} is not targetable", property.Name );
                     continue;
                 }
 
-                if( !property.IsPublicReadWrite( _logger ) )
-                {
-                    _logger?.Verbose<string>(
-                        "Property {0} is not publicly readable and writable and so can't be targeted",
-                        property.Name );
-                    continue;
-                }
-
-                _properties.Add(new TargetableProperty(property));
+                _properties.Add( curTP );
 
                 // if the property isn't defined in the container, create it so we can 
                 // traverse any properties it may have
-                object? child;
+                object? child = null;
 
-                if( isDefined ) child = property.GetValue( container );
+                if( curTP.IsDefined ) child = property.GetValue( container );
                 else
                 {
-                    child = Activator.CreateInstance( property.PropertyType );
-                    property.SetValue(container, child );
+                    // no need to create strings because they have no targetable subproperties
+                    if( property.PropertyType != typeof(string) )
+                    {
+                        child = Activator.CreateInstance( property.PropertyType );
+                        property.SetValue( container, child );
+                    }
                 }
 
                 _logger?.Information<string>( "Found targetable property {0}", property.Name );
 
-                // recurse over any child properties of the current property
-                _logger?.Verbose<Type>( "Finding targetable properties and methods for {0}",
-                    property.PropertyType );
+                // recurse over any child properties of the current property provided it's a
+                // SingleValue property but not a ValueType (which don't have child properties)
+                if( curTP.Multiplicity == PropertyMultiplicity.SingleValue 
+                    && !typeof(ValueType).IsAssignableFrom(property.PropertyType) )
+                {
+                    _logger?.Verbose<string>( "Finding targetable properties and methods for {0}", property.Name );
 
-                ScanProperties( property.PropertyType, child );
+                    pathToContainer.Push( property );
+
+                    ScanProperties(property.PropertyType, child, pathToContainer);
+                }
             }
+
+            if( pathToContainer.Count > 0 )
+                pathToContainer.Pop();
         }
+
+        object IBindingTarget.GetValue() => Value;
     }
 }

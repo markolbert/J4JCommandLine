@@ -1,6 +1,9 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Linq;
 using System.Reflection;
+using System.Text;
 
 namespace J4JSoftware.CommandLine
 {
@@ -13,7 +16,25 @@ namespace J4JSoftware.CommandLine
 
         protected override string GetKeyForItem( TargetableProperty item )
         {
-            return item.Path;
+            var retVal = item.Path.Aggregate( new StringBuilder(), ( sb, pi ) =>
+            {
+                if( sb.Length > 0 )
+                    sb.Append( "." );
+
+                sb.Append( pi.Name );
+
+                return sb;
+            }, sb =>
+            {
+                if( sb.Length > 0 )
+                    sb.Append( "." );
+
+                sb.Append( item.PropertyInfo.Name );
+
+                return sb.ToString();
+            } );
+
+            return retVal;
         }
     }
 }

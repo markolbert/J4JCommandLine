@@ -34,8 +34,7 @@ namespace J4JSoftware.CommandLine
         protected IJ4JLogger? Logger { get; }
 
         public ReadOnlyCollection<string> Keys => _keys.AsReadOnly();
-
-        public TOption DefaultValue { get; private set; }
+        public object DefaultValue { get; private set; }
 
         public IOption<TOption> AddKey( string key )
         {
@@ -83,7 +82,7 @@ namespace J4JSoftware.CommandLine
         {
             if (parseResult.NumParameters != 1)
             {
-                result = DefaultValue;
+                result = (TOption) DefaultValue;
 
                 bindingTarget.AddError(parseResult.Key, $"Incorrect number of parameters. Expected 1, got {parseResult.NumParameters}");
                 return TextConversionResult.FailedConversion;
@@ -95,7 +94,7 @@ namespace J4JSoftware.CommandLine
                 return TextConversionResult.Okay;
             }
 
-            result = DefaultValue;
+            result = (TOption) DefaultValue;
 
             bindingTarget.AddError(
                 parseResult.Key,

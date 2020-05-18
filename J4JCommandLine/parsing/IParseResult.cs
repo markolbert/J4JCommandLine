@@ -8,5 +8,6 @@ namespace J4JSoftware.CommandLine
         string Key { get; }
         int NumParameters { get; }
         List<string> Parameters { get; }
+        string ParametersToText();
     }
 }

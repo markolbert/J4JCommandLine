@@ -57,9 +57,9 @@ namespace J4JSoftware.CommandLine
             return retVal;
         }
 
-        public bool Parse( string[] args )
+        public MappingResults Parse( string[] args )
         {
-            var retVal = true;
+            var retVal = MappingResults.Success;
 
             // parse the arguments into a collection of arguments keyed by the option key
             // note that there can be multiple arguments associated with any option key
@@ -71,7 +71,7 @@ namespace J4JSoftware.CommandLine
 
             foreach( var kvp in _bindingTargets )
             {
-                retVal &= kvp.Value.MapParseResults( results );
+                retVal |= kvp.Value.MapParseResults( results );
             }
 
             return retVal;
