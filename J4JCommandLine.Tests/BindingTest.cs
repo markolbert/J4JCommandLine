@@ -62,13 +62,15 @@ namespace J4JCommandLine.Tests
         }
 
         [ Theory ]
-        [ InlineData( "x", "32", "IntProperty", "-1", MappingResults.Success ) ]
-        [InlineData("z", "32", "IntProperty", "-1", MappingResults.NoKeyFound, "-1")]
-        [InlineData("x", "123.456", "DecProperty", "0", MappingResults.Success, "123.456")]
+        [ InlineData( "x", "32", "IntProperty", true, "-1", MappingResults.Success ) ]
+        [InlineData("z", "32", "IntProperty", false, "-1", MappingResults.Success, "-1")]
+        [InlineData("z", "32", "IntProperty", true, "-1", MappingResults.MissingRequired, "-1")]
+        [InlineData("x", "123.456", "DecimalProperty", true, "0", MappingResults.Success, "123.456")]
         public void Bind_root_properties( 
             string key, 
             string arg, 
             string propToTest, 
+            bool required,
             string defaultValue, 
             MappingResults result, 
             string? propValue = null )
@@ -89,7 +91,10 @@ namespace J4JCommandLine.Tests
             var desiredValue = _textConv.Convert( boundProp.PropertyInfo.PropertyType, propValue );
             var defValue = _textConv.Convert( boundProp.PropertyInfo.PropertyType, defaultValue );
 
-            target.BindProperty( propToTest, defValue, "x" );
+            var option = target.BindProperty( propToTest, defValue, "x" );
+
+            if( required ) option.Required();
+            else option.Optional();
 
             var parseResult = context.Parse( new string[] { $"-{key}", arg } );
 

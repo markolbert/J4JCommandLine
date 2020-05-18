@@ -63,15 +63,16 @@ namespace J4JSoftware.CommandLine
 
             // start by setting the value we're going to set on our bound property to 
             // whatever default was specified for our BoundOption
-            object propValue = BoundOption.DefaultValue;;
+            object propValue = BoundOption.DefaultValue;
 
-            if ( parseResult == null )
+            if( parseResult == null )
             {
                 // set a return flag if there's no matching IParseResult and pick a default key
                 // value (needed for displaying context-sensitive help)
                 logger?.Error<string>( "No matching argument keys for property {0}", PropertyInfo.Name );
 
-                retVal |= MappingResults.NoKeyFound;
+                if( BoundOption.IsRequired )
+                    retVal |= MappingResults.MissingRequired;
 
                 optionKey = BoundOption.Keys.First();
             }
@@ -80,51 +81,65 @@ namespace J4JSoftware.CommandLine
                 // store the option key that we matched on for later use in displaying context-sensitive help
                 optionKey = parseResult.Key;
 
-                // the particular Option conversion method we call depends on whether or not we're binding to 
-                // a collection/array or a single value
-                switch (Multiplicity)
+                // check to see if we have a valid number of parameters to convert
+                if( parseResult.NumParameters >= BoundOption.MinParameters
+                    && parseResult.NumParameters <= BoundOption.MaxParameters )
                 {
-                    case PropertyMultiplicity.Array:
-                    case PropertyMultiplicity.List:
-                        if( BoundOption.ConvertList( bindingTarget, parseResult, out var collectionResult ) !=
-                            TextConversionResult.Okay )
-                        {
-                            logger?.Error<string, string>( "Couldn't parse {0} to property {1}",
-                                parseResult.ParametersToText(), PropertyInfo.Name );
+                    // the particular Option conversion method we call depends on whether or not we're binding to 
+                    // a collection/array or a single value
+                    switch( Multiplicity )
+                    {
+                        case PropertyMultiplicity.Array:
+                        case PropertyMultiplicity.List:
+                            if( BoundOption.ConvertList( bindingTarget, parseResult, out var collectionResult ) !=
+                                TextConversionResult.Okay )
+                            {
+                                logger?.Error<string, string>( "Couldn't parse {0} to property {1}",
+                                    parseResult.ParametersToText(), PropertyInfo.Name );
 
-                            // set a flag to show the error. Note that the default value is still 
-                            // the value we'll use to set our target property
-                            retVal |= MappingResults.ConversionFailed;
-                        }
-                        else
-                        {
-                            // if conversion succeeded, store the result, converting it to a
-                            // simple array if necessary
-                            if( Multiplicity == PropertyMultiplicity.Array )
-                                propValue = collectionResult.ToArray();
-                            else propValue = collectionResult;
-                        }
+                                // set a flag to show the error. Note that the default value is still 
+                                // the value we'll use to set our target property
+                                retVal |= MappingResults.ConversionFailed;
+                            }
+                            else
+                            {
+                                // if conversion succeeded, store the result, converting it to a
+                                // simple array if necessary
+                                if( Multiplicity == PropertyMultiplicity.Array )
+                                    propValue = collectionResult.ToArray();
+                                else propValue = collectionResult;
+                            }
 
-                        break;
+                            break;
 
-                    case PropertyMultiplicity.SingleValue:
-                    case PropertyMultiplicity.String:
-                        if (BoundOption.Convert(bindingTarget, parseResult, out var singleResult) != TextConversionResult.Okay)
-                        {
-                            logger?.Error<string, string>("Couldn't parse {0} to property {1}",
-                                parseResult.ParametersToText(), PropertyInfo.Name);
+                        case PropertyMultiplicity.SingleValue:
+                        case PropertyMultiplicity.String:
+                            if( BoundOption.Convert( bindingTarget, parseResult, out var singleResult ) !=
+                                TextConversionResult.Okay )
+                            {
+                                logger?.Error<string, string>( "Couldn't parse {0} to property {1}",
+                                    parseResult.ParametersToText(), PropertyInfo.Name );
 
-                            // set a flag to show the error. Note that the default value is still 
-                            // the value we'll use to set our target property
-                            retVal |= MappingResults.ConversionFailed;
-                        }
-                        else propValue = singleResult;
+                                // set a flag to show the error. Note that the default value is still 
+                                // the value we'll use to set our target property
+                                retVal |= MappingResults.ConversionFailed;
+                            }
+                            else propValue = singleResult;
 
-                        break;
+                            break;
+                    }
+                }
+                else
+                {
+                    if( parseResult.NumParameters < BoundOption.MinParameters )
+                        retVal |= MappingResults.TooFewParameters;
+
+                    if( parseResult.NumParameters > BoundOption.MaxParameters )
+                        retVal |= MappingResults.TooManyParameters;
                 }
             }
 
-            if (!BoundOption.Validate(bindingTarget, optionKey, propValue))
+            if( !BoundOption.Validate( bindingTarget, optionKey, propValue ) )
             {
                 // revert to our default value (which we presume is valid but don't actually know
                 // or care)
@@ -135,7 +150,7 @@ namespace J4JSoftware.CommandLine
             }
 
             // navigate down to our immediate container,
-            // initializing stuff along the way...
+            // initializing stuff as needed along the way...
             var container = bindingTarget.GetValue();
 
             for( var idx = 0; idx < Path.Count; idx++  )

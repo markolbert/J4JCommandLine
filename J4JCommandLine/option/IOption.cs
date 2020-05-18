@@ -8,9 +8,23 @@ namespace J4JSoftware.CommandLine
 {
     public interface IOption
     {
-        ReadOnlyCollection<string> Keys { get; }
+        Type SupportedType { get; }
+        string Description { get; }
+        List<string> Keys { get; }
         object DefaultValue { get; }
-        
+        bool IsRequired { get; }
+        int MinParameters { get; }
+        int MaxParameters { get; }
+        IOptionValidator Validator { get; }
+
+        //IOption SetDefaultValue( object defaultValue );
+        //IOption SetDescription( string description );
+        //IOption Required();
+        //IOption Optional();
+        //IOption AddKey(string key);
+        //IOption AddKeys(IEnumerable<string> keys);
+        //IOption SetValidator(IOptionValidator validator);
+
         bool Validate( IBindingTarget bindingTarget, string key, object value );
 
         TextConversionResult Convert(
@@ -24,22 +38,18 @@ namespace J4JSoftware.CommandLine
             out List<object> result);
     }
 
-    public interface IOption<TOption> : IOption
-    {
-        IOption<TOption> AddKey( string key );
-        IOption<TOption> AddKeys( IEnumerable<string> keys );
-        IOption<TOption> SetDefaultValue( TOption defaultValue );
-        IOption<TOption> SetValidator( IOptionValidator<TOption> validator );
-        bool Validate( IBindingTarget bindingTarget, string key, TOption value );
+    //public interface IOption<TOption> : IOption
+    //{
+    //    bool Validate( IBindingTarget bindingTarget, string key, TOption value );
 
-        TextConversionResult Convert(
-            IBindingTarget bindingTarget,
-            IParseResult parseResult,
-            out TOption result );
+    //    TextConversionResult Convert(
+    //        IBindingTarget bindingTarget,
+    //        IParseResult parseResult,
+    //        out TOption result );
 
-        TextConversionResult ConvertList(
-            IBindingTarget bindingTarget,
-            IParseResult parseResult,
-            out List<TOption> result);
-    }
+    //    TextConversionResult ConvertList(
+    //        IBindingTarget bindingTarget,
+    //        IParseResult parseResult,
+    //        out List<TOption> result);
+    //}
 }

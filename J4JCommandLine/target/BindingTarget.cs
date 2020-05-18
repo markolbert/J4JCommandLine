@@ -80,41 +80,17 @@ namespace J4JSoftware.CommandLine
         public string ID { get; }
         public ReadOnlyCollection<TargetableProperty> TargetableProperties => _properties.ToList().AsReadOnly();
 
-        public IOption<TProp>? BindProperty<TProp>(
+        public OptionBase BindProperty<TProp>(
             Expression<Func<TValue, TProp>> propertySelector,
             TProp defaultValue,
             params string[] keys )
         {
             var propPath = propertySelector.GetPropertyPath();
 
-            return BindProperty<TProp>( propPath, defaultValue, keys );
-
-            //if( _properties.Contains( propPath ) )
-            //{
-            //    var converter = _converters.FirstOrDefault( c => c.SupportedType == typeof(TProp) )
-            //        as ITextConverter<TProp>;
-
-            //    if( converter == null )
-            //    {
-            //        _logger?.Error<Type>( "No ITextConverter exists for Type {0}", typeof(TProp) );
-            //        return null;
-            //    }
-
-            //    var option = new Option<TProp>( _options, converter, _errors, _loggerFactory?.Invoke() );
-            //    option.AddKeys( keys );
-            //    option.SetDefaultValue( defaultValue );
-                
-            //    _properties[ propPath ].BoundOption = option;
-
-            //    return option;
-            //}
-
-            //_logger?.Error<string>( "Property '{propPath}' is not bindable", propPath );
-
-            //return null;
+            return BindProperty( propPath!, defaultValue!, keys )!;
         }
 
-        public IOption? BindProperty(
+        public OptionBase BindProperty(
             string propertyPath,
             object defaultValue,
             params string[] keys)
@@ -128,10 +104,11 @@ namespace J4JSoftware.CommandLine
                 if (converter == null)
                 {
                     _logger?.Error<Type>("No ITextConverter exists for Type {0}", propType);
-                    return null;
+
+                    return new NullOption( _options, _loggerFactory?.Invoke() );
                 }
 
-                var option = new Option<TProp>(_options, converter, _errors, _loggerFactory?.Invoke());
+                var option = new Option(_options, converter, _loggerFactory?.Invoke());
                 option.AddKeys(keys);
                 option.SetDefaultValue(defaultValue);
 
@@ -142,16 +119,21 @@ namespace J4JSoftware.CommandLine
 
             _logger?.Error<string>("Property '{propertyPath}' is not bindable", propertyPath);
 
-            return null;
+            return new NullOption(_options, _loggerFactory?.Invoke());
         }
 
         public MappingResults MapParseResults( ParseResults parseResults )
         {
             var retVal = MappingResults.Success;
 
+            // scan all the bound options that aren't tied to NullOptions, which are only
+            // "bound" in error
             foreach( var boundProp in _properties.Where( p => p.BoundOption != null ) )
             {
-                retVal |= boundProp.MapParseResult( this, parseResults, _logger );
+                if( boundProp.BoundOption is NullOption )
+                    retVal |= MappingResults.Unbound;
+                else
+                    retVal |= boundProp.MapParseResult( this, parseResults, _logger );
             }
 
             return retVal;

@@ -10,6 +10,11 @@ namespace J4JSoftware.CommandLine
         string ID { get; }
         ReadOnlyCollection<TargetableProperty> TargetableProperties { get; }
 
+        OptionBase BindProperty(
+            string propertyPath,
+            object defaultValue,
+            params string[] keys);
+
         void AddError( string key, string error );
         MappingResults MapParseResults( ParseResults parseResults );
         object GetValue();
@@ -20,13 +25,8 @@ namespace J4JSoftware.CommandLine
     {
         TTarget Value { get; }
 
-        IOption<TProp>? BindProperty<TProp>(
+        OptionBase BindProperty<TProp>(
             Expression<Func<TTarget, TProp>> propertySelector,
-            TProp defaultValue,
-            params string[] keys );
-
-        IOption<TProp>? BindProperty<TProp>(
-            string propertyPath,
             TProp defaultValue,
             params string[] keys );
     }

@@ -20,7 +20,6 @@ namespace J4JSoftware.CommandLine
         {
             PropertyMultiplicity multiplicity;
             Type relevantType = propInfo.PropertyType;
-            ;
 
             if( propInfo.PropertyType.IsArray )
             {
