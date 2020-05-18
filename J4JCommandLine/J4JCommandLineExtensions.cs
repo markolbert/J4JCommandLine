@@ -54,7 +54,7 @@ namespace J4JSoftware.CommandLine
             return true;
         }
 
-        public static string GetPropertyPath<TTarget, TProp>(
+        public static (string path, Type type) GetPropertyPathAndType<TTarget, TProp>(
             this Expression<Func<TTarget, TProp>> propertySelector )
         {
             // walk the expression tree to extract property path names and the property type
@@ -70,6 +70,9 @@ namespace J4JSoftware.CommandLine
                     case MemberExpression memExpr:
                         add_target_property_name(memExpr);
 
+                        if( propType == null )
+                            propType = memExpr.Type;
+
                         // walk up expression tree
                         curExpr = memExpr.Expression;
 
@@ -79,17 +82,16 @@ namespace J4JSoftware.CommandLine
                         if (unaryExpr.Operand is MemberExpression unaryMemExpr)
                             add_target_property_name(unaryMemExpr);
 
+                        if (propType == null)
+                            propType = unaryExpr.Type;
+
                         // we're done; UnaryExpressions aren't part of an expression tree
                         curExpr = null;
 
                         break;
 
                     case ParameterExpression paramExpr:
-                        // this is the root/anchor of the expression tree. we want 
-                        // the simple type name, not the node's name
-                        // commented out because we switched to relative property paths
-                        //propNames.Add(paramExpr.Type.Name);
-
+                        // this is the root/anchor of the expression tree.
                         // we're done
                         curExpr = null;
 
@@ -99,7 +101,7 @@ namespace J4JSoftware.CommandLine
 
             propNames.Reverse();
 
-            return string.Join( ".", propNames );
+            return ( string.Join( ".", propNames ), propType! );
 
             void add_target_property_name(MemberExpression memExpr)
             {

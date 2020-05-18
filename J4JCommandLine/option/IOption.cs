@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Reflection.Metadata;
@@ -27,6 +28,8 @@ namespace J4JSoftware.CommandLine
 
         bool Validate( IBindingTarget bindingTarget, string key, object value );
 
+        IList CreateEmptyList();
+
         TextConversionResult Convert(
             IBindingTarget bindingTarget,
             IParseResult parseResult,
@@ -35,7 +38,7 @@ namespace J4JSoftware.CommandLine
         TextConversionResult ConvertList(
             IBindingTarget bindingTarget,
             IParseResult parseResult,
-            out List<object> result);
+            out IList result);
     }
 
     //public interface IOption<TOption> : IOption

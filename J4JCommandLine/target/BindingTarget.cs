@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
@@ -82,17 +83,19 @@ namespace J4JSoftware.CommandLine
 
         public OptionBase BindProperty<TProp>(
             Expression<Func<TValue, TProp>> propertySelector,
-            TProp defaultValue,
+            object? defaultValue,
             params string[] keys )
         {
-            var propPath = propertySelector.GetPropertyPath();
+            var (propPath, propType) = propertySelector.GetPropertyPathAndType();
 
-            return BindProperty( propPath!, defaultValue!, keys )!;
+            return typeof(ICollection).IsAssignableFrom( propType )
+                ? BindPropertyCollection( propPath!, keys )
+                : BindProperty( propPath!, defaultValue!, keys );
         }
 
         public OptionBase BindProperty(
             string propertyPath,
-            object defaultValue,
+            object? defaultValue,
             params string[] keys)
         {
             if (_properties.Contains(propertyPath))
@@ -110,7 +113,9 @@ namespace J4JSoftware.CommandLine
 
                 var option = new Option(_options, converter, _loggerFactory?.Invoke());
                 option.AddKeys(keys);
-                option.SetDefaultValue(defaultValue);
+
+                if( defaultValue != null )
+                    option.SetDefaultValue( defaultValue );
 
                 _properties[propertyPath].BoundOption = option;
 
@@ -120,6 +125,45 @@ namespace J4JSoftware.CommandLine
             _logger?.Error<string>("Property '{propertyPath}' is not bindable", propertyPath);
 
             return new NullOption(_options, _loggerFactory?.Invoke());
+        }
+
+        public OptionBase BindPropertyCollection(
+            string propertyPath,
+            params string[] keys )
+        {
+            var property =
+                _properties.FirstOrDefault( p =>
+                    string.Equals( propertyPath, p.FullPath, StringComparison.Ordinal )
+                    && ( p.Multiplicity == PropertyMultiplicity.Array ||
+                         p.Multiplicity == PropertyMultiplicity.List ) );
+
+            if( property != null )
+            {
+                // we need to find the Type on which the collection is based
+                var propType = property.Multiplicity == PropertyMultiplicity.Array 
+                    ? property.PropertyInfo.PropertyType.GetElementType() 
+                    : property.PropertyInfo.PropertyType.GenericTypeArguments.First();
+
+                var converter = _converters.FirstOrDefault( c => c.SupportedType == propType );
+
+                if( converter == null )
+                {
+                    _logger?.Error<Type>( "No ITextConverter exists for Type {0}", propType! );
+
+                    return new NullOption( _options, _loggerFactory?.Invoke() );
+                }
+
+                var option = new Option( _options, converter, _loggerFactory?.Invoke() );
+                option.AddKeys( keys );
+
+                _properties[ propertyPath ].BoundOption = option;
+
+                return option;
+            }
+
+            _logger?.Error<string>( "Property '{propertyPath}' is not bindable", propertyPath );
+
+            return new NullOption( _options, _loggerFactory?.Invoke() );
         }
 
         public MappingResults MapParseResults( ParseResults parseResults )

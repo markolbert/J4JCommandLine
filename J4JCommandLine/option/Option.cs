@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
@@ -49,12 +50,22 @@ namespace J4JSoftware.CommandLine
             return TextConversionResult.FailedConversion;
         }
 
+        public override IList CreateEmptyList()
+        {
+            // create a list of the Type we're converting to
+            var listType = typeof(List<>);
+            var genericListType = listType.MakeGenericType(_converter.SupportedType);
+
+            return (Activator.CreateInstance(genericListType) as IList)!;
+        }
+
         public override TextConversionResult ConvertList(
             IBindingTarget bindingTarget,
             IParseResult parseResult,
-            out List<object> result )
+            out IList result )
         {
-            result = new List<object>();
+            // create a list of the Type we're converting to
+            result = CreateEmptyList();
 
             var allOkay = true;
 

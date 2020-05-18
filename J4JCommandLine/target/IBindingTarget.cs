@@ -15,19 +15,23 @@ namespace J4JSoftware.CommandLine
             object defaultValue,
             params string[] keys);
 
+        OptionBase BindPropertyCollection(
+            string propertyPath,
+            params string[] keys );
+
         void AddError( string key, string error );
         MappingResults MapParseResults( ParseResults parseResults );
         object GetValue();
     }
 
-    public interface IBindingTarget<TTarget> : IBindingTarget
-        where TTarget : class
+    public interface IBindingTarget<TValue> : IBindingTarget
+        where TValue : class
     {
-        TTarget Value { get; }
+        TValue Value { get; }
 
         OptionBase BindProperty<TProp>(
-            Expression<Func<TTarget, TProp>> propertySelector,
-            TProp defaultValue,
+            Expression<Func<TValue, TProp>> propertySelector,
+            object? defaultValue,
             params string[] keys );
     }
 }

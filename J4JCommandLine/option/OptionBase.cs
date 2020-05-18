@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Text;
@@ -151,7 +152,12 @@ namespace J4JSoftware.CommandLine
             throw new NotImplementedException();
         }
 
-        public virtual TextConversionResult ConvertList( IBindingTarget bindingTarget, IParseResult parseResult, out List<object> result )
+        public virtual IList CreateEmptyList()
+        {
+            throw new NotImplementedException();
+        }
+
+        public virtual TextConversionResult ConvertList( IBindingTarget bindingTarget, IParseResult parseResult, out IList result )
         {
             throw new NotImplementedException();
         }

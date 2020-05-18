@@ -32,7 +32,33 @@ namespace J4JSoftware.CommandLine
 
         public IOption? BoundOption { get; set; }
 
-        public List<PropertyInfo> Path { get; private set; }
+        public List<PropertyInfo> PathElements { get; private set; }
+
+        public string FullPath
+        {
+            get
+            {
+                var retVal = PathElements.Aggregate( new StringBuilder(), ( sb, pi ) =>
+                {
+                    if( sb.Length > 0 )
+                        sb.Append( "." );
+
+                    sb.Append( pi.Name );
+
+                    return sb;
+                }, sb =>
+                {
+                    if( sb.Length > 0 )
+                        sb.Append( "." );
+
+                    sb.Append( PropertyInfo.Name );
+
+                    return sb.ToString();
+                } );
+
+                return retVal;
+            }
+        }
 
         public MappingResults MapParseResult( 
             IBindingTarget bindingTarget, 
@@ -62,8 +88,11 @@ namespace J4JSoftware.CommandLine
             string optionKey;
 
             // start by setting the value we're going to set on our bound property to 
-            // whatever default was specified for our BoundOption
-            object propValue = BoundOption.DefaultValue;
+            // whatever default was specified for our BoundOption. if the stored
+            // default value is null we create an empty collection
+            object propValue = BoundOption.DefaultValue == null
+                ? BoundOption.CreateEmptyList()
+                : BoundOption.DefaultValue;
 
             if( parseResult == null )
             {
@@ -106,7 +135,7 @@ namespace J4JSoftware.CommandLine
                                 // if conversion succeeded, store the result, converting it to a
                                 // simple array if necessary
                                 if( Multiplicity == PropertyMultiplicity.Array )
-                                    propValue = collectionResult.ToArray();
+                                    propValue = new ArrayList(collectionResult).ToArray();
                                 else propValue = collectionResult;
                             }
 
@@ -153,13 +182,13 @@ namespace J4JSoftware.CommandLine
             // initializing stuff as needed along the way...
             var container = bindingTarget.GetValue();
 
-            for( var idx = 0; idx < Path.Count; idx++  )
+            for( var idx = 0; idx < PathElements.Count; idx++  )
             {
-                var value = Path[idx].GetValue( container );
+                var value = PathElements[idx].GetValue( container );
 
-                if( idx < ( Path.Count - 1 ) )
+                if( idx < ( PathElements.Count - 1 ) )
                 {
-                    value ??= Activator.CreateInstance( Path[ idx ].PropertyType );
+                    value ??= Activator.CreateInstance( PathElements[ idx ].PropertyType );
 
                     container = value!;
                 }

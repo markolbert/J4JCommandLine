@@ -16,25 +16,26 @@ namespace J4JSoftware.CommandLine
 
         protected override string GetKeyForItem( TargetableProperty item )
         {
-            var retVal = item.Path.Aggregate( new StringBuilder(), ( sb, pi ) =>
-            {
-                if( sb.Length > 0 )
-                    sb.Append( "." );
+            return item.FullPath;
+            //var retVal = item.PathElements.Aggregate( new StringBuilder(), ( sb, pi ) =>
+            //{
+            //    if( sb.Length > 0 )
+            //        sb.Append( "." );
 
-                sb.Append( pi.Name );
+            //    sb.Append( pi.Name );
 
-                return sb;
-            }, sb =>
-            {
-                if( sb.Length > 0 )
-                    sb.Append( "." );
+            //    return sb;
+            //}, sb =>
+            //{
+            //    if( sb.Length > 0 )
+            //        sb.Append( "." );
 
-                sb.Append( item.PropertyInfo.Name );
+            //    sb.Append( item.PropertyInfo.Name );
 
-                return sb.ToString();
-            } );
+            //    return sb.ToString();
+            //} );
 
-            return retVal;
+            //return retVal;
         }
     }
 }

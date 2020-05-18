@@ -80,7 +80,7 @@ namespace J4JSoftware.CommandLine
                 IsCreateable = relevantType.HasPublicParameterlessConstructor(),
                 IsDefined = propInfo.GetValue( container ) != null,
                 IsPubliclyReadWrite = propInfo.IsPublicReadWrite( logger ),
-                Path = pathToContainer.ToList()
+                PathElements = pathToContainer.ToList()
             };
 
             return retVal;

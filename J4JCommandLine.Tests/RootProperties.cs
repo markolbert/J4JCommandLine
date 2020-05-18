@@ -10,5 +10,6 @@ namespace J4JCommandLine.Tests
         public int IntProperty { get; set; }
         public bool BoolProperty { get; set; }
         public decimal DecimalProperty { get; set; }
+        public List<int> IntCollection { get; set; }
     }
 }
