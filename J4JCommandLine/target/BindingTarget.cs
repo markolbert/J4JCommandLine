@@ -78,6 +78,7 @@ namespace J4JSoftware.CommandLine
 
         public TValue Value { get; }
         public string ID { get; }
+        public ReadOnlyCollection<TargetableProperty> TargetableProperties => _properties.ToList().AsReadOnly();
 
         public IOption<TProp>? BindProperty<TProp>(
             Expression<Func<TValue, TProp>> propertySelector,
@@ -86,27 +87,60 @@ namespace J4JSoftware.CommandLine
         {
             var propPath = propertySelector.GetPropertyPath();
 
-            if( _properties.Contains( propPath ) )
-            {
-                var converter = _converters.FirstOrDefault( c => c.SupportedType == typeof(TProp) )
-                    as ITextConverter<TProp>;
+            return BindProperty<TProp>( propPath, defaultValue, keys );
 
-                if( converter == null )
+            //if( _properties.Contains( propPath ) )
+            //{
+            //    var converter = _converters.FirstOrDefault( c => c.SupportedType == typeof(TProp) )
+            //        as ITextConverter<TProp>;
+
+            //    if( converter == null )
+            //    {
+            //        _logger?.Error<Type>( "No ITextConverter exists for Type {0}", typeof(TProp) );
+            //        return null;
+            //    }
+
+            //    var option = new Option<TProp>( _options, converter, _errors, _loggerFactory?.Invoke() );
+            //    option.AddKeys( keys );
+            //    option.SetDefaultValue( defaultValue );
+                
+            //    _properties[ propPath ].BoundOption = option;
+
+            //    return option;
+            //}
+
+            //_logger?.Error<string>( "Property '{propPath}' is not bindable", propPath );
+
+            //return null;
+        }
+
+        public IOption? BindProperty(
+            string propertyPath,
+            object defaultValue,
+            params string[] keys)
+        {
+            if (_properties.Contains(propertyPath))
+            {
+                var propType = _properties[ propertyPath ].PropertyInfo.PropertyType;
+
+                var converter = _converters.FirstOrDefault( c => c.SupportedType == propType );
+
+                if (converter == null)
                 {
-                    _logger?.Error<Type>( "No ITextConverter exists for Type {0}", typeof(TProp) );
+                    _logger?.Error<Type>("No ITextConverter exists for Type {0}", propType);
                     return null;
                 }
 
-                var option = new Option<TProp>( _options, converter, _errors, _loggerFactory?.Invoke() );
-                option.AddKeys( keys );
-                option.SetDefaultValue( defaultValue );
-                
-                _properties[ propPath ].BoundOption = option;
+                var option = new Option<TProp>(_options, converter, _errors, _loggerFactory?.Invoke());
+                option.AddKeys(keys);
+                option.SetDefaultValue(defaultValue);
+
+                _properties[propertyPath].BoundOption = option;
 
                 return option;
             }
 
-            _logger?.Error<string>( "Property '{propPath}' is not bindable", propPath );
+            _logger?.Error<string>("Property '{propertyPath}' is not bindable", propertyPath);
 
             return null;
         }

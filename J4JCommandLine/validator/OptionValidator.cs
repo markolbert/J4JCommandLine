@@ -9,6 +9,8 @@ namespace J4JSoftware.CommandLine
         {
         }
 
+        public Type SupportedType => typeof(TOption);
+
         public abstract bool Validate( IBindingTarget bindingTarget, string key, TOption value );
 
         bool IOptionValidator.Validate(IBindingTarget bindingTarget, string key, object value)

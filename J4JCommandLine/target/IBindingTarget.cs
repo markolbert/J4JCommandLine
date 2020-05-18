@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Linq.Expressions;
 
 namespace J4JSoftware.CommandLine
@@ -7,6 +8,7 @@ namespace J4JSoftware.CommandLine
     public interface IBindingTarget
     {
         string ID { get; }
+        ReadOnlyCollection<TargetableProperty> TargetableProperties { get; }
 
         void AddError( string key, string error );
         MappingResults MapParseResults( ParseResults parseResults );
@@ -20,6 +22,11 @@ namespace J4JSoftware.CommandLine
 
         IOption<TProp>? BindProperty<TProp>(
             Expression<Func<TTarget, TProp>> propertySelector,
+            TProp defaultValue,
+            params string[] keys );
+
+        IOption<TProp>? BindProperty<TProp>(
+            string propertyPath,
             TProp defaultValue,
             params string[] keys );
     }

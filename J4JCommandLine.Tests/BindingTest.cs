@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.ComponentModel.DataAnnotations;
 using System.IO;
+using System.Linq;
 using System.Text;
 using FluentAssertions;
 using J4JSoftware.CommandLine;
@@ -10,9 +12,49 @@ using Xunit;
 
 namespace J4JCommandLine.Tests
 {
+    public class TextConverter
+    {
+        private readonly Dictionary<Type, Func<string, object?>> _converters =
+            new Dictionary<Type, Func<string, object?>>();
+
+        public TextConverter()
+        {
+            Case<int>( System.Convert.ToInt32 );
+            Case<double>( System.Convert.ToDouble );
+            Case<bool>( System.Convert.ToBoolean );
+            Case<string>( x => x );
+            Case<decimal>( System.Convert.ToDecimal );
+        }
+
+        public TextConverter Case<T>( Func<string, T> converter )
+        {
+            var type = typeof(T);
+
+            if( _converters.ContainsKey( type ) )
+                _converters[ type ] = x => converter( x );
+            else _converters.Add( typeof(T), x => converter( x ) );
+
+            return this;
+        }
+
+        public T Convert<T>( string x )
+        {
+            return (T) Convert( typeof(T), x );
+        }
+
+        public object Convert( Type targetType, string x )
+        {
+            if( !_converters.ContainsKey( targetType ) )
+                return default!;
+
+            return ( _converters[ targetType ]( x )! );
+        }
+    }
+
     public class BindingTest
     {
         private readonly StringWriter _consoleWriter = new StringWriter();
+        private readonly TextConverter _textConv = new TextConverter();
 
         public BindingTest()
         {
@@ -20,42 +62,34 @@ namespace J4JCommandLine.Tests
         }
 
         [ Theory ]
-        [ InlineData( "x", "32", "intproperty", -1, MappingResults.Success, 32 ) ]
-        [InlineData("z", "32", "intproperty", -1, MappingResults.NoKeyFound, -1)]
-        [InlineData("x", "123.456", "decproperty", 0, MappingResults.Success, 123.456)]
+        [ InlineData( "x", "32", "IntProperty", "-1", MappingResults.Success ) ]
+        [InlineData("z", "32", "IntProperty", "-1", MappingResults.NoKeyFound, "-1")]
+        [InlineData("x", "123.456", "DecProperty", "0", MappingResults.Success, "123.456")]
         public void Bind_root_properties( 
             string key, 
             string arg, 
             string propToTest, 
-            object defaultValue, 
+            string defaultValue, 
             MappingResults result, 
-            object value )
+            string? propValue = null )
         {
+            propValue ??= arg;
+            propToTest.Should().NotBeNullOrEmpty();
+
             var context = TestServiceProvider.Instance.GetRequiredService<CommandLineContext>();
 
             var target = context.AddBindingTarget( new RootProperties(), "test" );
 
-            propToTest = propToTest.ToLower();
+            target.TargetableProperties.Should()
+                .Contain( x => string.Equals( x.PropertyInfo.Name, propToTest, StringComparison.OrdinalIgnoreCase ) );
 
-            switch( propToTest )
-            {
-                case "intproperty":
-                    target.BindProperty( x => x.IntProperty, (int) defaultValue, "x" );
-                    break;
+            var boundProp = target.TargetableProperties
+                .First( x => string.Equals( x.PropertyInfo.Name, propToTest, StringComparison.OrdinalIgnoreCase ) );
 
-                case "boolproperty":
-                    target.BindProperty( x => x.BoolProperty, (bool) defaultValue, "x" );
-                    break;
+            var desiredValue = _textConv.Convert( boundProp.PropertyInfo.PropertyType, propValue );
+            var defValue = _textConv.Convert( boundProp.PropertyInfo.PropertyType, defaultValue );
 
-                case "textproperty":
-                    target.BindProperty( x => x.TextProperty, (string) defaultValue, "x" );
-                    break;
-
-                case "decproperty":
-                    var decDefault = Convert.ToDecimal( defaultValue );
-                    target.BindProperty( x => x.DecimalProperty, decDefault, "x" );
-                    break;
-            }
+            target.BindProperty( propToTest, defValue, "x" );
 
             var parseResult = context.Parse( new string[] { $"-{key}", arg } );
 
@@ -63,25 +97,10 @@ namespace J4JCommandLine.Tests
 
             parseResult.Should().Be( result );
 
-            switch( propToTest )
-            {
-                case "intproperty":
-                    target.Value.IntProperty.Should().Be( (int) value );
-                    break;
+            var boundValue = boundProp!.PropertyInfo!.GetValue( target.Value );
 
-                case "boolproperty":
-                    target.Value.BoolProperty.Should().Be( (bool) value );
-                    break;
-
-                case "textproperty":
-                    target.Value.TextProperty.Should().Be( (string) value );
-                    break;
-
-                case "decproperty":
-                    var decValue = Convert.ToDecimal( value );
-                    target.Value.DecimalProperty.Should().Be( decValue );
-                    break;
-            }
+            boundValue.Should().NotBeNull();
+            boundValue.Should().Be( desiredValue );
         }
     }
 }
