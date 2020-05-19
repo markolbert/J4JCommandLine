@@ -1,8 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.Linq;
-using System.Text;
 using J4JSoftware.Logging;
 
 namespace J4JSoftware.CommandLine
@@ -11,8 +9,8 @@ namespace J4JSoftware.CommandLine
     {
         private readonly Dictionary<string, IBindingTarget> _bindingTargets = new Dictionary<string, IBindingTarget>();
         private readonly IEnumerable<ITextConverter> _converters;
-        private readonly IOptionCollection _options;
         private readonly Func<IJ4JLogger>? _loggerFactory;
+        private readonly IOptionCollection _options;
 
         public CommandLineContext(
             ICommandLineTextParser textParser,
@@ -27,7 +25,7 @@ namespace J4JSoftware.CommandLine
             Errors = new CommandLineErrors( ParsingConfiguration );
             _loggerFactory = loggerFactory;
 
-            _options = new OptionCollection(parsingConfig, _loggerFactory?.Invoke());
+            _options = new OptionCollection( parsingConfig, _loggerFactory?.Invoke() );
         }
 
         public ICommandLineTextParser TextParser { get; }
@@ -40,8 +38,8 @@ namespace J4JSoftware.CommandLine
         public IBindingTarget<TTarget> AddBindingTarget<TTarget>( TTarget? value, string targetID )
             where TTarget : class
         {
-            if( string.IsNullOrEmpty(targetID  ))
-                throw new NullReferenceException($"{nameof(targetID)} cannot be null or empty");
+            if( string.IsNullOrEmpty( targetID ) )
+                throw new NullReferenceException( $"{nameof(targetID)} cannot be null or empty" );
 
             if( _bindingTargets.ContainsKey( targetID ) )
                 throw new IndexOutOfRangeException( $"Duplicate binding target key '{targetID}'" );
@@ -49,8 +47,10 @@ namespace J4JSoftware.CommandLine
             var options = new OptionCollection( ParsingConfiguration, _loggerFactory?.Invoke() );
 
             var retVal = value == null
-                ? new BindingTarget<TTarget>( targetID, _converters, _options, ParsingConfiguration, Errors, _loggerFactory )
-                : new BindingTarget<TTarget>( targetID, value, _converters, _options, ParsingConfiguration, Errors, _loggerFactory );
+                ? new BindingTarget<TTarget>( targetID, _converters, _options, ParsingConfiguration, Errors,
+                    _loggerFactory )
+                : new BindingTarget<TTarget>( targetID, value, _converters, _options, ParsingConfiguration, Errors,
+                    _loggerFactory );
 
             _bindingTargets.Add( targetID, retVal );
 
@@ -69,13 +69,9 @@ namespace J4JSoftware.CommandLine
             // process the parsing results
             Errors.Clear();
 
-            foreach( var kvp in _bindingTargets )
-            {
-                retVal |= kvp.Value.MapParseResults( results );
-            }
+            foreach( var kvp in _bindingTargets ) retVal |= kvp.Value.MapParseResults( results );
 
             return retVal;
         }
-
     }
 }

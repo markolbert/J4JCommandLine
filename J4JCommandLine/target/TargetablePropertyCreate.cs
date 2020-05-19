@@ -3,8 +3,6 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
-using System.Security.Principal;
-using System.Text;
 using J4JSoftware.Logging;
 
 namespace J4JSoftware.CommandLine
@@ -19,7 +17,7 @@ namespace J4JSoftware.CommandLine
             IJ4JLogger? logger = null )
         {
             PropertyMultiplicity multiplicity;
-            Type? relevantType = propInfo.PropertyType;
+            var relevantType = propInfo.PropertyType;
 
             if( propInfo.PropertyType.IsArray )
             {
@@ -31,7 +29,10 @@ namespace J4JSoftware.CommandLine
                     logger?.Error<string>( "Cannot determine element type for array {0}", propInfo.Name );
                     multiplicity = PropertyMultiplicity.Unsupported;
                 }
-                else multiplicity = PropertyMultiplicity.Array;
+                else
+                {
+                    multiplicity = PropertyMultiplicity.Array;
+                }
             }
             else
             {
@@ -63,9 +64,11 @@ namespace J4JSoftware.CommandLine
                     var numIndexParams = propInfo.GetMethod?.GetParameters().Length;
 
                     if( numIndexParams == 0 )
+                    {
                         multiplicity = typeof(string).IsAssignableFrom( propInfo.PropertyType )
                             ? PropertyMultiplicity.String
                             : PropertyMultiplicity.SingleValue;
+                    }
                     else
                     {
                         logger?.Error<string>( "Property {0} is indexed but in an unsupported way", propInfo.Name );

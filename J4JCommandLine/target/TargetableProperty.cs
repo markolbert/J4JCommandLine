@@ -1,9 +1,7 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
-using System.Security.Principal;
 using System.Text;
 using J4JSoftware.Logging;
 
@@ -20,7 +18,7 @@ namespace J4JSoftware.CommandLine
         }
 
         public PropertyInfo PropertyInfo { get; }
-        
+
         public bool IsCreateable { get; private set; }
         public bool IsDefined { get; private set; }
         public bool IsPubliclyReadWrite { get; private set; }
@@ -28,7 +26,7 @@ namespace J4JSoftware.CommandLine
 
         public bool IsTargetable => ( IsCreateable || IsDefined )
                                     && IsPubliclyReadWrite
-                                    && ( Multiplicity != PropertyMultiplicity.Unsupported );
+                                    && Multiplicity != PropertyMultiplicity.Unsupported;
 
         public IOption? BoundOption { get; set; }
 
@@ -60,9 +58,9 @@ namespace J4JSoftware.CommandLine
             }
         }
 
-        public MappingResults MapParseResult( 
-            IBindingTarget bindingTarget, 
-            ParseResults parseResults, 
+        public MappingResults MapParseResult(
+            IBindingTarget bindingTarget,
+            ParseResults parseResults,
             IJ4JLogger? logger = null )
         {
             // validate parameters and state
@@ -74,15 +72,15 @@ namespace J4JSoftware.CommandLine
 
             if( Multiplicity == PropertyMultiplicity.Unsupported )
             {
-                logger?.Error<string>("Property {0} has an unsupported Multiplicity", PropertyInfo.Name);
+                logger?.Error<string>( "Property {0} has an unsupported Multiplicity", PropertyInfo.Name );
                 return MappingResults.UnsupportedMultiplicity;
             }
 
             // see if our BoundOption's keys match a key in the parse results so we can retrieve a
             // specific IParseResult
             var parseResult = parseResults
-                .FirstOrDefault(pr =>
-                    BoundOption.Keys.Any(k => string.Equals(k, pr.Key, _keyComp)));
+                .FirstOrDefault( pr =>
+                    BoundOption.Keys.Any( k => string.Equals( k, pr.Key, _keyComp ) ) );
 
             var retVal = MappingResults.Success;
             string optionKey;
@@ -95,16 +93,14 @@ namespace J4JSoftware.CommandLine
             if( BoundOption.DefaultValue != null )
                 defaultValue = BoundOption.DefaultValue;
             else
-            {
                 defaultValue = Multiplicity switch
                 {
                     PropertyMultiplicity.Array => BoundOption.CreateEmptyArray( 0 ),
                     PropertyMultiplicity.List => BoundOption.CreateEmptyList(),
                     _ => null
                 };
-            }
 
-            object? propValue = defaultValue;
+            var propValue = defaultValue;
 
             if( parseResult == null )
             {
@@ -151,13 +147,14 @@ namespace J4JSoftware.CommandLine
                                     var tempArray = BoundOption.CreateEmptyArray( collectionResult.Count );
 
                                     for( var idx = 0; idx < collectionResult.Count; idx++ )
-                                    {
                                         tempArray.SetValue( collectionResult[ idx ], idx );
-                                    }
 
                                     propValue = tempArray;
                                 }
-                                else propValue = collectionResult;
+                                else
+                                {
+                                    propValue = collectionResult;
+                                }
                             }
 
                             break;
@@ -174,7 +171,10 @@ namespace J4JSoftware.CommandLine
                                 // the value we'll use to set our target property
                                 retVal |= MappingResults.ConversionFailed;
                             }
-                            else propValue = singleResult;
+                            else
+                            {
+                                propValue = singleResult;
+                            }
 
                             break;
                     }
@@ -203,11 +203,11 @@ namespace J4JSoftware.CommandLine
             // initializing stuff as needed along the way...
             var container = bindingTarget.GetValue();
 
-            for( var idx = 0; idx < PathElements.Count; idx++  )
+            for( var idx = 0; idx < PathElements.Count; idx++ )
             {
-                var value = PathElements[idx].GetValue( container );
+                var value = PathElements[ idx ].GetValue( container );
 
-                if( idx < ( PathElements.Count - 1 ) )
+                if( idx < PathElements.Count - 1 )
                 {
                     value ??= Activator.CreateInstance( PathElements[ idx ].PropertyType );
 
@@ -216,7 +216,7 @@ namespace J4JSoftware.CommandLine
             }
 
             // finally, set the target property's value
-            PropertyInfo.SetValue(container, propValue);
+            PropertyInfo.SetValue( container, propValue );
 
             return retVal;
         }

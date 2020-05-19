@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq.Expressions;
 
@@ -13,7 +12,7 @@ namespace J4JSoftware.CommandLine
         OptionBase BindProperty(
             string propertyPath,
             object defaultValue,
-            params string[] keys);
+            params string[] keys );
 
         OptionBase BindPropertyCollection(
             string propertyPath,

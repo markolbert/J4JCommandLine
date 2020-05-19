@@ -1,7 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Collections.Specialized;
-using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
 using J4JSoftware.Logging;
@@ -9,41 +7,41 @@ using J4JSoftware.Logging;
 namespace J4JSoftware.CommandLine
 {
     /// <summary>
-    /// Based on the ArgumentParser class: https://gist.github.com/shadowfox/5844284,
-    /// which is in turn based on Richard Lopes' (GriffonRL's) class at
-    /// http://www.codeproject.com/Articles/3111/C-NET-Command-Line-Arguments-Parser
+    ///     Based on the ArgumentParser class: https://gist.github.com/shadowfox/5844284,
+    ///     which is in turn based on Richard Lopes' (GriffonRL's) class at
+    ///     http://www.codeproject.com/Articles/3111/C-NET-Command-Line-Arguments-Parser
     /// </summary>
     public class CommandLineTextParser : ICommandLineTextParser
     {
-        private readonly IParsingConfiguration _parseConfig;
         private readonly IJ4JLogger? _logger;
-        private readonly Regex _splitter;
+        private readonly IParsingConfiguration _parseConfig;
         private readonly Regex _remover;
+        private readonly Regex _splitter;
 
         public CommandLineTextParser(
             IParsingConfiguration parseConfig,
             IJ4JLogger? logger = null
-            )
+        )
         {
             _parseConfig = parseConfig;
             _logger = logger;
 
-            _logger?.SetLoggedType( this.GetType() );
+            _logger?.SetLoggedType( GetType() );
 
             if( parseConfig.Prefixes.Count == 0 )
             {
-                _logger?.Fatal("No command line prefixes defined");
+                _logger?.Fatal( "No command line prefixes defined" );
                 throw new ApplicationException( "No command line prefixes defined" );
             }
 
             if( parseConfig.TextDelimiters.Count == 0 )
             {
-                _logger?.Fatal("No command line text delimiters defined");
-                throw new ApplicationException("No command line text delimiters defined");
+                _logger?.Fatal( "No command line text delimiters defined" );
+                throw new ApplicationException( "No command line text delimiters defined" );
             }
 
-            if (parseConfig.ValueEnclosers.Count == 0)
-                _logger?.Warning("No command line value enclosers defined");
+            if( parseConfig.ValueEnclosers.Count == 0 )
+                _logger?.Warning( "No command line value enclosers defined" );
 
             // create the regex remover
 
@@ -58,7 +56,7 @@ namespace J4JSoftware.CommandLine
                     break;
             }
 
-            _splitter = new Regex( GetRegexSplitter(parseConfig), regexOptions );
+            _splitter = new Regex( GetRegexSplitter( parseConfig ), regexOptions );
 
             var rxRemover = GetRegexRemover( parseConfig );
             _remover = new Regex( @$"{rxRemover}?(.*?){rxRemover}?$", regexOptions );
@@ -90,7 +88,7 @@ namespace J4JSoftware.CommandLine
                         // if there's no option pending (i.e., being processed) something
                         // has gone wrong because we've encountered a "naked value", one
                         // not following a declared option
-                        if( string.IsNullOrEmpty(curKey) )
+                        if( string.IsNullOrEmpty( curKey ) )
                             throw new ApplicationException(
                                 $"Found command line value '{parts[ 0 ]}' unassociated with an option" );
 
@@ -154,62 +152,64 @@ namespace J4JSoftware.CommandLine
             {
                 // retVal will never be null when this private function is called
                 if( retVal == null )
-                    throw new ApplicationException($"{nameof(ParseResults)} is undefined.");
+                    throw new ApplicationException( $"{nameof(ParseResults)} is undefined." );
 
                 // an empty keyValues list means this was a switch option so add
                 // the value "true" to keyValues
-                if ( keyValues.Count == 0 )
+                if( keyValues.Count == 0 )
                     keyValues.Add( "true" );
 
                 // if retVal already contains an entry for key merge the current
                 // parameter list into the exiting parameter list
-                if ( retVal.Contains( key ) )
-                    retVal[key].Parameters.AddRange(keyValues);
+                if( retVal.Contains( key ) )
+                {
+                    retVal[ key ].Parameters.AddRange( keyValues );
+                }
                 else
                 {
                     var entry = new ParseResult { Key = key };
-                    entry.Parameters.AddRange(keyValues);
+                    entry.Parameters.AddRange( keyValues );
 
-                    retVal.Add(entry);
+                    retVal.Add( entry );
                 }
             }
         }
 
-        private string GetRegexRemover(IParsingConfiguration parseConfig)
+        private string GetRegexRemover( IParsingConfiguration parseConfig )
         {
-            var retVal = new StringBuilder("[");
-            
+            var retVal = new StringBuilder( "[" );
+
             for( var idx = 0; idx < parseConfig.TextDelimiters.Count; idx++ )
             {
-                if (idx > 0)
-                    retVal.Append("|");
+                if( idx > 0 )
+                    retVal.Append( "|" );
 
                 retVal.Append( parseConfig.TextDelimiters[ idx ] );
             }
 
-            retVal.Append("]");
+            retVal.Append( "]" );
 
             return retVal.ToString();
         }
 
-        private string GetRegexSplitter(IParsingConfiguration parseConfig)
+        private string GetRegexSplitter( IParsingConfiguration parseConfig )
         {
             var retVal = new StringBuilder();
 
-            foreach (var prefix in parseConfig.Prefixes)
+            foreach( var prefix in parseConfig.Prefixes )
             {
-                if (retVal.Length > 0)
-                    retVal.Append("|");
+                if( retVal.Length > 0 )
+                    retVal.Append( "|" );
 
-                retVal.Append($"^{prefix}");
+                retVal.Append( $"^{prefix}" );
             }
 
-            foreach (var encloser in parseConfig.ValueEnclosers)
+            foreach( var encloser in parseConfig.ValueEnclosers )
             {
-                if (retVal.Length > 0)
-                    retVal.Append("|");
+                if( retVal.Length > 0 )
+                    retVal.Append( "|" );
 
-                retVal.Append($"{encloser}");
+                retVal.Append( $"{encloser}" );
             }
 
             return retVal.ToString();

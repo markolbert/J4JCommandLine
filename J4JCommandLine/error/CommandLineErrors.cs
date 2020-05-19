@@ -19,11 +19,14 @@ namespace J4JSoftware.CommandLine
                 Key = key
             };
 
-            if( Contains( source ) ) this[ source ].Errors.Add( error );
+            if( Contains( source ) )
+            {
+                this[ source ].Errors.Add( error );
+            }
             else
             {
-                var cle = new CommandLineError{ Source = source };
-                cle.Errors.Add(error  );
+                var cle = new CommandLineError { Source = source };
+                cle.Errors.Add( error );
 
                 Add( cle );
             }

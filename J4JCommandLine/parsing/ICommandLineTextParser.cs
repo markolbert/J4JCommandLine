@@ -1,6 +1,4 @@
-﻿using System.Collections.Generic;
-
-namespace J4JSoftware.CommandLine
+﻿namespace J4JSoftware.CommandLine
 {
     public interface ICommandLineTextParser
     {

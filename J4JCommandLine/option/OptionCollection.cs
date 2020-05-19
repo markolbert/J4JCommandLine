@@ -8,19 +8,19 @@ namespace J4JSoftware.CommandLine
 {
     public class OptionCollection : IOptionCollection
     {
-        private readonly List<IOption> _options = new List<IOption>();
         private readonly IJ4JLogger? _logger;
+        private readonly List<IOption> _options = new List<IOption>();
         private readonly IParsingConfiguration _parseConfig;
 
-        public OptionCollection( 
+        public OptionCollection(
             IParsingConfiguration parseConfig,
-            IJ4JLogger? logger = null 
+            IJ4JLogger? logger = null
         )
         {
             _parseConfig = parseConfig;
             _logger = logger;
 
-            _logger?.SetLoggedType( this.GetType() );
+            _logger?.SetLoggedType( GetType() );
         }
 
         public ReadOnlyCollection<IOption> Options => _options.AsReadOnly();
@@ -34,14 +34,14 @@ namespace J4JSoftware.CommandLine
                 return true;
             }
 
-            _logger?.Verbose<string>("Key '{0}' not in use", key);
+            _logger?.Verbose<string>( "Key '{0}' not in use", key );
 
             return false;
         }
 
         public IOption? this[ string key ] =>
-                _options.FirstOrDefault( opt =>
-                    opt.Keys.Any( k => string.Equals( k, key, _parseConfig.TextComparison ) ) );
+            _options.FirstOrDefault( opt =>
+                opt.Keys.Any( k => string.Equals( k, key, _parseConfig.TextComparison ) ) );
 
         public void Clear()
         {
@@ -53,14 +53,12 @@ namespace J4JSoftware.CommandLine
         public bool Add( IOption option )
         {
             foreach( var key in option.Keys )
-            {
                 if( _options.Any( opt => opt.Keys.Any( k => string.Equals( k, key, _parseConfig.TextComparison ) ) ) )
                 {
                     _logger?.Warning<string>( "Key '{0}' already in use", key );
 
                     return false;
                 }
-            }
 
             _options.Add( option );
 
@@ -71,10 +69,7 @@ namespace J4JSoftware.CommandLine
 
         public IEnumerator<IOption> GetEnumerator()
         {
-            foreach( var option in _options )
-            {
-                yield return option;
-            }
+            foreach( var option in _options ) yield return option;
         }
 
         IEnumerator IEnumerable.GetEnumerator()

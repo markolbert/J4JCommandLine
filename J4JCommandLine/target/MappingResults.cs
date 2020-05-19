@@ -2,7 +2,7 @@
 
 namespace J4JSoftware.CommandLine
 {
-    [Flags]
+    [ Flags ]
     public enum MappingResults
     {
         Unbound = 1 << 0,

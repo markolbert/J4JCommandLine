@@ -12,7 +12,7 @@ namespace J4JSoftware.CommandLine
 
         public OptionInSet( params T[] checkValues )
         {
-            _checkValues = new List<T>(checkValues);
+            _checkValues = new List<T>( checkValues );
         }
 
         public OptionInSet( List<T> checkValues )
@@ -25,16 +25,16 @@ namespace J4JSoftware.CommandLine
             if( _checkValues.Any( v => v.Equals( value ) ) )
                 return true;
 
-            var validValues = _checkValues.Aggregate( 
-                    new StringBuilder(), 
-                    ( sb, x ) =>
-                    {
-                        if( sb.Length > 0 )
-                            sb.Append( ", " );
-                        
-                        return sb.Append( x );
-                    }, 
-                    sb => sb.ToString() );
+            var validValues = _checkValues.Aggregate(
+                new StringBuilder(),
+                ( sb, x ) =>
+                {
+                    if( sb.Length > 0 )
+                        sb.Append( ", " );
+
+                    return sb.Append( x );
+                },
+                sb => sb.ToString() );
 
             bindingTarget.AddError( key, $"'{value}' not in set '{validValues}'" );
 

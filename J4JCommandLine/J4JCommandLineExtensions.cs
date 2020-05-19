@@ -2,8 +2,6 @@
 using System.Collections.Generic;
 using System.Linq.Expressions;
 using System.Reflection;
-using System.Runtime;
-using System.Text;
 using J4JSoftware.Logging;
 
 namespace J4JSoftware.CommandLine
@@ -15,39 +13,39 @@ namespace J4JSoftware.CommandLine
             var getAccessor = propInfo.GetGetMethod();
             var setAccessor = propInfo.GetSetMethod();
 
-            if ( getAccessor == null )
+            if( getAccessor == null )
             {
-                logger?.Verbose<string>("Property {0} is not readable", propInfo.Name);
+                logger?.Verbose<string>( "Property {0} is not readable", propInfo.Name );
                 return false;
             }
 
-            if (setAccessor == null)
+            if( setAccessor == null )
             {
-                logger?.Verbose<string>("Property {0} is not writable", propInfo.Name);
+                logger?.Verbose<string>( "Property {0} is not writable", propInfo.Name );
                 return false;
             }
 
-            if (!getAccessor.IsPublic )
+            if( !getAccessor.IsPublic )
             {
-                logger?.Verbose<string>("Property {0} is not publicly readable", propInfo.Name);
+                logger?.Verbose<string>( "Property {0} is not publicly readable", propInfo.Name );
                 return false;
             }
 
-            if (getAccessor.IsAbstract || setAccessor.IsAbstract)
+            if( getAccessor.IsAbstract || setAccessor.IsAbstract )
             {
-                logger?.Verbose<string>("Property {0} is abstract", propInfo.Name);
+                logger?.Verbose<string>( "Property {0} is abstract", propInfo.Name );
                 return false;
             }
 
-            if (!setAccessor.IsPublic )
+            if( !setAccessor.IsPublic )
             {
-                logger?.Verbose<string>("Property {0} is not publicly writable", propInfo.Name);
+                logger?.Verbose<string>( "Property {0} is not publicly writable", propInfo.Name );
                 return false;
             }
 
-            if (setAccessor.IsAbstract)
+            if( setAccessor.IsAbstract )
             {
-                logger?.Verbose<string>("Property {0} is not writable", propInfo.Name);
+                logger?.Verbose<string>( "Property {0} is not writable", propInfo.Name );
                 return false;
             }
 
@@ -60,15 +58,14 @@ namespace J4JSoftware.CommandLine
             // walk the expression tree to extract property path names and the property type
             var propNames = new List<string>();
 
-            Expression? curExpr = propertySelector.Body;
+            var curExpr = propertySelector.Body;
             Type? propType = null;
 
-            while (curExpr != null)
-            {
-                switch (curExpr)
+            while( curExpr != null )
+                switch( curExpr )
                 {
                     case MemberExpression memExpr:
-                        add_target_property_name(memExpr);
+                        add_target_property_name( memExpr );
 
                         if( propType == null )
                             propType = memExpr.Type;
@@ -79,10 +76,10 @@ namespace J4JSoftware.CommandLine
                         break;
 
                     case UnaryExpression unaryExpr:
-                        if (unaryExpr.Operand is MemberExpression unaryMemExpr)
-                            add_target_property_name(unaryMemExpr);
+                        if( unaryExpr.Operand is MemberExpression unaryMemExpr )
+                            add_target_property_name( unaryMemExpr );
 
-                        if (propType == null)
+                        if( propType == null )
                             propType = unaryExpr.Type;
 
                         // we're done; UnaryExpressions aren't part of an expression tree
@@ -97,19 +94,18 @@ namespace J4JSoftware.CommandLine
 
                         break;
                 }
-            }
 
             propNames.Reverse();
 
             return ( string.Join( ".", propNames ), propType! );
 
-            void add_target_property_name(MemberExpression memExpr)
+            void add_target_property_name( MemberExpression memExpr )
             {
-                if (memExpr.Member is PropertyInfo propInfo)
+                if( memExpr.Member is PropertyInfo propInfo )
                 {
-                    propNames?.Add(propInfo.Name);
+                    propNames?.Add( propInfo.Name );
 
-                    if (propType == null)
+                    if( propType == null )
                         propType = propInfo.PropertyType;
                 }
             }

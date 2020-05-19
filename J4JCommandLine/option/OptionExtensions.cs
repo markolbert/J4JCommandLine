@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using J4JSoftware.Logging;
+﻿using System.Collections.Generic;
 
 namespace J4JSoftware.CommandLine
 {
@@ -16,35 +13,34 @@ namespace J4JSoftware.CommandLine
 
             return option;
         }
-        public static T AddKeys<T>(this T option, IEnumerable<string> keys)
+
+        public static T AddKeys<T>( this T option, IEnumerable<string> keys )
             where T : OptionBase
         {
-            foreach (var key in keys)
-            {
-                if (option.Options.HasKey(key))
-                    option.Logger?.Warning<string>("Key '{key}' already in use", key);
-                else option.Keys.Add(key);
-            }
+            foreach( var key in keys )
+                if( option.Options.HasKey( key ) )
+                    option.Logger?.Warning<string>( "Key '{key}' already in use", key );
+                else option.Keys.Add( key );
 
             return option;
         }
 
-        public static T SetDefaultValue<T>(this T option, object defaultValue)
+        public static T SetDefaultValue<T>( this T option, object defaultValue )
             where T : OptionBase
         {
-            if (defaultValue.GetType() != option.SupportedType)
+            if( defaultValue.GetType() != option.SupportedType )
             {
-                option.Logger?.Error<Type, Type>(
+                option.Logger?.Error(
                     "Default value is a {0} but should be a {1}",
                     defaultValue.GetType(),
-                    option.SupportedType);
+                    option.SupportedType );
 
                 return option;
             }
 
             option.DefaultValue = defaultValue;
 
-            option.Logger?.Verbose<string>("Set default value to '{0}'", defaultValue?.ToString() ?? "**value**");
+            option.Logger?.Verbose<string>( "Set default value to '{0}'", defaultValue?.ToString() ?? "**value**" );
 
             return option;
         }
@@ -65,13 +61,13 @@ namespace J4JSoftware.CommandLine
             return option;
         }
 
-        public static T ArgumentCount<T>( this T option, int minimum, int maximum = Int32.MaxValue)
+        public static T ArgumentCount<T>( this T option, int minimum, int maximum = int.MaxValue )
             where T : OptionBase
         {
             minimum = minimum < 0 ? 0 : minimum;
-            maximum = maximum < 0 ? Int32.MaxValue : maximum;
+            maximum = maximum < 0 ? int.MaxValue : maximum;
 
-            if (minimum > maximum)
+            if( minimum > maximum )
             {
                 var temp = maximum;
 
@@ -85,7 +81,7 @@ namespace J4JSoftware.CommandLine
             return option;
         }
 
-        public static T SetDescription<T>( this T option, string description)
+        public static T SetDescription<T>( this T option, string description )
             where T : OptionBase
         {
             option.Description = description;
@@ -93,22 +89,22 @@ namespace J4JSoftware.CommandLine
             return option;
         }
 
-        public static T SetValidator<T>( this T option, IOptionValidator validator)
+        public static T SetValidator<T>( this T option, IOptionValidator validator )
             where T : OptionBase
         {
-            if (validator.SupportedType != option.SupportedType)
+            if( validator.SupportedType != option.SupportedType )
             {
-                option.Logger?.Error<Type, Type>(
+                option.Logger?.Error(
                     "Validator works with a {0} but should validate a {1}",
                     validator.SupportedType,
-                    option.SupportedType);
+                    option.SupportedType );
 
                 return option;
             }
 
             option.Validator = validator;
 
-            option.Logger?.Verbose("Set validator");
+            option.Logger?.Verbose( "Set validator" );
 
             return option;
         }

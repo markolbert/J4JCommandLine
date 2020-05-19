@@ -8,11 +8,11 @@ namespace J4JSoftware.CommandLine
     public class OptionNotInSet<T> : OptionValidator<T>
         where T : IEquatable<T>
     {
-        private List<T> _checkValues;
+        private readonly List<T> _checkValues;
 
-        public OptionNotInSet(params T[] checkValues)
+        public OptionNotInSet( params T[] checkValues )
         {
-            _checkValues = new List<T>(checkValues);
+            _checkValues = new List<T>( checkValues );
         }
 
         public OptionNotInSet( List<T> checkValues )
@@ -20,23 +20,23 @@ namespace J4JSoftware.CommandLine
             _checkValues = checkValues;
         }
 
-        public override bool Validate(IBindingTarget bindingTarget, string key, T value)
+        public override bool Validate( IBindingTarget bindingTarget, string key, T value )
         {
             if( !_checkValues.Any( v => v.Equals( value ) ) )
                 return true;
 
             var validValues = _checkValues.Aggregate(
                 new StringBuilder(),
-                (sb, x) =>
+                ( sb, x ) =>
                 {
-                    if (sb.Length > 0)
-                        sb.Append(", ");
+                    if( sb.Length > 0 )
+                        sb.Append( ", " );
 
-                    return sb.Append(x);
+                    return sb.Append( x );
                 },
-                sb => sb.ToString());
+                sb => sb.ToString() );
 
-            bindingTarget.AddError(key, $"'{value}' is in set '{validValues}'");
+            bindingTarget.AddError( key, $"'{value}' is in set '{validValues}'" );
 
             return false;
         }

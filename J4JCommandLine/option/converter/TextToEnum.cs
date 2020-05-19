@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using J4JSoftware.Logging;
 using System.Linq;
 
 namespace J4JSoftware.CommandLine
@@ -22,10 +21,8 @@ namespace J4JSoftware.CommandLine
             var values = new List<object>();
 
             foreach( var enumValue in Enum.GetValues( typeof(TEnum) ) )
-            {
                 if( enumValue != null )
                     values.Add( enumValue );
-            }
 
             result = (TEnum) values.Min();
 

@@ -5,23 +5,20 @@ using System.Collections.ObjectModel;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
-using System.Reflection.Metadata.Ecma335;
-using System.Text;
 using J4JSoftware.Logging;
-using Microsoft.Extensions.DependencyInjection;
 
 namespace J4JSoftware.CommandLine
 {
-    public class BindingTarget<TValue> : IBindingTarget<TValue> 
+    public class BindingTarget<TValue> : IBindingTarget<TValue>
         where TValue : class
     {
-        private readonly TargetableProperties _properties = new TargetableProperties();
-        private readonly IJ4JLogger? _logger;
-        private readonly Func<IJ4JLogger>? _loggerFactory;
-        private readonly StringComparison _keyComp;
         private readonly IEnumerable<ITextConverter> _converters;
         private readonly CommandLineErrors _errors;
+        private readonly StringComparison _keyComp;
+        private readonly IJ4JLogger? _logger;
+        private readonly Func<IJ4JLogger>? _loggerFactory;
         private readonly IOptionCollection _options;
+        private readonly TargetableProperties _properties = new TargetableProperties();
 
         public BindingTarget(
             string targetID,
@@ -41,7 +38,7 @@ namespace J4JSoftware.CommandLine
             _loggerFactory = loggerFactory;
 
             _logger = _loggerFactory?.Invoke();
-            _logger?.SetLoggedType( this.GetType() );
+            _logger?.SetLoggedType( GetType() );
 
             _keyComp = parseConfig.TextComparison;
 
@@ -64,7 +61,7 @@ namespace J4JSoftware.CommandLine
             _loggerFactory = loggerFactory;
 
             _logger = _loggerFactory?.Invoke();
-            _logger?.SetLoggedType( this.GetType() );
+            _logger?.SetLoggedType( GetType() );
 
             // if TTarget can't be created we have to abort
             if( !typeof(TValue).HasPublicParameterlessConstructor() )
@@ -96,35 +93,35 @@ namespace J4JSoftware.CommandLine
         public OptionBase BindProperty(
             string propertyPath,
             object? defaultValue,
-            params string[] keys)
+            params string[] keys )
         {
-            if (_properties.Contains(propertyPath))
+            if( _properties.Contains( propertyPath ) )
             {
                 var propType = _properties[ propertyPath ].PropertyInfo.PropertyType;
 
                 var converter = _converters.FirstOrDefault( c => c.SupportedType == propType );
 
-                if (converter == null)
+                if( converter == null )
                 {
-                    _logger?.Error<Type>("No ITextConverter exists for Type {0}", propType);
+                    _logger?.Error( "No ITextConverter exists for Type {0}", propType );
 
                     return new NullOption( _options, _loggerFactory?.Invoke() );
                 }
 
-                var option = new Option(_options, converter, _loggerFactory?.Invoke());
-                option.AddKeys(keys);
+                var option = new Option( _options, converter, _loggerFactory?.Invoke() );
+                option.AddKeys( keys );
 
                 if( defaultValue != null )
                     option.SetDefaultValue( defaultValue );
 
-                _properties[propertyPath].BoundOption = option;
+                _properties[ propertyPath ].BoundOption = option;
 
                 return option;
             }
 
-            _logger?.Error<string>("Property '{propertyPath}' is not bindable", propertyPath);
+            _logger?.Error<string>( "Property '{propertyPath}' is not bindable", propertyPath );
 
-            return new NullOption(_options, _loggerFactory?.Invoke());
+            return new NullOption( _options, _loggerFactory?.Invoke() );
         }
 
         public OptionBase BindPropertyCollection(
@@ -140,15 +137,15 @@ namespace J4JSoftware.CommandLine
             if( property != null )
             {
                 // we need to find the Type on which the collection is based
-                var propType = property.Multiplicity == PropertyMultiplicity.Array 
-                    ? property.PropertyInfo.PropertyType.GetElementType() 
+                var propType = property.Multiplicity == PropertyMultiplicity.Array
+                    ? property.PropertyInfo.PropertyType.GetElementType()
                     : property.PropertyInfo.PropertyType.GenericTypeArguments.First();
 
                 var converter = _converters.FirstOrDefault( c => c.SupportedType == propType );
 
                 if( converter == null )
                 {
-                    _logger?.Error<Type>( "No ITextConverter exists for Type {0}", propType! );
+                    _logger?.Error( "No ITextConverter exists for Type {0}", propType! );
 
                     return new NullOption( _options, _loggerFactory?.Invoke() );
                 }
@@ -173,23 +170,29 @@ namespace J4JSoftware.CommandLine
             // scan all the bound options that aren't tied to NullOptions, which are only
             // "bound" in error
             foreach( var boundProp in _properties.Where( p => p.BoundOption != null ) )
-            {
                 if( boundProp.BoundOption is NullOption )
                     retVal |= MappingResults.Unbound;
                 else
                     retVal |= boundProp.MapParseResult( this, parseResults, _logger );
-            }
 
             return retVal;
         }
 
-        public void AddError( string key, string error ) => _errors.AddError( this, key, error );
+        public void AddError( string key, string error )
+        {
+            _errors.AddError( this, key, error );
+        }
+
+        object IBindingTarget.GetValue()
+        {
+            return Value;
+        }
 
         private void Initialize()
         {
             var type = typeof(TValue);
 
-            _logger?.Verbose<Type>( "Finding targetable properties for {type}", type );
+            _logger?.Verbose( "Finding targetable properties for {type}", type );
 
             ScanProperties( type, Value, new Stack<PropertyInfo>() );
         }
@@ -200,7 +203,7 @@ namespace J4JSoftware.CommandLine
             {
                 var curTP = TargetableProperty.Create( property, container, _keyComp, pathToContainer, _logger );
 
-                if ( !curTP.IsTargetable )
+                if( !curTP.IsTargetable )
                 {
                     _logger?.Verbose<string>( "Property {0} is not targetable", property.Name );
                     continue;
@@ -212,7 +215,10 @@ namespace J4JSoftware.CommandLine
                 // traverse any properties it may have
                 object? child = null;
 
-                if( curTP.IsDefined ) child = property.GetValue( container );
+                if( curTP.IsDefined )
+                {
+                    child = property.GetValue( container );
+                }
                 else
                 {
                     // we only need to create properties that are SingleValues because
@@ -228,21 +234,19 @@ namespace J4JSoftware.CommandLine
 
                 // recurse over any child properties of the current property provided it's a
                 // SingleValue property but not a ValueType (which don't have child properties)
-                if( curTP.Multiplicity == PropertyMultiplicity.SingleValue 
-                    && !typeof(ValueType).IsAssignableFrom(property.PropertyType) )
+                if( curTP.Multiplicity == PropertyMultiplicity.SingleValue
+                    && !typeof(ValueType).IsAssignableFrom( property.PropertyType ) )
                 {
                     _logger?.Verbose<string>( "Finding targetable properties and methods for {0}", property.Name );
 
                     pathToContainer.Push( property );
 
-                    ScanProperties(property.PropertyType, child, pathToContainer);
+                    ScanProperties( property.PropertyType, child, pathToContainer );
                 }
             }
 
             if( pathToContainer.Count > 0 )
                 pathToContainer.Pop();
         }
-
-        object IBindingTarget.GetValue() => Value;
     }
 }

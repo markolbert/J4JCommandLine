@@ -1,7 +1,4 @@
-﻿using System.Collections.Generic;
-using J4JSoftware.Logging;
-
-namespace J4JSoftware.CommandLine
+﻿namespace J4JSoftware.CommandLine
 {
     public class TextToText : TextConverter<string>
     {

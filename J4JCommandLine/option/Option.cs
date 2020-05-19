@@ -1,9 +1,6 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.Diagnostics;
-using System.Linq;
 using J4JSoftware.Logging;
 
 namespace J4JSoftware.CommandLine
@@ -12,12 +9,12 @@ namespace J4JSoftware.CommandLine
     {
         private readonly ITextConverter _converter;
 
-        public Option( 
+        public Option(
             IOptionCollection options,
             ITextConverter converter,
-            IJ4JLogger? logger = null 
+            IJ4JLogger? logger = null
         )
-        : base(converter.SupportedType, options, logger)
+            : base( converter.SupportedType, options, logger )
         {
             _converter = converter;
         }
@@ -27,11 +24,12 @@ namespace J4JSoftware.CommandLine
             IParseResult parseResult,
             out object result )
         {
-            if (parseResult.NumParameters != 1)
+            if( parseResult.NumParameters != 1 )
             {
                 result = DefaultValue;
 
-                bindingTarget.AddError(parseResult.Key, $"Incorrect number of parameters. Expected 1, got {parseResult.NumParameters}");
+                bindingTarget.AddError( parseResult.Key,
+                    $"Incorrect number of parameters. Expected 1, got {parseResult.NumParameters}" );
                 return TextConversionResult.FailedConversion;
             }
 
@@ -45,7 +43,7 @@ namespace J4JSoftware.CommandLine
 
             bindingTarget.AddError(
                 parseResult.Key,
-                $"Couldn't convert '{parseResult.Parameters[0]}' to {_converter.SupportedType}");
+                $"Couldn't convert '{parseResult.Parameters[ 0 ]}' to {_converter.SupportedType}" );
 
             return TextConversionResult.FailedConversion;
         }
@@ -54,9 +52,9 @@ namespace J4JSoftware.CommandLine
         {
             // create a list of the Type we're converting to
             var listType = typeof(List<>);
-            var genericListType = listType.MakeGenericType(_converter.SupportedType);
+            var genericListType = listType.MakeGenericType( _converter.SupportedType );
 
-            return (Activator.CreateInstance(genericListType) as IList)!;
+            return ( Activator.CreateInstance( genericListType ) as IList )!;
         }
 
         public override Array CreateEmptyArray( int capacity )
@@ -77,9 +75,10 @@ namespace J4JSoftware.CommandLine
             var allOkay = true;
 
             foreach( var parameter in parseResult.Parameters )
-            {
                 if( _converter.Convert( parameter, out var innerResult ) )
+                {
                     result.Add( innerResult );
+                }
                 else
                 {
                     bindingTarget.AddError(
@@ -88,7 +87,6 @@ namespace J4JSoftware.CommandLine
 
                     allOkay = false;
                 }
-            }
 
             return allOkay ? TextConversionResult.Okay : TextConversionResult.FailedConversion;
         }
