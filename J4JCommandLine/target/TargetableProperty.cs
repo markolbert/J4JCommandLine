@@ -90,9 +90,21 @@ namespace J4JSoftware.CommandLine
             // start by setting the value we're going to set on our bound property to 
             // whatever default was specified for our BoundOption. if the stored
             // default value is null we create an empty collection
-            object propValue = BoundOption.DefaultValue == null
-                ? BoundOption.CreateEmptyList()
-                : BoundOption.DefaultValue;
+            object? defaultValue;
+
+            if( BoundOption.DefaultValue != null )
+                defaultValue = BoundOption.DefaultValue;
+            else
+            {
+                defaultValue = Multiplicity switch
+                {
+                    PropertyMultiplicity.Array => BoundOption.CreateEmptyArray( 0 ),
+                    PropertyMultiplicity.List => BoundOption.CreateEmptyList(),
+                    _ => null
+                };
+            }
+
+            object? propValue = defaultValue;
 
             if( parseResult == null )
             {
@@ -135,7 +147,16 @@ namespace J4JSoftware.CommandLine
                                 // if conversion succeeded, store the result, converting it to a
                                 // simple array if necessary
                                 if( Multiplicity == PropertyMultiplicity.Array )
-                                    propValue = new ArrayList(collectionResult).ToArray();
+                                {
+                                    var tempArray = BoundOption.CreateEmptyArray( collectionResult.Count );
+
+                                    for( var idx = 0; idx < collectionResult.Count; idx++ )
+                                    {
+                                        tempArray.SetValue( collectionResult[ idx ], idx );
+                                    }
+
+                                    propValue = tempArray;
+                                }
                                 else propValue = collectionResult;
                             }
 
@@ -168,11 +189,11 @@ namespace J4JSoftware.CommandLine
                 }
             }
 
-            if( !BoundOption.Validate( bindingTarget, optionKey, propValue ) )
+            if( propValue != null && !BoundOption.Validate( bindingTarget, optionKey, propValue ) )
             {
                 // revert to our default value (which we presume is valid but don't actually know
                 // or care)
-                propValue = BoundOption.DefaultValue;
+                propValue = defaultValue;
 
                 // set a flag to record the validation failure
                 retVal |= MappingResults.ValidationFailed;

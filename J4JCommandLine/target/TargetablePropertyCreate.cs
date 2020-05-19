@@ -19,14 +19,14 @@ namespace J4JSoftware.CommandLine
             IJ4JLogger? logger = null )
         {
             PropertyMultiplicity multiplicity;
-            Type relevantType = propInfo.PropertyType;
+            Type? relevantType = propInfo.PropertyType;
 
             if( propInfo.PropertyType.IsArray )
             {
                 // we want to ensure we can target/create the underlying element type
-                var elemType = propInfo.PropertyType.GetElementType();
+                relevantType = propInfo.PropertyType.GetElementType();
 
-                if( elemType == null )
+                if( relevantType == null )
                 {
                     logger?.Error<string>( "Cannot determine element type for array {0}", propInfo.Name );
                     multiplicity = PropertyMultiplicity.Unsupported;
@@ -77,7 +77,7 @@ namespace J4JSoftware.CommandLine
             var retVal = new TargetableProperty( propInfo, keyComp )
             {
                 Multiplicity = multiplicity,
-                IsCreateable = relevantType.HasPublicParameterlessConstructor(),
+                IsCreateable = relevantType!.HasPublicParameterlessConstructor(),
                 IsDefined = propInfo.GetValue( container ) != null,
                 IsPubliclyReadWrite = propInfo.IsPublicReadWrite( logger ),
                 PathElements = pathToContainer.ToList()

@@ -29,6 +29,7 @@ namespace J4JSoftware.CommandLine
         bool Validate( IBindingTarget bindingTarget, string key, object value );
 
         IList CreateEmptyList();
+        Array CreateEmptyArray( int capacity );
 
         TextConversionResult Convert(
             IBindingTarget bindingTarget,

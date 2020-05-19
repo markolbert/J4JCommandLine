@@ -59,6 +59,13 @@ namespace J4JSoftware.CommandLine
             return (Activator.CreateInstance(genericListType) as IList)!;
         }
 
+        public override Array CreateEmptyArray( int capacity )
+        {
+            capacity = capacity < 0 ? 0 : capacity;
+
+            return Array.CreateInstance( SupportedType, capacity );
+        }
+
         public override TextConversionResult ConvertList(
             IBindingTarget bindingTarget,
             IParseResult parseResult,

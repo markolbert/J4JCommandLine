@@ -120,7 +120,7 @@ namespace J4JCommandLine.Tests
 
             var target = context.AddBindingTarget(new RootProperties(), "test");
 
-            var option = target.BindProperty(x => x.IntCollection, null, "x");
+            var option = target.BindProperty(x => x.IntList, null, "x");
             option.Should().BeAssignableTo<Option>();
 
             option.ArgumentCount( minArgs, maxArgs );
@@ -143,9 +143,51 @@ namespace J4JCommandLine.Tests
                 expectedValues.Add( Convert.ToInt32( rawArgs[ idx ] ) );
             }
 
-            target.Value.IntCollection.Should().NotBeNull();
-            target.Value.IntCollection.Count.Should().Be( expectedValues.Count );
-            target.Value.IntCollection.Should().BeEquivalentTo( expectedValues );
+            target.Value.IntList.Should().NotBeNull();
+            target.Value.IntList.Count.Should().Be( expectedValues.Count );
+            target.Value.IntList.Should().BeEquivalentTo( expectedValues );
+        }
+
+        [Theory]
+        [InlineData(new string[] { "32" }, 0, Int32.MaxValue, MappingResults.Success)]
+        [InlineData(new string[] { "32" }, 2, Int32.MaxValue, MappingResults.TooFewParameters)]
+        [InlineData(new string[] { "32" }, 0, 0, MappingResults.TooManyParameters)]
+        public void Num_parameters_array(
+            string[] rawArgs,
+            int minArgs,
+            int maxArgs,
+            MappingResults result)
+        {
+            var context = TestServiceProvider.Instance.GetRequiredService<CommandLineContext>();
+
+            var target = context.AddBindingTarget(new RootProperties(), "test");
+
+            var option = target.BindProperty(x => x.IntArray, null, "x");
+            option.Should().BeAssignableTo<Option>();
+
+            option.ArgumentCount(minArgs, maxArgs);
+
+            var args = rawArgs.ToList();
+            args.Insert(0, "-x");
+
+            var parseResult = context.Parse(args.ToArray());
+
+            var consoleText = _consoleWriter.ToString();
+
+            parseResult.Should().Be(result);
+
+            var expectedValues = new List<int>();
+            var lowerLimit = minArgs > rawArgs.Length ? minArgs : 0;
+            var upperLimit = maxArgs > rawArgs.Length ? rawArgs.Length : maxArgs;
+
+            for (var idx = lowerLimit; idx < upperLimit; idx++)
+            {
+                expectedValues.Add(Convert.ToInt32(rawArgs[idx]));
+            }
+
+            target.Value.IntArray.Should().NotBeNull();
+            target.Value.IntArray.Length.Should().Be(expectedValues.Count);
+            target.Value.IntArray.Should().BeEquivalentTo(expectedValues.ToArray());
         }
     }
 }

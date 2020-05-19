@@ -215,8 +215,9 @@ namespace J4JSoftware.CommandLine
                 if( curTP.IsDefined ) child = property.GetValue( container );
                 else
                 {
-                    // no need to create strings because they have no targetable subproperties
-                    if( property.PropertyType != typeof(string) )
+                    // we only need to create properties that are SingleValues because
+                    // those are the only ones we recurse into looking for targetable properties
+                    if( curTP.Multiplicity == PropertyMultiplicity.SingleValue )
                     {
                         child = Activator.CreateInstance( property.PropertyType );
                         property.SetValue( container, child );

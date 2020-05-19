@@ -157,6 +157,11 @@ namespace J4JSoftware.CommandLine
             throw new NotImplementedException();
         }
 
+        public virtual Array CreateEmptyArray( int capacity )
+        {
+            throw new NotImplementedException();
+        }
+
         public virtual TextConversionResult ConvertList( IBindingTarget bindingTarget, IParseResult parseResult, out IList result )
         {
             throw new NotImplementedException();
