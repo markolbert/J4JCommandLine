@@ -203,16 +203,11 @@ namespace J4JSoftware.CommandLine
             // initializing stuff as needed along the way...
             var container = bindingTarget.GetValue();
 
-            for( var idx = 0; idx < PathElements.Count; idx++ )
+            foreach( var propertyInfo in PathElements )
             {
-                var value = PathElements[ idx ].GetValue( container );
+                container = propertyInfo.GetValue( container );
 
-                if( idx < PathElements.Count - 1 )
-                {
-                    value ??= Activator.CreateInstance( PathElements[ idx ].PropertyType );
-
-                    container = value!;
-                }
+                container ??= Activator.CreateInstance(propertyInfo.PropertyType)!;
             }
 
             // finally, set the target property's value

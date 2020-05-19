@@ -12,12 +12,22 @@ using Xunit;
 
 namespace J4JCommandLine.Tests
 {
-    public class BindingTest
+    public class RootLevelTests
     {
+        public class RootProperties
+        {
+            public string TextProperty { get; set; }
+            public int IntProperty { get; set; }
+            public bool BoolProperty { get; set; }
+            public decimal DecimalProperty { get; set; }
+            public List<int> IntList { get; set; }
+            public int[] IntArray { get; set; }
+        }
+
         private readonly StringWriter _consoleWriter = new StringWriter();
         private readonly TextConverter _textConv = new TextConverter();
 
-        public BindingTest()
+        public RootLevelTests()
         {
             Console.SetOut( _consoleWriter );
         }

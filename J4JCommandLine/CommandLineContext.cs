@@ -69,7 +69,10 @@ namespace J4JSoftware.CommandLine
             // process the parsing results
             Errors.Clear();
 
-            foreach( var kvp in _bindingTargets ) retVal |= kvp.Value.MapParseResults( results );
+            foreach( var kvp in _bindingTargets )
+            {
+                retVal |= kvp.Value.MapParseResults( results );
+            }
 
             return retVal;
         }

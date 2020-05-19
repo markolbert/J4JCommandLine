@@ -170,10 +170,12 @@ namespace J4JSoftware.CommandLine
             // scan all the bound options that aren't tied to NullOptions, which are only
             // "bound" in error
             foreach( var boundProp in _properties.Where( p => p.BoundOption != null ) )
+            {
                 if( boundProp.BoundOption is NullOption )
                     retVal |= MappingResults.Unbound;
                 else
                     retVal |= boundProp.MapParseResult( this, parseResults, _logger );
+            }
 
             return retVal;
         }
