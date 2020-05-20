@@ -25,6 +25,19 @@ namespace J4JCommandLine.Tests
                 .As<IParsingConfiguration>()
                 .SingleInstance();
 
+            builder.Register( c => new OutputConfiguration( null )
+                {
+                    DetailAreaWidth = 55,
+                    KeyAreaWidth = 20,
+                    KeyDetailSeparation = 5
+                } )
+                .AsImplementedInterfaces()
+                .SingleInstance();
+
+            builder.RegisterType<SimpleConsoleHelpErrorProcessor>()
+                .As<IHelpErrorProcessor>()
+                .SingleInstance();
+
             builder.RegisterType<CommandLineContext>()
                 .AsSelf();
 

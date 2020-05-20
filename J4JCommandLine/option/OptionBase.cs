@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using J4JSoftware.Logging;
 
 namespace J4JSoftware.CommandLine
@@ -8,11 +9,13 @@ namespace J4JSoftware.CommandLine
     public class OptionBase : IOption
     {
         protected OptionBase(
+            OptionType optionType,
             Type supportedType,
             IOptionCollection options,
             IJ4JLogger? logger
         )
         {
+            OptionType = optionType;
             SupportedType = supportedType;
             Options = options;
             Logger = logger;
@@ -26,7 +29,9 @@ namespace J4JSoftware.CommandLine
         public Type SupportedType { get; }
         public string Description { get; internal set; }
         public List<string> Keys { get; } = new List<string>();
+        public string FirstKey => Keys.Count == 0 ? string.Empty : Keys.OrderBy( k => k ).First();
         public object DefaultValue { get; internal set; }
+        public OptionType OptionType { get; }
         public bool IsRequired { get; internal set; }
         public int MinParameters { get; internal set; }
         public int MaxParameters { get; internal set; } = int.MaxValue;

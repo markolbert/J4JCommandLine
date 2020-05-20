@@ -14,7 +14,7 @@ namespace J4JSoftware.CommandLine
             ITextConverter converter,
             IJ4JLogger? logger = null
         )
-            : base( converter.SupportedType, options, logger )
+            : base( OptionType.Mappable, converter.SupportedType, options, logger )
         {
             _converter = converter;
         }

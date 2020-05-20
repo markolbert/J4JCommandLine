@@ -108,10 +108,13 @@ namespace J4JSoftware.CommandLine
                 // value (needed for displaying context-sensitive help)
                 logger?.Error<string>( "No matching argument keys for property {0}", PropertyInfo.Name );
 
-                if( BoundOption.IsRequired )
-                    retVal |= MappingResults.MissingRequired;
-
                 optionKey = BoundOption.Keys.First();
+
+                if ( BoundOption.IsRequired )
+                {
+                    bindingTarget.AddError(optionKey, $"Missing required option '{optionKey}'");
+                    retVal |= MappingResults.MissingRequired;
+                }
             }
             else
             {

@@ -1,13 +1,15 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 
 namespace J4JSoftware.CommandLine
 {
     public interface IParsingConfiguration
     {
-        ReadOnlyCollection<string> Prefixes { get; }
-        ReadOnlyCollection<string> ValueEnclosers { get; }
-        ReadOnlyCollection<string> TextDelimiters { get; }
+        List<string> Prefixes { get; }
+        List<string> ValueEnclosers { get; }
+        List<string> TextDelimiters { get; }
+        List<string> HelpKeys { get; }
         StringComparison TextComparison { get; }
     }
 }

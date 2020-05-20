@@ -8,8 +8,10 @@ namespace J4JSoftware.CommandLine
     {
         Type SupportedType { get; }
         string Description { get; }
+        string FirstKey { get; }
         List<string> Keys { get; }
         object DefaultValue { get; }
+        OptionType OptionType { get; }
         bool IsRequired { get; }
         int MinParameters { get; }
         int MaxParameters { get; }

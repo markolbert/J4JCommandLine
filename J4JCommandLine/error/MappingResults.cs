@@ -12,6 +12,7 @@ namespace J4JSoftware.CommandLine
         ValidationFailed = 1 << 4,
         TooFewParameters = 1 << 5,
         TooManyParameters = 1 << 6,
+        HelpRequested = 1 << 7,
 
         Success = 0
     }

@@ -8,6 +8,7 @@ namespace J4JSoftware.CommandLine
         ReadOnlyCollection<IOption> Options { get; }
         IOption? this[ string key ] { get; }
         bool HasKey( string key );
+        string[] GetUniqueKeys( params string[] keys );
         void Clear();
         bool Add( IOption option );
     }

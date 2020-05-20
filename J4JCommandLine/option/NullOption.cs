@@ -7,7 +7,7 @@ namespace J4JSoftware.CommandLine
         public NullOption(
             IOptionCollection options,
             IJ4JLogger? logger )
-            : base( typeof(object), options, logger )
+            : base( OptionType.Null, typeof(object), options, logger )
         {
         }
     }

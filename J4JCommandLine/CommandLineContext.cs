@@ -11,26 +11,38 @@ namespace J4JSoftware.CommandLine
         private readonly IEnumerable<ITextConverter> _converters;
         private readonly Func<IJ4JLogger>? _loggerFactory;
         private readonly IOptionCollection _options;
+        private readonly CommandLineErrors _errors;
+        private readonly IHelpErrorProcessor? _helpErrorProcessor;
 
         public CommandLineContext(
             ICommandLineTextParser textParser,
             IEnumerable<ITextConverter> converters,
             IParsingConfiguration parsingConfig,
+            IHelpErrorProcessor? helpErrorProcessor,
             Func<IJ4JLogger>? loggerFactory
         )
         {
             TextParser = textParser;
             _converters = converters;
             ParsingConfiguration = parsingConfig;
-            Errors = new CommandLineErrors( ParsingConfiguration );
+            _helpErrorProcessor = helpErrorProcessor;
             _loggerFactory = loggerFactory;
 
             _options = new OptionCollection( parsingConfig, _loggerFactory?.Invoke() );
+            _errors = new CommandLineErrors(ParsingConfiguration);
+
+            if( ParsingConfiguration.HelpKeys.Count > 0 )
+            {
+                var helpOption = new HelpOption( _options, _loggerFactory?.Invoke() );
+                helpOption.AddKeys( ParsingConfiguration.HelpKeys.ToArray() );
+
+                _options.Add( helpOption );
+            }
         }
 
         public ICommandLineTextParser TextParser { get; }
         public IParsingConfiguration ParsingConfiguration { get; }
-        public CommandLineErrors Errors { get; }
+        public string? Description { get; set; }
 
         public ReadOnlyDictionary<string, IBindingTarget> BindingTargets =>
             new ReadOnlyDictionary<string, IBindingTarget>( _bindingTargets );
@@ -47,9 +59,9 @@ namespace J4JSoftware.CommandLine
             var options = new OptionCollection( ParsingConfiguration, _loggerFactory?.Invoke() );
 
             var retVal = value == null
-                ? new BindingTarget<TTarget>( targetID, _converters, _options, ParsingConfiguration, Errors,
+                ? new BindingTarget<TTarget>( targetID, _converters, _options, ParsingConfiguration, _errors,
                     _loggerFactory )
-                : new BindingTarget<TTarget>( targetID, value, _converters, _options, ParsingConfiguration, Errors,
+                : new BindingTarget<TTarget>( targetID, value, _converters, _options, ParsingConfiguration, _errors,
                     _loggerFactory );
 
             _bindingTargets.Add( targetID, retVal );
@@ -67,12 +79,18 @@ namespace J4JSoftware.CommandLine
 
             // go through all the bound targets, giving each of their defined options a chance to
             // process the parsing results
-            Errors.Clear();
+            _errors.Clear();
 
             foreach( var kvp in _bindingTargets )
             {
                 retVal |= kvp.Value.MapParseResults( results );
             }
+
+            var helpRequested = ( retVal & MappingResults.HelpRequested ) == MappingResults.HelpRequested;
+            var errorsEncountered = ( retVal & ~MappingResults.HelpRequested ) != MappingResults.Success;
+
+            if( helpRequested || errorsEncountered )
+                _helpErrorProcessor?.Display( _options, _errors, Description );
 
             return retVal;
         }

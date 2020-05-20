@@ -5,6 +5,7 @@ using System.Collections.ObjectModel;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
+using System.Runtime.InteropServices;
 using J4JSoftware.Logging;
 
 namespace J4JSoftware.CommandLine
@@ -13,6 +14,7 @@ namespace J4JSoftware.CommandLine
         where TValue : class
     {
         private readonly IEnumerable<ITextConverter> _converters;
+        private readonly IParsingConfiguration _parseConfig;
         private readonly CommandLineErrors _errors;
         private readonly StringComparison _keyComp;
         private readonly IJ4JLogger? _logger;
@@ -34,6 +36,7 @@ namespace J4JSoftware.CommandLine
             Value = value;
             _converters = converters;
             _options = options;
+            _parseConfig = parseConfig;
             _errors = errors;
             _loggerFactory = loggerFactory;
 
@@ -57,6 +60,7 @@ namespace J4JSoftware.CommandLine
             ID = targetID;
             _converters = converters;
             _options = options;
+            _parseConfig = parseConfig;
             _errors = errors;
             _loggerFactory = loggerFactory;
 
@@ -93,75 +97,11 @@ namespace J4JSoftware.CommandLine
         public OptionBase BindProperty(
             string propertyPath,
             object? defaultValue,
-            params string[] keys )
-        {
-            if( _properties.Contains( propertyPath ) )
-            {
-                var propType = _properties[ propertyPath ].PropertyInfo.PropertyType;
-
-                var converter = _converters.FirstOrDefault( c => c.SupportedType == propType );
-
-                if( converter == null )
-                {
-                    _logger?.Error( "No ITextConverter exists for Type {0}", propType );
-
-                    return new NullOption( _options, _loggerFactory?.Invoke() );
-                }
-
-                var option = new Option( _options, converter, _loggerFactory?.Invoke() );
-                option.AddKeys( keys );
-
-                if( defaultValue != null )
-                    option.SetDefaultValue( defaultValue );
-
-                _properties[ propertyPath ].BoundOption = option;
-
-                return option;
-            }
-
-            _logger?.Error<string>( "Property '{propertyPath}' is not bindable", propertyPath );
-
-            return new NullOption( _options, _loggerFactory?.Invoke() );
-        }
+            params string[] keys ) => CreateSingleOption( propertyPath, keys, defaultValue );
 
         public OptionBase BindPropertyCollection(
             string propertyPath,
-            params string[] keys )
-        {
-            var property =
-                _properties.FirstOrDefault( p =>
-                    string.Equals( propertyPath, p.FullPath, StringComparison.Ordinal )
-                    && ( p.Multiplicity == PropertyMultiplicity.Array ||
-                         p.Multiplicity == PropertyMultiplicity.List ) );
-
-            if( property != null )
-            {
-                // we need to find the Type on which the collection is based
-                var propType = property.Multiplicity == PropertyMultiplicity.Array
-                    ? property.PropertyInfo.PropertyType.GetElementType()
-                    : property.PropertyInfo.PropertyType.GenericTypeArguments.First();
-
-                var converter = _converters.FirstOrDefault( c => c.SupportedType == propType );
-
-                if( converter == null )
-                {
-                    _logger?.Error( "No ITextConverter exists for Type {0}", propType! );
-
-                    return new NullOption( _options, _loggerFactory?.Invoke() );
-                }
-
-                var option = new Option( _options, converter, _loggerFactory?.Invoke() );
-                option.AddKeys( keys );
-
-                _properties[ propertyPath ].BoundOption = option;
-
-                return option;
-            }
-
-            _logger?.Error<string>( "Property '{propertyPath}' is not bindable", propertyPath );
-
-            return new NullOption( _options, _loggerFactory?.Invoke() );
-        }
+            params string[] keys ) => CreateCollectionOption( propertyPath, keys );
 
         public MappingResults MapParseResults( ParseResults parseResults )
         {
@@ -171,10 +111,21 @@ namespace J4JSoftware.CommandLine
             // "bound" in error
             foreach( var boundProp in _properties.Where( p => p.BoundOption != null ) )
             {
-                if( boundProp.BoundOption is NullOption )
-                    retVal |= MappingResults.Unbound;
-                else
-                    retVal |= boundProp.MapParseResult( this, parseResults, _logger );
+                switch( boundProp.BoundOption!.OptionType )
+                {
+                    case OptionType.Help:
+                        if( boundProp.MapParseResult( this, parseResults, _logger ) == MappingResults.Success )
+                            retVal |= MappingResults.HelpRequested;
+                        break;
+
+                    case OptionType.Mappable:
+                        retVal |= boundProp.MapParseResult(this, parseResults, _logger);
+                        break;
+
+                    case OptionType.Null:
+                        retVal |= MappingResults.Unbound;
+                        break;
+                }
             }
 
             return retVal;
@@ -249,6 +200,96 @@ namespace J4JSoftware.CommandLine
 
             if( pathToContainer.Count > 0 )
                 pathToContainer.Pop();
+        }
+
+        // Creates an Option if a TargetableProperty based on a supported single value exists with the specified propertyPath
+        private OptionBase CreateSingleOption( string propertyPath, string[] keys, object? defaultValue )
+        {
+            OptionBase? retVal = null;
+
+            // see if the property we want to bind is targetable
+            var property = _properties.GetProperty(propertyPath);
+
+            if (property == null)
+                throw new NullReferenceException($"Could not find {nameof(TargetableProperty)} '{propertyPath}'");
+
+            // check that it's the right multiplicity
+            if (!property.Multiplicity.IsTargetableSingleValue())
+                _logger?.Error<string>( "Property '{propertyPath}' is not single-value", propertyPath );
+            else
+            {
+                retVal = CreateOption( property.PropertyInfo.PropertyType );
+
+                if( !( retVal is NullOption ) && defaultValue != null )
+                    retVal.SetDefaultValue( defaultValue );
+            }
+
+            return FinalizeAndStoreOption( property, retVal, keys );
+        }
+
+        // Creates an Option if a TargetableProperty based on a supported collection exists with the specified propertyPath
+        private OptionBase CreateCollectionOption( string propertyPath, string[] keys )
+        {
+            OptionBase? retVal = null;
+
+            // see if the property we want to bind is targetable
+            var property = _properties.GetProperty( propertyPath );
+
+            if( property == null )
+                throw new NullReferenceException( $"Could not find {nameof(TargetableProperty)} '{propertyPath}'" );
+
+            // check that it's the right multiplicity
+            if( !property.Multiplicity.IsTargetableCollection() )
+                _logger?.Error<string>( "Property '{propertyPath}' is not a collection", propertyPath );
+            else
+            {
+                // we need to find the Type on which the collection is based
+                var propType = property.Multiplicity == PropertyMultiplicity.Array
+                    ? property.PropertyInfo.PropertyType.GetElementType()
+                    : property.PropertyInfo.PropertyType.GenericTypeArguments.First();
+
+                retVal = CreateOption( propType! );
+            }
+
+            return FinalizeAndStoreOption( property, retVal, keys );
+        }
+
+        // creates an option for the specified Type provided an ITextConverter for
+        // that Type exists. Otherwise, returns a NullOption
+        private OptionBase CreateOption(Type propType)
+        {
+            OptionBase? retVal = null;
+
+            var converter = _converters.FirstOrDefault(c => c.SupportedType == propType);
+
+            if (converter == null)
+                _logger?.Error("No ITextConverter exists for Type {0}", propType);
+            else
+                retVal = new Option(_options, converter, _loggerFactory?.Invoke());
+
+            return retVal ?? new NullOption(_options, _loggerFactory?.Invoke());
+        }
+
+        // ensures option exists and has at least one valid, unique key.
+        // returns a NullOption if not. Stores the new option in the options
+        // collection.
+        private OptionBase FinalizeAndStoreOption( TargetableProperty property, OptionBase? option, string[] keys )
+        {
+            keys = _options.GetUniqueKeys( keys );
+
+            if( keys.Length == 0 )
+                _logger?.Error( "No unique keys defined for Option" );
+
+            if( keys.Length == 0 || option == null )
+                option = new NullOption( _options, _loggerFactory?.Invoke() );
+
+            option.AddKeys( keys );
+
+            _options.Add( option );
+
+            property.BoundOption = option;
+
+            return option;
         }
     }
 }

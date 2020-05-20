@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
 using J4JSoftware.Logging;
@@ -138,6 +139,22 @@ namespace J4JSoftware.CommandLine
                 StringComparison.OrdinalIgnoreCase => StringComparer.OrdinalIgnoreCase,
                 _ => throw new NotImplementedException()
             };
+        }
+
+        public static bool IsTargetableCollection( this PropertyMultiplicity multiplicity )
+        {
+            return multiplicity == PropertyMultiplicity.Array || multiplicity == PropertyMultiplicity.List;
+        }
+
+        public static bool IsTargetableSingleValue(this PropertyMultiplicity multiplicity)
+        {
+            return multiplicity == PropertyMultiplicity.SingleValue || multiplicity == PropertyMultiplicity.String;
+        }
+
+        public static TargetableProperty? GetProperty( this TargetableProperties properties, string propertyPath )
+        {
+            return properties.FirstOrDefault( p =>
+                string.Equals( propertyPath, p.FullPath, StringComparison.Ordinal ) );
         }
     }
 }

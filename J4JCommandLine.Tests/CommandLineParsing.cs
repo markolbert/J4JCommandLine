@@ -17,9 +17,6 @@ namespace J4JCommandLine.Tests
         public CommandLineParsing()
         {
             var parseConfig = new ParsingConfiguration();
-            parseConfig.AddPrefixes("-", "--");
-            parseConfig.AddTextDelimiters("\"", "'");
-            parseConfig.AddValueEnclosers(":", "=", " ");
 
             _cmdLineParser = new CommandLineTextParser( parseConfig );
 

@@ -39,6 +39,10 @@ namespace J4JSoftware.CommandLine
             return false;
         }
 
+        public string[] GetUniqueKeys( params string[] keys ) =>
+            keys.Where( k => !HasKey( k ) )
+                .ToArray();
+
         public IOption? this[ string key ] =>
             _options.FirstOrDefault( opt =>
                 opt.Keys.Any( k => string.Equals( k, key, _parseConfig.TextComparison ) ) );
