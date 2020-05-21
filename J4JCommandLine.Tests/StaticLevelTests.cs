@@ -12,51 +12,31 @@ using Xunit;
 
 namespace J4JCommandLine.Tests
 {
-    public class SubLevelTests
+    public class StaticLevelTests
     {
-        public class SimpleChildProperties
-        {
-            public string TextProperty { get; set; }
-            public int IntProperty { get; set; }
-            public bool BoolProperty { get; set; }
-            public decimal DecimalProperty { get; set; }
-            public List<int> IntList { get; set; }
-            public int[] IntArray { get; set; }
-        }
-
-        public class ComplexChildProperties
-        {
-            public ComplexChildProperties( int someValue )
-            {
-            }
-
-            public string TextProperty { get; set; }
-            public int IntProperty { get; set; }
-            public bool BoolProperty { get; set; }
-            public decimal DecimalProperty { get; set; }
-            public List<int> IntList { get; set; }
-            public int[] IntArray { get; set; }
-        }
-
         public class RootProperties
         {
-            public SimpleChildProperties SimpleChildProperties { get; set; }
-            public ComplexChildProperties ComplexChildProperties { get; set; }
+            public static string TextProperty { get; set; }
+            public static int IntProperty { get; set; }
+            public static bool BoolProperty { get; set; }
+            public static decimal DecimalProperty { get; set; }
+            public static List<int> IntList { get; set; }
+            public static int[] IntArray { get; set; }
         }
 
         private readonly StringWriter _consoleWriter = new StringWriter();
         private readonly TextConverter _textConv = new TextConverter();
 
-        public SubLevelTests()
+        public StaticLevelTests()
         {
             Console.SetOut( _consoleWriter );
         }
 
         [ Theory ]
-        [ InlineData( "z", "32", "SimpleChildProperties.IntProperty", "-1", MappingResults.MissingRequired, "-1" ) ]
-        [ InlineData( "x", "123.456", "SimpleChildProperties.DecimalProperty", "0", MappingResults.Success ) ]
-        [InlineData("x", "32", "SimpleChildProperties.IntProperty", "-1", MappingResults.Success)]
-        public void Simple_properties(
+        [ InlineData( "x", "32", "IntProperty", "-1", MappingResults.Success ) ]
+        [ InlineData( "z", "32", "IntProperty", "-1", MappingResults.Success, "-1" ) ]
+        [ InlineData( "x", "123.456", "DecimalProperty", "0", MappingResults.Success ) ]
+        public void Root_properties(
             string key,
             string arg,
             string propToTest,
@@ -72,16 +52,15 @@ namespace J4JCommandLine.Tests
             var target = context.AddBindingTarget( new RootProperties(), "test" );
 
             target.TargetableProperties.Should()
-                .Contain( x => string.Equals( x.FullPath, propToTest, StringComparison.OrdinalIgnoreCase ) );
+                .Contain( x => string.Equals( x.PropertyInfo.Name, propToTest, StringComparison.OrdinalIgnoreCase ) );
 
             var boundProp = target.TargetableProperties
-                .First( x => string.Equals( x.FullPath, propToTest, StringComparison.OrdinalIgnoreCase ) );
+                .First( x => string.Equals( x.PropertyInfo.Name, propToTest, StringComparison.OrdinalIgnoreCase ) );
 
             var desiredValue = _textConv.Convert( boundProp.PropertyInfo.PropertyType, propValue );
             var defValue = _textConv.Convert( boundProp.PropertyInfo.PropertyType, defaultValue );
 
             var option = target.BindProperty( propToTest, defValue, "x" );
-            option.Required();
 
             var parseResult = context.Parse( new string[] { $"-{key}", arg } );
 
@@ -89,72 +68,52 @@ namespace J4JCommandLine.Tests
 
             parseResult.Should().Be( result );
 
-            var subProp = target.Value.SimpleChildProperties;
-            var boundValue = boundProp.PropertyInfo.GetValue( subProp );
+            var boundValue = boundProp!.PropertyInfo!.GetValue( target.Value );
 
             boundValue.Should().NotBeNull();
             boundValue.Should().Be( desiredValue );
         }
 
         [Theory]
-        [InlineData("x", "32", "-1")]
-        public void Complex_properties_single(
+        [InlineData("x", "32", "IntProperty", "-1", MappingResults.Success)]
+        [InlineData("z", "32", "IntProperty", "-1", MappingResults.Success, "-1")]
+        [InlineData("x", "123.456", "DecimalProperty", "0", MappingResults.Success)]
+        public void Root_properties_null_target(
             string key,
             string arg,
-            string defaultValue)
+            string propToTest,
+            string defaultValue,
+            MappingResults result,
+            string? propValue = null)
         {
+            propValue ??= arg;
+            propToTest.Should().NotBeNullOrEmpty();
+
             var context = TestServiceProvider.Instance.GetRequiredService<CommandLineContext>();
 
-            var target = context.AddBindingTarget(new RootProperties(), "test");
+            var target = context.AddBindingTarget<RootProperties>(null, "test");
 
             target.TargetableProperties.Should()
-                .NotContain( x => string.Equals( x.FullPath, "ComplexChildProperties.IntProperty",
-                    StringComparison.OrdinalIgnoreCase ) );
+                .Contain(x => string.Equals(x.PropertyInfo.Name, propToTest, StringComparison.OrdinalIgnoreCase));
 
-            var option = target.BindProperty( 
-                x => x.ComplexChildProperties.IntProperty,
-                Convert.ToInt32( defaultValue ), 
-                "x" );
+            var boundProp = target.TargetableProperties
+                .First(x => string.Equals(x.PropertyInfo.Name, propToTest, StringComparison.OrdinalIgnoreCase));
+
+            var desiredValue = _textConv.Convert(boundProp.PropertyInfo.PropertyType, propValue);
+            var defValue = _textConv.Convert(boundProp.PropertyInfo.PropertyType, defaultValue);
+
+            var option = target.BindProperty(propToTest, defValue, "x");
 
             var parseResult = context.Parse(new string[] { $"-{key}", arg });
 
             var consoleText = _consoleWriter.ToString();
 
-            parseResult.Should().Be( MappingResults.Unbound );
+            parseResult.Should().Be(result);
 
-            var boundValue = target.Value.ComplexChildProperties;
+            var boundValue = boundProp!.PropertyInfo!.GetValue(target.Value);
 
-            boundValue.Should().BeNull();
-        }
-
-        [Theory]
-        [InlineData("x", "32")]
-        public void Complex_properties_collection(
-            string key,
-            string arg)
-        {
-            var context = TestServiceProvider.Instance.GetRequiredService<CommandLineContext>();
-
-            var target = context.AddBindingTarget(new RootProperties(), "test");
-
-            target.TargetableProperties.Should()
-                .NotContain(x => string.Equals(x.FullPath, "ComplexChildProperties.IntList",
-                    StringComparison.OrdinalIgnoreCase));
-
-            var option = target.BindProperty(
-                x => x.ComplexChildProperties.IntList,
-                new List<int>(),
-                "x");
-
-            var parseResult = context.Parse(new string[] { $"-{key}", arg });
-
-            var consoleText = _consoleWriter.ToString();
-
-            parseResult.Should().Be(MappingResults.Unbound);
-
-            var boundValue = target.Value.ComplexChildProperties;
-
-            boundValue.Should().BeNull();
+            boundValue.Should().NotBeNull();
+            boundValue.Should().Be(desiredValue);
         }
 
         [Theory]
@@ -175,14 +134,14 @@ namespace J4JCommandLine.Tests
             var target = context.AddBindingTarget(new RootProperties(), "test");
 
             target.TargetableProperties.Should()
-                .Contain(x => string.Equals(x.FullPath, "SimpleChildProperties.IntProperty", StringComparison.OrdinalIgnoreCase));
+                .Contain(x => string.Equals(x.PropertyInfo.Name, "IntProperty", StringComparison.OrdinalIgnoreCase));
 
             var boundProp = target.TargetableProperties
-                .First(x => string.Equals(x.FullPath, "SimpleChildProperties.IntProperty", StringComparison.OrdinalIgnoreCase));
+                .First(x => string.Equals(x.PropertyInfo.Name, "IntProperty", StringComparison.OrdinalIgnoreCase));
 
             var desiredValue = _textConv.Convert(boundProp.PropertyInfo.PropertyType, propValue);
 
-            var option = target.BindProperty( x => x.SimpleChildProperties.IntProperty, -1, "x" );
+            var option = target.BindProperty( x => RootProperties.IntProperty, -1, "x" );
 
             if( required ) option.Required();
             else option.Optional();
@@ -193,8 +152,7 @@ namespace J4JCommandLine.Tests
 
             parseResult.Should().Be(result);
 
-            var subProp = target.Value.SimpleChildProperties;
-            var boundValue = boundProp.PropertyInfo.GetValue(subProp);
+            var boundValue = boundProp!.PropertyInfo!.GetValue(target.Value);
 
             boundValue.Should().NotBeNull();
             boundValue.Should().Be(desiredValue);
@@ -214,7 +172,7 @@ namespace J4JCommandLine.Tests
 
             var target = context.AddBindingTarget(new RootProperties(), "test");
 
-            var option = target.BindProperty(x => x.SimpleChildProperties.IntList, null, "x");
+            var option = target.BindProperty(x => RootProperties.IntList, null, "x");
             option.Should().BeAssignableTo<Option>();
 
             option.ArgumentCount( minArgs, maxArgs );
@@ -237,9 +195,9 @@ namespace J4JCommandLine.Tests
                 expectedValues.Add( Convert.ToInt32( rawArgs[ idx ] ) );
             }
 
-            target.Value.SimpleChildProperties.IntList.Should().NotBeNull();
-            target.Value.SimpleChildProperties.IntList.Count.Should().Be( expectedValues.Count );
-            target.Value.SimpleChildProperties.IntList.Should().BeEquivalentTo( expectedValues );
+            RootProperties.IntList.Should().NotBeNull();
+            RootProperties.IntList.Count.Should().Be( expectedValues.Count );
+            RootProperties.IntList.Should().BeEquivalentTo( expectedValues );
         }
 
         [Theory]
@@ -256,7 +214,7 @@ namespace J4JCommandLine.Tests
 
             var target = context.AddBindingTarget(new RootProperties(), "test");
 
-            var option = target.BindProperty(x => x.SimpleChildProperties.IntArray, null, "x");
+            var option = target.BindProperty(x => RootProperties.IntArray, null, "x");
             option.Should().BeAssignableTo<Option>();
 
             option.ArgumentCount(minArgs, maxArgs);
@@ -279,9 +237,9 @@ namespace J4JCommandLine.Tests
                 expectedValues.Add(Convert.ToInt32(rawArgs[idx]));
             }
 
-            target.Value.SimpleChildProperties.IntArray.Should().NotBeNull();
-            target.Value.SimpleChildProperties.IntArray.Length.Should().Be(expectedValues.Count);
-            target.Value.SimpleChildProperties.IntArray.Should().BeEquivalentTo(expectedValues.ToArray());
+            RootProperties.IntArray.Should().NotBeNull();
+            RootProperties.IntArray.Length.Should().Be(expectedValues.Count);
+            RootProperties.IntArray.Should().BeEquivalentTo(expectedValues.ToArray());
         }
     }
 }

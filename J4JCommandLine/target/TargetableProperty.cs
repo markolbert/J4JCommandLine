@@ -10,14 +10,32 @@ namespace J4JSoftware.CommandLine
     public partial class TargetableProperty
     {
         private readonly StringComparison _keyComp;
+        private readonly string? _dummyName = null;
 
+        private List<PropertyInfo> _pathElements = new List<PropertyInfo>();
+        private string? _fullPath = null;
+
+        // called by TargetableProperty.Create()
         private TargetableProperty( PropertyInfo propertyInfo, StringComparison keyComp )
         {
             PropertyInfo = propertyInfo;
             _keyComp = keyComp;
         }
 
+        // used solely to create ersatz untargetable properties for when attempts
+        // are made to bind to complex properties (i.e., properties whose full path
+        // involves types that do not have public parameterless constructors)
+        internal TargetableProperty( StringComparison keyComp, int dummyNum  )
+        {
+            _keyComp = keyComp;
+            _dummyName = $"dummy-property-{dummyNum}";
+
+            Multiplicity = PropertyMultiplicity.Unsupported;
+        }
+
         public PropertyInfo PropertyInfo { get; }
+
+        public string Name => PropertyInfo == null ? _dummyName! : PropertyInfo.Name;
 
         public bool IsCreateable { get; private set; }
         public bool IsDefined { get; private set; }
@@ -30,31 +48,41 @@ namespace J4JSoftware.CommandLine
 
         public IOption? BoundOption { get; set; }
 
-        public List<PropertyInfo> PathElements { get; private set; }
+        public List<PropertyInfo> PathElements
+        {
+            get => _pathElements;
+
+            private set
+            {
+                _pathElements = value;
+                _fullPath = null;
+            }
+        }
 
         public string FullPath
         {
             get
             {
-                var retVal = PathElements.Aggregate( new StringBuilder(), ( sb, pi ) =>
-                {
-                    if( sb.Length > 0 )
-                        sb.Append( "." );
+                if( _fullPath == null )
+                    _fullPath = PathElements.Aggregate( new StringBuilder(), ( sb, pi ) =>
+                    {
+                        if( sb.Length > 0 )
+                            sb.Append( "." );
 
-                    sb.Append( pi.Name );
+                        sb.Append( pi.Name );
 
-                    return sb;
-                }, sb =>
-                {
-                    if( sb.Length > 0 )
-                        sb.Append( "." );
+                        return sb;
+                    }, sb =>
+                    {
+                        if( sb.Length > 0 )
+                            sb.Append( "." );
 
-                    sb.Append( PropertyInfo.Name );
+                        sb.Append( Name );
 
-                    return sb.ToString();
-                } );
+                        return sb.ToString();
+                    } );
 
-                return retVal;
+                return _fullPath;
             }
         }
 

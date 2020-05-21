@@ -71,10 +71,6 @@ namespace J4JSoftware.CommandLine
             // note that there can be multiple arguments associated with any option key
             var results = TextParser.Parse( args );
 
-            // go through all the bound targets, giving each of their defined options a chance to
-            // process the parsing results
-            Errors.Clear();
-
             foreach( var kvp in _bindingTargets )
             {
                 retVal |= kvp.Value.MapParseResults( results );
@@ -86,6 +82,8 @@ namespace J4JSoftware.CommandLine
                 retVal |= MappingResults.HelpRequested;
 
             _helpErrorProcessor.Display( retVal, this );
+
+            Errors.Clear();
 
             return retVal;
         }

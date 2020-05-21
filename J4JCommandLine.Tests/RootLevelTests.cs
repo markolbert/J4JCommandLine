@@ -75,6 +75,48 @@ namespace J4JCommandLine.Tests
         }
 
         [Theory]
+        [InlineData("x", "32", "IntProperty", "-1", MappingResults.Success)]
+        [InlineData("z", "32", "IntProperty", "-1", MappingResults.Success, "-1")]
+        [InlineData("x", "123.456", "DecimalProperty", "0", MappingResults.Success)]
+        public void Root_properties_null_target(
+            string key,
+            string arg,
+            string propToTest,
+            string defaultValue,
+            MappingResults result,
+            string? propValue = null)
+        {
+            propValue ??= arg;
+            propToTest.Should().NotBeNullOrEmpty();
+
+            var context = TestServiceProvider.Instance.GetRequiredService<CommandLineContext>();
+
+            var target = context.AddBindingTarget<RootProperties>(null, "test");
+
+            target.TargetableProperties.Should()
+                .Contain(x => string.Equals(x.PropertyInfo.Name, propToTest, StringComparison.OrdinalIgnoreCase));
+
+            var boundProp = target.TargetableProperties
+                .First(x => string.Equals(x.PropertyInfo.Name, propToTest, StringComparison.OrdinalIgnoreCase));
+
+            var desiredValue = _textConv.Convert(boundProp.PropertyInfo.PropertyType, propValue);
+            var defValue = _textConv.Convert(boundProp.PropertyInfo.PropertyType, defaultValue);
+
+            var option = target.BindProperty(propToTest, defValue, "x");
+
+            var parseResult = context.Parse(new string[] { $"-{key}", arg });
+
+            var consoleText = _consoleWriter.ToString();
+
+            parseResult.Should().Be(result);
+
+            var boundValue = boundProp!.PropertyInfo!.GetValue(target.Value);
+
+            boundValue.Should().NotBeNull();
+            boundValue.Should().Be(desiredValue);
+        }
+
+        [Theory]
         [InlineData("x", "32", false, MappingResults.Success)]
         [InlineData("z", "32", true, MappingResults.MissingRequired, "-1")]
         [InlineData("z", "32", false, MappingResults.Success, "-1")]

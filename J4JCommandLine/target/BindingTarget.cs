@@ -210,8 +210,19 @@ namespace J4JSoftware.CommandLine
             // see if the property we want to bind is targetable
             var property = _properties.GetProperty(propertyPath);
 
-            if (property == null)
-                throw new NullReferenceException($"Could not find {nameof(TargetableProperty)} '{propertyPath}'");
+            if( property == null )
+            {
+                _logger?.Error<string>(
+                    "Attempted to bind to complex property '{0}', which is not supported", propertyPath );
+
+                property = new TargetableProperty(_keyComp, _properties.Count + 1 );
+                _properties.Add( property );
+
+                var key = keys.FirstOrDefault() ?? "?";
+                AddError(key, $"Attempted to bind to complex property '{propertyPath}', which is not supported");
+
+                return FinalizeAndStoreOption(property, retVal, keys);
+            }
 
             // check that it's the right multiplicity
             if (!property.Multiplicity.IsTargetableSingleValue())
@@ -236,7 +247,18 @@ namespace J4JSoftware.CommandLine
             var property = _properties.GetProperty( propertyPath );
 
             if( property == null )
-                throw new NullReferenceException( $"Could not find {nameof(TargetableProperty)} '{propertyPath}'" );
+            {
+                _logger?.Error<string>(
+                    "Attempted to bind to complex property '{0}', which is not supported", propertyPath);
+
+                property = new TargetableProperty(_keyComp, _properties.Count + 1);
+                _properties.Add(property);
+
+                var key = keys.FirstOrDefault() ?? "?";
+                AddError(key, $"Attempted to bind to complex property '{propertyPath}', which is not supported");
+
+                return FinalizeAndStoreOption(property, retVal, keys);
+            }
 
             // check that it's the right multiplicity
             if( !property.Multiplicity.IsTargetableCollection() )
