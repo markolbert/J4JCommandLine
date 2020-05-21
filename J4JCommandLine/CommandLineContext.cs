@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Linq;
 using J4JSoftware.Logging;
 
 namespace J4JSoftware.CommandLine
@@ -10,15 +11,13 @@ namespace J4JSoftware.CommandLine
         private readonly Dictionary<string, IBindingTarget> _bindingTargets = new Dictionary<string, IBindingTarget>();
         private readonly IEnumerable<ITextConverter> _converters;
         private readonly Func<IJ4JLogger>? _loggerFactory;
-        private readonly IOptionCollection _options;
-        private readonly CommandLineErrors _errors;
-        private readonly IHelpErrorProcessor? _helpErrorProcessor;
+        private readonly IHelpErrorProcessor _helpErrorProcessor;
 
         public CommandLineContext(
             ICommandLineTextParser textParser,
             IEnumerable<ITextConverter> converters,
             IParsingConfiguration parsingConfig,
-            IHelpErrorProcessor? helpErrorProcessor,
+            IHelpErrorProcessor helpErrorProcessor,
             Func<IJ4JLogger>? loggerFactory
         )
         {
@@ -28,21 +27,16 @@ namespace J4JSoftware.CommandLine
             _helpErrorProcessor = helpErrorProcessor;
             _loggerFactory = loggerFactory;
 
-            _options = new OptionCollection( parsingConfig, _loggerFactory?.Invoke() );
-            _errors = new CommandLineErrors(ParsingConfiguration);
-
-            if( ParsingConfiguration.HelpKeys.Count > 0 )
-            {
-                var helpOption = new HelpOption( _options, _loggerFactory?.Invoke() );
-                helpOption.AddKeys( ParsingConfiguration.HelpKeys.ToArray() );
-
-                _options.Add( helpOption );
-            }
+            Options = new OptionCollection( parsingConfig, _loggerFactory?.Invoke() );
+            Errors = new CommandLineErrors(ParsingConfiguration);
         }
 
         public ICommandLineTextParser TextParser { get; }
         public IParsingConfiguration ParsingConfiguration { get; }
         public string? Description { get; set; }
+        public string? ProgramName { get; set; }
+        public IOptionCollection Options { get; }
+        public CommandLineErrors Errors { get; }
 
         public ReadOnlyDictionary<string, IBindingTarget> BindingTargets =>
             new ReadOnlyDictionary<string, IBindingTarget>( _bindingTargets );
@@ -59,9 +53,9 @@ namespace J4JSoftware.CommandLine
             var options = new OptionCollection( ParsingConfiguration, _loggerFactory?.Invoke() );
 
             var retVal = value == null
-                ? new BindingTarget<TTarget>( targetID, _converters, _options, ParsingConfiguration, _errors,
+                ? new BindingTarget<TTarget>( targetID, _converters, Options, ParsingConfiguration, Errors,
                     _loggerFactory )
-                : new BindingTarget<TTarget>( targetID, value, _converters, _options, ParsingConfiguration, _errors,
+                : new BindingTarget<TTarget>( targetID, value, _converters, Options, ParsingConfiguration, Errors,
                     _loggerFactory );
 
             _bindingTargets.Add( targetID, retVal );
@@ -79,18 +73,19 @@ namespace J4JSoftware.CommandLine
 
             // go through all the bound targets, giving each of their defined options a chance to
             // process the parsing results
-            _errors.Clear();
+            Errors.Clear();
 
             foreach( var kvp in _bindingTargets )
             {
                 retVal |= kvp.Value.MapParseResults( results );
             }
 
-            var helpRequested = ( retVal & MappingResults.HelpRequested ) == MappingResults.HelpRequested;
-            var errorsEncountered = ( retVal & ~MappingResults.HelpRequested ) != MappingResults.Success;
+            if( results.Any(
+                pr => ParsingConfiguration.HelpKeys
+                    .Any( k => string.Equals( k, pr.Key, ParsingConfiguration.TextComparison ) ) ) )
+                retVal |= MappingResults.HelpRequested;
 
-            if( helpRequested || errorsEncountered )
-                _helpErrorProcessor?.Display( _options, _errors, Description );
+            _helpErrorProcessor.Display( retVal, this );
 
             return retVal;
         }

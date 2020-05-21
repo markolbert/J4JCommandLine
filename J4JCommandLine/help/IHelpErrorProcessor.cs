@@ -2,6 +2,6 @@
 {
     public interface IHelpErrorProcessor
     {
-        void Display( IOptionCollection options, CommandLineErrors errors, string? headerMesg = null );
+        void Display( MappingResults results, CommandLineContext context );
     }
 }

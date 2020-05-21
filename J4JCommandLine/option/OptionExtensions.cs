@@ -168,39 +168,53 @@ namespace J4JSoftware.CommandLine
             return option;
         }
 
-        public static string FormatKeys( this IOption option, IParsingConfiguration parseConfig )
+        public static List<string> ConjugateKey( this IParsingConfiguration parseConfig, string key )
         {
-            if( option.OptionType == OptionType.Null )
-                return string.Empty;
+            var retVal = new List<string>();
+
+            if( string.IsNullOrEmpty( key ) )
+                return retVal;
+
+            retVal.AddRange(
+                parseConfig.Prefixes.Aggregate(
+                    new List<string>(),
+                    ( innerList, delim ) =>
+                    {
+                        innerList.Add( $"{delim}{key}" );
+
+                        return innerList;
+                    }
+                )
+            );
+
+            return retVal;
+        }
+
+        public static List<string> ConjugateKeys(this IOption option, IParsingConfiguration parseConfig)
+        {
+            var retVal = new List<string>();
+
+            if (option.OptionType == OptionType.Null)
+                return retVal;
 
             return option.Keys.Aggregate(
-                new StringBuilder(),
-                ( sb, key ) =>
+                retVal,
+                (list, key) =>
                 {
-                    if( sb.Length > 0 )
-                        sb.Append( ", " );
-
-                    sb.Append(
+                    list.AddRange(
                         parseConfig.Prefixes.Aggregate(
-                            new StringBuilder(),
-                            ( sb2, delim ) =>
+                            new List<string>(),
+                            (innerList, delim) =>
                             {
-                                if( sb2.Length > 0 )
-                                    sb2.Append( ", " );
+                                innerList.Add($"{delim}{key}");
 
-                                sb2.Append( $"{delim}{key}" );
-
-                                return sb2;
-                            },
-                            sb2 => sb2.ToString()
+                                return innerList;
+                            }
                         )
                     );
 
-                    return sb;
-                },
-                sb => sb.ToString()
-            );
+                    return list;
+                });
         }
-
     }
 }

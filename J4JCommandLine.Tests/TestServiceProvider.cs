@@ -27,18 +27,23 @@ namespace J4JCommandLine.Tests
 
             builder.Register( c => new OutputConfiguration( null )
                 {
-                    DetailAreaWidth = 55,
+                    DetailAreaWidth = 58,
                     KeyAreaWidth = 20,
-                    KeyDetailSeparation = 5
+                    KeyDetailSeparation = 2
                 } )
                 .AsImplementedInterfaces()
                 .SingleInstance();
 
-            builder.RegisterType<SimpleConsoleHelpErrorProcessor>()
+            builder.RegisterType<SimpleHelpErrorProcessor>()
                 .As<IHelpErrorProcessor>()
                 .SingleInstance();
 
             builder.RegisterType<CommandLineContext>()
+                .OnActivated( ae =>
+                {
+                    ae.Instance.Description = "a description of the program";
+                    ae.Instance.ProgramName = "program.exe";
+                })
                 .AsSelf();
 
             builder.RegisterType<CommandLineTextParser>()
