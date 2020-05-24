@@ -6,11 +6,11 @@ namespace J4JSoftware.CommandLine
 {
     public interface IOption
     {
-        Type SupportedType { get; }
+        ITargetableType TargetableType { get; }
         string Description { get; }
         string FirstKey { get; }
         List<string> Keys { get; }
-        object DefaultValue { get; }
+        object? DefaultValue { get; }
         OptionType OptionType { get; }
         bool IsRequired { get; }
         int MinParameters { get; }
@@ -19,17 +19,18 @@ namespace J4JSoftware.CommandLine
 
         bool Validate( IBindingTarget bindingTarget, string key, object value );
 
-        IList CreateEmptyList();
-        Array CreateEmptyArray( int capacity );
+        //IList CreateEmptyList();
+        //Array CreateEmptyArray( int capacity );
 
-        TextConversionResult Convert(
+        MappingResults Convert(
             IBindingTarget bindingTarget,
             IParseResult parseResult,
-            out object result );
+            ITargetableType targetType,
+            out object? result );
 
-        TextConversionResult ConvertList(
-            IBindingTarget bindingTarget,
-            IParseResult parseResult,
-            out IList result );
+        //TextConversionResult ConvertList(
+        //    IBindingTarget bindingTarget,
+        //    IParseResult parseResult,
+        //    out IList result );
     }
 }

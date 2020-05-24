@@ -13,6 +13,8 @@ namespace J4JSoftware.CommandLine
         TooFewParameters = 1 << 5,
         TooManyParameters = 1 << 6,
         HelpRequested = 1 << 7,
+        NotDefinedOrCreatable = 1 << 8,
+        NotPublicReadWrite = 1 << 9,
 
         Success = 0
     }

@@ -14,38 +14,31 @@ namespace J4JCommandLine.Tests
 {
     public class SubLevelTests
     {
-        public class SimpleChildProperties
+        protected class SimpleChildProperties
         {
-            public string TextProperty { get; set; }
             public int IntProperty { get; set; }
-            public bool BoolProperty { get; set; }
-            public decimal DecimalProperty { get; set; }
             public List<int> IntList { get; set; }
             public int[] IntArray { get; set; }
         }
 
-        public class ComplexChildProperties
+        protected class ComplexChildProperties
         {
             public ComplexChildProperties( int someValue )
             {
             }
 
-            public string TextProperty { get; set; }
             public int IntProperty { get; set; }
-            public bool BoolProperty { get; set; }
-            public decimal DecimalProperty { get; set; }
             public List<int> IntList { get; set; }
             public int[] IntArray { get; set; }
         }
 
-        public class RootProperties
+        protected class RootProperties
         {
             public SimpleChildProperties SimpleChildProperties { get; set; }
             public ComplexChildProperties ComplexChildProperties { get; set; }
         }
 
         private readonly StringWriter _consoleWriter = new StringWriter();
-        private readonly TextConverter _textConv = new TextConverter();
 
         public SubLevelTests()
         {
@@ -53,35 +46,24 @@ namespace J4JCommandLine.Tests
         }
 
         [ Theory ]
-        [ InlineData( "z", "32", "SimpleChildProperties.IntProperty", "-1", MappingResults.MissingRequired, "-1" ) ]
-        [ InlineData( "x", "123.456", "SimpleChildProperties.DecimalProperty", "0", MappingResults.Success ) ]
-        [InlineData("x", "32", "SimpleChildProperties.IntProperty", "-1", MappingResults.Success)]
-        public void Simple_properties(
+        [ InlineData( "z", "32", true, MappingResults.MissingRequired, -1 ) ]
+        [InlineData("x", "32", true, MappingResults.Success, 32)]
+        [InlineData("z", "32", false, MappingResults.Success, -1)]
+        public void Simple_property_single(
             string key,
             string arg,
-            string propToTest,
-            string defaultValue,
+            bool required,
             MappingResults result,
-            string? propValue = null )
+            int desiredValue )
         {
-            propValue ??= arg;
-            propToTest.Should().NotBeNullOrEmpty();
-
             var context = TestServiceProvider.Instance.GetRequiredService<CommandLineContext>();
 
             var target = context.AddBindingTarget( new RootProperties(), "test" );
 
-            target.TargetableProperties.Should()
-                .Contain( x => string.Equals( x.FullPath, propToTest, StringComparison.OrdinalIgnoreCase ) );
+            var option = target.Bind( x => x.SimpleChildProperties.IntProperty, "x" );
 
-            var boundProp = target.TargetableProperties
-                .First( x => string.Equals( x.FullPath, propToTest, StringComparison.OrdinalIgnoreCase ) );
-
-            var desiredValue = _textConv.Convert( boundProp.PropertyInfo.PropertyType, propValue );
-            var defValue = _textConv.Convert( boundProp.PropertyInfo.PropertyType, defaultValue );
-
-            var option = target.BindProperty( propToTest, defValue, "x" );
-            option.Required();
+            if( required )
+                option.Required();
 
             var parseResult = context.Parse( new string[] { $"-{key}", arg } );
 
@@ -90,46 +72,88 @@ namespace J4JCommandLine.Tests
             parseResult.Should().Be( result );
 
             var subProp = target.Value.SimpleChildProperties;
-            var boundValue = boundProp.PropertyInfo.GetValue( subProp );
+            var boundValue = target.Value.SimpleChildProperties.IntProperty;
 
-            boundValue.Should().NotBeNull();
-            boundValue.Should().Be( desiredValue );
+            boundValue.Should().Be( Convert.ToInt32( desiredValue ) );
         }
 
         [Theory]
-        [InlineData("x", "32", "-1")]
-        public void Complex_properties_single(
+        [InlineData("z", new string[] { "32", "33" }, true, MappingResults.MissingRequired, null)]
+        [InlineData("x", new string[] { "32", "33" }, true, MappingResults.Success, new int[] { 32, 33 })]
+        [InlineData("z", new string[] { "32", "33" }, false, MappingResults.Success, null)]
+        public void Simple_property_array(
             string key,
-            string arg,
-            string defaultValue)
+            string[] args,
+            bool required,
+            MappingResults result,
+            int[]? desiredValues)
         {
+            var desired = desiredValues == null ? new List<int>() : new List<int>(desiredValues);
+
             var context = TestServiceProvider.Instance.GetRequiredService<CommandLineContext>();
 
             var target = context.AddBindingTarget(new RootProperties(), "test");
 
-            target.TargetableProperties.Should()
-                .NotContain( x => string.Equals( x.FullPath, "ComplexChildProperties.IntProperty",
-                    StringComparison.OrdinalIgnoreCase ) );
+            var option = target.Bind( x => x.SimpleChildProperties.IntArray, "x" );
 
-            var option = target.BindProperty( 
-                x => x.ComplexChildProperties.IntProperty,
-                Convert.ToInt32( defaultValue ), 
-                "x" );
+            if (required)
+                option.Required();
 
-            var parseResult = context.Parse(new string[] { $"-{key}", arg });
+            var cmdLineArgs = new List<string> { $"-{key}" };
+            cmdLineArgs.AddRange(args);
+
+            var parseResult = context.Parse(cmdLineArgs.ToArray());
 
             var consoleText = _consoleWriter.ToString();
 
-            parseResult.Should().Be( MappingResults.Unbound );
+            parseResult.Should().Be(result);
 
-            var boundValue = target.Value.ComplexChildProperties;
+            var subProp = target.Value.SimpleChildProperties;
+            var boundValue = target.Value.SimpleChildProperties.IntArray;
 
-            boundValue.Should().BeNull();
+            boundValue.Should().BeEquivalentTo(desired);
+        }
+
+        [Theory ]
+        [ InlineData( "z", new string[] { "32", "33" }, true, MappingResults.MissingRequired, null)]
+        [InlineData("x", new string[] { "32", "33" }, true, MappingResults.Success, new int[]{32,33})]
+        [InlineData("z", new string[] { "32", "33" }, false, MappingResults.Success, null)]
+        public void Simple_property_list(
+            string key,
+            string[] args,
+            bool required,
+            MappingResults result,
+            int[]? desiredValues)
+        {
+            var desired = desiredValues == null ? new List<int>() : new List<int>( desiredValues );
+
+            var context = TestServiceProvider.Instance.GetRequiredService<CommandLineContext>();
+
+            var target = context.AddBindingTarget(new RootProperties(), "test");
+
+            var option = target.Bind( x => x.SimpleChildProperties.IntList, "x" );
+
+            if (required)
+                option.Required();
+
+            var cmdLineArgs = new List<string> { $"-{key}" };
+            cmdLineArgs.AddRange( args );
+
+            var parseResult = context.Parse( cmdLineArgs.ToArray() );
+
+            var consoleText = _consoleWriter.ToString();
+
+            parseResult.Should().Be(result);
+
+            var subProp = target.Value.SimpleChildProperties;
+            var boundValue = target.Value.SimpleChildProperties.IntList;
+
+            boundValue.Should().BeEquivalentTo( desired );
         }
 
         [Theory]
         [InlineData("x", "32")]
-        public void Complex_properties_collection(
+        public void Complex_property_single(
             string key,
             string arg)
         {
@@ -137,67 +161,40 @@ namespace J4JCommandLine.Tests
 
             var target = context.AddBindingTarget(new RootProperties(), "test");
 
-            target.TargetableProperties.Should()
-                .NotContain(x => string.Equals(x.FullPath, "ComplexChildProperties.IntList",
-                    StringComparison.OrdinalIgnoreCase));
-
-            var option = target.BindProperty(
-                x => x.ComplexChildProperties.IntList,
-                new List<int>(),
-                "x");
+            var option = target.Bind(x => x.ComplexChildProperties.IntProperty, "x" );
 
             var parseResult = context.Parse(new string[] { $"-{key}", arg });
 
             var consoleText = _consoleWriter.ToString();
 
-            parseResult.Should().Be(MappingResults.Unbound);
+            parseResult.Should().Be( MappingResults.NotDefinedOrCreatable );
 
             var boundValue = target.Value.ComplexChildProperties;
 
             boundValue.Should().BeNull();
         }
 
-        [Theory]
-        [InlineData("x", "32", false, MappingResults.Success)]
-        [InlineData("z", "32", true, MappingResults.MissingRequired, "-1")]
-        [InlineData("z", "32", false, MappingResults.Success, "-1")]
-        public void Is_required(
+        [ Theory ]
+        [ InlineData( "x", "32" ) ]
+        public void Complex_properties_collection(
             string key,
-            string arg,
-            bool required,
-            MappingResults result,
-            string? propValue = null)
+            string arg )
         {
-            propValue ??= arg;
-
             var context = TestServiceProvider.Instance.GetRequiredService<CommandLineContext>();
 
-            var target = context.AddBindingTarget(new RootProperties(), "test");
+            var target = context.AddBindingTarget( new RootProperties(), "test" );
 
-            target.TargetableProperties.Should()
-                .Contain(x => string.Equals(x.FullPath, "SimpleChildProperties.IntProperty", StringComparison.OrdinalIgnoreCase));
+            var option = target.Bind( x => x.ComplexChildProperties.IntList, "x" );
 
-            var boundProp = target.TargetableProperties
-                .First(x => string.Equals(x.FullPath, "SimpleChildProperties.IntProperty", StringComparison.OrdinalIgnoreCase));
-
-            var desiredValue = _textConv.Convert(boundProp.PropertyInfo.PropertyType, propValue);
-
-            var option = target.BindProperty( x => x.SimpleChildProperties.IntProperty, -1, "x" );
-
-            if( required ) option.Required();
-            else option.Optional();
-
-            var parseResult = context.Parse(new string[] { $"-{key}", arg });
+            var parseResult = context.Parse( new string[] { $"-{key}", arg } );
 
             var consoleText = _consoleWriter.ToString();
 
-            parseResult.Should().Be(result);
+            parseResult.Should().Be( MappingResults.NotDefinedOrCreatable );
 
-            var subProp = target.Value.SimpleChildProperties;
-            var boundValue = boundProp.PropertyInfo.GetValue(subProp);
+            var boundValue = target.Value.ComplexChildProperties;
 
-            boundValue.Should().NotBeNull();
-            boundValue.Should().Be(desiredValue);
+            boundValue.Should().BeNull();
         }
 
         [Theory]
@@ -214,7 +211,7 @@ namespace J4JCommandLine.Tests
 
             var target = context.AddBindingTarget(new RootProperties(), "test");
 
-            var option = target.BindProperty(x => x.SimpleChildProperties.IntList, null, "x");
+            var option = target.Bind( x => x.SimpleChildProperties.IntList, "x" );
             option.Should().BeAssignableTo<Option>();
 
             option.ArgumentCount( minArgs, maxArgs );
@@ -256,7 +253,7 @@ namespace J4JCommandLine.Tests
 
             var target = context.AddBindingTarget(new RootProperties(), "test");
 
-            var option = target.BindProperty(x => x.SimpleChildProperties.IntArray, null, "x");
+            var option = target.Bind( x => x.SimpleChildProperties.IntArray, "x" );
             option.Should().BeAssignableTo<Option>();
 
             option.ArgumentCount(minArgs, maxArgs);

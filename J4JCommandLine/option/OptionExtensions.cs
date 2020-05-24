@@ -42,29 +42,29 @@ namespace J4JSoftware.CommandLine
             return option;
         }
 
-        public static T SetDefaultValue<T>( this T option, object defaultValue )
+        public static T SetDefaultValue<T>(this T option, object defaultValue)
             where T : OptionBase
         {
-            if( option.OptionType != OptionType.Mappable )
+            if (option.OptionType != OptionType.Mappable)
             {
-                option.Logger?.Warning( "Trying to add set default value for a NullOption or HelpOption, ignoring" );
+                option.Logger?.Warning("Trying to add set default value for a NullOption or HelpOption, ignoring");
 
                 return option;
             }
 
-            if( defaultValue.GetType() != option.SupportedType )
+            if (defaultValue.GetType() != option.TargetableType.SupportedType)
             {
                 option.Logger?.Error(
                     "Default value is a {0} but should be a {1}",
                     defaultValue.GetType(),
-                    option.SupportedType );
+                    option.TargetableType.SupportedType);
 
                 return option;
             }
 
             option.DefaultValue = defaultValue;
 
-            option.Logger?.Verbose<string>( "Set default value to '{0}'", defaultValue?.ToString() ?? "**value**" );
+            option.Logger?.Verbose<string>("Set default value to '{0}'", defaultValue?.ToString() ?? "**value**");
 
             return option;
         }
@@ -151,12 +151,12 @@ namespace J4JSoftware.CommandLine
                 return option;
             }
 
-            if( validator.SupportedType != option.SupportedType )
+            if( validator.SupportedType != option.TargetableType )
             {
                 option.Logger?.Error(
                     "Validator works with a {0} but should validate a {1}",
                     validator.SupportedType,
-                    option.SupportedType );
+                    option.TargetableType );
 
                 return option;
             }

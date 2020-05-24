@@ -59,7 +59,7 @@ namespace J4JSoftware.CommandLine
             // walk the expression tree to extract property path names and the property type
             var propNames = new List<string>();
 
-            var curExpr = propertySelector.Body;
+            Expression? curExpr = propertySelector.Body;
             Type? propType = null;
 
             while( curExpr != null )
@@ -112,6 +112,48 @@ namespace J4JSoftware.CommandLine
             }
         }
 
+        public static List<PropertyInfo> GetPropertyPathInfo<TTarget, TProp>(
+            this Expression<Func<TTarget, TProp>> propertySelector)
+        {
+            // walk the expression tree to extract the PropertyInfo objects defining
+            // the path to the property of interest
+            var retVal = new List<PropertyInfo>();
+
+            Expression? curExpr = propertySelector.Body;
+
+            while (curExpr != null)
+                switch (curExpr)
+                {
+                    case MemberExpression memExpr:
+                        retVal.Add( (PropertyInfo) memExpr.Member );
+
+                        // walk up expression tree
+                        curExpr = memExpr.Expression;
+
+                        break;
+
+                    case UnaryExpression unaryExpr:
+                        if (unaryExpr.Operand is MemberExpression unaryMemExpr)
+                            retVal.Add((PropertyInfo)unaryMemExpr.Member);
+
+                        // we're done; UnaryExpressions aren't part of an expression tree
+                        curExpr = null;
+
+                        break;
+
+                    case ParameterExpression paramExpr:
+                        // this is the root/anchor of the expression tree.
+                        // we're done
+                        curExpr = null;
+
+                        break;
+                }
+
+            retVal.Reverse();
+
+            return retVal;
+        }
+
         public static bool HasPublicParameterlessConstructor( this PropertyInfo propertyInfo )
         {
             return propertyInfo.PropertyType.HasPublicParameterlessConstructor();
@@ -125,6 +167,20 @@ namespace J4JSoftware.CommandLine
                 return true;
 
             return toCheck.GetConstructor( Type.EmptyTypes ) != null;
+        }
+
+        public static bool HasPublicParameterlessConstructors(this List<PropertyInfo> valuesToCheck )
+        {
+            foreach( var toCheck in valuesToCheck )
+            {
+                if( !toCheck.PropertyType.IsValueType
+                    && !toCheck.PropertyType.IsArray
+                    && toCheck.PropertyType != typeof(string)
+                    && toCheck.PropertyType.GetConstructor( Type.EmptyTypes ) == null )
+                    return false;
+            }
+
+            return true;
         }
 
         public static StringComparer ToStringComparer( this StringComparison textComp )
@@ -151,7 +207,7 @@ namespace J4JSoftware.CommandLine
             return multiplicity == PropertyMultiplicity.SingleValue || multiplicity == PropertyMultiplicity.String;
         }
 
-        public static TargetableProperty? GetProperty( this TargetableProperties properties, string propertyPath )
+        public static TargetedProperty? GetProperty( this TargetedProperties properties, string propertyPath )
         {
             return properties.FirstOrDefault( p =>
                 string.Equals( propertyPath, p.FullPath, StringComparison.Ordinal ) );

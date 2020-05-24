@@ -2,21 +2,24 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using J4JSoftware.Logging;
 
 namespace J4JSoftware.CommandLine
 {
-    public class OptionBase : IOption
+    public abstract class OptionBase : IOption
     {
+        private object? _defaultValue;
+
         protected OptionBase(
             OptionType optionType,
-            Type supportedType,
+            ITargetableType targetableType,
             IOptionCollection options,
             IJ4JLogger? logger
         )
         {
             OptionType = optionType;
-            SupportedType = supportedType;
+            TargetableType = targetableType;
             Options = options;
             Logger = logger;
 
@@ -26,16 +29,28 @@ namespace J4JSoftware.CommandLine
         protected internal IJ4JLogger? Logger { get; }
         protected internal IOptionCollection Options { get; }
 
-        public Type SupportedType { get; }
+        public ITargetableType TargetableType { get; }
         public string Description { get; internal set; }
         public List<string> Keys { get; } = new List<string>();
         public string FirstKey => Keys.Count == 0 ? string.Empty : Keys.OrderBy( k => k ).First();
-        public object DefaultValue { get; internal set; }
         public OptionType OptionType { get; }
         public bool IsRequired { get; internal set; }
         public int MinParameters { get; internal set; }
         public int MaxParameters { get; internal set; } = int.MaxValue;
         public IOptionValidator Validator { get; internal set; }
+
+        public object? DefaultValue
+        {
+            get
+            {
+                if( _defaultValue == null && TargetableType.IsCreatable )
+                    _defaultValue = TargetableType.Create();
+
+                return _defaultValue;
+            }
+
+            internal set => _defaultValue = value;
+        }
 
         public bool Validate( IBindingTarget bindingTarget, string key, object value )
         {
@@ -53,26 +68,24 @@ namespace J4JSoftware.CommandLine
             return false;
         }
 
-        public virtual TextConversionResult Convert( IBindingTarget bindingTarget, IParseResult parseResult,
-            out object result )
-        {
-            throw new NotImplementedException();
-        }
+        public abstract MappingResults Convert( 
+            IBindingTarget bindingTarget, 
+            IParseResult parseResult, 
+            ITargetableType targetType,
+            out object? result );
 
-        public virtual IList CreateEmptyList()
-        {
-            throw new NotImplementedException();
-        }
+        //public virtual IList CreateEmptyList()
+        //{
+        //    throw new NotImplementedException();
+        //}
 
-        public virtual Array CreateEmptyArray( int capacity )
-        {
-            throw new NotImplementedException();
-        }
+        //public virtual Array CreateEmptyArray( int capacity )
+        //{
+        //    throw new NotImplementedException();
+        //}
 
-        public virtual TextConversionResult ConvertList( IBindingTarget bindingTarget, IParseResult parseResult,
-            out IList result )
-        {
-            throw new NotImplementedException();
-        }
+        //protected abstract object? Convert(IBindingTarget bindingTarget, IParseResult parseResult);
+
+        //protected abstract IList? ConvertList( IBindingTarget bindingTarget, IParseResult parseResult );
     }
 }

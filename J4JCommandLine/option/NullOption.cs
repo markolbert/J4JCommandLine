@@ -7,8 +7,19 @@ namespace J4JSoftware.CommandLine
         public NullOption(
             IOptionCollection options,
             IJ4JLogger? logger )
-            : base( OptionType.Null, typeof(object), options, logger )
+            : base( OptionType.Null, new UntargetableType(), options, logger )
         {
+        }
+
+        public override MappingResults Convert( 
+            IBindingTarget bindingTarget, 
+            IParseResult parseResult, 
+            ITargetableType targetType,
+            out object? result )
+        {
+            result = null;
+
+            return MappingResults.Unbound;
         }
     }
 }

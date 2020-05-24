@@ -14,95 +14,41 @@ namespace J4JCommandLine.Tests
 {
     public class RootLevelTests
     {
-        public class RootProperties
+        protected class RootProperties
         {
-            public string TextProperty { get; set; }
             public int IntProperty { get; set; }
-            public bool BoolProperty { get; set; }
-            public decimal DecimalProperty { get; set; }
             public List<int> IntList { get; set; }
             public int[] IntArray { get; set; }
         }
 
         private readonly StringWriter _consoleWriter = new StringWriter();
-        private readonly TextConverter _textConv = new TextConverter();
 
         public RootLevelTests()
         {
             Console.SetOut( _consoleWriter );
         }
 
-        [ Theory ]
-        [ InlineData( "x", "32", "IntProperty", "-1", MappingResults.Success ) ]
-        [ InlineData( "z", "32", "IntProperty", "-1", MappingResults.Success, "-1" ) ]
-        [ InlineData( "x", "123.456", "DecimalProperty", "0", MappingResults.Success ) ]
-        public void Root_properties(
-            string key,
-            string arg,
-            string propToTest,
-            string defaultValue,
-            MappingResults result,
-            string? propValue = null )
-        {
-            propValue ??= arg;
-            propToTest.Should().NotBeNullOrEmpty();
-
-            var context = TestServiceProvider.Instance.GetRequiredService<CommandLineContext>();
-
-            var target = context.AddBindingTarget( new RootProperties(), "test" );
-
-            target.TargetableProperties.Should()
-                .Contain( x => string.Equals( x.PropertyInfo.Name, propToTest, StringComparison.OrdinalIgnoreCase ) );
-
-            var boundProp = target.TargetableProperties
-                .First( x => string.Equals( x.PropertyInfo.Name, propToTest, StringComparison.OrdinalIgnoreCase ) );
-
-            var desiredValue = _textConv.Convert( boundProp.PropertyInfo.PropertyType, propValue );
-            var defValue = _textConv.Convert( boundProp.PropertyInfo.PropertyType, defaultValue );
-
-            var option = target.BindProperty( propToTest, defValue, "x" );
-
-            var parseResult = context.Parse( new string[] { $"-{key}", arg } );
-
-            var consoleText = _consoleWriter.ToString();
-
-            parseResult.Should().Be( result );
-
-            var boundValue = boundProp!.PropertyInfo!.GetValue( target.Value );
-
-            boundValue.Should().NotBeNull();
-            boundValue.Should().Be( desiredValue );
-        }
-
         [Theory]
-        [InlineData("x", "32", "IntProperty", "-1", MappingResults.Success)]
-        [InlineData("z", "32", "IntProperty", "-1", MappingResults.Success, "-1")]
-        [InlineData("x", "123.456", "DecimalProperty", "0", MappingResults.Success)]
-        public void Root_properties_null_target(
+        [InlineData("z", "32", true, MappingResults.MissingRequired, -1)]
+        [InlineData("x", "32", true, MappingResults.Success, 32)]
+        [InlineData("z", "32", false, MappingResults.Success, -1)]
+        public void Simple_property_single(
             string key,
             string arg,
-            string propToTest,
-            string defaultValue,
+            bool required,
             MappingResults result,
-            string? propValue = null)
+            int desiredValue)
         {
-            propValue ??= arg;
-            propToTest.Should().NotBeNullOrEmpty();
-
             var context = TestServiceProvider.Instance.GetRequiredService<CommandLineContext>();
 
-            var target = context.AddBindingTarget<RootProperties>(null, "test");
+            var target = context.AddBindingTarget(new RootProperties(), "test");
 
-            target.TargetableProperties.Should()
-                .Contain(x => string.Equals(x.PropertyInfo.Name, propToTest, StringComparison.OrdinalIgnoreCase));
+            var option = target.Bind(x => x.IntProperty, "x");
 
-            var boundProp = target.TargetableProperties
-                .First(x => string.Equals(x.PropertyInfo.Name, propToTest, StringComparison.OrdinalIgnoreCase));
+            option.SetDefaultValue( -1 );
 
-            var desiredValue = _textConv.Convert(boundProp.PropertyInfo.PropertyType, propValue);
-            var defValue = _textConv.Convert(boundProp.PropertyInfo.PropertyType, defaultValue);
-
-            var option = target.BindProperty(propToTest, defValue, "x");
+            if (required)
+                option.Required();
 
             var parseResult = context.Parse(new string[] { $"-{key}", arg });
 
@@ -110,56 +56,85 @@ namespace J4JCommandLine.Tests
 
             parseResult.Should().Be(result);
 
-            var boundValue = boundProp!.PropertyInfo!.GetValue(target.Value);
+            var boundValue = target.Value.IntProperty;
 
-            boundValue.Should().NotBeNull();
-            boundValue.Should().Be(desiredValue);
+            boundValue.Should().Be(Convert.ToInt32(desiredValue));
         }
 
         [Theory]
-        [InlineData("x", "32", false, MappingResults.Success)]
-        [InlineData("z", "32", true, MappingResults.MissingRequired, "-1")]
-        [InlineData("z", "32", false, MappingResults.Success, "-1")]
-        public void Is_required(
+        [InlineData("z", new string[] { "32", "33" }, true, MappingResults.MissingRequired, null)]
+        [InlineData("x", new string[] { "32", "33" }, true, MappingResults.Success, new int[] { 32, 33 })]
+        [InlineData("z", new string[] { "32", "33" }, false, MappingResults.Success, null)]
+        public void Simple_property_array(
             string key,
-            string arg,
+            string[] args,
             bool required,
             MappingResults result,
-            string? propValue = null)
+            int[]? desiredValues)
         {
-            propValue ??= arg;
+            var desired = desiredValues == null ? new List<int>() : new List<int>(desiredValues);
 
             var context = TestServiceProvider.Instance.GetRequiredService<CommandLineContext>();
 
             var target = context.AddBindingTarget(new RootProperties(), "test");
 
-            target.TargetableProperties.Should()
-                .Contain(x => string.Equals(x.PropertyInfo.Name, "IntProperty", StringComparison.OrdinalIgnoreCase));
+            var option = target.Bind(x => x.IntArray, "x");
 
-            var boundProp = target.TargetableProperties
-                .First(x => string.Equals(x.PropertyInfo.Name, "IntProperty", StringComparison.OrdinalIgnoreCase));
+            if (required)
+                option.Required();
 
-            var desiredValue = _textConv.Convert(boundProp.PropertyInfo.PropertyType, propValue);
+            var cmdLineArgs = new List<string> { $"-{key}" };
+            cmdLineArgs.AddRange(args);
 
-            var option = target.BindProperty( x => x.IntProperty, -1, "x" );
-
-            if( required ) option.Required();
-            else option.Optional();
-
-            var parseResult = context.Parse(new string[] { $"-{key}", arg });
+            var parseResult = context.Parse(cmdLineArgs.ToArray());
 
             var consoleText = _consoleWriter.ToString();
 
             parseResult.Should().Be(result);
 
-            var boundValue = boundProp!.PropertyInfo!.GetValue(target.Value);
+            var boundValue = target.Value.IntArray;
 
-            boundValue.Should().NotBeNull();
-            boundValue.Should().Be(desiredValue);
+            boundValue.Should().BeEquivalentTo(desired);
         }
 
         [Theory]
-        [InlineData(new string[]{ "32"}, 0, Int32.MaxValue, MappingResults.Success)]
+        [InlineData("z", new string[] { "32", "33" }, true, MappingResults.MissingRequired, null)]
+        [InlineData("x", new string[] { "32", "33" }, true, MappingResults.Success, new int[] { 32, 33 })]
+        [InlineData("z", new string[] { "32", "33" }, false, MappingResults.Success, null)]
+        public void Simple_property_list(
+            string key,
+            string[] args,
+            bool required,
+            MappingResults result,
+            int[]? desiredValues)
+        {
+            var desired = desiredValues == null ? new List<int>() : new List<int>(desiredValues);
+
+            var context = TestServiceProvider.Instance.GetRequiredService<CommandLineContext>();
+
+            var target = context.AddBindingTarget(new RootProperties(), "test");
+
+            var option = target.Bind(x => x.IntList, "x");
+
+            if (required)
+                option.Required();
+
+            var cmdLineArgs = new List<string> { $"-{key}" };
+            cmdLineArgs.AddRange(args);
+
+            var parseResult = context.Parse(cmdLineArgs.ToArray());
+
+            var consoleText = _consoleWriter.ToString();
+
+            parseResult.Should().Be(result);
+
+            var boundValue = target.Value.IntList;
+
+            boundValue.Should().BeEquivalentTo(desired);
+        }
+
+        [Theory]
+        [InlineData(new string[] { "32" }, 0, Int32.MaxValue, MappingResults.Success)]
         [InlineData(new string[] { "32" }, 2, Int32.MaxValue, MappingResults.TooFewParameters)]
         [InlineData(new string[] { "32" }, 0, 0, MappingResults.TooManyParameters)]
         public void Num_parameters_list(
@@ -172,15 +147,15 @@ namespace J4JCommandLine.Tests
 
             var target = context.AddBindingTarget(new RootProperties(), "test");
 
-            var option = target.BindProperty(x => x.IntList, null, "x");
+            var option = target.Bind(x => x.IntList, "x");
             option.Should().BeAssignableTo<Option>();
 
-            option.ArgumentCount( minArgs, maxArgs );
+            option.ArgumentCount(minArgs, maxArgs);
 
             var args = rawArgs.ToList();
             args.Insert(0, "-x");
 
-            var parseResult = context.Parse( args.ToArray() );
+            var parseResult = context.Parse(args.ToArray());
 
             var consoleText = _consoleWriter.ToString();
 
@@ -190,14 +165,14 @@ namespace J4JCommandLine.Tests
             var lowerLimit = minArgs > rawArgs.Length ? minArgs : 0;
             var upperLimit = maxArgs > rawArgs.Length ? rawArgs.Length : maxArgs;
 
-            for( var idx = lowerLimit; idx < upperLimit; idx++ )
+            for (var idx = lowerLimit; idx < upperLimit; idx++)
             {
-                expectedValues.Add( Convert.ToInt32( rawArgs[ idx ] ) );
+                expectedValues.Add(Convert.ToInt32(rawArgs[idx]));
             }
 
             target.Value.IntList.Should().NotBeNull();
-            target.Value.IntList.Count.Should().Be( expectedValues.Count );
-            target.Value.IntList.Should().BeEquivalentTo( expectedValues );
+            target.Value.IntList.Count.Should().Be(expectedValues.Count);
+            target.Value.IntList.Should().BeEquivalentTo(expectedValues);
         }
 
         [Theory]
@@ -214,7 +189,7 @@ namespace J4JCommandLine.Tests
 
             var target = context.AddBindingTarget(new RootProperties(), "test");
 
-            var option = target.BindProperty(x => x.IntArray, null, "x");
+            var option = target.Bind(x => x.IntArray, "x");
             option.Should().BeAssignableTo<Option>();
 
             option.ArgumentCount(minArgs, maxArgs);

@@ -38,10 +38,13 @@ namespace J4JSoftware.CommandLine
         public IOptionCollection Options { get; }
         public CommandLineErrors Errors { get; }
 
+        public bool CanConvert<T>() => CanConvert(typeof(T));
+        public bool CanConvert(Type toCheck) => _converters.Any(c => c.SupportedType == toCheck);
+
         public ReadOnlyDictionary<string, IBindingTarget> BindingTargets =>
             new ReadOnlyDictionary<string, IBindingTarget>( _bindingTargets );
 
-        public IBindingTarget<TTarget> AddBindingTarget<TTarget>( TTarget? value, string targetID )
+        public IBindingTarget<TTarget> AddBindingTarget<TTarget>( TTarget value, string targetID )
             where TTarget : class
         {
             if( string.IsNullOrEmpty( targetID ) )
@@ -52,15 +55,27 @@ namespace J4JSoftware.CommandLine
 
             var options = new OptionCollection( ParsingConfiguration, _loggerFactory?.Invoke() );
 
-            var retVal = value == null
-                ? new BindingTarget<TTarget>( targetID, _converters, Options, ParsingConfiguration, Errors,
-                    _loggerFactory )
-                : new BindingTarget<TTarget>( targetID, value, _converters, Options, ParsingConfiguration, Errors,
-                    _loggerFactory );
+            var retVal = new BindingTarget<TTarget>( 
+                targetID, value, 
+                _converters, 
+                Options, 
+                ParsingConfiguration,
+                Errors,
+                _loggerFactory );
 
             _bindingTargets.Add( targetID, retVal );
 
             return retVal;
+        }
+
+        public IBindingTarget<TTarget> AddBindingTarget<TTarget>(string targetID)
+            where TTarget : class
+        {
+            // if TTarget can't be created we have to abort
+            if (!typeof(TTarget).HasPublicParameterlessConstructor())
+                throw new ApplicationException($"Couldn't create and instance of {typeof(TTarget)}");
+
+            return AddBindingTarget<TTarget>( Activator.CreateInstance<TTarget>(), targetID );
         }
 
         public MappingResults Parse( string[] args )
