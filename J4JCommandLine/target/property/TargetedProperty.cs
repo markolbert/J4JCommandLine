@@ -11,8 +11,6 @@ namespace J4JSoftware.CommandLine
     {
         private readonly StringComparison _keyComp;
 
-        private object? _defaultValue;
-
         //private List<PropertyInfo> _pathElements = new List<PropertyInfo>();
         //private string? _fullPath = null;
 
@@ -92,45 +90,6 @@ namespace J4JSoftware.CommandLine
             }
 
             return retVal;
-        }
-
-        public object? DefaultValue
-        {
-            get
-            {
-                if( _defaultValue == null && IsCreateable )
-                {
-                    switch( Multiplicity )
-                    {
-                        case PropertyMultiplicity.Array:
-                            _defaultValue = Array.CreateInstance( PropertyInfo.PropertyType.GetElementType()!, 0 );
-                            break;
-
-                        case PropertyMultiplicity.List:
-                            var listType = typeof(List<>).MakeGenericType(
-                                PropertyInfo.PropertyType.GenericTypeArguments[ 0 ] );
-
-                            _defaultValue = Activator.CreateInstance( listType );
-
-                            break;
-
-                        case PropertyMultiplicity.SingleValue:
-                            _defaultValue = PropertyInfo.PropertyType.IsValueType 
-                                ? default 
-                                : Activator.CreateInstance( PropertyInfo.PropertyType );
-
-                            break;
-
-                        case PropertyMultiplicity.String:
-                            _defaultValue = string.Empty;
-                            break;
-                    }
-                }
-
-                return _defaultValue;
-            }
-
-            set => _defaultValue = value;
         }
 
         //public List<PropertyInfo> PathElements
@@ -224,8 +183,7 @@ namespace J4JSoftware.CommandLine
 
             // start by setting the value we're going to set on our bound property to 
             // whatever default was specified for our BoundOption.
-
-            var propValue = DefaultValue;
+            var propValue = BoundOption.DefaultValue;
 
             if( parseResult == null )
             {
@@ -320,7 +278,7 @@ namespace J4JSoftware.CommandLine
             {
                 // revert to our default value (which we presume is valid but don't actually know
                 // or care)
-                propValue = DefaultValue;
+                propValue = BoundOption.DefaultValue;
 
                 // set a flag to record the validation failure
                 retVal |= MappingResults.ValidationFailed;
