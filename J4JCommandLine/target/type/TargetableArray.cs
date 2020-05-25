@@ -7,11 +7,11 @@ namespace J4JSoftware.CommandLine
 {
     public class TargetableArray : TargetableType
     {
-        internal TargetableArray( 
-            Type type, 
+        internal TargetableArray(
+            Type type,
             List<ITextConverter> converters,
-            IJ4JLogger? logger 
-            )
+            IJ4JLogger? logger
+        )
             : base( type.GetElementType()!, PropertyMultiplicity.Array )
         {
             if( !type.IsArray )
@@ -24,7 +24,9 @@ namespace J4JSoftware.CommandLine
                 {
                     var elementType = type.GetElementType()!;
 
-                    if( converters.Any( c => c.SupportedType == elementType ) )
+                    Converter = converters.FirstOrDefault( c => c.SupportedType == elementType );
+
+                    if( Converter != null )
                         IsCreatable = true;
                     else logger?.Error<Type>( "{0} is not convertible from text", elementType );
                 }

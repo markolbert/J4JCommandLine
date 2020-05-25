@@ -1,12 +1,10 @@
-﻿using System;
+﻿using J4JSoftware.Logging;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Linq.Expressions;
-using System.Reflection;
-using System.Runtime.InteropServices;
-using J4JSoftware.Logging;
 
 namespace J4JSoftware.CommandLine
 {
@@ -85,7 +83,6 @@ namespace J4JSoftware.CommandLine
             Expression<Func<TValue, TProp>> propertySelector,
             params string[] keys )
         {
-            var propType = typeof(TProp);
             var pathElements = propertySelector.GetPropertyPathInfo();
 
             TargetedProperty? property = null;
@@ -102,40 +99,17 @@ namespace J4JSoftware.CommandLine
                 );
             }
 
-            if( property == null )
+            OptionBase? option = null;
+
+            if( property != null )
             {
-                AddError(keys.First(), $"Final TargetProperty is undefined");
-                return new NullOption( _options, _loggerFactory?.Invoke() );
+                _properties.Add(property);
+                option = CreateOption(property.TargetableType);
             }
+            // next condition should never be met
+            else AddError(keys.First(), $"Final TargetProperty is undefined");
 
-            _properties.Add( property );
-
-            // only certain types of collections are handled, and they are handled
-            // differently from single-valued properties. Also, all single-valued properties
-            // must have an associated ITextConverter
-            if ( propType.IsArray )
-            {
-                var elementType = propType.GetElementType()!;
-
-                if( _converters.Any( c => c.SupportedType == elementType ) )
-                    return CreateCollectionOption( property, keys );
-            }
-
-            if( propType.IsGenericType 
-                && typeof(IList).IsAssignableFrom(propType) 
-                && propType.GenericTypeArguments.Length == 1 )
-            {
-                var elementType = propType.GenericTypeArguments[0];
-
-                if ( _converters.Any( c => c.SupportedType == elementType ) )
-                    return CreateCollectionOption(property, keys);
-            }
-
-            if (_converters.Any(c => c.SupportedType == propType))
-                return CreateSingleOption( property, keys );
-
-            // create a NullOption
-            return FinalizeAndStoreOption( property, null, keys );
+            return FinalizeAndStoreOption( property, option, keys );
         }
 
         //public OptionBase BindCollection<TProp>(
@@ -258,114 +232,106 @@ namespace J4JSoftware.CommandLine
         //        pathToContainer.Pop();
         //}
 
-        // Creates an Option based on a supported single value property
-        // The properties must be ordered from "root" to "leaf" (i.e., from the ultimate parent property to the property
-        // being targeted).
-        private OptionBase CreateSingleOption( TargetedProperty property, string[] keys )
-        {
-            OptionBase? retVal = null;
+        //// Creates an Option based on a supported single value property
+        //// The properties must be ordered from "root" to "leaf" (i.e., from the ultimate parent property to the property
+        //// being targeted).
+        //private OptionBase CreateSingleOption( TargetedProperty property, string[] keys )
+        //{
+        //    OptionBase? retVal = null;
 
-            //if( property == null )
-            //{
-            //    _logger?.Error<string>(
-            //        "Attempted to bind to complex property '{0}', which is not supported", propertyPath );
+        //    //if( property == null )
+        //    //{
+        //    //    _logger?.Error<string>(
+        //    //        "Attempted to bind to complex property '{0}', which is not supported", propertyPath );
 
-            //    property = new TargetedProperty(_keyComp, _properties.Count + 1 );
-            //    _properties.Add( property );
+        //    //    property = new TargetedProperty(_keyComp, _properties.Count + 1 );
+        //    //    _properties.Add( property );
 
-            //    var key = keys.FirstOrDefault() ?? "?";
-            //    AddError(key, $"Attempted to bind to complex property '{propertyPath}', which is not supported");
+        //    //    var key = keys.FirstOrDefault() ?? "?";
+        //    //    AddError(key, $"Attempted to bind to complex property '{propertyPath}', which is not supported");
 
-            //    return FinalizeAndStoreOption(property, retVal, keys);
-            //}
+        //    //    return FinalizeAndStoreOption(property, retVal, keys);
+        //    //}
 
-            // check that it's the right multiplicity (this method only handles single-valued properties)
-            if (!property.Multiplicity.IsTargetableSingleValue())
-                _logger?.Error<string>( "Property '{propertyPath}' is not single-valued", property.FullPath );
-            else
-                retVal = CreateOption( property.PropertyInfo.PropertyType );
+        //    // check that it's the right multiplicity (this method only handles single-valued properties)
+        //    if (!property.Multiplicity.IsTargetableSingleValue())
+        //        _logger?.Error<string>( "Property '{propertyPath}' is not single-valued", property.FullPath );
+        //    else
+        //        retVal = CreateOption( property.PropertyInfo.PropertyType );
 
-            return FinalizeAndStoreOption( property, retVal, keys );
-        }
+        //    return FinalizeAndStoreOption( property, retVal, keys );
+        //}
 
-        // Creates an Option based on a supported collection property
-        // The properties must be ordered from "root" to "leaf" (i.e., from the ultimate parent property to the property
-        // being targeted).
-        private OptionBase CreateCollectionOption(TargetedProperty property, string[] keys )
-        {
-            OptionBase? retVal = null;
+        //// Creates an Option based on a supported collection property
+        //// The properties must be ordered from "root" to "leaf" (i.e., from the ultimate parent property to the property
+        //// being targeted).
+        //private OptionBase CreateCollectionOption(TargetedProperty property, string[] keys )
+        //{
+        //    OptionBase? retVal = null;
 
-            //var property = TargetedProperty.Create(properties, Value, _keyComp, _logger);
-            //_properties.Add(property);
+        //    //var property = TargetedProperty.Create(properties, Value, _keyComp, _logger);
+        //    //_properties.Add(property);
 
-            //if ( property == null )
-            //{
-            //    _logger?.Error<string>(
-            //        "Attempted to bind to complex property '{0}', which is not supported", propertyPath);
+        //    //if ( property == null )
+        //    //{
+        //    //    _logger?.Error<string>(
+        //    //        "Attempted to bind to complex property '{0}', which is not supported", propertyPath);
 
-            //    property = new TargetedProperty(_keyComp, _properties.Count + 1);
-            //    _properties.Add(property);
+        //    //    property = new TargetedProperty(_keyComp, _properties.Count + 1);
+        //    //    _properties.Add(property);
 
-            //    var key = keys.FirstOrDefault() ?? "?";
-            //    AddError(key, $"Attempted to bind to complex property '{propertyPath}', which is not supported");
+        //    //    var key = keys.FirstOrDefault() ?? "?";
+        //    //    AddError(key, $"Attempted to bind to complex property '{propertyPath}', which is not supported");
 
-            //    return FinalizeAndStoreOption(property, retVal, keys);
-            //}
+        //    //    return FinalizeAndStoreOption(property, retVal, keys);
+        //    //}
 
-            // check that it's the right multiplicity (this method only handles collection properties)
-            if ( !property.Multiplicity.IsTargetableCollection() )
-                _logger?.Error<string>( "Property '{propertyPath}' is not a supported collection", property.FullPath );
-            else
-            {
-                // we need to find the Type on which the collection is based
-                var elementType = property.Multiplicity == PropertyMultiplicity.Array
-                    ? property.PropertyInfo.PropertyType.GetElementType()
-                    : property.PropertyInfo.PropertyType.GenericTypeArguments.First();
+        //    // check that it's the right multiplicity (this method only handles collection properties)
+        //    if ( !property.Multiplicity.IsTargetableCollection() )
+        //        _logger?.Error<string>( "Property '{propertyPath}' is not a supported collection", property.FullPath );
+        //    else
+        //    {
+        //        // we need to find the Type on which the collection is based
+        //        var elementType = property.Multiplicity == PropertyMultiplicity.Array
+        //            ? property.PropertyInfo.PropertyType.GetElementType()
+        //            : property.PropertyInfo.PropertyType.GenericTypeArguments.First();
 
-                retVal = CreateOption( elementType! );
-            }
+        //        retVal = CreateOption( elementType! );
+        //    }
 
-            return FinalizeAndStoreOption( property, retVal, keys );
-        }
+        //    return FinalizeAndStoreOption( property, retVal, keys );
+        //}
 
         // creates an option for the specified Type provided an ITextConverter for
         // that Type exists. Otherwise, returns a NullOption
-        private OptionBase CreateOption(Type propType)
-        {
-            OptionBase? retVal = null;
-
-            var converter = _converters.FirstOrDefault(c => c.SupportedType == propType);
-
-            if( converter == null )
-                _logger?.Error( "No ITextConverter exists for Type {0}", propType );
-            else
-                retVal = new Option( 
-                    _options, 
-                    converter, 
-                    _targetableTypeFactory.Create( propType ),
+        private OptionBase? CreateOption( ITargetableType targetedType ) =>
+            targetedType.Converter == null
+                ? null
+                : new Option(
+                    _options,
+                    targetedType.Converter,
+                    targetedType,
                     _loggerFactory?.Invoke() );
-
-            return retVal ?? new NullOption(_options, _loggerFactory?.Invoke());
-        }
 
         // ensures option exists and has at least one valid, unique key.
         // returns a NullOption if not. Stores the new option in the options
         // collection.
-        private OptionBase FinalizeAndStoreOption( TargetedProperty property, OptionBase? option, string[] keys )
+        private OptionBase FinalizeAndStoreOption( TargetedProperty? property, OptionBase? option, string[] keys )
         {
             keys = _options.GetUniqueKeys( keys );
 
             if( keys.Length == 0 )
                 _logger?.Error( "No unique keys defined for Option" );
 
-            if( keys.Length == 0 || option == null )
+            if( keys.Length == 0 || option == null || property == null )
                 option = new NullOption( _options, _loggerFactory?.Invoke() );
 
             option.AddKeys( keys );
 
             _options.Add( option );
 
-            property.BoundOption = option;
+            if( property != null )
+                property.BoundOption = option;
 
             return option;
         }

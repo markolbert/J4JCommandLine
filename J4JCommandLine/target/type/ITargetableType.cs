@@ -11,6 +11,7 @@ namespace J4JSoftware.CommandLine
         ConstructorInfo? ParameterlessConstructor { get; }
         bool HasPublicParameterlessConstructor { get; }
         PropertyMultiplicity Multiplicity { get; }
+        ITextConverter? Converter { get; }
         bool IsCreatable { get; }
 
         object? Create();

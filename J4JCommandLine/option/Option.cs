@@ -71,22 +71,24 @@ namespace J4JSoftware.CommandLine
         private MappingResults ConvertSingleValue( IBindingTarget bindingTarget, IParseResult parseResult,
             out object? result )
         {
-            if( parseResult.NumParameters == 1 )
+            if( !ValidParameterCount( parseResult, out var paramResult ) )
             {
-                bindingTarget.AddError( parseResult.Key,
-                    $"Incorrect number of parameters. Expected 1, got {parseResult.NumParameters}" );
-
                 result = null;
-                return MappingResults.ConversionFailed;
+                return paramResult;
             }
 
-            result = Convert( bindingTarget, parseResult.Key, parseResult.Parameters[ 0 ] );
+            // handle boolean flag parameters which don't have a parameter
+            var text = TargetableType.SupportedType == typeof( bool )
+                       && parseResult.NumParameters == 0
+                ? "true"
+                : parseResult.Parameters[ 0 ];
+
+            result = Convert( bindingTarget, parseResult.Key, text );
 
             if( result != null )
                 return MappingResults.Success;
 
-            bindingTarget.AddError( parseResult.Key,
-                $"Couldn't convert '{parseResult.Parameters[ 0 ]}' to {TargetableType}" );
+            bindingTarget.AddError( parseResult.Key, $"Couldn't convert '{text}' to {TargetableType}" );
 
             return MappingResults.ConversionFailed;
         }

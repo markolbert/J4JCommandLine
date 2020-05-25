@@ -27,8 +27,10 @@ namespace J4JSoftware.CommandLine
                         logger?.Error<Type>( "{0} has more than one generic type parameter", type );
                     else
                     {
-                        if( converters.All( c => c.SupportedType != type.GenericTypeArguments[ 0 ] ) )
-                            logger?.Error<Type>( "{0} is not convertible from text", type.GenericTypeArguments[0]);
+                        Converter = converters.FirstOrDefault( c => c.SupportedType == type.GenericTypeArguments[ 0 ] );
+
+                        if( Converter == null )
+                            logger?.Error<Type>( "{0} is not convertible from text", type.GenericTypeArguments[ 0 ] );
                         else IsCreatable = HasPublicParameterlessConstructor;
                     }
                 }
@@ -37,7 +39,7 @@ namespace J4JSoftware.CommandLine
 
         public override object? Create()
         {
-            var retType = typeof(List<>).MakeGenericType(SupportedType);
+            var retType = typeof(List<>).MakeGenericType(SupportedType.GenericTypeArguments[0]);
 
             return Activator.CreateInstance(retType)!;
         }

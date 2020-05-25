@@ -200,6 +200,9 @@ namespace J4JSoftware.CommandLine
             else
             {
                 retVal = BoundOption.Convert( bindingTarget, parseResult, TargetableType, out var convResult );
+
+                if( retVal == MappingResults.Success )
+                    propValue = convResult;
                 //// check to see if we have a valid number of parameters to convert
                 //if( parseResult.NumParameters >= BoundOption.MinParameters
                 //    && parseResult.NumParameters <= BoundOption.MaxParameters )

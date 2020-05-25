@@ -14,17 +14,27 @@ namespace J4JSoftware.CommandLine
             )
             : base( type, PropertyMultiplicity.SingleValue )
         {
-            if( !HasPublicParameterlessConstructor )
+            Converter = converters.FirstOrDefault( c => c.SupportedType == type );
+
+            if( type.IsValueType || type == typeof( string ) )
             {
-                if( type == typeof(string) )
+                if( Converter != null )
                     IsCreatable = true;
-                else logger?.Error<Type>( "{0} has no public parameterless constructor and is not a string", type );
+                else
+                    logger?.Error<Type>( "{0} does not have an ITextConverter available", type );
             }
             else
             {
-                if( type != typeof(string) && converters.All(c=>c.SupportedType != type))
-                    logger?.Error<Type>("{0} is not convertible from text", type);
-                else IsCreatable = true;
+                if( HasPublicParameterlessConstructor )
+                {
+                    if( Converter != null )
+                        IsCreatable = true;
+                    else
+                        logger?.Error<Type>( "{0} does not have an ITextConverter available", type );
+                }
+                else
+                    logger?.Error<Type>(
+                        "{0} has no public parameterless constructor and is not a string or a ValueType", type );
             }
         }
 
