@@ -2,7 +2,7 @@
 {
     public enum PropertyMultiplicity
     {
-        SingleValue,
+        SimpleValue,
         Array,
         List,
         String,

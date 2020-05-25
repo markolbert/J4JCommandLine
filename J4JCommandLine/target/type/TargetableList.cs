@@ -37,7 +37,7 @@ namespace J4JSoftware.CommandLine
             }
         }
 
-        public override object? Create()
+        public override object? GetDefaultValue()
         {
             var retType = typeof(List<>).MakeGenericType(SupportedType.GenericTypeArguments[0]);
 

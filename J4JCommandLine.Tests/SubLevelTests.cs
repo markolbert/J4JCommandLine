@@ -62,6 +62,8 @@ namespace J4JCommandLine.Tests
 
             var option = target.Bind( x => x.SimpleChildProperties.IntProperty, "x" );
 
+            option.SetDefaultValue( -1 );
+
             if( required )
                 option.Required();
 

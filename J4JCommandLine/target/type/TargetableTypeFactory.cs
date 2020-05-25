@@ -40,7 +40,7 @@ namespace J4JSoftware.CommandLine
                 return temp.IsCreatable ? temp : (ITargetableType) new UntargetableType();
             }
 
-            var retVal = new TargetableSingleValue( type, _converters, _logger );
+            var retVal = new TargetableSimpleValue( type, _converters, _logger );
 
             return retVal.IsCreatable ? retVal : (ITargetableType) new UntargetableType();
         }

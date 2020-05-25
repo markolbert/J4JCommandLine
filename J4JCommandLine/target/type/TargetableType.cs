@@ -23,6 +23,6 @@ namespace J4JSoftware.CommandLine
         public PropertyMultiplicity Multiplicity { get; }
         public ITextConverter? Converter { get; protected set; }
         public bool IsCreatable { get; protected set; }
-        public abstract object? Create();
+        public abstract object? GetDefaultValue();
     }
 }

@@ -83,10 +83,15 @@ namespace J4JSoftware.CommandLine
             Expression<Func<TValue, TProp>> propertySelector,
             params string[] keys )
         {
+            // get the PropertyInfo objects defining the path between the binding target's Type
+            // and the property we're trying to bind to
             var pathElements = propertySelector.GetPropertyPathInfo();
 
             TargetedProperty? property = null;
 
+            // walk through the chain of PropertyInfo objects creating TargetedProperty objects
+            // for each property. These objects define whether a property is targetable and, if 
+            // so, how to bind an Option to it.
             foreach( var pathElement in pathElements )
             {
                 property = new TargetedProperty(
@@ -99,17 +104,49 @@ namespace J4JSoftware.CommandLine
                 );
             }
 
+            // create an OptionBase object to bind to the "final" property (i.e., the one
+            // we're trying to bind to)
             OptionBase? option = null;
 
             if( property != null )
             {
                 _properties.Add(property);
-                option = CreateOption(property.TargetableType);
-            }
-            // next condition should never be met
-            else AddError(keys.First(), $"Final TargetProperty is undefined");
 
-            return FinalizeAndStoreOption( property, option, keys );
+                option = property.TargetableType.Converter == null
+                    ? null
+                    : new Option(
+                        _options,
+                        property.TargetableType,
+                        _loggerFactory?.Invoke() );
+
+                //option = CreateOption(property.TargetableType);
+            }
+            // next condition should never be met because there should always be
+            // at least one PropertyInfo object and hence one TargetedProperty
+            else AddError(keys.First(), $"Final TargetedProperty is undefined");
+
+            // determine whether we were given at least one valid, unique (i.e., so far
+            // unused) key
+            keys = _options.GetUniqueKeys(keys);
+
+            if (keys.Length == 0)
+                _logger?.Error("No unique keys defined for Option");
+
+            // if something went wrong create a NullOption to return. These cannot be
+            // bound to commandline parameters but serve to capture error information
+            if (keys.Length == 0 || option == null || property == null)
+                option = new NullOption(_options, _loggerFactory?.Invoke());
+
+            option.AddKeys(keys);
+
+            _options.Add(option);
+
+            if (property != null)
+                property.BoundOption = option;
+
+            return option;
+
+            //return FinalizeAndStoreOption( property, option, keys );
         }
 
         //public OptionBase BindCollection<TProp>(
@@ -302,38 +339,38 @@ namespace J4JSoftware.CommandLine
         //    return FinalizeAndStoreOption( property, retVal, keys );
         //}
 
-        // creates an option for the specified Type provided an ITextConverter for
-        // that Type exists. Otherwise, returns a NullOption
-        private OptionBase? CreateOption( ITargetableType targetedType ) =>
-            targetedType.Converter == null
-                ? null
-                : new Option(
-                    _options,
-                    targetedType.Converter,
-                    targetedType,
-                    _loggerFactory?.Invoke() );
+        //// creates an option for the specified Type provided an ITextConverter for
+        //// that Type exists. Otherwise, returns a NullOption
+        //private OptionBase? CreateOption( ITargetableType targetedType ) =>
+        //    targetedType.Converter == null
+        //        ? null
+        //        : new Option(
+        //            _options,
+        //            targetedType.Converter,
+        //            targetedType,
+        //            _loggerFactory?.Invoke() );
 
-        // ensures option exists and has at least one valid, unique key.
-        // returns a NullOption if not. Stores the new option in the options
-        // collection.
-        private OptionBase FinalizeAndStoreOption( TargetedProperty? property, OptionBase? option, string[] keys )
-        {
-            keys = _options.GetUniqueKeys( keys );
+        //// ensures option exists and has at least one valid, unique key.
+        //// returns a NullOption if not. Stores the new option in the options
+        //// collection.
+        //private OptionBase FinalizeAndStoreOption( TargetedProperty? property, OptionBase? option, string[] keys )
+        //{
+        //    keys = _options.GetUniqueKeys( keys );
 
-            if( keys.Length == 0 )
-                _logger?.Error( "No unique keys defined for Option" );
+        //    if( keys.Length == 0 )
+        //        _logger?.Error( "No unique keys defined for Option" );
 
-            if( keys.Length == 0 || option == null || property == null )
-                option = new NullOption( _options, _loggerFactory?.Invoke() );
+        //    if( keys.Length == 0 || option == null || property == null )
+        //        option = new NullOption( _options, _loggerFactory?.Invoke() );
 
-            option.AddKeys( keys );
+        //    option.AddKeys( keys );
 
-            _options.Add( option );
+        //    _options.Add( option );
 
-            if( property != null )
-                property.BoundOption = option;
+        //    if( property != null )
+        //        property.BoundOption = option;
 
-            return option;
-        }
+        //    return option;
+        //}
     }
 }

@@ -33,6 +33,6 @@ namespace J4JSoftware.CommandLine
             }
         }
 
-        public override object? Create() => Array.CreateInstance( SupportedType, 0 );
+        public override object? GetDefaultValue() => Array.CreateInstance( SupportedType, 0 );
     }
 }

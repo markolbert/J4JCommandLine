@@ -44,7 +44,7 @@ namespace J4JSoftware.CommandLine
             get
             {
                 if( _defaultValue == null && TargetableType.IsCreatable )
-                    _defaultValue = TargetableType.Create();
+                    _defaultValue = TargetableType.GetDefaultValue();
 
                 return _defaultValue;
             }

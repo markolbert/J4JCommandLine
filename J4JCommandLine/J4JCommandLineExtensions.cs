@@ -204,7 +204,7 @@ namespace J4JSoftware.CommandLine
 
         public static bool IsTargetableSingleValue(this PropertyMultiplicity multiplicity)
         {
-            return multiplicity == PropertyMultiplicity.SingleValue || multiplicity == PropertyMultiplicity.String;
+            return multiplicity == PropertyMultiplicity.SimpleValue || multiplicity == PropertyMultiplicity.String;
         }
 
         public static TargetedProperty? GetProperty( this TargetedProperties properties, string propertyPath )

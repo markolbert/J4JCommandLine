@@ -11,12 +11,14 @@ namespace J4JSoftware.CommandLine
     {
         private readonly StringComparison _keyComp;
 
+        private bool _preAssigned;
+
         //private List<PropertyInfo> _pathElements = new List<PropertyInfo>();
         //private string? _fullPath = null;
 
         public TargetedProperty( 
             PropertyInfo propertyInfo, 
-            object? container,
+            object? rootContainer,
             TargetedProperty? parent,
             ITargetableTypeFactory targetableTypeFactory, 
             StringComparison keyComp,
@@ -28,7 +30,11 @@ namespace J4JSoftware.CommandLine
             Parent = parent;
             TargetableType = targetableTypeFactory.Create( PropertyInfo.PropertyType );
             IsPubliclyReadWrite = PropertyInfo.IsPublicReadWrite( logger );
-            IsPreAssigned = PropertyInfo.PropertyType.IsValueType || PropertyInfo.GetValue( container ) != null;
+
+            var targetContainer = GetContainer( rootContainer );
+
+            IsPreAssigned = PropertyInfo.PropertyType.IsValueType
+                            || ( targetContainer != null && PropertyInfo.GetValue( targetContainer ) != null );
         }
 
         public TargetedProperty? Parent { get; }
@@ -50,8 +56,35 @@ namespace J4JSoftware.CommandLine
         public PropertyInfo PropertyInfo { get; }
         public ITargetableType TargetableType { get; }
         public string Name => PropertyInfo.Name;
-        public bool IsCreateable => TargetableType.IsCreatable;
-        public bool IsPreAssigned { get; }
+
+        // a property is only creatable if every parent property back to the 
+        // root container is also creatable.
+        public bool IsCreateable
+        {
+            get
+            {
+                if( Parent == null )
+                    return TargetableType.IsCreatable;
+
+                return TargetableType.IsCreatable && Parent.IsCreateable;
+            }
+        }
+
+        // a property is only preassigned if every parent property back to the
+        // root container is also preassigned
+        public bool IsPreAssigned
+        {
+            get
+            {
+                if( Parent == null )
+                    return _preAssigned;
+
+                return _preAssigned && Parent.IsPreAssigned;
+            }
+
+            set => _preAssigned = value;
+        }
+
         public bool IsPubliclyReadWrite { get; private set; }
         public PropertyMultiplicity Multiplicity => TargetableType.Multiplicity;
 
@@ -61,31 +94,33 @@ namespace J4JSoftware.CommandLine
 
         public IOption? BoundOption { get; set; }
 
-        public object? GetContainer( IBindingTarget bindingTarget )
-        {
-            var propPath = PropertyPath.ToList();
-            propPath.Reverse();
+        public object? GetContainer( IBindingTarget bindingTarget ) => GetContainer( bindingTarget.GetValue() );
 
-            object? retVal = bindingTarget.GetValue();
+        protected object? GetContainer( object? container )
+        {
+            if( container == null )
+                return null;
+
+            object? retVal = container;
 
             // walk through the parent containers grabbing values,
             // creating the ones that are undefined
-            foreach( var targeted in propPath.SkipLast(1) )
+            foreach (var targeted in PropertyPath.SkipLast(1))
             {
-                var newContainer = targeted.PropertyInfo.GetValue( retVal );
+                var newContainer = targeted.PropertyInfo.GetValue(retVal);
 
                 // if the property doesn't have a value, create it
                 // if possible
-                if( newContainer != null ) 
-                    continue;
-                
-                newContainer = TargetableType.Create();
+                if( newContainer == null )
+                {
+                    newContainer = targeted.TargetableType.GetDefaultValue();
 
-                targeted.PropertyInfo.SetValue( retVal, newContainer );
+                    targeted.PropertyInfo.SetValue( retVal, newContainer );
+                }
 
                 retVal = newContainer;
 
-                if( retVal == null )
+                if (retVal == null)
                     return null;
             }
 
@@ -141,7 +176,7 @@ namespace J4JSoftware.CommandLine
             if( BoundOption == null )
             {
                 logger?.Error<string>( "Trying to map parsing results to unbound property {0}", PropertyInfo.Name );
-                bindingTarget.AddError("?", $"Property '{PropertyInfo.Name}' is unbound");
+                bindingTarget.AddError( "?", $"Property '{PropertyInfo.Name}' is unbound" );
 
                 return MappingResults.Unbound;
             }
@@ -149,32 +184,34 @@ namespace J4JSoftware.CommandLine
             // see if our BoundOption's keys match a key in the parse results so we can retrieve a
             // specific IParseResult
             var parseResult = parseResults
-                .FirstOrDefault(pr =>
-                    BoundOption.Keys.Any(k => string.Equals(k, pr.Key, _keyComp)));
+                .FirstOrDefault( pr =>
+                    BoundOption.Keys.Any( k => string.Equals( k, pr.Key, _keyComp ) ) );
 
             // store the option key that we matched on for later use in displaying context-sensitive help
             var optionKey = parseResult == null ? BoundOption.Keys.First() : parseResult.Key;
 
-            if ( Multiplicity == PropertyMultiplicity.Unsupported )
+            if( Multiplicity == PropertyMultiplicity.Unsupported )
             {
                 logger?.Error<string>( "Property {0} has an unsupported Multiplicity", PropertyInfo.Name );
-                bindingTarget.AddError(optionKey, $"Property '{PropertyInfo.Name}' has an unsupported Multiplicity");
+                bindingTarget.AddError( optionKey, $"Property '{PropertyInfo.Name}' has an unsupported Multiplicity" );
 
                 return MappingResults.UnsupportedMultiplicity;
             }
 
             if( !IsPreAssigned && !IsCreateable )
             {
-                logger?.Error<string>("Property {0} was not pre-assigned and is not creatable", PropertyInfo.Name);
-                bindingTarget.AddError(optionKey, $"Property '{PropertyInfo.Name}' was not pre-assigned and is not creatable");
+                logger?.Error<string>( "Property {0} was not pre-assigned and is not creatable", PropertyInfo.Name );
+                bindingTarget.AddError( optionKey,
+                    $"Property '{PropertyInfo.Name}' was not pre-assigned and is not creatable" );
 
                 return MappingResults.NotDefinedOrCreatable;
             }
 
-            if (!IsPubliclyReadWrite)
+            if( !IsPubliclyReadWrite )
             {
-                logger?.Error<string>("Property {0} is not publicly readable/writeable", PropertyInfo.Name);
-                bindingTarget.AddError(optionKey, $"Property '{PropertyInfo.Name}' is not publicly readable/writeable");
+                logger?.Error<string>( "Property {0} is not publicly readable/writeable", PropertyInfo.Name );
+                bindingTarget.AddError( optionKey,
+                    $"Property '{PropertyInfo.Name}' is not publicly readable/writeable" );
 
                 return MappingResults.NotPublicReadWrite;
             }
@@ -191,9 +228,9 @@ namespace J4JSoftware.CommandLine
                 logger?.Error<string>( "No matching argument keys for property {0}", PropertyInfo.Name );
 
                 // if the option isn't required we'll just use the previously-determined default value
-                if ( BoundOption.IsRequired )
+                if( BoundOption.IsRequired )
                 {
-                    bindingTarget.AddError(optionKey, $"Missing required option '{optionKey}'");
+                    bindingTarget.AddError( optionKey, $"Missing required option '{optionKey}'" );
                     retVal |= MappingResults.MissingRequired;
                 }
             }
@@ -287,8 +324,11 @@ namespace J4JSoftware.CommandLine
                 retVal |= MappingResults.ValidationFailed;
             }
 
-            // finally, set the target property's value
-            PropertyInfo.SetValue( GetContainer( bindingTarget ), propValue );
+            // finally, set the target property's value if we can
+            var container = GetContainer( bindingTarget );
+
+            if( container != null )
+                PropertyInfo.SetValue( GetContainer( bindingTarget ), propValue );
 
             return retVal;
         }

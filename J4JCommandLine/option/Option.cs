@@ -12,13 +12,12 @@ namespace J4JSoftware.CommandLine
 
         public Option(
             IOptionCollection options,
-            ITextConverter converter,
             ITargetableType targetableType,
             IJ4JLogger? logger = null
         )
             : base( OptionType.Mappable, targetableType, options, logger )
         {
-            _converter = converter;
+            _converter = targetableType.Converter!;
         }
 
         public override MappingResults Convert(
@@ -42,7 +41,7 @@ namespace J4JSoftware.CommandLine
                     result = listResult;
                     break;
 
-                case PropertyMultiplicity.SingleValue:
+                case PropertyMultiplicity.SimpleValue:
                     retVal = ConvertSingleValue( bindingTarget, parseResult, out var singleResult );
                     result = singleResult;
                     break;

@@ -14,6 +14,6 @@ namespace J4JSoftware.CommandLine
         ITextConverter? Converter { get; }
         bool IsCreatable { get; }
 
-        object? Create();
+        object? GetDefaultValue();
     }
 }

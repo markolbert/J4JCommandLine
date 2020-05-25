@@ -8,6 +8,6 @@
             IsCreatable = false;
         }
 
-        public override object? Create() => null;
+        public override object? GetDefaultValue() => null;
     }
 }
