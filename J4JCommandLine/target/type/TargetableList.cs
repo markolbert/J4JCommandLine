@@ -13,7 +13,7 @@ namespace J4JSoftware.CommandLine
             List<ITextConverter> converters,
             IJ4JLogger? logger 
             )
-            : base(type, PropertyMultiplicity.List)
+            : base(type, Multiplicity.List)
         {
             if (!typeof(ICollection).IsAssignableFrom(type) )
                 logger?.Error<Type>("{0} does not implement ICollection", type);

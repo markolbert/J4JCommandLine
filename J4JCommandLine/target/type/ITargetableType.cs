@@ -10,7 +10,7 @@ namespace J4JSoftware.CommandLine
         Type SupportedType { get; }
         ConstructorInfo? ParameterlessConstructor { get; }
         bool HasPublicParameterlessConstructor { get; }
-        PropertyMultiplicity Multiplicity { get; }
+        Multiplicity Multiplicity { get; }
         ITextConverter? Converter { get; }
         bool IsCreatable { get; }
 

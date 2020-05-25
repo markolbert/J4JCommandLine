@@ -1,11 +1,10 @@
 ﻿namespace J4JSoftware.CommandLine
 {
-    public enum PropertyMultiplicity
+    public enum Multiplicity
     {
         SimpleValue,
         Array,
         List,
-        String,
         Unsupported
     }
 }

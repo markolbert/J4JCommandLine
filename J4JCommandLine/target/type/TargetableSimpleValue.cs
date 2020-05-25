@@ -13,7 +13,7 @@ namespace J4JSoftware.CommandLine
             List<ITextConverter> converters,
             IJ4JLogger? logger
             )
-            : base( type, PropertyMultiplicity.SimpleValue )
+            : base( type, Multiplicity.SimpleValue )
         {
             Converter = converters.FirstOrDefault( c => c.SupportedType == type );
 

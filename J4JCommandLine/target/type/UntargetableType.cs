@@ -3,7 +3,7 @@
     public class UntargetableType : TargetableType
     {
         internal UntargetableType()
-            : base( typeof(object), PropertyMultiplicity.Unsupported )
+            : base( typeof(object), Multiplicity.Unsupported )
         {
             IsCreatable = false;
         }

@@ -30,18 +30,18 @@ namespace J4JSoftware.CommandLine
 
             switch( targetType.Multiplicity )
             {
-                case PropertyMultiplicity.Array:
+                case Multiplicity.Array:
                     retVal = ConvertArray( bindingTarget, parseResult, out var arrayResult );
                     result = arrayResult;
 
                     break;
 
-                case PropertyMultiplicity.List:
+                case Multiplicity.List:
                     retVal = ConvertList( bindingTarget, parseResult, out var listResult );
                     result = listResult;
                     break;
 
-                case PropertyMultiplicity.SimpleValue:
+                case Multiplicity.SimpleValue:
                     retVal = ConvertSingleValue( bindingTarget, parseResult, out var singleResult );
                     result = singleResult;
                     break;
@@ -92,21 +92,6 @@ namespace J4JSoftware.CommandLine
             return MappingResults.ConversionFailed;
         }
 
-        //public override IList CreateEmptyList()
-        //{
-        //    // create a list of the Type we're converting to
-        //    var listType = typeof(List<>);
-        //    var genericListType = listType.MakeGenericType( _converter.SupportedType );
-
-        //    return ( Activator.CreateInstance( genericListType ) as IList )!;
-        //}
-
-        //public override Array CreateEmptyArray( int capacity )
-        //{
-        //    capacity = capacity < 0 ? 0 : capacity;
-
-        //    return Array.CreateInstance( SupportedType, capacity );
-        //}
         private MappingResults ConvertArray( IBindingTarget bindingTarget, IParseResult parseResult, out Array? result )
         {
             if( !ValidParameterCount( parseResult, out var paramResult ) )
@@ -175,29 +160,6 @@ namespace J4JSoftware.CommandLine
             }
 
             return allOkay ? MappingResults.Success : MappingResults.ConversionFailed;
-        }
-
-        private bool ValidParameterCount( IParseResult parseResult, out MappingResults result )
-        {
-            if( parseResult.NumParameters < MinParameters )
-            {
-                Logger?.Error<int, int>( "Expected {0} parameters, got {1}", MinParameters, parseResult.NumParameters );
-                result = MappingResults.TooFewParameters;
-
-                return false;
-            }
-
-            if (parseResult.NumParameters > MaxParameters)
-            {
-                Logger?.Error<int, int>("Expected {0} parameters, got {1}", MinParameters, parseResult.NumParameters);
-                result = MappingResults.TooManyParameters;
-
-                return false;
-            }
-
-            result = MappingResults.Success;
-
-            return true;
         }
     }
 }

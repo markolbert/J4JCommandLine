@@ -74,18 +74,27 @@ namespace J4JSoftware.CommandLine
             ITargetableType targetType,
             out object? result );
 
-        //public virtual IList CreateEmptyList()
-        //{
-        //    throw new NotImplementedException();
-        //}
+        protected virtual bool ValidParameterCount(IParseResult parseResult, out MappingResults result)
+        {
+            if (parseResult.NumParameters < MinParameters)
+            {
+                Logger?.Error<int, int>("Expected {0} parameters, got {1}", MinParameters, parseResult.NumParameters);
+                result = MappingResults.TooFewParameters;
 
-        //public virtual Array CreateEmptyArray( int capacity )
-        //{
-        //    throw new NotImplementedException();
-        //}
+                return false;
+            }
 
-        //protected abstract object? Convert(IBindingTarget bindingTarget, IParseResult parseResult);
+            if (parseResult.NumParameters > MaxParameters)
+            {
+                Logger?.Error<int, int>("Expected {0} parameters, got {1}", MinParameters, parseResult.NumParameters);
+                result = MappingResults.TooManyParameters;
 
-        //protected abstract IList? ConvertList( IBindingTarget bindingTarget, IParseResult parseResult );
+                return false;
+            }
+
+            result = MappingResults.Success;
+
+            return true;
+        }
     }
 }

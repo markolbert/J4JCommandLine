@@ -9,7 +9,7 @@ namespace J4JSoftware.CommandLine
     {
         protected TargetableType( 
             Type type, 
-            PropertyMultiplicity multiplicity
+            Multiplicity multiplicity
             )
         {
             SupportedType = type;
@@ -20,7 +20,7 @@ namespace J4JSoftware.CommandLine
         public Type SupportedType { get; }
         public ConstructorInfo? ParameterlessConstructor { get; }
         public bool HasPublicParameterlessConstructor => ParameterlessConstructor != null;
-        public PropertyMultiplicity Multiplicity { get; }
+        public Multiplicity Multiplicity { get; }
         public ITextConverter? Converter { get; protected set; }
         public bool IsCreatable { get; protected set; }
         public abstract object? GetDefaultValue();

@@ -7,14 +7,11 @@ using J4JSoftware.Logging;
 
 namespace J4JSoftware.CommandLine
 {
-    public partial class TargetedProperty
+    public class TargetedProperty
     {
         private readonly StringComparison _keyComp;
 
         private bool _preAssigned;
-
-        //private List<PropertyInfo> _pathElements = new List<PropertyInfo>();
-        //private string? _fullPath = null;
 
         public TargetedProperty( 
             PropertyInfo propertyInfo, 
@@ -86,11 +83,11 @@ namespace J4JSoftware.CommandLine
         }
 
         public bool IsPubliclyReadWrite { get; private set; }
-        public PropertyMultiplicity Multiplicity => TargetableType.Multiplicity;
+        public Multiplicity Multiplicity => TargetableType.Multiplicity;
 
         public bool IsTargetable => ( IsCreateable || IsPreAssigned )
                                     && IsPubliclyReadWrite
-                                    && Multiplicity != PropertyMultiplicity.Unsupported;
+                                    && Multiplicity != Multiplicity.Unsupported;
 
         public IOption? BoundOption { get; set; }
 
@@ -127,45 +124,7 @@ namespace J4JSoftware.CommandLine
             return retVal;
         }
 
-        //public List<PropertyInfo> PathElements
-        //{
-        //    get => _pathElements;
-
-        //    private set
-        //    {
-        //        _pathElements = value;
-        //        _fullPath = null;
-        //    }
-        //}
-
-        public string FullPath
-        {
-            get
-            {
-                return Parent == null ? PropertyInfo.Name : $"{Parent.FullPath}.{Name}";
-
-                //if( _fullPath == null )
-                //    _fullPath = PathElements.Aggregate( new StringBuilder(), ( sb, pi ) =>
-                //    {
-                //        if( sb.Length > 0 )
-                //            sb.Append( "." );
-
-                //        sb.Append( pi.Name );
-
-                //        return sb;
-                //    }, sb =>
-                //    {
-                //        if( sb.Length > 0 )
-                //            sb.Append( "." );
-
-                //        sb.Append( Name );
-
-                //        return sb.ToString();
-                //    } );
-
-                //return _fullPath;
-            }
-        }
+        public string FullPath => Parent == null ? PropertyInfo.Name : $"{Parent.FullPath}.{Name}";
 
         public MappingResults MapParseResult(
             IBindingTarget bindingTarget,
@@ -190,7 +149,7 @@ namespace J4JSoftware.CommandLine
             // store the option key that we matched on for later use in displaying context-sensitive help
             var optionKey = parseResult == null ? BoundOption.Keys.First() : parseResult.Key;
 
-            if( Multiplicity == PropertyMultiplicity.Unsupported )
+            if( Multiplicity == Multiplicity.Unsupported )
             {
                 logger?.Error<string>( "Property {0} has an unsupported Multiplicity", PropertyInfo.Name );
                 bindingTarget.AddError( optionKey, $"Property '{PropertyInfo.Name}' has an unsupported Multiplicity" );
@@ -240,78 +199,6 @@ namespace J4JSoftware.CommandLine
 
                 if( retVal == MappingResults.Success )
                     propValue = convResult;
-                //// check to see if we have a valid number of parameters to convert
-                //if( parseResult.NumParameters >= BoundOption.MinParameters
-                //    && parseResult.NumParameters <= BoundOption.MaxParameters )
-                //{
-                //    // if we're creating an array, size it to hold the observed number of parameters
-                //    var createArgs = new object[] { parseResult.NumParameters };
-
-                //    // the particular Option conversion method we call depends on whether or not we're binding to 
-                //    // a collection/array or a single value
-                //    switch( Multiplicity )
-                //    {
-                //        case PropertyMultiplicity.Array:
-                //        case PropertyMultiplicity.List:
-                //            if( BoundOption.ConvertList( bindingTarget, parseResult, out var collectionResult ) !=
-                //                TextConversionResult.Okay )
-                //            {
-                //                logger?.Error<string, string>( "Couldn't parse {0} to property {1}",
-                //                    parseResult.ParametersToText(), PropertyInfo.Name );
-
-                //                // set a flag to show the error. Note that the default value is still 
-                //                // the value we'll use to set our target property
-                //                retVal |= MappingResults.ConversionFailed;
-                //            }
-                //            else
-                //            {
-                //                // if conversion succeeded, store the result, converting it to a
-                //                // simple array if necessary
-                //                if( Multiplicity == PropertyMultiplicity.Array )
-                //                {
-                //                    var tempArray = BoundOption.CreateEmptyArray( collectionResult.Count );
-
-                //                    for( var idx = 0; idx < collectionResult.Count; idx++ )
-                //                        tempArray.SetValue( collectionResult[ idx ], idx );
-
-                //                    propValue = tempArray;
-                //                }
-                //                else
-                //                {
-                //                    propValue = collectionResult;
-                //                }
-                //            }
-
-                //            break;
-
-                //        case PropertyMultiplicity.SingleValue:
-                //        case PropertyMultiplicity.String:
-                //            if( BoundOption.Convert( bindingTarget, parseResult, out var singleResult ) !=
-                //                TextConversionResult.Okay )
-                //            {
-                //                logger?.Error<string, string>( "Couldn't parse {0} to property {1}",
-                //                    parseResult.ParametersToText(), PropertyInfo.Name );
-
-                //                // set a flag to show the error. Note that the default value is still 
-                //                // the value we'll use to set our target property
-                //                retVal |= MappingResults.ConversionFailed;
-                //            }
-                //            else
-                //            {
-                //                propValue = singleResult;
-                //            }
-
-                //            break;
-                //    }
-                //}
-                //else
-                //{
-                //    if( parseResult.NumParameters < BoundOption.MinParameters )
-                //        retVal |= MappingResults.TooFewParameters;
-
-                //    if( parseResult.NumParameters > BoundOption.MaxParameters )
-                //        retVal |= MappingResults.TooManyParameters;
-                //}
             }
 
             if( propValue != null && !BoundOption.Validate( bindingTarget, optionKey, propValue ) )

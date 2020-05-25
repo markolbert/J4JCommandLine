@@ -12,7 +12,7 @@ namespace J4JSoftware.CommandLine
             List<ITextConverter> converters,
             IJ4JLogger? logger
         )
-            : base( type.GetElementType()!, PropertyMultiplicity.Array )
+            : base( type.GetElementType()!, Multiplicity.Array )
         {
             if( !type.IsArray )
                 logger?.Error<Type>( "{0} is not an Array", type );
