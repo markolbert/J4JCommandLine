@@ -1,6 +1,5 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 
 namespace J4JSoftware.CommandLine
 {
@@ -12,14 +11,10 @@ namespace J4JSoftware.CommandLine
             where T : OptionBase
         {
             if( option.OptionType == OptionType.Null )
-            {
-                option.Logger?.Warning<string>( "Trying to add '{key}' to a NullOption's keys, ignoring", key );
                 return option;
-            }
 
-            if( option.Options.HasKey( key ) )
-                option.Logger?.Warning<string>( "Key '{key}' already in use", key );
-            else option.Keys.Add( key );
+            if( !option.Options.HasKey( key ) )
+                option.Keys.Add( key );
 
             return option;
         }
@@ -30,18 +25,13 @@ namespace J4JSoftware.CommandLine
             where T : OptionBase
         {
             if( option.OptionType == OptionType.Null )
-            {
-                option.Logger?.Warning<string>(
-                    "Trying to add '{0}' to a NullOption's keys, ignoring",
-                    string.Join( ",", keys ) );
-
                 return option;
-            }
 
             foreach( var key in keys )
-                if( option.Options.HasKey( key ) )
-                    option.Logger?.Warning<string>( "Key '{key}' already in use", key );
-                else option.Keys.Add( key );
+            {
+                if( !option.Options.HasKey( key ) )
+                    option.Keys.Add( key );
+            }
 
             return option;
         }
@@ -53,25 +43,12 @@ namespace J4JSoftware.CommandLine
             where T : OptionBase
         {
             if (option.OptionType != OptionType.Mappable)
-            {
-                option.Logger?.Warning("Trying to add set default value for a NullOption or HelpOption, ignoring");
-
                 return option;
-            }
 
             if (defaultValue.GetType() != option.TargetableType.SupportedType)
-            {
-                option.Logger?.Error(
-                    "Default value is a {0} but should be a {1}",
-                    defaultValue.GetType(),
-                    option.TargetableType.SupportedType);
-
                 return option;
-            }
 
             option.DefaultValue = defaultValue;
-
-            option.Logger?.Verbose<string>("Set default value to '{0}'", defaultValue?.ToString() ?? "**value**");
 
             return option;
         }
@@ -82,11 +59,7 @@ namespace J4JSoftware.CommandLine
             where T : OptionBase
         {
             if( option.OptionType != OptionType.Mappable )
-            {
-                option.Logger?.Warning( "Trying to require a NullOption or HelpOption, ignoring" );
-
                 return option;
-            }
 
             option.IsRequired = true;
 
@@ -99,11 +72,7 @@ namespace J4JSoftware.CommandLine
             where T : OptionBase
         {
             if( option.OptionType != OptionType.Mappable )
-            {
-                option.Logger?.Warning( "Trying to make a NullOption or HelpOption optional, ignoring" );
-
                 return option;
-            }
 
             option.IsRequired = false;
 
@@ -117,11 +86,7 @@ namespace J4JSoftware.CommandLine
             where T : OptionBase
         {
             if( option.OptionType != OptionType.Mappable )
-            {
-                option.Logger?.Warning( "Trying to set argument limits on a NullOption or HelpOption, ignoring" );
-
                 return option;
-            }
 
             minimum = minimum < 0 ? 0 : minimum;
             maximum = maximum < 0 ? int.MaxValue : maximum;
@@ -146,11 +111,7 @@ namespace J4JSoftware.CommandLine
             where T : OptionBase
         {
             if( option.OptionType == OptionType.Null )
-            {
-                option.Logger?.Warning( "Trying to set a description on a NullOption, ignoring" );
-
                 return option;
-            }
 
             option.Description = description;
 
@@ -163,25 +124,12 @@ namespace J4JSoftware.CommandLine
             where T : OptionBase
         {
             if( option.OptionType != OptionType.Mappable )
-            {
-                option.Logger?.Warning( "Trying to set a validator on a NullOption or HelpOption, ignoring" );
-
                 return option;
-            }
 
             if( validator.SupportedType != option.TargetableType )
-            {
-                option.Logger?.Error(
-                    "Validator works with a {0} but should validate a {1}",
-                    validator.SupportedType,
-                    option.TargetableType );
-
                 return option;
-            }
 
             option.Validator = validator;
-
-            option.Logger?.Verbose( "Set validator" );
 
             return option;
         }

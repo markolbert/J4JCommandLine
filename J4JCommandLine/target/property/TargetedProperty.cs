@@ -2,8 +2,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
-using System.Text;
-using J4JSoftware.Logging;
 
 namespace J4JSoftware.CommandLine
 {
@@ -25,15 +23,14 @@ namespace J4JSoftware.CommandLine
             object? rootContainer,
             TargetedProperty? parent,
             ITargetableTypeFactory targetableTypeFactory, 
-            StringComparison keyComp,
-            IJ4JLogger? logger)
+            StringComparison keyComp)
         {
             _keyComp = keyComp;
 
             PropertyInfo = propertyInfo;
             Parent = parent;
             TargetableType = targetableTypeFactory.Create( PropertyInfo.PropertyType );
-            IsPubliclyReadWrite = PropertyInfo.IsPublicReadWrite( logger );
+            IsPubliclyReadWrite = PropertyInfo.IsPublicReadWrite();
 
             var targetContainer = GetContainer( rootContainer );
 
@@ -162,13 +159,11 @@ namespace J4JSoftware.CommandLine
         // errors when it's not.
         public MappingResults MapParseResult(
             IBindingTarget bindingTarget,
-            ParseResults parseResults,
-            IJ4JLogger? logger = null )
+            ParseResults parseResults )
         {
             // validate parameters and state
             if( BoundOption == null )
             {
-                logger?.Error<string>( "Trying to map parsing results to unbound property {0}", PropertyInfo.Name );
                 bindingTarget.AddError( "?", $"Property '{PropertyInfo.Name}' is unbound" );
 
                 return MappingResults.Unbound;
@@ -185,7 +180,6 @@ namespace J4JSoftware.CommandLine
 
             if( Multiplicity == Multiplicity.Unsupported )
             {
-                logger?.Error<string>( "Property {0} has an unsupported Multiplicity", PropertyInfo.Name );
                 bindingTarget.AddError( optionKey, $"Property '{PropertyInfo.Name}' has an unsupported Multiplicity" );
 
                 return MappingResults.UnsupportedMultiplicity;
@@ -193,7 +187,6 @@ namespace J4JSoftware.CommandLine
 
             if( !IsPreAssigned && !IsCreateable )
             {
-                logger?.Error<string>( "Property {0} was not pre-assigned and is not creatable", PropertyInfo.Name );
                 bindingTarget.AddError( optionKey,
                     $"Property '{PropertyInfo.Name}' was not pre-assigned and is not creatable" );
 
@@ -202,7 +195,6 @@ namespace J4JSoftware.CommandLine
 
             if( !IsPubliclyReadWrite )
             {
-                logger?.Error<string>( "Property {0} is not publicly readable/writeable", PropertyInfo.Name );
                 bindingTarget.AddError( optionKey,
                     $"Property '{PropertyInfo.Name}' is not publicly readable/writeable" );
 
@@ -217,9 +209,6 @@ namespace J4JSoftware.CommandLine
 
             if( parseResult == null )
             {
-                // set a return flag if there's no matching IParseResult
-                logger?.Error<string>( "No matching argument keys for property {0}", PropertyInfo.Name );
-
                 // if the option isn't required we'll just use the previously-determined default value
                 if( BoundOption.IsRequired )
                 {

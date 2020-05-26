@@ -2,37 +2,25 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using J4JSoftware.Logging;
 
 namespace J4JSoftware.CommandLine
 {
     // represents a generic List<> of some Type. Can only be created via the ITargetedPropertyFactory interface
     public class TargetableList : TargetableType
     {
-        internal TargetableList(
-            Type type, 
-            List<ITextConverter> converters,
-            IJ4JLogger? logger 
-            )
+        internal TargetableList( Type type, List<ITextConverter> converters )
             : base(type, Multiplicity.List)
         {
-            if (!typeof(ICollection).IsAssignableFrom(type) )
-                logger?.Error<Type>("{0} does not implement ICollection", type);
-            else
+            if (typeof(ICollection).IsAssignableFrom(type) )
             {
-                if( !type.IsGenericType )
-                    logger?.Error<Type>("{0} is not a generic type", type);
-                else
+                if( type.IsGenericType )
                 {
-                    if( type.GenericTypeArguments.Length != 1 )
-                        logger?.Error<Type>( "{0} has more than one generic type parameter", type );
-                    else
+                    if( type.GenericTypeArguments.Length == 1 )
                     {
                         Converter = converters.FirstOrDefault( c => c.SupportedType == type.GenericTypeArguments[ 0 ] );
 
-                        if( Converter == null )
-                            logger?.Error<Type>( "{0} is not convertible from text", type.GenericTypeArguments[ 0 ] );
-                        else IsCreatable = HasPublicParameterlessConstructor;
+                        if( Converter != null )
+                            IsCreatable = HasPublicParameterlessConstructor;
                     }
                 }
             }

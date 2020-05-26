@@ -1,11 +1,7 @@
 ﻿using System;
-using System.Linq;
-using System.Runtime.CompilerServices;
 using Autofac;
 using Autofac.Extensions.DependencyInjection;
-using AutoFacJ4JLogging;
 using J4JSoftware.CommandLine;
-using J4JSoftware.Logging;
 
 namespace J4JCommandLine.Tests
 {
@@ -30,7 +26,7 @@ namespace J4JCommandLine.Tests
                 .As<IParsingConfiguration>()
                 .SingleInstance();
 
-            builder.Register( c => new OutputConfiguration( null )
+            builder.Register( c => new OutputConfiguration()
                 {
                     DetailAreaWidth = 58,
                     KeyAreaWidth = 20,
@@ -55,22 +51,6 @@ namespace J4JCommandLine.Tests
                              && typeof(ITextConverter).IsAssignableFrom( t )
                              && t.GetConstructors().Length > 0 )
                 .AsImplementedInterfaces();
-
-            builder.Register(c =>
-               {
-                   var retVal = new J4JLoggerConfiguration
-                   {
-                       EventElements = EventElements.All,
-                   };
-
-                   retVal.Channels.Add(new ConsoleChannel());
-
-                   return retVal;
-               })
-                .As<IJ4JLoggerConfiguration>()
-                .SingleInstance();
-
-            builder.AddJ4JLogging();
 
             Instance = new AutofacServiceProvider( builder.Build() );
         }

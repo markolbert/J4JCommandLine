@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-
-namespace J4JSoftware.CommandLine
+﻿namespace J4JSoftware.CommandLine
 {
     // A basic implementation of IHelpErrorProcessor. Doesn't do anything by itself, instead
     // serving as a starting point for customized handlers (e.g., to output errors and help information

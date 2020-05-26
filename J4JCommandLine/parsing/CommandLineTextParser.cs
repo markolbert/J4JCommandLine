@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Text;
 using System.Text.RegularExpressions;
-using J4JSoftware.Logging;
 
 namespace J4JSoftware.CommandLine
 {
@@ -13,20 +12,13 @@ namespace J4JSoftware.CommandLine
     // http://www.codeproject.com/Articles/3111/C-NET-Command-Line-Arguments-Parser
     public class CommandLineTextParser : ICommandLineTextParser
     {
-        private readonly IJ4JLogger? _logger;
         private readonly IParsingConfiguration _parseConfig;
         private readonly Regex _remover;
         private readonly Regex _splitter;
 
-        public CommandLineTextParser(
-            IParsingConfiguration parseConfig,
-            IJ4JLogger? logger = null
-        )
+        public CommandLineTextParser( IParsingConfiguration parseConfig )
         {
             _parseConfig = parseConfig.Validate();
-            _logger = logger;
-
-            _logger?.SetLoggedType( GetType() );
 
             // create the regex remover
             var regexOptions = RegexOptions.Compiled;

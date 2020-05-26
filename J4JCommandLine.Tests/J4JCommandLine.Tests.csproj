@@ -28,7 +28,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\J4JLogging\AutoFacJ4JLogging\AutoFacJ4JLogging.csproj" />
     <ProjectReference Include="..\J4JCommandLine\J4JCommandLine.csproj" />
   </ItemGroup>
 

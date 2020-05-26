@@ -1,8 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Runtime.CompilerServices;
-using J4JSoftware.Logging;
 
 namespace J4JSoftware.CommandLine
 {
@@ -10,30 +8,15 @@ namespace J4JSoftware.CommandLine
     // Can only be created via the ITargetedPropertyFactory interface
     public class TargetableSimpleValue : TargetableType
     {
-        internal TargetableSimpleValue( 
-            Type type, 
-            List<ITextConverter> converters,
-            IJ4JLogger? logger
-            )
+        internal TargetableSimpleValue( Type type, List<ITextConverter> converters )
             : base( type, Multiplicity.SimpleValue )
         {
             Converter = converters.FirstOrDefault( c => c.SupportedType == type );
 
-            if( type.IsValueType || type == typeof( string ) )
-            {
-                if( Converter != null )
-                    IsCreatable = true;
-                else
-                    logger?.Error<Type>( "{0} does not have an ITextConverter available", type );
-            }
+            if( type.IsValueType || type == typeof(string) )
+                IsCreatable = Converter != null;
             else
-            {
-                if( HasPublicParameterlessConstructor )
-                    IsCreatable = true;
-                else
-                    logger?.Error<Type>(
-                        "{0} has no public parameterless constructor and is not a string or a ValueType", type );
-            }
+                IsCreatable = HasPublicParameterlessConstructor;
         }
 
         // strings aren't created; instead, an empty string is returned. Returns null if the object

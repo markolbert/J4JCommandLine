@@ -1,27 +1,18 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using J4JSoftware.Logging;
 
 namespace J4JSoftware.CommandLine
 {
     // represents an Array of some Type. Can only be created via the ITargetedPropertyFactory interface
     public class TargetableArray : TargetableType
     {
-        internal TargetableArray(
-            Type type,
-            List<ITextConverter> converters,
-            IJ4JLogger? logger
-        )
+        internal TargetableArray( Type type, List<ITextConverter> converters )
             : base( type.GetElementType()!, Multiplicity.Array )
         {
-            if( !type.IsArray )
-                logger?.Error<Type>( "{0} is not an Array", type );
-            else
+            if( type.IsArray )
             {
-                if( type.GetArrayRank() != 1 )
-                    logger?.Error<Type>( "{0} is not a one-dimensional Array", type );
-                else
+                if( type.GetArrayRank() == 1 )
                 {
                     var elementType = type.GetElementType()!;
 
@@ -29,7 +20,6 @@ namespace J4JSoftware.CommandLine
 
                     if( Converter != null )
                         IsCreatable = true;
-                    else logger?.Error<Type>( "{0} is not convertible from text", elementType );
                 }
             }
         }

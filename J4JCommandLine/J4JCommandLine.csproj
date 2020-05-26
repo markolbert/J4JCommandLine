@@ -15,13 +15,6 @@
 
   <ItemGroup>
     <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="3.1.4" />
-    <PackageReference Include="Microsoft.Extensions.Logging" Version="3.1.4" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <ProjectReference Include="..\..\J4JLogging\ConsoleChannel\ConsoleChannel.csproj" />
-    <ProjectReference Include="..\..\J4JLogging\FileChannel\FileChannel.csproj" />
-    <ProjectReference Include="..\..\J4JLogging\J4JLogging\J4JLogging.csproj" />
   </ItemGroup>
 
 </Project>

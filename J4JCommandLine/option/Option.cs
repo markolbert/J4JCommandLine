@@ -1,8 +1,6 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Xml.XPath;
-using J4JSoftware.Logging;
 
 namespace J4JSoftware.CommandLine
 {
@@ -12,10 +10,9 @@ namespace J4JSoftware.CommandLine
 
         public Option(
             IOptionCollection options,
-            ITargetableType targetableType,
-            IJ4JLogger? logger = null
+            ITargetableType targetableType
         )
-            : base( OptionType.Mappable, targetableType, options, logger )
+            : base( OptionType.Mappable, targetableType, options )
         {
             _converter = targetableType.Converter!;
         }
@@ -77,7 +74,7 @@ namespace J4JSoftware.CommandLine
         private MappingResults ConvertToSimpleValue( IBindingTarget bindingTarget, IParseResult parseResult,
             out object? result )
         {
-            if( !ValidParameterCount( parseResult, out var paramResult ) )
+            if( !ValidParameterCount(bindingTarget, parseResult, out var paramResult ) )
             {
                 result = null;
                 return paramResult;
@@ -103,7 +100,7 @@ namespace J4JSoftware.CommandLine
         // attempts to convert them to an array of simple values (i.e., a single object, an IValueType, a string)
         private MappingResults ConvertToArray( IBindingTarget bindingTarget, IParseResult parseResult, out Array? result )
         {
-            if( !ValidParameterCount( parseResult, out var paramResult ) )
+            if( !ValidParameterCount( bindingTarget, parseResult, out var paramResult ) )
             {
                 result = null;
                 return paramResult;
@@ -138,7 +135,7 @@ namespace J4JSoftware.CommandLine
         // attempts to convert them to a generic list of simple values (i.e., a single object, an IValueType, a string)
         private MappingResults ConvertToList( IBindingTarget bindingTarget, IParseResult parseResult, out IList? result )
         {
-            if (!ValidParameterCount(parseResult, out var paramResult))
+            if (!ValidParameterCount( bindingTarget, parseResult, out var paramResult))
             {
                 result = null;
                 return paramResult;

@@ -1,6 +1,4 @@
-﻿using J4JSoftware.Logging;
-using System;
-using System.Collections;
+﻿using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
@@ -16,8 +14,6 @@ namespace J4JSoftware.CommandLine
         private readonly ICommandLineTextParser _textParser;
         private readonly IEnumerable<ITextConverter> _converters;
         private readonly IHelpErrorProcessor _helpErrorProcessor;
-        private readonly IJ4JLogger? _logger;
-        private readonly Func<IJ4JLogger>? _loggerFactory;
         private readonly List<TargetedProperty> _properties = new List<TargetedProperty>();
         private readonly ITargetableTypeFactory _targetableTypeFactory;
 
@@ -28,8 +24,7 @@ namespace J4JSoftware.CommandLine
             ICommandLineTextParser textParser,
             IEnumerable<ITextConverter> converters,
             IHelpErrorProcessor helpErrorProcessor,
-            IParsingConfiguration parseConfig,
-            Func<IJ4JLogger>? loggerFactory = null
+            IParsingConfiguration parseConfig
         )
         {
             if( !typeof( TValue ).HasPublicParameterlessConstructor() )
@@ -40,15 +35,11 @@ namespace J4JSoftware.CommandLine
             _textParser = textParser;
             _converters = converters;
             _helpErrorProcessor = helpErrorProcessor;
-            _loggerFactory = loggerFactory;
-
-            _logger = _loggerFactory?.Invoke();
-            _logger?.SetLoggedType( GetType() );
 
             ParsingConfiguration = parseConfig;
-            _targetableTypeFactory = new TargetableTypeFactory( _converters, loggerFactory?.Invoke() );
+            _targetableTypeFactory = new TargetableTypeFactory( _converters );
 
-            Options = new OptionCollection( ParsingConfiguration, _loggerFactory?.Invoke() );
+            Options = new OptionCollection( ParsingConfiguration );
             Errors = new CommandLineErrors( ParsingConfiguration );
         }
 
@@ -59,23 +50,18 @@ namespace J4JSoftware.CommandLine
             ICommandLineTextParser textParser,
             IEnumerable<ITextConverter> converters,
             IHelpErrorProcessor helpErrorProcessor,
-            IParsingConfiguration parseConfig,
-            Func<IJ4JLogger>? loggerFactory = null
+            IParsingConfiguration parseConfig
         )
         {
             Value = value;
             _textParser = textParser;
             _converters = converters;
             _helpErrorProcessor = helpErrorProcessor;
-            _loggerFactory = loggerFactory;
-
-            _logger = _loggerFactory?.Invoke();
-            _logger?.SetLoggedType( GetType() );
 
             ParsingConfiguration = parseConfig;
-            _targetableTypeFactory = new TargetableTypeFactory( _converters, loggerFactory?.Invoke() );
+            _targetableTypeFactory = new TargetableTypeFactory( _converters );
 
-            Options = new OptionCollection(ParsingConfiguration, _loggerFactory?.Invoke());
+            Options = new OptionCollection(ParsingConfiguration );
             Errors = new CommandLineErrors(ParsingConfiguration);
         }
 
@@ -123,8 +109,7 @@ namespace J4JSoftware.CommandLine
                     Value,
                     property,
                     _targetableTypeFactory,
-                    ParsingConfiguration.TextComparison,
-                    _loggerFactory?.Invoke()
+                    ParsingConfiguration.TextComparison
                 );
             }
 
@@ -138,12 +123,7 @@ namespace J4JSoftware.CommandLine
 
                 option = property.TargetableType.Converter == null
                     ? null
-                    : new Option(
-                        Options,
-                        property.TargetableType,
-                        _loggerFactory?.Invoke() );
-
-                //option = CreateOption(property.TargetableType);
+                    : new Option( Options, property.TargetableType );
             }
             // next condition should never be met because there should always be
             // at least one PropertyInfo object and hence one TargetedProperty
@@ -153,13 +133,10 @@ namespace J4JSoftware.CommandLine
             // unused) key
             keys = Options.GetUniqueKeys(keys);
 
-            if (keys.Length == 0)
-                _logger?.Error("No unique keys defined for Option");
-
             // if something went wrong create a NullOption to return. These cannot be
             // bound to commandline parameters but serve to capture error information
             if (keys.Length == 0 || option == null || property == null)
-                option = new NullOption(Options, _loggerFactory?.Invoke());
+                option = new NullOption(Options);
 
             option.AddKeys(keys);
 
@@ -188,7 +165,7 @@ namespace J4JSoftware.CommandLine
                 switch (property.BoundOption!.OptionType)
                 {
                     case OptionType.Mappable:
-                        retVal |= property.MapParseResult(this, parseResults, _logger);
+                        retVal |= property.MapParseResult(this, parseResults);
                         break;
 
                     case OptionType.Null:

@@ -1,9 +1,5 @@
-﻿using System;
-using System.Collections;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
-using System.Reflection;
-using J4JSoftware.Logging;
 
 namespace J4JSoftware.CommandLine
 {
@@ -15,19 +11,13 @@ namespace J4JSoftware.CommandLine
         protected OptionBase(
             OptionType optionType,
             ITargetableType targetableType,
-            IOptionCollection options,
-            IJ4JLogger? logger
+            IOptionCollection options
         )
         {
             OptionType = optionType;
             TargetableType = targetableType;
             Options = options;
-            Logger = logger;
-
-            Logger?.SetLoggedType( GetType() );
         }
-
-        protected internal IJ4JLogger? Logger { get; }
 
         // the collection of Options used by the parsing activity
         protected internal IOptionCollection Options { get; }
@@ -87,10 +77,9 @@ namespace J4JSoftware.CommandLine
             if( value.GetType() == Validator.SupportedType )
                 return Validator?.Validate( bindingTarget, key, value ) ?? true;
 
-            Logger?.Error(
-                "Object to be validated is a {0} but should be a {1}, rejecting",
-                value.GetType(),
-                Validator.SupportedType );
+            bindingTarget.AddError( 
+                key,
+                $"Object to be validated is a {value.GetType()} but should be a {Validator.SupportedType}, rejecting" );
 
             return false;
         }
@@ -108,11 +97,14 @@ namespace J4JSoftware.CommandLine
 
         // validates whether or not a valid number of parameters are included in the specified
         // IParseResult
-        protected virtual bool ValidParameterCount(IParseResult parseResult, out MappingResults result)
+        protected virtual bool ValidParameterCount(IBindingTarget bindingTarget, IParseResult parseResult, out MappingResults result)
         {
             if (parseResult.NumParameters < MinParameters)
             {
-                Logger?.Error<int, int>("Expected {0} parameters, got {1}", MinParameters, parseResult.NumParameters);
+                bindingTarget.AddError( 
+                    parseResult.Key,
+                    $"Expected {MinParameters} parameters, got {parseResult.NumParameters}" );
+
                 result = MappingResults.TooFewParameters;
 
                 return false;
@@ -120,7 +112,10 @@ namespace J4JSoftware.CommandLine
 
             if (parseResult.NumParameters > MaxParameters)
             {
-                Logger?.Error<int, int>("Expected {0} parameters, got {1}", MinParameters, parseResult.NumParameters);
+                bindingTarget.AddError(
+                    parseResult.Key,
+                    $"Expected {MinParameters} parameters, got {parseResult.NumParameters}" );
+
                 result = MappingResults.TooManyParameters;
 
                 return false;
