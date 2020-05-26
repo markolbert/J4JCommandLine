@@ -20,6 +20,10 @@ namespace J4JSoftware.CommandLine
             _converter = targetableType.Converter!;
         }
 
+        // the method called to convert the parsing results for a particular command
+        // line key to a option value. Return values other than MappingResults.Success
+        // indicate one or more problems were encountered in the conversion and validation
+        // process
         public override MappingResults Convert(
             IBindingTarget bindingTarget,
             IParseResult parseResult,
@@ -31,18 +35,18 @@ namespace J4JSoftware.CommandLine
             switch( targetType.Multiplicity )
             {
                 case Multiplicity.Array:
-                    retVal = ConvertArray( bindingTarget, parseResult, out var arrayResult );
+                    retVal = ConvertToArray( bindingTarget, parseResult, out var arrayResult );
                     result = arrayResult;
 
                     break;
 
                 case Multiplicity.List:
-                    retVal = ConvertList( bindingTarget, parseResult, out var listResult );
+                    retVal = ConvertToList( bindingTarget, parseResult, out var listResult );
                     result = listResult;
                     break;
 
                 case Multiplicity.SimpleValue:
-                    retVal = ConvertSingleValue( bindingTarget, parseResult, out var singleResult );
+                    retVal = ConvertToSimpleValue( bindingTarget, parseResult, out var singleResult );
                     result = singleResult;
                     break;
 
@@ -55,6 +59,7 @@ namespace J4JSoftware.CommandLine
             return retVal;
         }
 
+        // attempts to convert a text value using the defined ITextConverter property
         private object? Convert(IBindingTarget bindingTarget, string key, string text)
         {
             if (_converter.Convert(text, out var innerResult))
@@ -67,7 +72,9 @@ namespace J4JSoftware.CommandLine
             return null;
         }
 
-        private MappingResults ConvertSingleValue( IBindingTarget bindingTarget, IParseResult parseResult,
+        // checks to see if the provided IParseResult contains an allowable number of parameters and, if so,
+        // attempts to convert them to a simple value (i.e., a single object, an IValueType, a string)
+        private MappingResults ConvertToSimpleValue( IBindingTarget bindingTarget, IParseResult parseResult,
             out object? result )
         {
             if( !ValidParameterCount( parseResult, out var paramResult ) )
@@ -92,7 +99,9 @@ namespace J4JSoftware.CommandLine
             return MappingResults.ConversionFailed;
         }
 
-        private MappingResults ConvertArray( IBindingTarget bindingTarget, IParseResult parseResult, out Array? result )
+        // checks to see if the provided IParseResult contains an allowable number of parameters and, if so,
+        // attempts to convert them to an array of simple values (i.e., a single object, an IValueType, a string)
+        private MappingResults ConvertToArray( IBindingTarget bindingTarget, IParseResult parseResult, out Array? result )
         {
             if( !ValidParameterCount( parseResult, out var paramResult ) )
             {
@@ -125,7 +134,9 @@ namespace J4JSoftware.CommandLine
             return allOkay ? MappingResults.Success : MappingResults.ConversionFailed;
         }
 
-        private MappingResults ConvertList( IBindingTarget bindingTarget, IParseResult parseResult, out IList? result )
+        // checks to see if the provided IParseResult contains an allowable number of parameters and, if so,
+        // attempts to convert them to a generic list of simple values (i.e., a single object, an IValueType, a string)
+        private MappingResults ConvertToList( IBindingTarget bindingTarget, IParseResult parseResult, out IList? result )
         {
             if (!ValidParameterCount(parseResult, out var paramResult))
             {

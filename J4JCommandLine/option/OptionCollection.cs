@@ -25,6 +25,8 @@ namespace J4JSoftware.CommandLine
 
         public ReadOnlyCollection<IOption> Options => _options.AsReadOnly();
 
+        // determines whether or not a key is being used by an existing option, honoring whatever
+        // case sensitivity is in use
         public bool HasKey( string key )
         {
             if( _options.Any( opt => opt.Keys.Any( k => string.Equals( k, key, _parseConfig.TextComparison ) ) ) )
@@ -39,6 +41,7 @@ namespace J4JSoftware.CommandLine
             return false;
         }
 
+        // eliminates duplicate keys from a collection based on the case sensitivity rules
         public string[] GetUniqueKeys( params string[] keys ) =>
             keys.Where( k => !HasKey( k ) )
                 .ToArray();
@@ -46,13 +49,6 @@ namespace J4JSoftware.CommandLine
         public IOption? this[ string key ] =>
             _options.FirstOrDefault( opt =>
                 opt.Keys.Any( k => string.Equals( k, key, _parseConfig.TextComparison ) ) );
-
-        public void Clear()
-        {
-            _options.Clear();
-
-            _logger?.Verbose( "Cleared option collection" );
-        }
 
         public bool Add( IOption option )
         {

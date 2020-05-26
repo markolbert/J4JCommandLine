@@ -6,6 +6,8 @@ using Serilog;
 
 namespace J4JSoftware.CommandLine
 {
+    // A simple, functional proof-of-concept IHelpErrorProcessor. Outputs error and help information
+    // organized by command line key.
     public class SimpleHelpErrorProcessor : HelpErrorProcessor
     {
         private readonly string _keyDetailSep;
@@ -19,6 +21,8 @@ namespace J4JSoftware.CommandLine
             _keyDetailSep = new string( ' ', OutputConfiguration.KeyDetailSeparation );
         }
 
+        // displays errors and/or help depending upon what the binding and parsing process
+        // produced and the user requested
         public override void Display( MappingResults result, IBindingTarget bindingTarget )
         {
             base.Display(result, bindingTarget);
@@ -47,6 +51,7 @@ namespace J4JSoftware.CommandLine
                 return;
             }
 
+            // errors are displayed organized by keys
             foreach (var errorGroup in BindingTarget.Errors.OrderBy(e => e.Source.Key))
             {
                 var keys = MergeWords( 
@@ -74,6 +79,7 @@ namespace J4JSoftware.CommandLine
             }
         }
 
+        // help is displayed organized by key
         protected void DisplayHelp()
         {
             var sb = new StringBuilder();
@@ -133,7 +139,9 @@ namespace J4JSoftware.CommandLine
             }
         }
 
-        protected List<string> MergeWords( List<string> parts, int width, string wordSep )
+        // takes a list of words and merges them together using the specified wordSep (e.g.,
+        // a space, a ", ") such that they fit within the specified width
+        protected List<string> MergeWords( List<string> words, int width, string wordSep )
         {
             var retVal = new List<string>();
 
@@ -141,16 +149,16 @@ namespace J4JSoftware.CommandLine
             var partNum = -1;
             string? part = null;
 
-            while( partNum < parts.Count )
+            while( partNum < words.Count )
             {
                 if( string.IsNullOrEmpty( part ) )
                 {
                     partNum++;
 
-                    if( partNum >= parts.Count )
+                    if( partNum >= words.Count )
                         break;
 
-                    part = parts[ partNum ];
+                    part = words[ partNum ];
                 }
 
                 if( line.Length > 0 )
@@ -194,6 +202,9 @@ namespace J4JSoftware.CommandLine
             return retVal;
         }
 
+        // outputs a block of key-focused information, either help or errors, ensuring that
+        // blank lines are added when necessary to either block to make both blocks take up
+        // the same number of lines
         protected virtual void OutputToConsole(List<string> keyLines, List<string> detailLines)
         {
             var numDetail = detailLines.Count;

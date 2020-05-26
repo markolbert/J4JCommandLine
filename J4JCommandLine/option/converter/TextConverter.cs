@@ -2,6 +2,8 @@
 
 namespace J4JSoftware.CommandLine
 {
+    // An abstract base class implementing the ITextConverter<T> and ITextConverter
+    // interfaces.
     public abstract class TextConverter<T> : ITextConverter<T>
     {
         public Type SupportedType => typeof(T);

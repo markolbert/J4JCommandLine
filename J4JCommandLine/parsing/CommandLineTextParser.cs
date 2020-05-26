@@ -6,11 +6,11 @@ using J4JSoftware.Logging;
 
 namespace J4JSoftware.CommandLine
 {
-    /// <summary>
-    ///     Based on the ArgumentParser class: https://gist.github.com/shadowfox/5844284,
-    ///     which is in turn based on Richard Lopes' (GriffonRL's) class at
-    ///     http://www.codeproject.com/Articles/3111/C-NET-Command-Line-Arguments-Parser
-    /// </summary>
+    // An implementation of ICommandLineTextParser suitable for parsing command lines
+
+    // Based on the ArgumentParser class: https://gist.github.com/shadowfox/5844284,
+    // which is in turn based on Richard Lopes' (GriffonRL's) class at
+    // http://www.codeproject.com/Articles/3111/C-NET-Command-Line-Arguments-Parser
     public class CommandLineTextParser : ICommandLineTextParser
     {
         private readonly IJ4JLogger? _logger;
@@ -23,28 +23,12 @@ namespace J4JSoftware.CommandLine
             IJ4JLogger? logger = null
         )
         {
-            _parseConfig = parseConfig;
+            _parseConfig = parseConfig.Validate();
             _logger = logger;
 
             _logger?.SetLoggedType( GetType() );
 
-            if( parseConfig.Prefixes.Count == 0 )
-            {
-                _logger?.Fatal( "No command line prefixes defined" );
-                throw new ApplicationException( "No command line prefixes defined" );
-            }
-
-            if( parseConfig.TextDelimiters.Count == 0 )
-            {
-                _logger?.Fatal( "No command line text delimiters defined" );
-                throw new ApplicationException( "No command line text delimiters defined" );
-            }
-
-            if( parseConfig.ValueEnclosers.Count == 0 )
-                _logger?.Warning( "No command line value enclosers defined" );
-
             // create the regex remover
-
             var regexOptions = RegexOptions.Compiled;
 
             switch( _parseConfig.TextComparison )

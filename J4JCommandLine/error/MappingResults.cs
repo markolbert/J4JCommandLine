@@ -2,6 +2,9 @@
 
 namespace J4JSoftware.CommandLine
 {
+    // a list of all the possible errors that may be encountered during binding and
+    // parsing. These are configured as flags so that multiple problems can be reported
+    // simultaneously
     [ Flags ]
     public enum MappingResults
     {

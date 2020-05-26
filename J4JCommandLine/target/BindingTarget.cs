@@ -8,6 +8,8 @@ using System.Linq.Expressions;
 
 namespace J4JSoftware.CommandLine
 {
+    // defines target for binding operations, tying command line arguments to
+    // specific properties of TValue
     public class BindingTarget<TValue> : IBindingTarget<TValue>
         where TValue : class
     {
@@ -19,6 +21,9 @@ namespace J4JSoftware.CommandLine
         private readonly List<TargetedProperty> _properties = new List<TargetedProperty>();
         private readonly ITargetableTypeFactory _targetableTypeFactory;
 
+        // attempts to create an instance tied to a dynamically-created instance
+        // of TValue. If TValue lacks a parameterless public constructor an ArgumentException
+        // is thrown.
         public BindingTarget(
             ICommandLineTextParser textParser,
             IEnumerable<ITextConverter> converters,
@@ -47,6 +52,8 @@ namespace J4JSoftware.CommandLine
             Errors = new CommandLineErrors( ParsingConfiguration );
         }
 
+        // creates an instance tied to the supplied instance of TValue. This allows for binding
+        // to more complex objects which may require constructor parameters.
         public BindingTarget(
             TValue value,
             ICommandLineTextParser textParser,
@@ -78,6 +85,15 @@ namespace J4JSoftware.CommandLine
         public IOptionCollection Options { get; }
         public CommandLineErrors Errors { get; }
 
+        // binds the selected property to a newly-created OptionBase instance. If all goes
+        // well that will be an Option object capable of being a valid parsing target. If
+        // something goes wrong a NullOption object will be returned. These only serve
+        // to capture error information about the binding and parsing efforts.
+        //
+        // There are a number of reasons why a selected property may not be able to be bound
+        // to an Option object. Examples: the property is not publicly read- and write-able; 
+        // the property has a null value and does not have a public parameterless constructor
+        // to create an instance of it. Check the error output after parsing for details.
         public OptionBase Bind<TProp>(
             Expression<Func<TValue, TProp>> propertySelector,
             params string[] keys )
@@ -146,6 +162,8 @@ namespace J4JSoftware.CommandLine
             return option;
         }
 
+        // Parses the command line arguments against the Option objects bound to 
+        // targeted properties, or to NullOption objects to collect error information.
         public MappingResults Parse(string[] args)
         {
             var retVal = MappingResults.Success;
@@ -160,11 +178,6 @@ namespace J4JSoftware.CommandLine
             {
                 switch (property.BoundOption!.OptionType)
                 {
-                    case OptionType.Help:
-                        if (property.MapParseResult(this, parseResults, _logger) == MappingResults.Success)
-                            retVal |= MappingResults.HelpRequested;
-                        break;
-
                     case OptionType.Mappable:
                         retVal |= property.MapParseResult(this, parseResults, _logger);
                         break;
@@ -187,39 +200,14 @@ namespace J4JSoftware.CommandLine
             return retVal;
         }
 
-        public MappingResults MapParseResults( ParseResults parseResults )
-        {
-            var retVal = MappingResults.Success;
-
-            // scan all the bound options that aren't tied to NullOptions, which are only
-            // "bound" in error
-            foreach( var property in _properties )
-            {
-                switch( property.BoundOption!.OptionType )
-                {
-                    case OptionType.Help:
-                        if( property.MapParseResult( this, parseResults, _logger ) == MappingResults.Success )
-                            retVal |= MappingResults.HelpRequested;
-                        break;
-
-                    case OptionType.Mappable:
-                        retVal |= property.MapParseResult(this, parseResults, _logger);
-                        break;
-
-                    case OptionType.Null:
-                        retVal |= MappingResults.Unbound;
-                        break;
-                }
-            }
-
-            return retVal;
-        }
-
+        // Utility method for adding errors to the error collection. These are keyed by whatever
+        // option key (e.g., the 'x' in '-x') is associated with the error.
         public void AddError( string key, string error )
         {
             Errors.AddError( this, key, error );
         }
 
+        // allows retrieval of the TValue instance in a type-agnostic way
         object IBindingTarget.GetValue()
         {
             return Value;

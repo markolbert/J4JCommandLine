@@ -4,6 +4,8 @@ using System.Linq;
 
 namespace J4JSoftware.CommandLine
 {
+    // Converts a text value to the specified type of Enum. Flag Enums can
+    // be handled if the individual values are separated by commas (e.g., "EnumValue1, EnumValue2").
     public class TextToEnum<TEnum> : TextConverter<TEnum>
         where TEnum : Enum
     {
