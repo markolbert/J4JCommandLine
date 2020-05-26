@@ -17,11 +17,16 @@ namespace J4JCommandLine.Tests
         {
             var builder = new ContainerBuilder();
 
-            builder.RegisterType<OptionCollection>()
-                .As<IOptionCollection>()
-                .SingleInstance();
+            //builder.RegisterType<OptionCollection>()
+            //    .As<IOptionCollection>()
+            //    .SingleInstance();
 
             builder.RegisterType<ParsingConfiguration>()
+                .OnActivated(ae =>
+                {
+                    ae.Instance.Description = "a description of the program";
+                    ae.Instance.ProgramName = "program.exe";
+                })
                 .As<IParsingConfiguration>()
                 .SingleInstance();
 
@@ -34,17 +39,12 @@ namespace J4JCommandLine.Tests
                 .AsImplementedInterfaces()
                 .SingleInstance();
 
+            builder.RegisterGeneric( typeof( BindingTarget<> ) )
+                .As( typeof( IBindingTarget<> ) );
+
             builder.RegisterType<SimpleHelpErrorProcessor>()
                 .As<IHelpErrorProcessor>()
                 .SingleInstance();
-
-            builder.RegisterType<CommandLineContext>()
-                .OnActivated( ae =>
-                {
-                    ae.Instance.Description = "a description of the program";
-                    ae.Instance.ProgramName = "program.exe";
-                })
-                .AsSelf();
 
             builder.RegisterType<CommandLineTextParser>()
                 .As<ICommandLineTextParser>()

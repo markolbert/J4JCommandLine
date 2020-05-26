@@ -20,15 +20,15 @@ namespace J4JSoftware.CommandLine
         protected IOutputConfiguration OutputConfiguration { get; }
 
         protected MappingResults Result { get; private set; }
-        protected CommandLineContext Context { get; private set; }
+        protected IBindingTarget BindingTarget { get; private set; }
         
         protected bool HasErrors => ( Result & ~MappingResults.HelpRequested ) != MappingResults.Success;
         protected bool HelpRequested => (Result & MappingResults.HelpRequested) == MappingResults.HelpRequested;
 
-        public virtual void Display( MappingResults result, CommandLineContext context )
+        public virtual void Display( MappingResults result, IBindingTarget bindingTarget )
         {
             Result = result;
-            Context = context;
+            BindingTarget = bindingTarget;
         }
     }
 }

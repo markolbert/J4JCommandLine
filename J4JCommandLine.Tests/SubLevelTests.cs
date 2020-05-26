@@ -56,9 +56,7 @@ namespace J4JCommandLine.Tests
             MappingResults result,
             int desiredValue )
         {
-            var context = TestServiceProvider.Instance.GetRequiredService<CommandLineContext>();
-
-            var target = context.AddBindingTarget( new RootProperties(), "test" );
+            var target = TestServiceProvider.Instance.GetRequiredService<IBindingTarget<RootProperties>>();
 
             var option = target.Bind( x => x.SimpleChildProperties.IntProperty, "x" );
 
@@ -67,7 +65,7 @@ namespace J4JCommandLine.Tests
             if( required )
                 option.Required();
 
-            var parseResult = context.Parse( new string[] { $"-{key}", arg } );
+            var parseResult = target.Parse( new string[] { $"-{key}", arg } );
 
             var consoleText = _consoleWriter.ToString();
 
@@ -92,9 +90,7 @@ namespace J4JCommandLine.Tests
         {
             var desired = desiredValues == null ? new List<int>() : new List<int>(desiredValues);
 
-            var context = TestServiceProvider.Instance.GetRequiredService<CommandLineContext>();
-
-            var target = context.AddBindingTarget(new RootProperties(), "test");
+            var target = TestServiceProvider.Instance.GetRequiredService<IBindingTarget<RootProperties>>();
 
             var option = target.Bind( x => x.SimpleChildProperties.IntArray, "x" );
 
@@ -104,7 +100,7 @@ namespace J4JCommandLine.Tests
             var cmdLineArgs = new List<string> { $"-{key}" };
             cmdLineArgs.AddRange(args);
 
-            var parseResult = context.Parse(cmdLineArgs.ToArray());
+            var parseResult = target.Parse(cmdLineArgs.ToArray());
 
             var consoleText = _consoleWriter.ToString();
 
@@ -129,9 +125,7 @@ namespace J4JCommandLine.Tests
         {
             var desired = desiredValues == null ? new List<int>() : new List<int>( desiredValues );
 
-            var context = TestServiceProvider.Instance.GetRequiredService<CommandLineContext>();
-
-            var target = context.AddBindingTarget(new RootProperties(), "test");
+            var target = TestServiceProvider.Instance.GetRequiredService<IBindingTarget<RootProperties>>();
 
             var option = target.Bind( x => x.SimpleChildProperties.IntList, "x" );
 
@@ -141,7 +135,7 @@ namespace J4JCommandLine.Tests
             var cmdLineArgs = new List<string> { $"-{key}" };
             cmdLineArgs.AddRange( args );
 
-            var parseResult = context.Parse( cmdLineArgs.ToArray() );
+            var parseResult = target.Parse( cmdLineArgs.ToArray() );
 
             var consoleText = _consoleWriter.ToString();
 
@@ -159,13 +153,11 @@ namespace J4JCommandLine.Tests
             string key,
             string arg)
         {
-            var context = TestServiceProvider.Instance.GetRequiredService<CommandLineContext>();
-
-            var target = context.AddBindingTarget(new RootProperties(), "test");
+            var target = TestServiceProvider.Instance.GetRequiredService<IBindingTarget<RootProperties>>();
 
             var option = target.Bind(x => x.ComplexChildProperties.IntProperty, "x" );
 
-            var parseResult = context.Parse(new string[] { $"-{key}", arg });
+            var parseResult = target.Parse(new string[] { $"-{key}", arg });
 
             var consoleText = _consoleWriter.ToString();
 
@@ -182,13 +174,11 @@ namespace J4JCommandLine.Tests
             string key,
             string arg )
         {
-            var context = TestServiceProvider.Instance.GetRequiredService<CommandLineContext>();
-
-            var target = context.AddBindingTarget( new RootProperties(), "test" );
+            var target = TestServiceProvider.Instance.GetRequiredService<IBindingTarget<RootProperties>>();
 
             var option = target.Bind( x => x.ComplexChildProperties.IntList, "x" );
 
-            var parseResult = context.Parse( new string[] { $"-{key}", arg } );
+            var parseResult = target.Parse( new string[] { $"-{key}", arg } );
 
             var consoleText = _consoleWriter.ToString();
 
@@ -209,9 +199,7 @@ namespace J4JCommandLine.Tests
             int maxArgs,
             MappingResults result)
         {
-            var context = TestServiceProvider.Instance.GetRequiredService<CommandLineContext>();
-
-            var target = context.AddBindingTarget(new RootProperties(), "test");
+            var target = TestServiceProvider.Instance.GetRequiredService<IBindingTarget<RootProperties>>();
 
             var option = target.Bind( x => x.SimpleChildProperties.IntList, "x" );
             option.Should().BeAssignableTo<Option>();
@@ -221,7 +209,7 @@ namespace J4JCommandLine.Tests
             var args = rawArgs.ToList();
             args.Insert(0, "-x");
 
-            var parseResult = context.Parse( args.ToArray() );
+            var parseResult = target.Parse( args.ToArray() );
 
             var consoleText = _consoleWriter.ToString();
 
@@ -251,9 +239,7 @@ namespace J4JCommandLine.Tests
             int maxArgs,
             MappingResults result)
         {
-            var context = TestServiceProvider.Instance.GetRequiredService<CommandLineContext>();
-
-            var target = context.AddBindingTarget(new RootProperties(), "test");
+            var target = TestServiceProvider.Instance.GetRequiredService<IBindingTarget<RootProperties>>();
 
             var option = target.Bind( x => x.SimpleChildProperties.IntArray, "x" );
             option.Should().BeAssignableTo<Option>();
@@ -263,7 +249,7 @@ namespace J4JCommandLine.Tests
             var args = rawArgs.ToList();
             args.Insert(0, "-x");
 
-            var parseResult = context.Parse(args.ToArray());
+            var parseResult = target.Parse(args.ToArray());
 
             var consoleText = _consoleWriter.ToString();
 

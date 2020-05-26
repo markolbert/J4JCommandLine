@@ -27,7 +27,5 @@ namespace J4JSoftware.CommandLine
                 _key = value;
             }
         }
-
-        public string ErrorPath => $"{BindingTarget.ID}:{Key}";
     }
 }

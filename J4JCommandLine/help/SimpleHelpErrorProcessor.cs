@@ -19,16 +19,16 @@ namespace J4JSoftware.CommandLine
             _keyDetailSep = new string( ' ', OutputConfiguration.KeyDetailSeparation );
         }
 
-        public override void Display( MappingResults result, CommandLineContext context )
+        public override void Display( MappingResults result, IBindingTarget bindingTarget )
         {
-            base.Display(result, context);
+            base.Display(result, bindingTarget);
 
             if( !HasErrors && !HelpRequested )
                 return;
 
-            if( !string.IsNullOrEmpty( context.Description ) )
+            if( !string.IsNullOrEmpty( ParsingConfiguration.Description ) )
             {
-                Console.WriteLine( context.Description );
+                Console.WriteLine( ParsingConfiguration.Description );
                 Console.WriteLine();
             }
 
@@ -41,13 +41,13 @@ namespace J4JSoftware.CommandLine
 
         protected void DisplayErrors()
         {
-            if( Context.Errors.Count == 0 )
+            if( BindingTarget.Errors.Count == 0 )
             {
                 Console.WriteLine("Errors were encountered but not described");
                 return;
             }
 
-            foreach (var errorGroup in Context.Errors.OrderBy(e => e.Source.Key))
+            foreach (var errorGroup in BindingTarget.Errors.OrderBy(e => e.Source.Key))
             {
                 var keys = MergeWords( 
                     ParsingConfiguration.ConjugateKey( errorGroup.Source.Key ),
@@ -78,8 +78,8 @@ namespace J4JSoftware.CommandLine
         {
             var sb = new StringBuilder();
 
-            if( !string.IsNullOrEmpty( Context.ProgramName ) )
-                sb.Append( $"{Context.ProgramName} " );
+            if( !string.IsNullOrEmpty( ParsingConfiguration.ProgramName ) )
+                sb.Append( $"{ParsingConfiguration.ProgramName} " );
 
             sb.Append("command line options");
 
@@ -99,7 +99,7 @@ namespace J4JSoftware.CommandLine
             Console.WriteLine( sb.ToString() );
             Console.WriteLine();
 
-            foreach( var option in Context.Options
+            foreach( var option in BindingTarget.Options
                 .OrderBy( opt => opt.FirstKey )
                 .Where( opt => opt.OptionType != OptionType.Null ) )
             {

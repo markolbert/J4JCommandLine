@@ -14,6 +14,13 @@ namespace J4JCommandLine.Tests
 {
     public class HelpErrorTests
     {
+        protected class RootProperties
+        {
+            public int IntProperty { get; set; }
+            public List<int> IntList { get; set; }
+            public int[] IntArray { get; set; }
+        }
+
         private readonly StringWriter _consoleWriter = new StringWriter();
         private readonly TextConverter _textConv = new TextConverter();
 
@@ -28,9 +35,9 @@ namespace J4JCommandLine.Tests
             string key,
             MappingResults result )
         {
-            var context = TestServiceProvider.Instance.GetRequiredService<CommandLineContext>();
+            var target = TestServiceProvider.Instance.GetRequiredService<IBindingTarget<RootProperties>>();
 
-            var parseResult = context.Parse( new string[] { $"-{key}" } );
+            var parseResult = target.Parse( new string[] { $"-{key}" } );
 
             var consoleText = _consoleWriter.ToString();
 

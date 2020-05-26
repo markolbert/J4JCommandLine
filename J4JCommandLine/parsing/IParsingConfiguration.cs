@@ -11,5 +11,8 @@ namespace J4JSoftware.CommandLine
         List<string> TextDelimiters { get; }
         List<string> HelpKeys { get; }
         StringComparison TextComparison { get; }
+        string? Description { get; }
+        string? ProgramName { get; }
+
     }
 }

@@ -2,6 +2,6 @@
 {
     public interface IHelpErrorProcessor
     {
-        void Display( MappingResults results, CommandLineContext context );
+        void Display( MappingResults results, IBindingTarget bindingTarget );
     }
 }

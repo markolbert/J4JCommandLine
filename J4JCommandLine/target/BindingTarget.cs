@@ -11,42 +11,72 @@ namespace J4JSoftware.CommandLine
     public class BindingTarget<TValue> : IBindingTarget<TValue>
         where TValue : class
     {
+        private readonly ICommandLineTextParser _textParser;
         private readonly IEnumerable<ITextConverter> _converters;
-        private readonly CommandLineErrors _errors;
-        private readonly StringComparison _keyComp;
+        private readonly IHelpErrorProcessor _helpErrorProcessor;
         private readonly IJ4JLogger? _logger;
         private readonly Func<IJ4JLogger>? _loggerFactory;
-        private readonly IOptionCollection _options;
         private readonly List<TargetedProperty> _properties = new List<TargetedProperty>();
         private readonly ITargetableTypeFactory _targetableTypeFactory;
 
         public BindingTarget(
-            string targetID,
-            TValue value,
+            ICommandLineTextParser textParser,
             IEnumerable<ITextConverter> converters,
-            IOptionCollection options,
+            IHelpErrorProcessor helpErrorProcessor,
             IParsingConfiguration parseConfig,
-            CommandLineErrors errors,
             Func<IJ4JLogger>? loggerFactory = null
         )
         {
-            ID = targetID;
-            Value = value;
+            if( !typeof( TValue ).HasPublicParameterlessConstructor() )
+                throw new ArgumentException(
+                    $"{typeof( TValue )} does not have a public parameterless constructor and cannot be used as a binding target" );
+
+            Value = Activator.CreateInstance<TValue>();
+            _textParser = textParser;
             _converters = converters;
-            _options = options;
-            _errors = errors;
+            _helpErrorProcessor = helpErrorProcessor;
             _loggerFactory = loggerFactory;
 
             _logger = _loggerFactory?.Invoke();
             _logger?.SetLoggedType( GetType() );
 
-            _keyComp = parseConfig.TextComparison;
+            ParsingConfiguration = parseConfig;
             _targetableTypeFactory = new TargetableTypeFactory( _converters, loggerFactory?.Invoke() );
+
+            Options = new OptionCollection( ParsingConfiguration, _loggerFactory?.Invoke() );
+            Errors = new CommandLineErrors( ParsingConfiguration );
+        }
+
+        public BindingTarget(
+            TValue value,
+            ICommandLineTextParser textParser,
+            IEnumerable<ITextConverter> converters,
+            IHelpErrorProcessor helpErrorProcessor,
+            IParsingConfiguration parseConfig,
+            Func<IJ4JLogger>? loggerFactory = null
+        )
+        {
+            Value = value;
+            _textParser = textParser;
+            _converters = converters;
+            _helpErrorProcessor = helpErrorProcessor;
+            _loggerFactory = loggerFactory;
+
+            _logger = _loggerFactory?.Invoke();
+            _logger?.SetLoggedType( GetType() );
+
+            ParsingConfiguration = parseConfig;
+            _targetableTypeFactory = new TargetableTypeFactory( _converters, loggerFactory?.Invoke() );
+
+            Options = new OptionCollection(ParsingConfiguration, _loggerFactory?.Invoke());
+            Errors = new CommandLineErrors(ParsingConfiguration);
         }
 
         public TValue Value { get; }
-        public string ID { get; }
-        public ReadOnlyCollection<TargetedProperty> TargetableProperties => _properties.ToList().AsReadOnly();
+        public ReadOnlyCollection<TargetedProperty> TargetedProperties => _properties.ToList().AsReadOnly();
+        public IParsingConfiguration ParsingConfiguration { get; }
+        public IOptionCollection Options { get; }
+        public CommandLineErrors Errors { get; }
 
         public OptionBase Bind<TProp>(
             Expression<Func<TValue, TProp>> propertySelector,
@@ -68,7 +98,7 @@ namespace J4JSoftware.CommandLine
                     Value,
                     property,
                     _targetableTypeFactory,
-                    _keyComp,
+                    ParsingConfiguration.TextComparison,
                     _loggerFactory?.Invoke()
                 );
             }
@@ -84,7 +114,7 @@ namespace J4JSoftware.CommandLine
                 option = property.TargetableType.Converter == null
                     ? null
                     : new Option(
-                        _options,
+                        Options,
                         property.TargetableType,
                         _loggerFactory?.Invoke() );
 
@@ -96,7 +126,7 @@ namespace J4JSoftware.CommandLine
 
             // determine whether we were given at least one valid, unique (i.e., so far
             // unused) key
-            keys = _options.GetUniqueKeys(keys);
+            keys = Options.GetUniqueKeys(keys);
 
             if (keys.Length == 0)
                 _logger?.Error("No unique keys defined for Option");
@@ -104,16 +134,57 @@ namespace J4JSoftware.CommandLine
             // if something went wrong create a NullOption to return. These cannot be
             // bound to commandline parameters but serve to capture error information
             if (keys.Length == 0 || option == null || property == null)
-                option = new NullOption(_options, _loggerFactory?.Invoke());
+                option = new NullOption(Options, _loggerFactory?.Invoke());
 
             option.AddKeys(keys);
 
-            _options.Add(option);
+            Options.Add(option);
 
             if (property != null)
                 property.BoundOption = option;
 
             return option;
+        }
+
+        public MappingResults Parse(string[] args)
+        {
+            var retVal = MappingResults.Success;
+
+            // parse the arguments into a collection of arguments keyed by the option key
+            // note that there can be multiple arguments associated with any option key
+            var parseResults = _textParser.Parse(args);
+
+            // scan all the bound options that aren't tied to NullOptions, which are only
+            // "bound" in error
+            foreach (var property in _properties)
+            {
+                switch (property.BoundOption!.OptionType)
+                {
+                    case OptionType.Help:
+                        if (property.MapParseResult(this, parseResults, _logger) == MappingResults.Success)
+                            retVal |= MappingResults.HelpRequested;
+                        break;
+
+                    case OptionType.Mappable:
+                        retVal |= property.MapParseResult(this, parseResults, _logger);
+                        break;
+
+                    case OptionType.Null:
+                        retVal |= MappingResults.Unbound;
+                        break;
+                }
+            }
+
+            if (parseResults.Any(
+                pr => ParsingConfiguration.HelpKeys
+                    .Any(k => string.Equals(k, pr.Key, ParsingConfiguration.TextComparison))))
+                retVal |= MappingResults.HelpRequested;
+
+            _helpErrorProcessor.Display(retVal, this);
+
+            Errors.Clear();
+
+            return retVal;
         }
 
         public MappingResults MapParseResults( ParseResults parseResults )
@@ -146,7 +217,7 @@ namespace J4JSoftware.CommandLine
 
         public void AddError( string key, string error )
         {
-            _errors.AddError( this, key, error );
+            Errors.AddError( this, key, error );
         }
 
         object IBindingTarget.GetValue()
