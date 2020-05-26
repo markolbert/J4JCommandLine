@@ -6,6 +6,7 @@ using J4JSoftware.Logging;
 
 namespace J4JSoftware.CommandLine
 {
+    // represents a generic List<> of some Type. Can only be created via the ITargetedPropertyFactory interface
     public class TargetableList : TargetableType
     {
         internal TargetableList(
@@ -37,8 +38,13 @@ namespace J4JSoftware.CommandLine
             }
         }
 
+        // Returns null if the object described by the instance is not creatable. Otherwise
+        // creates an empty List<SupportedType>
         public override object? GetDefaultValue()
         {
+            if( !IsCreatable )
+                return null;
+
             var retType = typeof(List<>).MakeGenericType(SupportedType.GenericTypeArguments[0]);
 
             return Activator.CreateInstance(retType)!;

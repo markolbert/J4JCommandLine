@@ -5,6 +5,9 @@ using System.Text;
 
 namespace J4JSoftware.CommandLine
 {
+    // determines whether an object is contained in a pre-defined list of objects. This is done
+    // by using the object's IEquatable<T> interface, so only Types supporting that interface
+    // can be validated by this object.
     public class OptionInSet<T> : OptionValidator<T>
         where T : IEquatable<T>
     {

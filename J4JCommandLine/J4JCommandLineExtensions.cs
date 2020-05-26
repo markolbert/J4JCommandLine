@@ -7,8 +7,10 @@ using J4JSoftware.Logging;
 
 namespace J4JSoftware.CommandLine
 {
+    // various extension methods used by the framework
     public static class J4JCommandLineExtensions
     {
+        // determines whether a PropertyInfo object describes a publicly readable or writeable property
         public static bool IsPublicReadWrite( this PropertyInfo propInfo, IJ4JLogger? logger )
         {
             var getAccessor = propInfo.GetGetMethod();
@@ -53,6 +55,8 @@ namespace J4JSoftware.CommandLine
             return true;
         }
 
+        // walks the Expression tree targeting a selected property to capture the PropertyInfo objects of
+        // every parent/ancestor property
         public static List<PropertyInfo> GetPropertyPathInfo<TTarget, TProp>(
             this Expression<Func<TTarget, TProp>> propertySelector)
         {
@@ -105,6 +109,7 @@ namespace J4JSoftware.CommandLine
             return toCheck.GetConstructor( Type.EmptyTypes ) != null;
         }
 
+        // converts from StringComparison values to StringComparer values
         public static StringComparer ToStringComparer( this StringComparison textComp )
         {
             return textComp switch

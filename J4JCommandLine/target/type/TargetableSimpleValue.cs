@@ -6,6 +6,8 @@ using J4JSoftware.Logging;
 
 namespace J4JSoftware.CommandLine
 {
+    // represents an 'simple' Type, meaning one which isn't either an array or a List<>.
+    // Can only be created via the ITargetedPropertyFactory interface
     public class TargetableSimpleValue : TargetableType
     {
         internal TargetableSimpleValue( 
@@ -34,15 +36,17 @@ namespace J4JSoftware.CommandLine
             }
         }
 
+        // strings aren't created; instead, an empty string is returned. Returns null if the object
+        // described by the instance is not creatable
         public override object? GetDefaultValue()
         {
+            if( !IsCreatable )
+                return null;
+
             if( SupportedType == typeof( string ) )
                 return string.Empty;
 
-            //if( SupportedType.IsValueType )
             return Activator.CreateInstance( SupportedType );
-
-            //return ParameterlessConstructor?.Invoke( null );
         }
     }
 }

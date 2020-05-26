@@ -2,6 +2,8 @@
 
 namespace J4JSoftware.CommandLine
 {
+    // determines whether two instances are not equal by using the Type's IEquatable<T> interface.
+    // Consequently, only Types supporting that interface can be validated by this class.
     public class OptionNotEqual<T> : OptionValidator<T>
         where T : IEquatable<T>
     {

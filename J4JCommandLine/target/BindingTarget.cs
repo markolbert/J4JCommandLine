@@ -79,10 +79,19 @@ namespace J4JSoftware.CommandLine
             Errors = new CommandLineErrors(ParsingConfiguration);
         }
 
+        // The instance of TValue being bound to, which was either supplied in the constructor to 
+        // this instance or created by it if TValue has a public parameterless constructor
         public TValue Value { get; }
+
+        // the properties targeted by this binding operation (i.e., ones tied to particular OptionBase objects)
         public ReadOnlyCollection<TargetedProperty> TargetedProperties => _properties.ToList().AsReadOnly();
+
         public IParsingConfiguration ParsingConfiguration { get; }
+
+        // the IOption objects created by binding properties to TValue
         public IOptionCollection Options { get; }
+
+        // Errors encountered during the binding or parsing operations
         public CommandLineErrors Errors { get; }
 
         // binds the selected property to a newly-created OptionBase instance. If all goes

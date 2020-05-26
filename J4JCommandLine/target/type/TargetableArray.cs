@@ -5,6 +5,7 @@ using J4JSoftware.Logging;
 
 namespace J4JSoftware.CommandLine
 {
+    // represents an Array of some Type. Can only be created via the ITargetedPropertyFactory interface
     public class TargetableArray : TargetableType
     {
         internal TargetableArray(
@@ -33,6 +34,14 @@ namespace J4JSoftware.CommandLine
             }
         }
 
-        public override object? GetDefaultValue() => Array.CreateInstance( SupportedType, 0 );
+        // Returns null if the object described by the instance is not creatable. Otherwise
+        // creates an empty/zero-length Array of SupportedType
+        public override object? GetDefaultValue()
+        {
+            if (!IsCreatable)
+                return null;
+
+            return Array.CreateInstance( SupportedType, 0 );
+        }
     }
 }

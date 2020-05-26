@@ -3,7 +3,13 @@ using System.Text;
 
 namespace J4JSoftware.CommandLine
 {
-    public class OptionInRange<T> : OptionValidator<T>
+    // determines whether a Type which supports the IComparable<T> interface 
+    // meets certain inclusion criteria (e.g., >, >=). Only Types supporting IComparable<T>
+    // can be validated by this class.
+    //
+    // Instances of this class should not be created directly. Instead, call one of the static
+    // creation methods defined in OptionInRangeStatic.cs
+    public partial class OptionInRange<T> : OptionValidator<T>
         where T : IComparable<T>
     {
         protected OptionInRange()
@@ -17,56 +23,6 @@ namespace J4JSoftware.CommandLine
         public T Maximum { get; private set; }
         public bool IncludeMaximumEqual { get; private set; }
         protected bool MaximumSet { get; set; }
-
-        public static OptionInRange<TProp> GreaterThan<TProp>( TProp min ) where TProp : IComparable<TProp>
-        {
-            return new OptionInRange<TProp> { Minimum = min, MinimumSet = true };
-        }
-
-        public static OptionInRange<TProp> GreaterThanEqual<TProp>( TProp min ) where TProp : IComparable<TProp>
-        {
-            return new OptionInRange<TProp> { Minimum = min, IncludeMinimumEqual = true, MinimumSet = true };
-        }
-
-        public static OptionInRange<TProp> LessThan<TProp>( TProp max ) where TProp : IComparable<TProp>
-        {
-            return new OptionInRange<TProp> { Maximum = max, MaximumSet = true };
-        }
-
-        public static OptionInRange<TProp> LessThanEqual<TProp>( TProp max ) where TProp : IComparable<TProp>
-        {
-            return new OptionInRange<TProp> { Maximum = max, IncludeMaximumEqual = true, MaximumSet = true };
-        }
-
-        public static OptionInRange<TProp> GreaterLessThan<TProp>( TProp min, TProp max )
-            where TProp : IComparable<TProp>
-        {
-            return new OptionInRange<TProp> { Minimum = min, Maximum = max, MinimumSet = true, MaximumSet = true };
-        }
-
-        public static OptionInRange<TProp> GreaterLessThanEqual<TProp>( TProp min, TProp max )
-            where TProp : IComparable<TProp>
-        {
-            return new OptionInRange<TProp>
-            {
-                Minimum = min, IncludeMinimumEqual = true, Maximum = max, IncludeMaximumEqual = true, MinimumSet = true,
-                MaximumSet = true
-            };
-        }
-
-        public static OptionInRange<TProp> GreaterEqualLessThan<TProp>( TProp min, TProp max )
-            where TProp : IComparable<TProp>
-        {
-            return new OptionInRange<TProp>
-                { Minimum = min, IncludeMinimumEqual = true, Maximum = max, MinimumSet = true, MaximumSet = true };
-        }
-
-        public static OptionInRange<TProp> GreaterLessEqualThan<TProp>( TProp min, TProp max )
-            where TProp : IComparable<TProp>
-        {
-            return new OptionInRange<TProp>
-                { Minimum = min, Maximum = max, IncludeMaximumEqual = true, MinimumSet = true, MaximumSet = true };
-        }
 
         public override bool Validate( IBindingTarget bindingTarget, string key, T value )
         {

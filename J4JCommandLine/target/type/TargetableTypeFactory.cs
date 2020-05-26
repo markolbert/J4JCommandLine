@@ -6,6 +6,10 @@ using J4JSoftware.Logging;
 
 namespace J4JSoftware.CommandLine
 {
+    // implements ITargetableTypeFactory to create supported ITargetableType objects.
+    // if you expand the framework's repertoire beyond simple values, arrays and generic
+    // lists you'll have to implement your own ITargetableTypeFactory and use it instead
+    // of this one.
     public class TargetableTypeFactory : ITargetableTypeFactory
     {
         private readonly List<ITextConverter> _converters;

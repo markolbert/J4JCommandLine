@@ -5,6 +5,7 @@ using J4JSoftware.Logging;
 
 namespace J4JSoftware.CommandLine
 {
+    // abstract base class of the various ITargetableType classes
     public abstract class TargetableType : ITargetableType
     {
         protected TargetableType( 
@@ -17,12 +18,20 @@ namespace J4JSoftware.CommandLine
             Multiplicity = multiplicity;
         }
 
+        // the SupportedType's public parameterless constructor or null if it doesn't have one
+        protected ConstructorInfo? ParameterlessConstructor { get; }
+
+        // the Type supported/described by this instance
         public Type SupportedType { get; }
-        public ConstructorInfo? ParameterlessConstructor { get; }
+
         public bool HasPublicParameterlessConstructor => ParameterlessConstructor != null;
         public Multiplicity Multiplicity { get; }
+
+        // the ITextConverter used to create an instance of the SupportedType (or collection of
+        // SupportedType) from text value(s)
         public ITextConverter? Converter { get; protected set; }
         public bool IsCreatable { get; protected set; }
+
         public abstract object? GetDefaultValue();
     }
 }

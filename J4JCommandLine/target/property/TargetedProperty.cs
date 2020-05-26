@@ -7,6 +7,13 @@ using J4JSoftware.Logging;
 
 namespace J4JSoftware.CommandLine
 {
+    // describes a user-selected property intended to be a target of a command line option
+    // the targeted property may or may not actually be targetable unless it meets
+    // the following conditions:
+    // - is pre-defined (has a value when bound to)
+    // - has a public parameterless constructor (so if it's not defined when bound a value can be created)
+    // - is publicly readable and writeable
+    // - can be converted via a known ITextConverter
     public class TargetedProperty
     {
         private readonly StringComparison _keyComp;
@@ -34,8 +41,12 @@ namespace J4JSoftware.CommandLine
                             || ( targetContainer != null && PropertyInfo.GetValue( targetContainer ) != null );
         }
 
+        // the TargetedProperty which owns this TargetedProperty, or null if
+        // this TargetedProperty is owned by the object being bound to by the framework.
         public TargetedProperty? Parent { get; }
 
+        // the list of TargetedProperty values describing the "property path" from the
+        // object being bound by the framework to this TargetedProperty instance
         public List<TargetedProperty> PropertyPath
         {
             get
@@ -50,12 +61,18 @@ namespace J4JSoftware.CommandLine
             }
         }
 
+        // the PropertyInfo information for the property described by this TargetedProperty
         public PropertyInfo PropertyInfo { get; }
+
+        // information describing whether or not the Type of the property described by this
+        // TargetedProperty. This includes information about whether the Type is creatable
         public ITargetableType TargetableType { get; }
+
         public string Name => PropertyInfo.Name;
 
         // a property is only creatable if every parent property back to the 
-        // root container is also creatable.
+        // root container is also creatable. That's because if a property needs to
+        // be created all of its predecessor owners must be creatable as well.
         public bool IsCreateable
         {
             get
@@ -68,7 +85,9 @@ namespace J4JSoftware.CommandLine
         }
 
         // a property is only preassigned if every parent property back to the
-        // root container is also preassigned
+        // root container is also preassigned. This means that the property described
+        // by this TargetedProperty instance can be set without having to create
+        // instances of any parent/owner property.
         public bool IsPreAssigned
         {
             get
@@ -89,8 +108,18 @@ namespace J4JSoftware.CommandLine
                                     && IsPubliclyReadWrite
                                     && Multiplicity != Multiplicity.Unsupported;
 
+        // The IOption bound to this TargetedProperty. This should never be null for 
+        // a configured TargetedProperty but assignment of the Option being bound to is
+        // done after the TargetedProperty instance is created so it has to be nullable.
+        //
+        // An unsupported TargetedProperty (i.e., one which is not targetable) will always
+        // be bound to an instance of NullOption, which is used to capture error information
+        // during parsing.
         public IOption? BoundOption { get; set; }
 
+        // When getting or setting the value of the property described by this TargetedProperty
+        // you have to have access to the container object which owns the property. GetContainer()
+        // retrieves this by starting at the root, bound object and walking the TargetedProperty tree.
         public object? GetContainer( IBindingTarget bindingTarget ) => GetContainer( bindingTarget.GetValue() );
 
         protected object? GetContainer( object? container )
@@ -124,8 +153,13 @@ namespace J4JSoftware.CommandLine
             return retVal;
         }
 
+        // an informational value containing the names of all the properties between the root,
+        // bound object and this TargetedProperty (including this TargetedProperty's name itself).
         public string FullPath => Parent == null ? PropertyInfo.Name : $"{Parent.FullPath}.{Name}";
 
+        // maps the parsed information contained in parsedResults to Option bound to this TargetedProperty by matching
+        // keys. Performs various checks to ensure the conversion and binding process is valid, storing
+        // errors when it's not.
         public MappingResults MapParseResult(
             IBindingTarget bindingTarget,
             ParseResults parseResults,
@@ -211,11 +245,8 @@ namespace J4JSoftware.CommandLine
                 retVal |= MappingResults.ValidationFailed;
             }
 
-            // finally, set the target property's value if we can
-            var container = GetContainer( bindingTarget );
-
-            if( container != null )
-                PropertyInfo.SetValue( GetContainer( bindingTarget ), propValue );
+            // finally, set the target property's value
+            PropertyInfo.SetValue( GetContainer( bindingTarget ), propValue );
 
             return retVal;
         }
