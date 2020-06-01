@@ -19,6 +19,8 @@ namespace J4JSoftware.CommandLine
         // option key (e.g., the 'x' in '-x') is associated with the error.
         void AddError( string key, string error );
 
+        void Initialize();
+
         // Parses the command line arguments against the Option objects bound to 
         // targeted properties, or to NullOption objects to collect error information.
         MappingResults Parse(string[] args);

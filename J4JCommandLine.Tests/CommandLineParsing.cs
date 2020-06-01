@@ -1,5 +1,6 @@
 ﻿using FluentAssertions;
 using J4JSoftware.CommandLine;
+using Microsoft.Extensions.DependencyInjection;
 using Xunit;
 
 namespace J4JCommandLine.Tests
@@ -11,10 +12,9 @@ namespace J4JCommandLine.Tests
 
         public CommandLineParsing()
         {
-            var parseConfig = new ParsingConfiguration();
+            _cmdLineParser = TestServiceProvider.Instance.GetRequiredService<ICommandLineTextParser>();
 
-            _cmdLineParser = new CommandLineTextParser( parseConfig );
-
+            var parseConfig = TestServiceProvider.Instance.GetRequiredService<IParsingConfiguration>();
             _options = new OptionCollection( parseConfig );
         }
 
@@ -23,7 +23,7 @@ namespace J4JCommandLine.Tests
         [ InlineData( new string[] { "-x", "hello", "goodbye" }, "x", new string[] { "hello", "goodbye" } ) ]
         [ InlineData( new string[] { "-x" }, "x", new string[] { "true" } ) ]
         [ InlineData( new string[] { "-x:abc" }, "x", new string[] { "abc" } ) ]
-        [ InlineData( new string[] { "-x:\"abc\"" }, "x", new string[] { "abc" } ) ]
+        [ InlineData( new string[] { "-x:\"abc\"" }, "x", new string[] { "\"abc\"" } ) ]
         public void parse_one_item( string[] toParse, string key, string[] args )
         {
             var parsed = _cmdLineParser.Parse( toParse );

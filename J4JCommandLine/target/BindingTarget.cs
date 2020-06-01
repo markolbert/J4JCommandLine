@@ -80,6 +80,13 @@ namespace J4JSoftware.CommandLine
         // Errors encountered during the binding or parsing operations
         public CommandLineErrors Errors { get; }
 
+        public void Initialize()
+        {
+            _properties.Clear();
+            Errors.Clear();
+            Options.Clear();
+        }
+
         // binds the selected property to a newly-created OptionBase instance. If all goes
         // well that will be an Option object capable of being a valid parsing target. If
         // something goes wrong a NullOption object will be returned. These only serve

@@ -15,5 +15,6 @@ namespace J4JSoftware.CommandLine
         // eliminates duplicate keys from a collection based on the case sensitivity rules
         string[] GetUniqueKeys( params string[] keys );
         bool Add( IOption option );
+        void Clear();
     }
 }

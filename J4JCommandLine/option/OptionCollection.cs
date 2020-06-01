@@ -47,6 +47,8 @@ namespace J4JSoftware.CommandLine
             return true;
         }
 
+        public void Clear() => _options.Clear();
+
         public IEnumerator<IOption> GetEnumerator()
         {
             foreach( var option in _options ) yield return option;

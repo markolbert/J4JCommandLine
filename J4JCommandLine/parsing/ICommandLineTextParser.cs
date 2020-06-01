@@ -4,5 +4,6 @@
     public interface ICommandLineTextParser
     {
         ParseResults Parse( string[] args );
+        ParseResults Parse( string cmdLine );
     }
 }

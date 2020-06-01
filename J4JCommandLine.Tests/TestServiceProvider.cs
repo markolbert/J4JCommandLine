@@ -13,10 +13,6 @@ namespace J4JCommandLine.Tests
         {
             var builder = new ContainerBuilder();
 
-            //builder.RegisterType<OptionCollection>()
-            //    .As<IOptionCollection>()
-            //    .SingleInstance();
-
             builder.RegisterType<ParsingConfiguration>()
                 .OnActivated(ae =>
                 {
@@ -24,6 +20,7 @@ namespace J4JCommandLine.Tests
                     ae.Instance.ProgramName = "program.exe";
                 })
                 .As<IParsingConfiguration>()
+                .OnActivated(ae=>ae.Instance.Validate())
                 .SingleInstance();
 
             builder.Register( c => new OutputConfiguration()
@@ -42,8 +39,19 @@ namespace J4JCommandLine.Tests
                 .As<IHelpErrorProcessor>()
                 .SingleInstance();
 
-            builder.RegisterType<CommandLineTextParser>()
+            builder.RegisterType<CommandLineParser>()
                 .As<ICommandLineTextParser>()
+                .SingleInstance();
+
+            builder.RegisterType<ElementProcessor>()
+                .AsSelf();
+
+            builder.RegisterType<ElementTerminator>()
+                .As<IElementTerminator>()
+                .SingleInstance();
+
+            builder.RegisterType<KeyPrefixer>()
+                .As<IElementKey>()
                 .SingleInstance();
 
             builder.RegisterAssemblyTypes( typeof(ITextConverter).Assembly )

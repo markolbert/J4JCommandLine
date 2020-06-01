@@ -14,7 +14,7 @@ namespace J4JSoftware.CommandLine
     {
         private readonly IParsingConfiguration _parseConfig;
         private readonly Regex _remover;
-        private readonly Regex _splitter;
+        private readonly Regex _keySplitter;
 
         public CommandLineTextParser( IParsingConfiguration parseConfig )
         {
@@ -32,11 +32,14 @@ namespace J4JSoftware.CommandLine
                     break;
             }
 
-            _splitter = new Regex( GetRegexSplitter( parseConfig ), regexOptions );
+            _keySplitter = new Regex( GetRegexSplitter( parseConfig ), regexOptions );
 
             var rxRemover = GetRegexRemover( parseConfig );
             _remover = new Regex( @$"{rxRemover}?(.*?){rxRemover}?$", regexOptions );
         }
+
+        public ParseResults Parse( string cmdLine ) =>
+            Parse( cmdLine.Split( " ", StringSplitOptions.RemoveEmptyEntries ) );
 
         public ParseResults Parse( string[] values )
         {
@@ -54,7 +57,7 @@ namespace J4JSoftware.CommandLine
             // value bound together with an enclosurer text (the : in the example above).
             foreach( var value in values )
             {
-                var parts = _splitter.Split( value, 3 );
+                var parts = _keySplitter.Split( value, 3 );
 
                 switch( parts.Length )
                 {
