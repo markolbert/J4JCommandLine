@@ -6,6 +6,7 @@ using FluentAssertions;
 using J4JSoftware.CommandLine;
 using Microsoft.Extensions.DependencyInjection;
 using Xunit;
+using Xunit.Abstractions;
 
 namespace J4JCommandLine.Tests
 {
@@ -18,11 +19,8 @@ namespace J4JCommandLine.Tests
             public int[] IntArray { get; set; }
         }
 
-        private readonly StringWriter _consoleWriter = new StringWriter();
-
         public RootLevelTests()
         {
-            Console.SetOut( _consoleWriter );
         }
 
         [Theory]
@@ -47,7 +45,7 @@ namespace J4JCommandLine.Tests
 
             var parseResult = target.Parse(new string[] { $"-{key}", arg });
 
-            var consoleText = _consoleWriter.ToString();
+            //var consoleText = _consoleWriter.ToString();
 
             parseResult.Should().Be(result);
 
@@ -81,7 +79,7 @@ namespace J4JCommandLine.Tests
 
             var parseResult = target.Parse(cmdLineArgs.ToArray());
 
-            var consoleText = _consoleWriter.ToString();
+            //var consoleText = _consoleWriter.ToString();
 
             parseResult.Should().Be(result);
 
@@ -115,7 +113,7 @@ namespace J4JCommandLine.Tests
 
             var parseResult = target.Parse(cmdLineArgs.ToArray());
 
-            var consoleText = _consoleWriter.ToString();
+            //var consoleText = _consoleWriter.ToString();
 
             parseResult.Should().Be(result);
 
@@ -146,7 +144,7 @@ namespace J4JCommandLine.Tests
 
             var parseResult = target.Parse(args.ToArray());
 
-            var consoleText = _consoleWriter.ToString();
+            //var consoleText = _consoleWriter.ToString();
 
             parseResult.Should().Be(result);
 
@@ -186,7 +184,7 @@ namespace J4JCommandLine.Tests
 
             var parseResult = target.Parse(args.ToArray());
 
-            var consoleText = _consoleWriter.ToString();
+            //var consoleText = _consoleWriter.ToString();
 
             parseResult.Should().Be(result);
 

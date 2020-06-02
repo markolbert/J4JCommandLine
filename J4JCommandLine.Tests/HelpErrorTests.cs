@@ -17,12 +17,10 @@ namespace J4JCommandLine.Tests
             public int[] IntArray { get; set; }
         }
 
-        private readonly StringWriter _consoleWriter = new StringWriter();
         private readonly TextConverter _textConv = new TextConverter();
 
         public HelpErrorTests()
         {
-            Console.SetOut( _consoleWriter );
         }
 
         [ Theory ]
@@ -34,8 +32,6 @@ namespace J4JCommandLine.Tests
             var target = TestServiceProvider.Instance.GetRequiredService<IBindingTarget<RootProperties>>();
 
             var parseResult = target.Parse( new string[] { $"-{key}" } );
-
-            var consoleText = _consoleWriter.ToString();
 
             parseResult.Should().Be( result );
         }

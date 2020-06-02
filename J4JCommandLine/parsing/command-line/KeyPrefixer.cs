@@ -9,19 +9,19 @@
             _parsingConfig = parsingConfig;
         }
 
-        public int GetMaxPrefixLength( ElementProcessor processor )
+        public int GetMaxPrefixLength( string text )
         {
             var retVal = 0;
 
-            if( string.IsNullOrEmpty( processor.Text ) )
+            if( string.IsNullOrEmpty( text ) )
                 return retVal;
 
             foreach (var prefix in _parsingConfig.Prefixes)
             {
                 var prefixLen = prefix.Length;
 
-                var start = processor.Text.Length >= prefix.Length
-                    ? processor.Text.Substring(0, prefixLen)
+                var start = text.Length >= prefix.Length
+                    ? text.Substring(0, prefixLen)
                     : string.Empty;
 
                 if (!string.Equals(prefix, start, _parsingConfig.TextComparison))
@@ -33,7 +33,7 @@
 
             // the prefix must be followed by an alphabetic character for the text to be
             // a key
-            var hasAlpha = processor.Text.Length >= retVal + 1 && char.IsLetter( processor.Text[ retVal ] );
+            var hasAlpha = text.Length >= retVal + 1 && char.IsLetter( text[ retVal ] );
 
             return retVal > 0 && hasAlpha ? retVal : 0;
         }

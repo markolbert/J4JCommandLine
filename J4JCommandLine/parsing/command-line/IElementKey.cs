@@ -6,6 +6,6 @@ namespace J4JSoftware.CommandLine
 {
     public interface IElementKey
     {
-        int GetMaxPrefixLength( ElementProcessor processor );
+        int GetMaxPrefixLength( string text );
     }
 }

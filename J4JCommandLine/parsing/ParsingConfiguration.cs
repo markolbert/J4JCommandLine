@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 
 namespace J4JSoftware.CommandLine
 {
@@ -10,6 +9,12 @@ namespace J4JSoftware.CommandLine
         public static string[] DefaultEnclosers = { "=", ":" };
         public static string[] DefaultHelpKeys = { "h", "?" };
 
+        private UniqueText? _prefixes = null;
+        private UniqueText? _enclosers = null;
+        private UniqueText? _delimiters = null;
+        private UniqueText? _helpKeys = null;
+        private bool _textCompChanged = false;
+
         // an optional description
         public string? Description { get; set; }
 
@@ -17,39 +22,88 @@ namespace J4JSoftware.CommandLine
         public string? ProgramName { get; set; }
 
         // the strings used to introduce a key (e.g., "-, --" in "-x --y")
-        public List<string> Prefixes { get; private set; } = new List<string>();
+        public UniqueText Prefixes
+        {
+            get
+            {
+                if( _textCompChanged || _prefixes == null )
+                {
+                    var newCollection = new UniqueText(TextComparison);
+
+                    if( _prefixes == null )
+                        newCollection.AddRange( DefaultPrefixes );
+                    else newCollection.AddRange( _prefixes );
+
+                    _prefixes = newCollection;
+                }
+
+                return _prefixes;
+            }
+        }
 
         // the strings used to enclose parameters in a command line option
         // (e.g., the ':' in "-x:somevalue")
-        public List<string> ValueEnclosers { get; private set; } = new List<string>();
+        public UniqueText ValueEnclosers
+        {
+            get
+            {
+                if (_textCompChanged || _enclosers == null)
+                {
+                    var newCollection = new UniqueText(TextComparison);
+
+                    if (_enclosers == null)
+                        newCollection.AddRange(DefaultEnclosers);
+                    else newCollection.AddRange(_enclosers);
+
+                    _enclosers = newCollection;
+                }
+
+                return _enclosers;
+            }
+        }
 
         // the text delimiters (usually a " or ')
-        public List<string> TextDelimiters { get; private set; } = new List<string>();
+        public UniqueText TextDelimiters
+        {
+            get
+            {
+                if (_textCompChanged || _delimiters == null)
+                {
+                    var newCollection = new UniqueText(TextComparison);
+
+                    if (_delimiters== null)
+                        newCollection.AddRange(DefaultTextDelimiters);
+                    else newCollection.AddRange(_delimiters);
+
+                    _delimiters = newCollection;
+                }
+
+                return _delimiters;
+            }
+        }
 
         // the keys which indicate help was requested
-        public List<string> HelpKeys { get; private set; } = new List<string>();
+        public UniqueText HelpKeys
+        {
+            get
+            {
+                if( _textCompChanged || _helpKeys == null )
+                {
+                    var newCollection = new UniqueText( TextComparison );
+
+                    if( _helpKeys == null )
+                        newCollection.AddRange( DefaultHelpKeys );
+                    else newCollection.AddRange( _helpKeys );
+
+                    _helpKeys = newCollection;
+                }
+
+                return _helpKeys;
+            }
+        }
 
         // the value describing how key values should be compared for uniqueness (e.g.,
         // whether or not they're case sensitive)
         public StringComparison TextComparison { get; set; } = StringComparison.Ordinal;
-
-        // returns a valid IParsingConfiguration (used to ensure certain properties, like
-        // Prefixes, are non-empty)
-        public IParsingConfiguration Validate()
-        {
-            if( Prefixes.Count == 0 )
-                Prefixes = new List<string>( DefaultPrefixes );
-
-            if (ValueEnclosers.Count == 0)
-                ValueEnclosers = new List<string>(DefaultEnclosers);
-
-            if (TextDelimiters.Count == 0)
-                TextDelimiters = new List<string>(DefaultTextDelimiters);
-
-            if (HelpKeys.Count == 0)
-                HelpKeys = new List<string>(DefaultHelpKeys);
-
-            return this;
-        }
     }
 }

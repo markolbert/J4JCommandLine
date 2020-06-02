@@ -18,11 +18,8 @@ namespace J4JCommandLine.Tests
             public static int[] IntArray { get; set; }
         }
 
-        private readonly StringWriter _consoleWriter = new StringWriter();
-
         public StaticLevelTests()
         {
-            Console.SetOut( _consoleWriter );
         }
 
         [ Theory ]
@@ -46,8 +43,6 @@ namespace J4JCommandLine.Tests
             option.SetDefaultValue( -1 );
 
             var parseResult = target.Parse( new string[] { $"-{key}", arg } );
-
-            var consoleText = _consoleWriter.ToString();
 
             parseResult.Should().Be( result );
 
@@ -81,8 +76,6 @@ namespace J4JCommandLine.Tests
 
             var parseResult = target.Parse( cmdLineArgs.ToArray() );
 
-            var consoleText = _consoleWriter.ToString();
-
             parseResult.Should().Be( result );
 
             var boundValue = RootProperties.IntArray;
@@ -115,8 +108,6 @@ namespace J4JCommandLine.Tests
 
             var parseResult = target.Parse( cmdLineArgs.ToArray() );
 
-            var consoleText = _consoleWriter.ToString();
-
             parseResult.Should().Be( result );
 
             var boundValue = RootProperties.IntList;
@@ -145,8 +136,6 @@ namespace J4JCommandLine.Tests
             args.Insert( 0, "-x" );
 
             var parseResult = target.Parse( args.ToArray() );
-
-            var consoleText = _consoleWriter.ToString();
 
             parseResult.Should().Be( result );
 
@@ -185,8 +174,6 @@ namespace J4JCommandLine.Tests
             args.Insert( 0, "-x" );
 
             var parseResult = target.Parse( args.ToArray() );
-
-            var consoleText = _consoleWriter.ToString();
 
             parseResult.Should().Be( result );
 

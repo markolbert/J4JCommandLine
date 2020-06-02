@@ -20,7 +20,6 @@ namespace J4JCommandLine.Tests
                     ae.Instance.ProgramName = "program.exe";
                 })
                 .As<IParsingConfiguration>()
-                .OnActivated(ae=>ae.Instance.Validate())
                 .SingleInstance();
 
             builder.Register( c => new OutputConfiguration()
@@ -42,9 +41,6 @@ namespace J4JCommandLine.Tests
             builder.RegisterType<CommandLineParser>()
                 .As<ICommandLineTextParser>()
                 .SingleInstance();
-
-            builder.RegisterType<ElementProcessor>()
-                .AsSelf();
 
             builder.RegisterType<ElementTerminator>()
                 .As<IElementTerminator>()

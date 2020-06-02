@@ -2,6 +2,6 @@
 {
     public interface IElementTerminator
     {
-        int GetMaxTerminatorLength( ElementProcessor processor );
+        int GetMaxTerminatorLength( string text, bool isKey );
     }
 }

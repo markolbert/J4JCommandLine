@@ -35,13 +35,6 @@ namespace J4JCommandLine.Tests
             public ComplexChildProperties ComplexChildProperties { get; set; }
         }
 
-        private readonly StringWriter _consoleWriter = new StringWriter();
-
-        public SubLevelTests()
-        {
-            Console.SetOut( _consoleWriter );
-        }
-
         [ Theory ]
         [ InlineData( "z", "32", true, MappingResults.MissingRequired, -1 ) ]
         [InlineData("x", "32", true, MappingResults.Success, 32)]
@@ -63,8 +56,6 @@ namespace J4JCommandLine.Tests
                 option.Required();
 
             var parseResult = target.Parse( new string[] { $"-{key}", arg } );
-
-            var consoleText = _consoleWriter.ToString();
 
             parseResult.Should().Be( result );
 
@@ -99,8 +90,6 @@ namespace J4JCommandLine.Tests
 
             var parseResult = target.Parse(cmdLineArgs.ToArray());
 
-            var consoleText = _consoleWriter.ToString();
-
             parseResult.Should().Be(result);
 
             var subProp = target.Value.SimpleChildProperties;
@@ -134,8 +123,6 @@ namespace J4JCommandLine.Tests
 
             var parseResult = target.Parse( cmdLineArgs.ToArray() );
 
-            var consoleText = _consoleWriter.ToString();
-
             parseResult.Should().Be(result);
 
             var subProp = target.Value.SimpleChildProperties;
@@ -156,8 +143,6 @@ namespace J4JCommandLine.Tests
 
             var parseResult = target.Parse(new string[] { $"-{key}", arg });
 
-            var consoleText = _consoleWriter.ToString();
-
             parseResult.Should().Be( MappingResults.NotDefinedOrCreatable );
 
             var boundValue = target.Value.ComplexChildProperties;
@@ -176,8 +161,6 @@ namespace J4JCommandLine.Tests
             var option = target.Bind( x => x.ComplexChildProperties.IntList, "x" );
 
             var parseResult = target.Parse( new string[] { $"-{key}", arg } );
-
-            var consoleText = _consoleWriter.ToString();
 
             parseResult.Should().Be( MappingResults.NotDefinedOrCreatable );
 
@@ -207,8 +190,6 @@ namespace J4JCommandLine.Tests
             args.Insert(0, "-x");
 
             var parseResult = target.Parse( args.ToArray() );
-
-            var consoleText = _consoleWriter.ToString();
 
             parseResult.Should().Be(result);
 
@@ -247,8 +228,6 @@ namespace J4JCommandLine.Tests
             args.Insert(0, "-x");
 
             var parseResult = target.Parse(args.ToArray());
-
-            var consoleText = _consoleWriter.ToString();
 
             parseResult.Should().Be(result);
 
