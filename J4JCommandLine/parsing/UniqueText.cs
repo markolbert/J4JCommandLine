@@ -6,6 +6,8 @@ using System.Linq;
 
 namespace J4JSoftware.CommandLine
 {
+    // defines a class for holding unique text elements which can be used as 
+    // prefixes, value enclosers, etc.
     public class UniqueText : IEnumerable<string>
     {
         private readonly List<string> _elements = new List<string>();
