@@ -20,29 +20,13 @@ namespace J4JSoftware.CommandLine
             _keyDetailSep = new string( ' ', OutputConfiguration.KeyDetailSeparation );
         }
 
-        // displays errors and/or help depending upon what the binding and parsing process
-        // produced and the user requested
-        public override void Display( MappingResults result, IBindingTarget bindingTarget )
+        protected override void DisplayHeader()
         {
-            base.Display(result, bindingTarget);
-
-            if( !HasErrors && !HelpRequested )
-                return;
-
-            if( !string.IsNullOrEmpty( ParsingConfiguration.Description ) )
-            {
-                Console.WriteLine( ParsingConfiguration.Description );
-                Console.WriteLine();
-            }
-
-            if( HasErrors )
-                DisplayErrors();
-
-            if( HelpRequested || HasErrors )
-                DisplayHelp();
+            Console.WriteLine( ParsingConfiguration.Description );
+            Console.WriteLine();
         }
 
-        protected void DisplayErrors()
+        protected override void DisplayErrors()
         {
             if( BindingTarget.Errors.Count == 0 )
             {
@@ -73,13 +57,13 @@ namespace J4JSoftware.CommandLine
                 }
 
                 OutputToConsole(keys, errorLines);
-                
+
                 Console.WriteLine();
             }
         }
 
         // help is displayed organized by key
-        protected void DisplayHelp()
+        protected override void DisplayHelp()
         {
             var sb = new StringBuilder();
 
@@ -140,7 +124,7 @@ namespace J4JSoftware.CommandLine
 
         // takes a list of words and merges them together using the specified wordSep (e.g.,
         // a space, a ", ") such that they fit within the specified width
-        protected List<string> MergeWords( List<string> words, int width, string wordSep )
+        private List<string> MergeWords( List<string> words, int width, string wordSep )
         {
             var retVal = new List<string>();
 
@@ -204,7 +188,7 @@ namespace J4JSoftware.CommandLine
         // outputs a block of key-focused information, either help or errors, ensuring that
         // blank lines are added when necessary to either block to make both blocks take up
         // the same number of lines
-        protected virtual void OutputToConsole(List<string> keyLines, List<string> detailLines)
+        private void OutputToConsole(List<string> keyLines, List<string> detailLines)
         {
             var numDetail = detailLines.Count;
 

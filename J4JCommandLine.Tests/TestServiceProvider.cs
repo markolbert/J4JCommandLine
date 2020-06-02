@@ -13,48 +13,7 @@ namespace J4JCommandLine.Tests
         {
             var builder = new ContainerBuilder();
 
-            builder.RegisterType<ParsingConfiguration>()
-                .OnActivated(ae =>
-                {
-                    ae.Instance.Description = "a description of the program";
-                    ae.Instance.ProgramName = "program.exe";
-                })
-                .As<IParsingConfiguration>()
-                .SingleInstance();
-
-            builder.Register( c => new OutputConfiguration()
-                {
-                    DetailAreaWidth = 58,
-                    KeyAreaWidth = 20,
-                    KeyDetailSeparation = 2
-                } )
-                .AsImplementedInterfaces()
-                .SingleInstance();
-
-            builder.RegisterGeneric( typeof( BindingTarget<> ) )
-                .As( typeof( IBindingTarget<> ) );
-
-            builder.RegisterType<SimpleHelpErrorProcessor>()
-                .As<IHelpErrorProcessor>()
-                .SingleInstance();
-
-            builder.RegisterType<CommandLineParser>()
-                .As<ICommandLineTextParser>()
-                .SingleInstance();
-
-            builder.RegisterType<ElementTerminator>()
-                .As<IElementTerminator>()
-                .SingleInstance();
-
-            builder.RegisterType<KeyPrefixer>()
-                .As<IElementKey>()
-                .SingleInstance();
-
-            builder.RegisterAssemblyTypes( typeof(ITextConverter).Assembly )
-                .Where( t => !t.IsAbstract
-                             && typeof(ITextConverter).IsAssignableFrom( t )
-                             && t.GetConstructors().Length > 0 )
-                .AsImplementedInterfaces();
+            builder.AddJ4JCommandLine();
 
             Instance = new AutofacServiceProvider( builder.Build() );
         }
