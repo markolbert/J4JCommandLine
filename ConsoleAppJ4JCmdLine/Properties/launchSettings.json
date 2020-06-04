@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "ConsoleAppJ4JCmdLine": {
+      "commandName": "Project",
+      "commandLineArgs": "-h"
+    }
+  }
+}

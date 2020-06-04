@@ -1,6 +1,6 @@
 ﻿namespace J4JSoftware.CommandLine
 {
-    public class OutputConfiguration : IOutputConfiguration
+    public class OutputConfiguration //: IOutputConfiguration
     {
         private int _keyWidth = 20;
         private int _keyDetailSep = 5;

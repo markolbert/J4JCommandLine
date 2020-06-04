@@ -7,17 +7,12 @@ namespace J4JSoftware.CommandLine
     // to the console).
     public abstract class HelpErrorProcessor : IHelpErrorProcessor
     {
-        protected HelpErrorProcessor(
-            IParsingConfiguration parseConfig,
-            IOutputConfiguration outputConfig
-        )
+        protected HelpErrorProcessor( IParsingConfiguration parseConfig )
         {
             ParsingConfiguration = parseConfig;
-            OutputConfiguration = outputConfig;
         }
 
         protected IParsingConfiguration ParsingConfiguration { get; }
-        protected IOutputConfiguration OutputConfiguration { get; }
 
         // the result obtained from parsing the command line arguments
         protected MappingResults Result { get; private set; }
@@ -40,18 +35,27 @@ namespace J4JSoftware.CommandLine
             if (!HasErrors && !HelpRequested)
                 return;
 
+            Initialize();
+
             if( HasHeader )
-                DisplayHeader();
+                CreateHeaderSection();
 
             if (HasErrors)
-                DisplayErrors();
+                CreateErrorSection();
 
             if (HelpRequested || HasErrors)
-                DisplayHelp();
+                CreateHelpSection();
+
+            DisplayOutput();
         }
 
-        protected abstract void DisplayHeader();
-        protected abstract void DisplayErrors();
-        protected abstract void DisplayHelp();
+        protected virtual void Initialize()
+        {
+        }
+
+        protected abstract void CreateHeaderSection();
+        protected abstract void CreateErrorSection();
+        protected abstract void CreateHelpSection();
+        protected abstract void DisplayOutput();
     }
 }

@@ -6,147 +6,113 @@ using Alba.CsConsoleFormat;
 
 namespace J4JSoftware.CommandLine
 {
-    public interface IFancyOutputConfiguration : IOutputConfiguration
-    {
-        bool FrameErrors { get; set; }
-        bool FrameHelp { get; set; }
-        bool ShowGrid { get; set; }
-        ConsoleColor TitleColor { get; set; }
-        ConsoleColor ErrorColor { get; set; }
-        ConsoleColor HelpColor { get; set; }
-        ConsoleColor GridColor { get; set; }
-        LineThickness GridThickness { get; set; }
-        Align HeaderAlignment { get; set; }
-        Align KeyAlignment { get; set; }
-    }
-
-    public class FancyOutputConfiguration : OutputConfiguration, IFancyOutputConfiguration
-    {
-        public bool FrameErrors { get; set; }
-        public bool FrameHelp { get; set; }
-        public bool ShowGrid { get; set; }
-        public ConsoleColor TitleColor { get; set; } = ConsoleColor.Gray;
-        public ConsoleColor ErrorColor { get; set; } = ConsoleColor.Red;
-        public ConsoleColor HelpColor { get; set; } = ConsoleColor.Yellow;
-        public ConsoleColor GridColor { get; set; } = ConsoleColor.Gray;
-
-        public LineThickness GridThickness { get; set; }
-            = new LineThickness( Alba.CsConsoleFormat.LineWidth.Single, Alba.CsConsoleFormat.LineWidth.Single );
-
-        public Align HeaderAlignment { get; set; } = Align.Center;
-        public Align KeyAlignment { get; set; } = Align.Center;
-    }
-
     public class FancyHelpErrorProcessor : HelpErrorProcessor
     {
+        private readonly FancyOutputConfiguration _outConfig;
+
+        private Document _document;
+        private Grid _grid;
+
         public FancyHelpErrorProcessor( 
             IParsingConfiguration parseConfig, 
-            IFancyOutputConfiguration outputConfig 
-            ) : base( parseConfig, outputConfig )
+            FancyOutputConfiguration outputConfig 
+            ) : base( parseConfig )
         {
+            _outConfig = outputConfig;
         }
 
-        private IFancyOutputConfiguration FancyConfig => (IFancyOutputConfiguration) OutputConfiguration;
-
-        protected override void DisplayHeader()
+        protected override void Initialize()
         {
-            var document = new Document();
+            base.Initialize();
 
-            var grid = new Grid
+            _document = new Document();
+
+            _grid = new Grid { Color = _outConfig.GridColor };
+
+            _document.Children.Add( _grid );
+            _document.MaxWidth = _outConfig.MaxWidth;
+
+            _grid.Columns.Add( GridLength.Auto, GridLength.Auto );
+
+            if (_outConfig.ShowGrid)
             {
-                Columns = { GridLength.Auto },
-                Align = FancyConfig.HeaderAlignment
-            };
-
-            document.Children.Add(grid);
-
-            if (FancyConfig.ShowGrid)
-            {
-                grid.Stroke = FancyConfig.GridThickness;
-                grid.Color = FancyConfig.GridColor;
+                _grid.Stroke = _outConfig.GridThickness;
+                _grid.Color = _outConfig.GridColor;
             }
+        }
 
+        protected override void CreateHeaderSection()
+        {
             if (!string.IsNullOrEmpty(ParsingConfiguration.ProgramName))
             {
                 var cell = new Cell(ParsingConfiguration.ProgramName)
                 {
-                    Stroke = FancyConfig.GridThickness,
-                    Color = FancyConfig.TitleColor
+                    Stroke = _outConfig.GridThickness,
+                    Color = _outConfig.TitleColor,
+                    Margin = _outConfig.Margin,
+                    ColumnSpan = 2
                 };
 
-                grid.Children.Add(cell);
+                _grid.Children.Add(cell);
             }
 
             if (!string.IsNullOrEmpty(ParsingConfiguration.Description))
             {
                 var cell = new Cell(ParsingConfiguration.Description)
                 {
-                    Stroke = FancyConfig.GridThickness,
-                    Color = FancyConfig.TitleColor
+                    Stroke = _outConfig.GridThickness,
+                    Color = _outConfig.TitleColor,
+                    Margin = _outConfig.Margin,
+                    ColumnSpan = 2
                 };
 
-                grid.Children.Add(cell);
+                _grid.Children.Add(cell);
             }
-
-            ConsoleRenderer.RenderDocument(document);
         }
 
-        protected override void DisplayErrors()
+        protected override void CreateErrorSection()
         {
-            var document = new Document();
-
-            var grid = new Grid { Color = FancyConfig.GridColor };
-
-            document.Children.Add( grid );
-
             if (BindingTarget.Errors.Count == 0)
             {
-                grid.Columns.Add( GridLength.Auto );
-                grid.Align = FancyConfig.HeaderAlignment;
-
                 var cell = new Cell("Errors were encountered but not described")
                 {
-                    Stroke = FancyConfig.GridThickness,
-                    Color = FancyConfig.ErrorColor
+                    Stroke = _outConfig.GridThickness,
+                    Color = _outConfig.ErrorColor,
+                    Margin = _outConfig.Margin,
+                    ColumnSpan = 2
                 };
 
-                grid.Children.Add(cell);
-
-                ConsoleRenderer.RenderDocument(document);
+                _grid.Children.Add(cell);
 
                 return;
             }
-
-            grid.Columns.Add( GridLength.Auto, GridLength.Auto );
 
             // errors are displayed organized by keys
             foreach (var errorGroup in BindingTarget.Errors.OrderBy(e => e.Source.Key))
             {
                 var keys = ParsingConfiguration.ConjugateKey( errorGroup.Source.Key );
 
-                grid.Children.Add( new Cell( keys )
+                _grid.Children.Add( new Cell( keys )
                 {
-                    Align = FancyConfig.KeyAlignment, 
-                    Color = FancyConfig.ErrorColor, 
-                    Stroke = FancyConfig.GridThickness
-                } );
+                    Align = _outConfig.KeyAlignment, 
+                    Color = _outConfig.ErrorColor, 
+                    Stroke = _outConfig.GridThickness,
+                    Margin = _outConfig.Margin
+                });
 
                 var errorText = string.Join( "\n", errorGroup.Errors );
 
-                grid.Children.Add(new Cell(errorText)
+                _grid.Children.Add(new Cell(errorText)
                 {
-                    Color = FancyConfig.ErrorColor,
-                    Stroke = FancyConfig.GridThickness
+                    Color = _outConfig.ErrorColor,
+                    Stroke = _outConfig.GridThickness,
+                    Margin = _outConfig.Margin
                 });
             }
-
-            ConsoleRenderer.RenderDocument( document );
         }
 
-        protected override void DisplayHelp()
+        protected override void CreateHelpSection()
         {
-            var document = new Document();
-
             var sb = new StringBuilder();
 
             sb.Append( "Command line options" );
@@ -164,42 +130,39 @@ namespace J4JSoftware.CommandLine
                     break;
             }
 
-            document.Children.Add(
-                new Span( sb.ToString() )
-                {
-                    Color = FancyConfig.HelpColor
-                } );
+            _grid.Children.Add( new Cell(sb.ToString())
+            {
+                Color = _outConfig.HelpColor,
+                Margin = _outConfig.Margin,
+                ColumnSpan = 2
+            } );
 
-            var grid = new Grid { Color = FancyConfig.GridColor };
-
-            document.Children.Add( grid );
-
-            grid.Columns.Add( GridLength.Auto, GridLength.Auto );
-
-            // errors are displayed organized by keys
+            // help is displayed organized by keys
             foreach( var option in BindingTarget.Options
                 .OrderBy( opt => opt.FirstKey )
                 .Where( opt => opt.OptionType != OptionType.Null ) )
             {
-                var keys = option.ConjugateKeys( ParsingConfiguration );
+                var keys = string.Join( ", ", option.ConjugateKeys( ParsingConfiguration ) );
 
-                grid.Children.Add( new Cell( keys )
+                _grid.Children.Add( new Cell( keys )
                 {
-                    Align = FancyConfig.KeyAlignment,
-                    Color = FancyConfig.HelpColor,
-                    Stroke = FancyConfig.GridThickness
+                    Align = _outConfig.KeyAlignment,
+                    Color = _outConfig.HelpColor,
+                    Stroke = _outConfig.GridThickness,
+                    Margin = _outConfig.Margin
                 } );
 
                 var helpText = option.Description ?? "*** no description provided ***";
 
-                grid.Children.Add( new Cell( helpText )
+                _grid.Children.Add( new Cell( helpText )
                 {
-                    Color = FancyConfig.HelpColor,
-                    Stroke = FancyConfig.GridThickness
+                    Color = _outConfig.HelpColor,
+                    Stroke = _outConfig.GridThickness,
+                    Margin = _outConfig.Margin
                 } );
             }
-
-            ConsoleRenderer.RenderDocument( document );
         }
+
+        protected override void DisplayOutput() => ConsoleRenderer.RenderDocument( _document );
     }
 }

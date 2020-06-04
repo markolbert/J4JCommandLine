@@ -57,10 +57,26 @@ namespace J4JSoftware.CommandLine
             return builder;
         }
 
-        public static ContainerBuilder AddSimpleHelpErrorProcessor<TConfig>(
+        public static ContainerBuilder AddHelpErrorProcessor<TConfig, THelp>(
             this ContainerBuilder builder,
-            TConfig outputConfig )
-            where TConfig : class, IOutputConfiguration
+            TConfig outputConfig)
+            where TConfig : class
+            where THelp : class, IHelpErrorProcessor
+        {
+            builder.Register( c => outputConfig )
+                .AsSelf()
+                .SingleInstance();
+
+            builder.RegisterType<THelp>()
+                .AsImplementedInterfaces()
+                .SingleInstance();
+
+            return builder;
+        }
+
+        public static ContainerBuilder AddSimpleHelpErrorProcessor(
+            this ContainerBuilder builder,
+            OutputConfiguration outputConfig )
         {
             builder.Register( c => outputConfig )
                 .AsImplementedInterfaces()

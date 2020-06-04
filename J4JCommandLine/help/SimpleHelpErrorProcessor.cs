@@ -10,27 +10,42 @@ namespace J4JSoftware.CommandLine
     public class SimpleHelpErrorProcessor : HelpErrorProcessor
     {
         private readonly string _keyDetailSep;
+        private readonly OutputConfiguration _outConfig;
+        private readonly List<string> _lines = new List<string>();
 
         public SimpleHelpErrorProcessor(
             IParsingConfiguration parseConfig,
-            IOutputConfiguration outputConfig
+            OutputConfiguration outputConfig
         )
-            : base( parseConfig, outputConfig )
+            : base( parseConfig )
         {
-            _keyDetailSep = new string( ' ', OutputConfiguration.KeyDetailSeparation );
+            _outConfig = outputConfig;
+            _keyDetailSep = new string( ' ', _outConfig.KeyDetailSeparation );
         }
 
-        protected override void DisplayHeader()
+        protected override void Initialize()
         {
-            Console.WriteLine( ParsingConfiguration.Description );
-            Console.WriteLine();
+            base.Initialize();
+
+            _lines.Clear();
         }
 
-        protected override void DisplayErrors()
+        protected override void CreateHeaderSection()
+        {
+            if( !string.IsNullOrEmpty(ParsingConfiguration.ProgramName))
+                _lines.Add(ParsingConfiguration.ProgramName  );
+
+            if( !string.IsNullOrEmpty(ParsingConfiguration.Description))
+                _lines.Add(ParsingConfiguration.Description );
+
+            _lines.Add( string.Empty );
+        }
+
+        protected override void CreateErrorSection()
         {
             if( BindingTarget.Errors.Count == 0 )
             {
-                Console.WriteLine("Errors were encountered but not described");
+                _lines.Add("Errors were encountered but not described");
                 return;
             }
 
@@ -39,7 +54,7 @@ namespace J4JSoftware.CommandLine
             {
                 var keys = MergeWords( 
                     ParsingConfiguration.ConjugateKey( errorGroup.Source.Key ),
-                    OutputConfiguration.KeyAreaWidth,
+                    _outConfig.KeyAreaWidth,
                     ", ");
 
                 var errorLines = new List<string>();
@@ -52,18 +67,18 @@ namespace J4JSoftware.CommandLine
                     errorLines.AddRange(
                         MergeWords(
                             error.Split( ' ', StringSplitOptions.RemoveEmptyEntries ).ToList(),
-                            OutputConfiguration.DetailAreaWidth
+                            _outConfig.DetailAreaWidth
                             , " ") );
                 }
 
                 OutputToConsole(keys, errorLines);
 
-                Console.WriteLine();
+                _lines.Add(string.Empty  );
             }
         }
 
         // help is displayed organized by key
-        protected override void DisplayHelp()
+        protected override void CreateHelpSection()
         {
             var sb = new StringBuilder();
 
@@ -85,8 +100,8 @@ namespace J4JSoftware.CommandLine
                     break;
             }
 
-            Console.WriteLine( sb.ToString() );
-            Console.WriteLine();
+            _lines.Add(sb.ToString() );
+            _lines.Add(string.Empty  );
 
             foreach( var option in BindingTarget.Options
                 .OrderBy( opt => opt.FirstKey )
@@ -94,14 +109,14 @@ namespace J4JSoftware.CommandLine
             {
                 var keys = MergeWords( 
                     option.ConjugateKeys( ParsingConfiguration ),
-                    OutputConfiguration.KeyAreaWidth,
+                    _outConfig.KeyAreaWidth,
                     ", ");
 
                 var detailText = ( option.Description ?? "*** no description provided ***" )
                     .Split( ' ', StringSplitOptions.RemoveEmptyEntries )
                     .ToList();
 
-                var detail = MergeWords( detailText, OutputConfiguration.DetailAreaWidth, " " );
+                var detail = MergeWords( detailText, _outConfig.DetailAreaWidth, " " );
 
                 OutputToConsole( keys, detail );
 
@@ -113,12 +128,20 @@ namespace J4JSoftware.CommandLine
                     detailText = defaultText.Split( ' ', StringSplitOptions.RemoveEmptyEntries )
                         .ToList();
 
-                    detail = MergeWords( detailText, OutputConfiguration.DetailAreaWidth, " " );
+                    detail = MergeWords( detailText, _outConfig.DetailAreaWidth, " " );
 
                     OutputToConsole( new List<string>(), detail );
                 }
 
-                Console.WriteLine();
+                _lines.Add(string.Empty  );
+            }
+        }
+
+        protected override void DisplayOutput()
+        {
+            foreach( var line in _lines )
+            {
+                Console.WriteLine( line );
             }
         }
 
@@ -198,12 +221,12 @@ namespace J4JSoftware.CommandLine
             for (var idx = 0; idx < maxLines; idx++)
             {
                 var keyArea = idx >= keyLines.Count ? string.Empty : keyLines[idx];
-                keyArea = keyArea.PadRight( OutputConfiguration.KeyAreaWidth );
+                keyArea = keyArea.PadRight( _outConfig.KeyAreaWidth );
 
                 var detailArea = idx < detailLines.Count ? detailLines[ idx ] : string.Empty;
-                detailArea = detailArea.PadRight( OutputConfiguration.DetailAreaWidth );
+                detailArea = detailArea.PadRight( _outConfig.DetailAreaWidth );
 
-                Console.WriteLine($"{keyArea}{_keyDetailSep}{detailArea}");
+                _lines.Add($"{keyArea}{_keyDetailSep}{detailArea}");
             }
         }
     }
