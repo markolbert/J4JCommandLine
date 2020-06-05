@@ -19,6 +19,6 @@ namespace J4JSoftware.CommandLine
 
         public Align HeaderAlignment { get; set; } = Align.Center;
         public Align KeyAlignment { get; set; } = Align.Center;
-        public Thickness Margin { get; set; } = new Thickness(1,1,1,1);
+        public Thickness Margin { get; set; } = new Thickness(1,0,1,0);
     }
 }

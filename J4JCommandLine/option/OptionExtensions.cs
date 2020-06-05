@@ -126,7 +126,7 @@ namespace J4JSoftware.CommandLine
             if( option.OptionType != OptionType.Mappable )
                 return option;
 
-            if( validator.SupportedType != option.TargetableType )
+            if( validator.SupportedType != option.TargetableType.SupportedType )
                 return option;
 
             option.Validator = validator;

@@ -41,6 +41,8 @@ namespace ConsoleAppJ4JCmdLine
                 return;
             }
 
+            Console.WriteLine($"IntValue is {IntValue}");
+            Console.WriteLine($"TextValue is {TextValue}");
         }
 
         public static IServiceProvider ServiceProvider { get; set; }

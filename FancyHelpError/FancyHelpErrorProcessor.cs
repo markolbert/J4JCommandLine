@@ -90,7 +90,7 @@ namespace J4JSoftware.CommandLine
             // errors are displayed organized by keys
             foreach (var errorGroup in BindingTarget.Errors.OrderBy(e => e.Source.Key))
             {
-                var keys = ParsingConfiguration.ConjugateKey( errorGroup.Source.Key );
+                var keys = string.Join( ", ", ParsingConfiguration.ConjugateKey( errorGroup.Source.Key ) );
 
                 _grid.Children.Add( new Cell( keys )
                 {
