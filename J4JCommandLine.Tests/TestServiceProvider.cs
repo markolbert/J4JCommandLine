@@ -18,6 +18,8 @@ namespace J4JCommandLine.Tests
 
             builder.AddJ4JCommandLine();
 
+            builder.AddTextConverters( typeof(TestServiceProvider).Assembly );
+
             Instance = new AutofacServiceProvider( builder.Build() );
         }
     }

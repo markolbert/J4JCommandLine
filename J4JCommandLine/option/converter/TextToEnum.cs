@@ -9,6 +9,10 @@ namespace J4JSoftware.CommandLine
     public class TextToEnum<TEnum> : TextConverter<TEnum>
         where TEnum : Enum
     {
+        protected TextToEnum()
+        {
+        }
+
         public override bool Convert( string value, out TEnum result )
         {
             if( Enum.TryParse( typeof(TEnum), value, out var innerResult )
