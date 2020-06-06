@@ -13,7 +13,18 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AutofacCommandLine", "Autof
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FancyHelpError", "FancyHelpError\FancyHelpError.csproj", "{B8501AFB-7D56-426F-AF46-45297E754826}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ConsoleAppJ4JCmdLine", "ConsoleAppJ4JCmdLine\ConsoleAppJ4JCmdLine.csproj", "{E865E800-345E-4CC1-9F77-C787B511DD22}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ConsoleAppJ4JCmdLine", "ConsoleAppJ4JCmdLine\ConsoleAppJ4JCmdLine.csproj", "{E865E800-345E-4CC1-9F77-C787B511DD22}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "docs", "docs", "{473DDAC4-C8B9-4FBC-97C9-51AB11F038EF}"
+	ProjectSection(SolutionItems) = preProject
+		docs\goal-concept.md = docs\goal-concept.md
+		docs\README.md = docs\README.md
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "assets", "assets", "{9CABC5BB-C8B6-4BF4-97F2-0B9BC53A88BB}"
+	ProjectSection(SolutionItems) = preProject
+		docs\assets\fancy-help.png = docs\assets\fancy-help.png
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -44,6 +55,9 @@ Global
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{9CABC5BB-C8B6-4BF4-97F2-0B9BC53A88BB} = {473DDAC4-C8B9-4FBC-97C9-51AB11F038EF}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {F40695CC-CF6A-4293-81A1-04D389611E2D}

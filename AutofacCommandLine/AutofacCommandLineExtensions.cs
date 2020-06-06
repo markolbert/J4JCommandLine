@@ -1,8 +1,6 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Reflection;
 using Autofac;
-using Autofac.Core;
 
 namespace J4JSoftware.CommandLine
 {
