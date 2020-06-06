@@ -1,11 +1,12 @@
-﻿using System.Collections.ObjectModel;
+﻿using System;
+using System.Collections.ObjectModel;
 
 namespace J4JSoftware.CommandLine
 {
     public class ParseResults : KeyedCollection<string, IParseResult>
     {
-        public ParseResults( IParsingConfiguration parsingConfig )
-            : base( parsingConfig.TextComparison.ToStringComparer() )
+        public ParseResults( StringComparison keyComp )
+            : base( keyComp.ToStringComparer() )
         {
         }
 

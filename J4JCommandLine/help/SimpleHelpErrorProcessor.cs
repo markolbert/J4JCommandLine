@@ -9,34 +9,63 @@ namespace J4JSoftware.CommandLine
     // organized by command line key.
     public class SimpleHelpErrorProcessor : HelpErrorProcessor
     {
-        private readonly string _keyDetailSep;
-        private readonly OutputConfiguration _outConfig;
         private readonly List<string> _lines = new List<string>();
 
-        public SimpleHelpErrorProcessor(
-            IParsingConfiguration parseConfig,
-            OutputConfiguration outputConfig
-        )
-            : base( parseConfig )
+        private int _keyWidth = 20;
+        private int _keyDetailSpace = 5;
+        private int _detailWidth = 55;
+        private string _keyDetailSep;
+
+        public int LineWidth => KeyAreaWidth + KeyDetailSeparation + DetailAreaWidth;
+
+        public int KeyAreaWidth
         {
-            _outConfig = outputConfig;
-            _keyDetailSep = new string( ' ', _outConfig.KeyDetailSeparation );
+            get => _keyWidth;
+
+            set
+            {
+                if (value > 0)
+                    _keyWidth = value;
+            }
         }
 
-        protected override void Initialize()
+        public int DetailAreaWidth
         {
-            base.Initialize();
+            get => _detailWidth;
+
+            set
+            {
+                if (value > 0)
+                    _detailWidth = value;
+            }
+        }
+
+        public int KeyDetailSeparation
+        {
+            get => _keyDetailSpace;
+
+            set
+            {
+                if (value > 0)
+                    _keyDetailSpace = value;
+            }
+        }
+
+        protected override void InitializeOutput()
+        {
+            base.InitializeOutput();
 
             _lines.Clear();
+            _keyDetailSep = new string(' ', KeyDetailSeparation);
         }
 
         protected override void CreateHeaderSection()
         {
-            if( !string.IsNullOrEmpty(ParsingConfiguration.ProgramName))
-                _lines.Add(ParsingConfiguration.ProgramName  );
+            if( !string.IsNullOrEmpty(BindingTarget.ProgramName))
+                _lines.Add(BindingTarget.ProgramName  );
 
-            if( !string.IsNullOrEmpty(ParsingConfiguration.Description))
-                _lines.Add(ParsingConfiguration.Description );
+            if( !string.IsNullOrEmpty(BindingTarget.Description))
+                _lines.Add(BindingTarget.Description );
 
             _lines.Add( string.Empty );
         }
@@ -53,8 +82,8 @@ namespace J4JSoftware.CommandLine
             foreach (var errorGroup in BindingTarget.Errors.OrderBy(e => e.Source.Key))
             {
                 var keys = MergeWords( 
-                    ParsingConfiguration.ConjugateKey( errorGroup.Source.Key ),
-                    _outConfig.KeyAreaWidth,
+                    Prefixes.ConjugateKey( errorGroup.Source.Key ),
+                    KeyAreaWidth,
                     ", ");
 
                 var errorLines = new List<string>();
@@ -67,7 +96,7 @@ namespace J4JSoftware.CommandLine
                     errorLines.AddRange(
                         MergeWords(
                             error.Split( ' ', StringSplitOptions.RemoveEmptyEntries ).ToList(),
-                            _outConfig.DetailAreaWidth
+                            DetailAreaWidth
                             , " ") );
                 }
 
@@ -82,12 +111,12 @@ namespace J4JSoftware.CommandLine
         {
             var sb = new StringBuilder();
 
-            if( !string.IsNullOrEmpty( ParsingConfiguration.ProgramName ) )
-                sb.Append( $"{ParsingConfiguration.ProgramName} " );
+            if( !string.IsNullOrEmpty( BindingTarget.ProgramName ) )
+                sb.Append( $"{BindingTarget.ProgramName} " );
 
             sb.Append("command line options");
 
-            switch( ParsingConfiguration.TextComparison )
+            switch( BindingTarget.KeyComparison )
             {
                 case StringComparison.Ordinal:
                 case StringComparison.InvariantCulture:
@@ -108,15 +137,15 @@ namespace J4JSoftware.CommandLine
                 .Where( opt => opt.OptionType != OptionType.Null ) )
             {
                 var keys = MergeWords( 
-                    option.ConjugateKeys( ParsingConfiguration ),
-                    _outConfig.KeyAreaWidth,
+                    option.ConjugateKeys( Prefixes ),
+                    KeyAreaWidth,
                     ", ");
 
                 var detailText = ( option.Description ?? "*** no description provided ***" )
                     .Split( ' ', StringSplitOptions.RemoveEmptyEntries )
                     .ToList();
 
-                var detail = MergeWords( detailText, _outConfig.DetailAreaWidth, " " );
+                var detail = MergeWords( detailText, DetailAreaWidth, " " );
 
                 OutputToConsole( keys, detail );
 
@@ -128,7 +157,7 @@ namespace J4JSoftware.CommandLine
                     detailText = defaultText.Split( ' ', StringSplitOptions.RemoveEmptyEntries )
                         .ToList();
 
-                    detail = MergeWords( detailText, _outConfig.DetailAreaWidth, " " );
+                    detail = MergeWords( detailText, DetailAreaWidth, " " );
 
                     OutputToConsole( new List<string>(), detail );
                 }
@@ -221,10 +250,10 @@ namespace J4JSoftware.CommandLine
             for (var idx = 0; idx < maxLines; idx++)
             {
                 var keyArea = idx >= keyLines.Count ? string.Empty : keyLines[idx];
-                keyArea = keyArea.PadRight( _outConfig.KeyAreaWidth );
+                keyArea = keyArea.PadRight( KeyAreaWidth );
 
                 var detailArea = idx < detailLines.Count ? detailLines[ idx ] : string.Empty;
-                detailArea = detailArea.PadRight( _outConfig.DetailAreaWidth );
+                detailArea = detailArea.PadRight( DetailAreaWidth );
 
                 _lines.Add($"{keyArea}{_keyDetailSep}{detailArea}");
             }

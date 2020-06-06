@@ -14,10 +14,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Compile Remove="help\IOutputConfiguration.cs" />
     <Compile Remove="option\converter\TextToEnum.cs" />
-    <Compile Remove="parsing\CommandLineTextParser.cs" />
-    <Compile Remove="parsing\ElementProcessor.cs" />
   </ItemGroup>
 
   <ItemGroup>

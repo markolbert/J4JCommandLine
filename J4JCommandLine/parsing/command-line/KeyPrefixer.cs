@@ -1,22 +1,35 @@
-﻿namespace J4JSoftware.CommandLine
+﻿using System;
+using System.Linq;
+
+namespace J4JSoftware.CommandLine
 {
     public class KeyPrefixer : IElementKey
     {
-        private readonly IParsingConfiguration _parsingConfig;
+        private StringComparison _textComp;
 
-        public KeyPrefixer(IParsingConfiguration parsingConfig)
+        public bool IsInitialized => Prefixes?.Count() > 0;
+
+        public UniqueText Prefixes { get; private set; }
+
+        public void Initialize( StringComparison textComp, params string[] prefixers )
         {
-            _parsingConfig = parsingConfig;
+            _textComp = textComp;
+
+            Prefixes = new UniqueText( _textComp );
+            Prefixes.AddRange( prefixers );
         }
 
         public int GetMaxPrefixLength( string text )
         {
+            if( !IsInitialized )
+                throw new ApplicationException( $"{this.GetType()} is is not initialized" );
+
             var retVal = 0;
 
             if( string.IsNullOrEmpty( text ) )
                 return retVal;
 
-            foreach (var prefix in _parsingConfig.Prefixes)
+            foreach (var prefix in Prefixes)
             {
                 var prefixLen = prefix.Length;
 
@@ -24,7 +37,7 @@
                     ? text.Substring(0, prefixLen)
                     : string.Empty;
 
-                if (!string.Equals(prefix, start, _parsingConfig.TextComparison))
+                if (!string.Equals(prefix, start, _textComp))
                     continue;
 
                 if (prefixLen > retVal)

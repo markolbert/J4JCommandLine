@@ -13,18 +13,20 @@ namespace ConsoleAppJ4JCmdLine
     {
         static void Main(string[] args)
         {
-            var builder = new ContainerBuilder();
+            InitializeServiceProvider();
 
-            var outputConfig = new FancyOutputConfiguration();
+            var builder = ServiceProvider.GetRequiredService<BindingTargetBuilder>();
 
-            builder.AddJ4JCommandLine(new ParsingConfiguration())
-                .AddDefaultParser()
-                .AddHelpErrorProcessor<FancyOutputConfiguration, FancyHelpErrorProcessor>(outputConfig)
-                .AddTextConverters(typeof(ITextConverter).Assembly);
+            builder.Prefixes( "-", "--", "/" )
+                .Quotes( '\'', '"' )
+                .HelpKeys( "h", "?" )
+                .Description( "a test program for exercising J4JCommandLine" )
+                .ProgramName( $"{nameof(Program)}.exe" );
 
-            ServiceProvider = new AutofacServiceProvider( builder.Build() );
+            var binder = builder.Build<Program>();
 
-            var binder = ServiceProvider.GetRequiredService<IBindingTarget<Program>>();
+            if( binder == null )
+                throw new NullReferenceException( nameof(Program) );
 
             binder.Bind( x => Program.IntValue, "i" )
                 .SetDescription( "an integer value" )
@@ -48,5 +50,18 @@ namespace ConsoleAppJ4JCmdLine
         public static IServiceProvider ServiceProvider { get; set; }
         public static int IntValue { get; set; }
         public static string TextValue { get; set; }
+
+        private static void InitializeServiceProvider()
+        {
+            var builder = new ContainerBuilder();
+
+            builder.RegisterType<FancyHelpErrorProcessor>()
+                .AsImplementedInterfaces()
+                .SingleInstance();
+
+            builder.AddJ4JCommandLine();
+
+            ServiceProvider = new AutofacServiceProvider(builder.Build());
+        }
     }
 }

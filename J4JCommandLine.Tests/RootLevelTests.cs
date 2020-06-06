@@ -19,8 +19,17 @@ namespace J4JCommandLine.Tests
             public int[] IntArray { get; set; }
         }
 
+        private readonly BindingTargetBuilder _builder;
+
         public RootLevelTests()
         {
+            _builder = TestServiceProvider.Instance.GetRequiredService<BindingTargetBuilder>();
+
+            _builder.Prefixes("-", "--", "/")
+                .Quotes('\'', '"')
+                .HelpKeys("h", "?")
+                .Description("a test program for exercising J4JCommandLine")
+                .ProgramName($"{this.GetType()}");
         }
 
         [Theory]
@@ -34,9 +43,11 @@ namespace J4JCommandLine.Tests
             MappingResults result,
             int desiredValue)
         {
-            var target = TestServiceProvider.Instance.GetRequiredService<IBindingTarget<RootProperties>>();
+            var target = _builder.Build<RootProperties>();
 
-            var option = target.Bind(x => x.IntProperty, "x");
+            target.Should().NotBeNull();
+
+            var option = target!.Bind(x => x.IntProperty, "x");
 
             option.SetDefaultValue( -1 );
 
@@ -44,8 +55,6 @@ namespace J4JCommandLine.Tests
                 option.Required();
 
             var parseResult = target.Parse(new string[] { $"-{key}", arg });
-
-            //var consoleText = _consoleWriter.ToString();
 
             parseResult.Should().Be(result);
 
@@ -67,9 +76,11 @@ namespace J4JCommandLine.Tests
         {
             var desired = desiredValues == null ? new List<int>() : new List<int>(desiredValues);
 
-            var target = TestServiceProvider.Instance.GetRequiredService<IBindingTarget<RootProperties>>();
+            var target = _builder.Build<RootProperties>();
 
-            var option = target.Bind(x => x.IntArray, "x");
+            target.Should().NotBeNull();
+
+            var option = target!.Bind(x => x.IntArray, "x");
 
             if (required)
                 option.Required();
@@ -78,8 +89,6 @@ namespace J4JCommandLine.Tests
             cmdLineArgs.AddRange(args);
 
             var parseResult = target.Parse(cmdLineArgs.ToArray());
-
-            //var consoleText = _consoleWriter.ToString();
 
             parseResult.Should().Be(result);
 
@@ -101,9 +110,11 @@ namespace J4JCommandLine.Tests
         {
             var desired = desiredValues == null ? new List<int>() : new List<int>(desiredValues);
 
-            var target = TestServiceProvider.Instance.GetRequiredService<IBindingTarget<RootProperties>>();
+            var target = _builder.Build<RootProperties>();
 
-            var option = target.Bind(x => x.IntList, "x");
+            target.Should().NotBeNull();
+
+            var option = target!.Bind(x => x.IntList, "x");
 
             if (required)
                 option.Required();
@@ -112,8 +123,6 @@ namespace J4JCommandLine.Tests
             cmdLineArgs.AddRange(args);
 
             var parseResult = target.Parse(cmdLineArgs.ToArray());
-
-            //var consoleText = _consoleWriter.ToString();
 
             parseResult.Should().Be(result);
 
@@ -132,9 +141,11 @@ namespace J4JCommandLine.Tests
             int maxArgs,
             MappingResults result)
         {
-            var target = TestServiceProvider.Instance.GetRequiredService<IBindingTarget<RootProperties>>();
+            var target = _builder.Build<RootProperties>();
 
-            var option = target.Bind(x => x.IntList, "x");
+            target.Should().NotBeNull();
+
+            var option = target!.Bind(x => x.IntList, "x");
             option.Should().BeAssignableTo<Option>();
 
             option.ArgumentCount(minArgs, maxArgs);
@@ -143,8 +154,6 @@ namespace J4JCommandLine.Tests
             args.Insert(0, "-x");
 
             var parseResult = target.Parse(args.ToArray());
-
-            //var consoleText = _consoleWriter.ToString();
 
             parseResult.Should().Be(result);
 
@@ -172,9 +181,11 @@ namespace J4JCommandLine.Tests
             int maxArgs,
             MappingResults result)
         {
-            var target = TestServiceProvider.Instance.GetRequiredService<IBindingTarget<RootProperties>>();
+            var target = _builder.Build<RootProperties>();
 
-            var option = target.Bind(x => x.IntArray, "x");
+            target.Should().NotBeNull();
+
+            var option = target!.Bind(x => x.IntArray, "x");
             option.Should().BeAssignableTo<Option>();
 
             option.ArgumentCount(minArgs, maxArgs);

@@ -11,6 +11,20 @@ namespace J4JCommandLine.Tests
 {
     public class ParsingTests
     {
+        private readonly ICommandLineTextParser _cmdLineParser;
+
+        public ParsingTests()
+        {
+            _cmdLineParser = TestServiceProvider.Instance.GetRequiredService<ICommandLineTextParser>();
+
+            if (!_cmdLineParser.Initialize(
+                StringComparison.OrdinalIgnoreCase,
+                new string[] { "-", "--", "/" },
+                new string[] { ":" },
+                new char[] { '\'', '"' }))
+                throw new ApplicationException($"{nameof(CommandLineParser)} initialization failed");
+        }
+
         [ Theory ]
         [ InlineData( "x", new string[] { "-x" }, new string[] { "true" } ) ]
         [ InlineData( "x", new string[] { "-x 7" }, new string[] { "7" } ) ]
@@ -22,9 +36,7 @@ namespace J4JCommandLine.Tests
         {
             var numResults = string.IsNullOrEmpty( key ) ? 0 : 1;
 
-            var parser = TestServiceProvider.Instance.GetRequiredService<ICommandLineTextParser>();
-
-            var results = parser.Parse( input );
+            var results = _cmdLineParser.Parse( input );
 
             results.Count.Should().Be( numResults );
 
@@ -45,9 +57,7 @@ namespace J4JCommandLine.Tests
             if( keys.Length != rowLengths.Length)
                 throw new ArgumentException("Mismatch between keys and output row lengths");
 
-            var parser = TestServiceProvider.Instance.GetRequiredService<ICommandLineTextParser>();
-
-            var results = parser.Parse(cmdLine);
+            var results = _cmdLineParser.Parse(cmdLine);
 
             results.Count.Should().Be(keys.Length);
 

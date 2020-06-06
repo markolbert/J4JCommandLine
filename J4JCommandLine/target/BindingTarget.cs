@@ -20,11 +20,11 @@ namespace J4JSoftware.CommandLine
         // attempts to create an instance tied to a dynamically-created instance
         // of TValue. If TValue lacks a parameterless public constructor an ArgumentException
         // is thrown.
-        public BindingTarget(
+        internal BindingTarget(
             ICommandLineTextParser textParser,
             IEnumerable<ITextConverter> converters,
             IHelpErrorProcessor helpErrorProcessor,
-            IParsingConfiguration parseConfig
+            StringComparison keyComp
         )
         {
             if( !typeof( TValue ).HasPublicParameterlessConstructor() )
@@ -35,44 +35,47 @@ namespace J4JSoftware.CommandLine
             _textParser = textParser;
             _converters = converters;
             _helpErrorProcessor = helpErrorProcessor;
+            KeyComparison = keyComp;
 
-            ParsingConfiguration = parseConfig;
             _targetableTypeFactory = new TargetableTypeFactory( _converters );
 
-            Options = new OptionCollection( ParsingConfiguration );
-            Errors = new CommandLineErrors( ParsingConfiguration );
+            Options = new OptionCollection( KeyComparison );
+            Errors = new CommandLineErrors( KeyComparison );
         }
 
         // creates an instance tied to the supplied instance of TValue. This allows for binding
         // to more complex objects which may require constructor parameters.
-        public BindingTarget(
+        internal BindingTarget(
             TValue value,
             ICommandLineTextParser textParser,
             IEnumerable<ITextConverter> converters,
             IHelpErrorProcessor helpErrorProcessor,
-            IParsingConfiguration parseConfig
+            StringComparison keyComp
         )
         {
             Value = value;
             _textParser = textParser;
             _converters = converters;
             _helpErrorProcessor = helpErrorProcessor;
+            KeyComparison = keyComp;
 
-            ParsingConfiguration = parseConfig;
             _targetableTypeFactory = new TargetableTypeFactory( _converters );
 
-            Options = new OptionCollection(ParsingConfiguration );
-            Errors = new CommandLineErrors(ParsingConfiguration);
+            Options = new OptionCollection( KeyComparison );
+            Errors = new CommandLineErrors( KeyComparison );
         }
 
         // The instance of TValue being bound to, which was either supplied in the constructor to 
         // this instance or created by it if TValue has a public parameterless constructor
         public TValue Value { get; }
 
+        public StringComparison KeyComparison { get; }
+
+        public string ProgramName { get; internal set; }
+        public string Description { get; internal set; }
+
         // the properties targeted by this binding operation (i.e., ones tied to particular OptionBase objects)
         public ReadOnlyCollection<TargetedProperty> TargetedProperties => _properties.ToList().AsReadOnly();
-
-        public IParsingConfiguration ParsingConfiguration { get; }
 
         // the IOption objects created by binding properties to TValue
         public IOptionCollection Options { get; }
@@ -116,7 +119,7 @@ namespace J4JSoftware.CommandLine
                     Value,
                     property,
                     _targetableTypeFactory,
-                    ParsingConfiguration.TextComparison
+                    KeyComparison
                 );
             }
 
@@ -181,9 +184,8 @@ namespace J4JSoftware.CommandLine
                 }
             }
 
-            if (parseResults.Any(
-                pr => ParsingConfiguration.HelpKeys
-                    .Any(k => string.Equals(k, pr.Key, ParsingConfiguration.TextComparison))))
+            if( parseResults.Any(
+                pr => _helpErrorProcessor.HelpKeys.HasText( pr.Key ) ) )
                 retVal |= MappingResults.HelpRequested;
 
             _helpErrorProcessor.Display(retVal, this);

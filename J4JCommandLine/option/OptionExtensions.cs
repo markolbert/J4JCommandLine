@@ -136,7 +136,7 @@ namespace J4JSoftware.CommandLine
 
         // creates a list of all combinations of the specified key and the allowed key prefixes
         // (e.g., "-x, --x, /x" for 'x')
-        public static List<string> ConjugateKey( this IParsingConfiguration parseConfig, string key )
+        public static List<string> ConjugateKey( this UniqueText prefixes, string key )
         {
             var retVal = new List<string>();
 
@@ -144,7 +144,7 @@ namespace J4JSoftware.CommandLine
                 return retVal;
 
             retVal.AddRange(
-                parseConfig.Prefixes.Aggregate(
+                prefixes.Aggregate(
                     new List<string>(),
                     ( innerList, delim ) =>
                     {
@@ -160,7 +160,7 @@ namespace J4JSoftware.CommandLine
 
         // creates a list of all combinations of an Option's keys and the allowed key prefixes
         // (e.g., "-x, --x, /x" for 'x')
-        public static List<string> ConjugateKeys(this IOption option, IParsingConfiguration parseConfig)
+        public static List<string> ConjugateKeys(this IOption option, UniqueText prefixes)
         {
             var retVal = new List<string>();
 
@@ -172,7 +172,7 @@ namespace J4JSoftware.CommandLine
                 (list, key) =>
                 {
                     list.AddRange(
-                        parseConfig.Prefixes.Aggregate(
+                        prefixes.Aggregate(
                             new List<string>(),
                             (innerList, delim) =>
                             {

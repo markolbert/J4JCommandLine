@@ -10,81 +10,19 @@ namespace J4JSoftware.CommandLine
     {
         public static ContainerBuilder AddJ4JCommandLine( this ContainerBuilder builder )
         {
-            var outputConfig = new OutputConfiguration()
-            {
-                DetailAreaWidth = 58,
-                KeyAreaWidth = 20,
-                KeyDetailSeparation = 2
-            };
-
-            builder.AddJ4JCommandLine( new ParsingConfiguration() )
-                .AddDefaultParser()
-                .AddSimpleHelpErrorProcessor( outputConfig )
-                .AddTextConverters( typeof(ITextConverter).Assembly );
-
-            return builder;
-        }
-
-        public static ContainerBuilder AddJ4JCommandLine<TConfig>(
-            this ContainerBuilder builder,
-            TConfig parsingConfig )
-            where TConfig : class, IParsingConfiguration
-        {
-            builder.Register( c => parsingConfig )
-                .As<IParsingConfiguration>()
-                .SingleInstance();
-
-            builder.RegisterGeneric( typeof(BindingTarget<>) )
-                .As( typeof(IBindingTarget<>) );
-
-            return builder;
-        }
-
-        public static ContainerBuilder AddDefaultParser( this ContainerBuilder builder )
-        {
-            builder.RegisterType<CommandLineParser>()
-                .As<ICommandLineTextParser>()
-                .SingleInstance();
+            builder.RegisterType<KeyPrefixer>()
+                .AsImplementedInterfaces();
 
             builder.RegisterType<ElementTerminator>()
-                .As<IElementTerminator>()
-                .SingleInstance();
+                .AsImplementedInterfaces();
 
-            builder.RegisterType<KeyPrefixer>()
-                .As<IElementKey>()
-                .SingleInstance();
+            builder.RegisterType<CommandLineParser>()
+                .AsImplementedInterfaces();
 
-            return builder;
-        }
+            builder.RegisterType<BindingTargetBuilder>()
+                .AsSelf();
 
-        public static ContainerBuilder AddHelpErrorProcessor<TConfig, THelp>(
-            this ContainerBuilder builder,
-            TConfig outputConfig)
-            where TConfig : class
-            where THelp : class, IHelpErrorProcessor
-        {
-            builder.Register( c => outputConfig )
-                .AsSelf()
-                .SingleInstance();
-
-            builder.RegisterType<THelp>()
-                .AsImplementedInterfaces()
-                .SingleInstance();
-
-            return builder;
-        }
-
-        public static ContainerBuilder AddSimpleHelpErrorProcessor(
-            this ContainerBuilder builder,
-            OutputConfiguration outputConfig )
-        {
-            builder.Register( c => outputConfig )
-                .AsImplementedInterfaces()
-                .SingleInstance();
-
-            builder.RegisterType<SimpleHelpErrorProcessor>()
-                .As<IHelpErrorProcessor>()
-                .SingleInstance();
+            builder.AddTextConverters( typeof(ITextConverter).Assembly );
 
             return builder;
         }

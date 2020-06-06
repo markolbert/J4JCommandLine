@@ -1,4 +1,6 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Runtime.InteropServices.ComTypes;
 using System.Text;
 
@@ -7,25 +9,42 @@ namespace J4JSoftware.CommandLine
     public class CommandLineParser : ICommandLineTextParser
     {
         private readonly IElementTerminator _terminator;
-        private readonly IElementKey _prefixer;
-        private readonly IParsingConfiguration _parsingConfig;
+        
+        private StringComparison _keyComp;
 
         public CommandLineParser( 
             IElementTerminator terminator,
-            IElementKey prefixer,
-            IParsingConfiguration parsingConfig
+            IElementKey prefixer
             )
         {
             _terminator = terminator;
-            _prefixer = prefixer;
-            _parsingConfig = parsingConfig;
+            Prefixer = prefixer;
+        }
+
+        public IElementKey Prefixer { get; }
+
+        public bool IsInitialized => Prefixer.IsInitialized && _terminator.IsInitialized;
+
+        public bool Initialize( 
+            StringComparison keyComp, 
+            IEnumerable<string> prefixes, 
+            IEnumerable<string>? enclosers = null,
+            IEnumerable<char>? quoteChars = null )
+        {
+            _keyComp = keyComp;
+
+            Prefixer.Initialize( keyComp, prefixes.ToArray() );
+
+            _terminator.Initialize(keyComp, enclosers, quoteChars);
+
+            return Prefixer.IsInitialized && _terminator.IsInitialized;
         }
 
         public ParseResults Parse( string[] args ) => Parse( string.Join( " ", args ) );
 
         public ParseResults Parse( string cmdLine )
         {
-            var retVal = new ParseResults(_parsingConfig);
+            var retVal = new ParseResults(_keyComp);
 
             var accumulator = new StringBuilder();
             IParseResult? curResult = null;
@@ -41,7 +60,7 @@ namespace J4JSoftware.CommandLine
 
                 // analyze the sequence as it currently stands to see if it includes
                 // a prefixed key and/or has been terminated
-                var maxPrefix = _prefixer.GetMaxPrefixLength(element);
+                var maxPrefix = Prefixer.GetMaxPrefixLength(element);
                 var maxTerminator = _terminator.GetMaxTerminatorLength(element, maxPrefix > 0);
 
                 // keep adding characters unless we've encountered a termination 

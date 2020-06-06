@@ -17,10 +17,17 @@ namespace J4JCommandLine.Tests
             public int[] IntArray { get; set; }
         }
 
-        private readonly TextConverter _textConv = new TextConverter();
+        private readonly BindingTargetBuilder _builder;
 
         public HelpErrorTests()
         {
+            _builder = TestServiceProvider.Instance.GetRequiredService<BindingTargetBuilder>();
+
+            _builder.Prefixes("-", "--", "/")
+                .Quotes('\'', '"')
+                .HelpKeys("h", "?")
+                .Description("a test program for exercising J4JCommandLine")
+                .ProgramName($"{this.GetType()}");
         }
 
         [ Theory ]
@@ -29,9 +36,11 @@ namespace J4JCommandLine.Tests
             string key,
             MappingResults result )
         {
-            var target = TestServiceProvider.Instance.GetRequiredService<IBindingTarget<RootProperties>>();
+            var target = _builder.Build<RootProperties>();
 
-            var parseResult = target.Parse( new string[] { $"-{key}" } );
+            target.Should().NotBeNull();
+
+            var parseResult = target!.Parse( new string[] { $"-{key}" } );
 
             parseResult.Should().Be( result );
         }

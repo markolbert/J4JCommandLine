@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace J4JSoftware.CommandLine
 {
@@ -7,35 +9,50 @@ namespace J4JSoftware.CommandLine
     // to the console).
     public abstract class HelpErrorProcessor : IHelpErrorProcessor
     {
-        protected HelpErrorProcessor( IParsingConfiguration parseConfig )
+        protected HelpErrorProcessor()
         {
-            ParsingConfiguration = parseConfig;
         }
 
-        protected IParsingConfiguration ParsingConfiguration { get; }
+        public UniqueText HelpKeys { get; private set; }
+        public bool IsInitialized => HelpKeys?.Count() > 0;
+
+        public bool Initialize( StringComparison keyComp, IElementKey prefixer, params string[] helpKeys )
+        {
+            Prefixes = prefixer.Prefixes;
+
+            HelpKeys = new UniqueText(keyComp);
+            HelpKeys.AddRange( helpKeys );
+
+            return prefixer.IsInitialized && IsInitialized;
+        }
 
         // the result obtained from parsing the command line arguments
         protected MappingResults Result { get; private set; }
+
+        protected UniqueText Prefixes { get; private set; }
 
         // the IBindingTarget that called the HelpErrorProcessor
         protected IBindingTarget BindingTarget { get; private set; }
         
         protected bool HasErrors => ( Result & ~MappingResults.HelpRequested ) != MappingResults.Success;
         protected bool HelpRequested => (Result & MappingResults.HelpRequested) == MappingResults.HelpRequested;
-        protected bool HasHeader => !string.IsNullOrEmpty(ParsingConfiguration.ProgramName)
-                                  || !string.IsNullOrEmpty(ParsingConfiguration.Description);
+        protected bool HasHeader => !string.IsNullOrEmpty(BindingTarget?.ProgramName)
+                                  || !string.IsNullOrEmpty(BindingTarget?.Description);
 
         // displays errors and/or help depending upon what the binding and parsing process
         // produced and the user requested
         public virtual void Display( MappingResults result, IBindingTarget bindingTarget )
         {
+            if( !IsInitialized )
+                throw new ApplicationException( $"{this.GetType()} is not initialized" );
+
             Result = result;
             BindingTarget = bindingTarget;
 
             if (!HasErrors && !HelpRequested)
                 return;
 
-            Initialize();
+            InitializeOutput();
 
             if( HasHeader )
                 CreateHeaderSection();
@@ -49,7 +66,7 @@ namespace J4JSoftware.CommandLine
             DisplayOutput();
         }
 
-        protected virtual void Initialize()
+        protected virtual void InitializeOutput()
         {
         }
 

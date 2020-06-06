@@ -1,19 +1,20 @@
-﻿using System.Collections.ObjectModel;
+﻿using System;
+using System.Collections.ObjectModel;
 
 namespace J4JSoftware.CommandLine
 {
     public class CommandLineErrors : KeyedCollection<ErrorSource, CommandLineError>
     {
-        private readonly IParsingConfiguration _parsingConfig;
+        private readonly StringComparison _keyComp;
 
-        public CommandLineErrors( IParsingConfiguration parsingConfig )
+        public CommandLineErrors( StringComparison keyComp )
         {
-            _parsingConfig = parsingConfig;
+            _keyComp = keyComp;
         }
 
         public void AddError( IBindingTarget bindingTarget, string key, string error )
         {
-            var source = new ErrorSource( _parsingConfig.TextComparison )
+            var source = new ErrorSource
             {
                 BindingTarget = bindingTarget,
                 Key = key

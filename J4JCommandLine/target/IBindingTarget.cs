@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq.Expressions;
 
@@ -6,6 +7,10 @@ namespace J4JSoftware.CommandLine
 {
     public interface IBindingTarget
     {
+        string ProgramName { get; }
+        string Description { get; }
+        StringComparison KeyComparison { get; }
+
         // the properties targeted by this binding operation (i.e., ones tied to particular OptionBase objects)
         ReadOnlyCollection<TargetedProperty> TargetedProperties { get; }
 

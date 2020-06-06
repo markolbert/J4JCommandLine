@@ -14,10 +14,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Compile Remove="IFancyOutputConfiguration.cs" />
-  </ItemGroup>
-
-  <ItemGroup>
     <PackageReference Include="Alba.CsConsoleFormat-NoXaml" Version="1.0.0" />
     <PackageReference Include="Alba.CsConsoleFormat.ColorfulConsole-NoXaml" Version="1.0.0" />
   </ItemGroup>

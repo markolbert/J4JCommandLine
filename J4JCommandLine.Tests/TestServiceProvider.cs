@@ -13,6 +13,9 @@ namespace J4JCommandLine.Tests
         {
             var builder = new ContainerBuilder();
 
+            builder.RegisterType<SimpleHelpErrorProcessor>()
+                .AsImplementedInterfaces();
+
             builder.AddJ4JCommandLine();
 
             Instance = new AutofacServiceProvider( builder.Build() );

@@ -1,4 +1,5 @@
-﻿using FluentAssertions;
+﻿using System;
+using FluentAssertions;
 using J4JSoftware.CommandLine;
 using Microsoft.Extensions.DependencyInjection;
 using Xunit;
@@ -14,8 +15,14 @@ namespace J4JCommandLine.Tests
         {
             _cmdLineParser = TestServiceProvider.Instance.GetRequiredService<ICommandLineTextParser>();
 
-            var parseConfig = TestServiceProvider.Instance.GetRequiredService<IParsingConfiguration>();
-            _options = new OptionCollection( parseConfig );
+            if( !_cmdLineParser.Initialize(
+                StringComparison.OrdinalIgnoreCase,
+                new string[] { "-", "--", "/" },
+                new string[]{":"},
+                new char[] { '\'', '"' } ) )
+                throw new ApplicationException( $"{nameof(CommandLineParser)} initialization failed" );
+
+            _options = new OptionCollection( StringComparison.OrdinalIgnoreCase );
         }
 
         [ Theory ]

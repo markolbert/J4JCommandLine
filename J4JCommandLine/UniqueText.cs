@@ -10,8 +10,9 @@ namespace J4JSoftware.CommandLine
     // prefixes, value enclosers, etc.
     public class UniqueText : IEnumerable<string>
     {
-        private readonly List<string> _elements = new List<string>();
         private readonly StringComparison _textComp;
+
+        private List<string> _elements = new List<string>();
 
         public UniqueText( StringComparison textComp )
         {
@@ -20,55 +21,46 @@ namespace J4JSoftware.CommandLine
 
         public ReadOnlyCollection<string> Elements => _elements.AsReadOnly();
 
-        public bool HasElement( string element ) =>
+        public bool HasText( string element ) =>
             _elements.Any( e => string.Equals( e, element, _textComp ) );
 
-        public bool Add( string toAdd )
+        public void Add( string toAdd )
         {
-            if( HasElement( toAdd ) )
-                return false;
-
-            _elements.Add( toAdd );
-
-            return true;
+            if( !HasText( toAdd ) )
+                _elements.Add( toAdd );
         }
 
-        public bool Remove( string toRemove )
+        public void AddRange(params string[] range)
         {
-            if( !HasElement( toRemove ) )
-                return false;
+            _elements.AddRange(range);
 
-            _elements.Remove( toRemove );
-
-            return true;
+            _elements = _elements.Distinct( _textComp.ToStringComparer() )
+                .ToList();
         }
 
-        public bool AddRange(IEnumerable<string> range )
+        public void AddRange( IEnumerable<string> range )
         {
-            var retVal = true;
+            _elements.AddRange(range);
 
-            foreach( var toAdd in range )
-            {
-                if( HasElement( toAdd ) )
-                    retVal = false;
-                else _elements.Add( toAdd );
-            }
-
-            return retVal;
+            _elements = _elements.Distinct(_textComp.ToStringComparer())
+                .ToList();
         }
 
-        public bool Remove(IEnumerable<string> range)
+        public void Remove(string toRemove)
         {
-            var retVal = true;
+            if (!HasText(toRemove))
+                _elements.Remove(toRemove);
+        }
 
+        public void Remove( IEnumerable<string> range )
+        {
             foreach( var toRemove in range )
             {
-                if( !HasElement( toRemove ) )
-                    retVal = false;
-                else _elements.Remove(toRemove);
-            }
+                var idx = _elements.FindIndex( x => string.Equals( x, toRemove, _textComp ) );
 
-            return retVal;
+                if( idx >= 0 )
+                    _elements.RemoveAt( idx );
+            }
         }
 
         public void Clear()
