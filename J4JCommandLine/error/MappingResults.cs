@@ -18,7 +18,7 @@ namespace J4JSoftware.CommandLine
         HelpRequested = 1 << 7,
         NotDefinedOrCreatable = 1 << 8,
         NotPublicReadWrite = 1 << 9,
-        InitializationFailure = 1 << 10,
+        UnspecifiedFailure = 1 << 10,
 
         Success = 0
     }

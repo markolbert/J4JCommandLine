@@ -9,8 +9,6 @@ namespace J4JSoftware.CommandLine
     // to the console).
     public abstract class HelpErrorProcessor : IHelpErrorProcessor
     {
-        private CommandLineErrors _errors;
-
         protected HelpErrorProcessor()
         {
         }
@@ -24,10 +22,8 @@ namespace J4JSoftware.CommandLine
             IElementKey prefixer, 
             params string[] helpKeys )
         {
-            _errors = errors;
-
             if( !prefixer.IsInitialized )
-                _errors.AddError( null, 
+                errors.AddError( null, 
                     null,
                     $"Attempting to use uninitialized {nameof(IElementKey.Prefixes)} to initialize {nameof(HelpErrorProcessor)}" );
 
@@ -37,7 +33,7 @@ namespace J4JSoftware.CommandLine
             HelpKeys.AddRange( helpKeys );
 
             if( !IsInitialized )
-                _errors.AddError(null,
+                errors.AddError(null,
                     null,
                     "No help keys were specified");
 
@@ -51,8 +47,9 @@ namespace J4JSoftware.CommandLine
 
         // the IBindingTarget that called the HelpErrorProcessor
         protected IBindingTarget BindingTarget { get; private set; }
-        
-        protected bool HasErrors => ( Result & ~MappingResults.HelpRequested ) != MappingResults.Success;
+
+        protected bool HasErrors => ( ( Result & ~MappingResults.HelpRequested ) != MappingResults.Success )
+                                    || BindingTarget.Errors.Count > 0;
         protected bool HelpRequested => (Result & MappingResults.HelpRequested) == MappingResults.HelpRequested;
         protected bool HasHeader => !string.IsNullOrEmpty(BindingTarget?.ProgramName)
                                   || !string.IsNullOrEmpty(BindingTarget?.Description);
@@ -62,10 +59,7 @@ namespace J4JSoftware.CommandLine
         public virtual void Display( MappingResults result, IBindingTarget bindingTarget )
         {
             if( !IsInitialized )
-            {
-                _errors.AddError( bindingTarget, null, $"{nameof(HelpErrorProcessor)} is not initialized" );
-                return;
-            }
+                bindingTarget.AddError( null, $"{nameof(HelpErrorProcessor)} is not initialized" );
 
             Result = result;
             BindingTarget = bindingTarget;

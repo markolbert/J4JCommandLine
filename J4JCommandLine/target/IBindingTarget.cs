@@ -22,7 +22,7 @@ namespace J4JSoftware.CommandLine
 
         // Utility method for adding errors to the error collection. These are keyed by whatever
         // option key (e.g., the 'x' in '-x') is associated with the error.
-        void AddError( string key, string error );
+        void AddError( string? key, string error );
 
         void Initialize();
 

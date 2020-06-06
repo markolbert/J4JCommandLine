@@ -44,5 +44,22 @@ namespace J4JCommandLine.Tests
 
             parseResult.Should().Be( result );
         }
+
+        [Theory]
+        [InlineData(MappingResults.UnspecifiedFailure)]
+        public void No_help_keys( MappingResults result )
+        {
+            var builder = TestServiceProvider.Instance.GetRequiredService<BindingTargetBuilder>();
+
+            builder.Prefixes("-", "--", "/")
+                .Quotes('\'', '"')
+                .Description("a test program for exercising J4JCommandLine")
+                .ProgramName($"{this.GetType()}");
+
+            builder.Build<RootProperties>(null, out var target, out var errors);
+
+            target.Should().BeNull();
+            errors.Count.Should().BeGreaterThan( 0 );
+        }
     }
 }

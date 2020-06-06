@@ -29,9 +29,6 @@ namespace J4JSoftware.CommandLine
             _helpErrorProcessor = helpErrorProcessor;
         }
 
-        public bool IsValid => _prefixes?.Length > 0
-                               && _helpKeys?.Length > 0;
-
         public BindingTargetBuilder CaseSensitivity( StringComparison textComp )
         {
             _caseSensitivity = textComp;
@@ -87,12 +84,6 @@ namespace J4JSoftware.CommandLine
             }
 
             value ??= Activator.CreateInstance<TValue>();
-
-            if ( !IsValid )
-            {
-                errors.AddError( null, null, $"Invalid {nameof(BindingTargetBuilder)} configuration" );
-                return false;
-            }
 
             if( !_parser.Initialize( _caseSensitivity, errors, _prefixes, _enclosers, _quotes ) )
                 return false;

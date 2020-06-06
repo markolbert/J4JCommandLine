@@ -159,6 +159,10 @@ namespace J4JSoftware.CommandLine
                 }
             }
 
+            // safety net
+            if( retVal == MappingResults.Success && Errors.Count > 0 )
+                retVal |= MappingResults.UnspecifiedFailure;
+
             if( parseResults.Any(
                 pr => _helpErrorProcessor.HelpKeys.HasText( pr.Key ) ) )
                 retVal |= MappingResults.HelpRequested;
@@ -172,7 +176,7 @@ namespace J4JSoftware.CommandLine
 
         // Utility method for adding errors to the error collection. These are keyed by whatever
         // option key (e.g., the 'x' in '-x') is associated with the error.
-        public void AddError( string key, string error )
+        public void AddError( string? key, string error )
         {
             Errors.AddError( this, key, error );
         }

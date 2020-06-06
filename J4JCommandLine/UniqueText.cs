@@ -32,6 +32,9 @@ namespace J4JSoftware.CommandLine
 
         public void AddRange(params string[] range)
         {
+            if( range == null )
+                return;
+
             _elements.AddRange(range);
 
             _elements = _elements.Distinct( _textComp.ToStringComparer() )
@@ -40,6 +43,9 @@ namespace J4JSoftware.CommandLine
 
         public void AddRange( IEnumerable<string> range )
         {
+            if (range == null)
+                return;
+
             _elements.AddRange(range);
 
             _elements = _elements.Distinct(_textComp.ToStringComparer())
