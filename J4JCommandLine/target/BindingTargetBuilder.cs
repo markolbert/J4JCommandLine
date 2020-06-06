@@ -73,30 +73,40 @@ namespace J4JSoftware.CommandLine
             return this;
         }
 
-        public BindingTarget<TValue>? Build<TValue>( TValue? value = null )
+        public bool Build<TValue>( TValue? value, out BindingTarget<TValue>? result, out CommandLineErrors errors )
             where TValue : class
         {
+            errors = new CommandLineErrors( _caseSensitivity );
+            result = null;
+
             if( !IsValid )
-                throw new NullReferenceException();
-                //return null;
+            {
+                errors.AddError( null, null, $"Invalid {nameof(BindingTargetBuilder)} configuration" );
+                return false;
+            }
 
-            _textParser.Initialize(_caseSensitivity, _prefixes, _enclosers, _quotes);
-            _helpErrorProcessor.Initialize( _caseSensitivity, _textParser.Prefixer, _helpKeys );
+            if( !_textParser.Initialize( _caseSensitivity, _prefixes, _enclosers, _quotes ) )
+            {
+                errors.AddError( null, null, $"Failed to initialize {nameof(ICommandLineTextParser)}" );
+                return false;
+            }
 
-            if( !_helpErrorProcessor.IsInitialized
-                || !_textParser.IsInitialized )
-                return null;
+            if( !_helpErrorProcessor.Initialize( _caseSensitivity, _textParser.Prefixer, _helpKeys ) )
+            {
+                errors.AddError(null, null, $"Failed to initialize {nameof(IHelpErrorProcessor)}");
+                return false;
+            }
 
-            var retVal = value == null
-                ? new BindingTarget<TValue>( _textParser, _converters, _helpErrorProcessor, _caseSensitivity )
-                : new BindingTarget<TValue>( value, _textParser, _converters, _helpErrorProcessor, _caseSensitivity );
+            result = value == null
+                ? new BindingTarget<TValue>( _textParser, _converters, _helpErrorProcessor, _caseSensitivity, errors )
+                : new BindingTarget<TValue>( value, _textParser, _converters, _helpErrorProcessor, _caseSensitivity, errors );
 
-            retVal.ProgramName = _progName;
-            retVal.Description = _description;
+            result.ProgramName = _progName;
+            result.Description = _description;
 
-            retVal.Initialize();
+            result.Initialize();
 
-            return retVal;
+            return true;
         }
     }
 }

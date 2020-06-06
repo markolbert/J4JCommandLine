@@ -36,7 +36,7 @@ namespace J4JCommandLine.Tests
             string key,
             MappingResults result )
         {
-            var target = _builder.Build<RootProperties>();
+            _builder.Build<RootProperties>(null, out var target, out var _);
 
             target.Should().NotBeNull();
 

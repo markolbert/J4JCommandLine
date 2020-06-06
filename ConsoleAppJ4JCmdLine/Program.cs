@@ -23,7 +23,7 @@ namespace ConsoleAppJ4JCmdLine
                 .Description( "a test program for exercising J4JCommandLine" )
                 .ProgramName( $"{nameof(Program)}.exe" );
 
-            var binder = builder.Build<Program>();
+            builder.Build<Program>(null, out var binder, out var _);
 
             if( binder == null )
                 throw new NullReferenceException( nameof(Program) );

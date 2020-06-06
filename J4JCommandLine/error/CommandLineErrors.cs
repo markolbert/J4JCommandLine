@@ -12,12 +12,12 @@ namespace J4JSoftware.CommandLine
             _keyComp = keyComp;
         }
 
-        public void AddError( IBindingTarget bindingTarget, string key, string error )
+        public void AddError( IBindingTarget? bindingTarget, string? key, string error )
         {
             var source = new ErrorSource
             {
                 BindingTarget = bindingTarget,
-                Key = key
+                Key = key ?? string.Empty
             };
 
             if( Contains( source ) )

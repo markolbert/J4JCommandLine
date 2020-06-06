@@ -6,7 +6,7 @@ namespace J4JSoftware.CommandLine
     {
         private string _key = string.Empty;
 
-        public IBindingTarget BindingTarget { get; set; }
+        public IBindingTarget? BindingTarget { get; set; }
 
         public string Key
         {

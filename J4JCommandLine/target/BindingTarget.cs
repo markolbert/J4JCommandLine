@@ -24,7 +24,8 @@ namespace J4JSoftware.CommandLine
             ICommandLineTextParser textParser,
             IEnumerable<ITextConverter> converters,
             IHelpErrorProcessor helpErrorProcessor,
-            StringComparison keyComp
+            StringComparison keyComp,
+            CommandLineErrors errors
         )
         {
             if( !typeof( TValue ).HasPublicParameterlessConstructor() )
@@ -40,7 +41,7 @@ namespace J4JSoftware.CommandLine
             _targetableTypeFactory = new TargetableTypeFactory( _converters );
 
             Options = new OptionCollection( KeyComparison );
-            Errors = new CommandLineErrors( KeyComparison );
+            Errors = errors;
         }
 
         // creates an instance tied to the supplied instance of TValue. This allows for binding
@@ -50,7 +51,8 @@ namespace J4JSoftware.CommandLine
             ICommandLineTextParser textParser,
             IEnumerable<ITextConverter> converters,
             IHelpErrorProcessor helpErrorProcessor,
-            StringComparison keyComp
+            StringComparison keyComp,
+            CommandLineErrors errors
         )
         {
             Value = value;
@@ -62,7 +64,7 @@ namespace J4JSoftware.CommandLine
             _targetableTypeFactory = new TargetableTypeFactory( _converters );
 
             Options = new OptionCollection( KeyComparison );
-            Errors = new CommandLineErrors( KeyComparison );
+            Errors = errors;
         }
 
         // The instance of TValue being bound to, which was either supplied in the constructor to 
