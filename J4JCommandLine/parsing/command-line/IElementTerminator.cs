@@ -12,6 +12,7 @@ namespace J4JSoftware.CommandLine
 
         void Initialize(
             StringComparison textComp,
+            CommandLineErrors errors,
             IEnumerable<string>? enclosers = null,
             IEnumerable<char>? quoteChars = null );
 

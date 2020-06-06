@@ -11,14 +11,17 @@ namespace J4JCommandLine.Tests
 {
     public class ParsingTests
     {
-        private readonly ICommandLineTextParser _cmdLineParser;
+        private readonly ICommandLineParser _cmdLineParser;
+        private readonly CommandLineErrors _errors;
 
         public ParsingTests()
         {
-            _cmdLineParser = TestServiceProvider.Instance.GetRequiredService<ICommandLineTextParser>();
+            _cmdLineParser = TestServiceProvider.Instance.GetRequiredService<ICommandLineParser>();
+            _errors = new CommandLineErrors(StringComparison.OrdinalIgnoreCase);
 
             if (!_cmdLineParser.Initialize(
                 StringComparison.OrdinalIgnoreCase,
+                _errors,
                 new string[] { "-", "--", "/" },
                 new string[] { ":" },
                 new char[] { '\'', '"' }))

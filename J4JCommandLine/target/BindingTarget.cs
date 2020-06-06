@@ -11,44 +11,17 @@ namespace J4JSoftware.CommandLine
     public class BindingTarget<TValue> : IBindingTarget<TValue>
         where TValue : class
     {
-        private readonly ICommandLineTextParser _textParser;
+        private readonly ICommandLineParser _parser;
         private readonly IEnumerable<ITextConverter> _converters;
         private readonly IHelpErrorProcessor _helpErrorProcessor;
         private readonly List<TargetedProperty> _properties = new List<TargetedProperty>();
         private readonly ITargetableTypeFactory _targetableTypeFactory;
 
-        // attempts to create an instance tied to a dynamically-created instance
-        // of TValue. If TValue lacks a parameterless public constructor an ArgumentException
-        // is thrown.
-        internal BindingTarget(
-            ICommandLineTextParser textParser,
-            IEnumerable<ITextConverter> converters,
-            IHelpErrorProcessor helpErrorProcessor,
-            StringComparison keyComp,
-            CommandLineErrors errors
-        )
-        {
-            if( !typeof( TValue ).HasPublicParameterlessConstructor() )
-                throw new ArgumentException(
-                    $"{typeof( TValue )} does not have a public parameterless constructor and cannot be used as a binding target" );
-
-            Value = Activator.CreateInstance<TValue>();
-            _textParser = textParser;
-            _converters = converters;
-            _helpErrorProcessor = helpErrorProcessor;
-            KeyComparison = keyComp;
-
-            _targetableTypeFactory = new TargetableTypeFactory( _converters );
-
-            Options = new OptionCollection( KeyComparison );
-            Errors = errors;
-        }
-
         // creates an instance tied to the supplied instance of TValue. This allows for binding
         // to more complex objects which may require constructor parameters.
         internal BindingTarget(
             TValue value,
-            ICommandLineTextParser textParser,
+            ICommandLineParser parser,
             IEnumerable<ITextConverter> converters,
             IHelpErrorProcessor helpErrorProcessor,
             StringComparison keyComp,
@@ -56,7 +29,7 @@ namespace J4JSoftware.CommandLine
         )
         {
             Value = value;
-            _textParser = textParser;
+            _parser = parser;
             _converters = converters;
             _helpErrorProcessor = helpErrorProcessor;
             KeyComparison = keyComp;
@@ -168,7 +141,7 @@ namespace J4JSoftware.CommandLine
 
             // parse the arguments into a collection of arguments keyed by the option key
             // note that there can be multiple arguments associated with any option key
-            var parseResults = _textParser.Parse(args);
+            var parseResults = _parser.Parse(args);
 
             // scan all the bound options that aren't tied to NullOptions, which are only
             // "bound" in error

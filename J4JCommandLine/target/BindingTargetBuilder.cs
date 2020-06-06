@@ -1,11 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 
 namespace J4JSoftware.CommandLine
 {
     public class BindingTargetBuilder
     {
-        private readonly ICommandLineTextParser _textParser;
+        private readonly ICommandLineParser _parser;
         private readonly IEnumerable<ITextConverter> _converters;
         private readonly IHelpErrorProcessor _helpErrorProcessor;
 
@@ -18,12 +19,12 @@ namespace J4JSoftware.CommandLine
         private char[] _quotes;
 
         public BindingTargetBuilder(
-            ICommandLineTextParser textParser,
+            ICommandLineParser parser,
             IEnumerable<ITextConverter> converters,
             IHelpErrorProcessor helpErrorProcessor
         )
         {
-            _textParser = textParser;
+            _parser = parser;
             _converters = converters;
             _helpErrorProcessor = helpErrorProcessor;
         }
@@ -79,30 +80,36 @@ namespace J4JSoftware.CommandLine
             errors = new CommandLineErrors( _caseSensitivity );
             result = null;
 
-            if( !IsValid )
+            if( !typeof(TValue).HasPublicParameterlessConstructor() )
+            {
+                errors.AddError(null, null, $"{typeof(TValue)} does not have a public parameterless constructor");
+                return false;
+            }
+
+            value ??= Activator.CreateInstance<TValue>();
+
+            if ( !IsValid )
             {
                 errors.AddError( null, null, $"Invalid {nameof(BindingTargetBuilder)} configuration" );
                 return false;
             }
 
-            if( !_textParser.Initialize( _caseSensitivity, _prefixes, _enclosers, _quotes ) )
-            {
-                errors.AddError( null, null, $"Failed to initialize {nameof(ICommandLineTextParser)}" );
+            if( !_parser.Initialize( _caseSensitivity, errors, _prefixes, _enclosers, _quotes ) )
                 return false;
-            }
 
-            if( !_helpErrorProcessor.Initialize( _caseSensitivity, _textParser.Prefixer, _helpKeys ) )
-            {
-                errors.AddError(null, null, $"Failed to initialize {nameof(IHelpErrorProcessor)}");
+            if( !_helpErrorProcessor.Initialize( _caseSensitivity, errors, _parser.Prefixer, _helpKeys ) )
                 return false;
-            }
 
-            result = value == null
-                ? new BindingTarget<TValue>( _textParser, _converters, _helpErrorProcessor, _caseSensitivity, errors )
-                : new BindingTarget<TValue>( value, _textParser, _converters, _helpErrorProcessor, _caseSensitivity, errors );
-
-            result.ProgramName = _progName;
-            result.Description = _description;
+            result = new BindingTarget<TValue>( value, 
+                _parser, 
+                _converters, 
+                _helpErrorProcessor, 
+                _caseSensitivity,
+                errors )
+            {
+                ProgramName = _progName, 
+                Description = _description
+            };
 
             result.Initialize();
 

@@ -9,6 +9,8 @@ namespace J4JSoftware.CommandLine
     // to the console).
     public abstract class HelpErrorProcessor : IHelpErrorProcessor
     {
+        private CommandLineErrors _errors;
+
         protected HelpErrorProcessor()
         {
         }
@@ -16,12 +18,28 @@ namespace J4JSoftware.CommandLine
         public UniqueText HelpKeys { get; private set; }
         public bool IsInitialized => HelpKeys?.Count() > 0;
 
-        public bool Initialize( StringComparison keyComp, IElementKey prefixer, params string[] helpKeys )
+        public bool Initialize( 
+            StringComparison keyComp, 
+            CommandLineErrors errors,
+            IElementKey prefixer, 
+            params string[] helpKeys )
         {
+            _errors = errors;
+
+            if( !prefixer.IsInitialized )
+                _errors.AddError( null, 
+                    null,
+                    $"Attempting to use uninitialized {nameof(IElementKey.Prefixes)} to initialize {nameof(HelpErrorProcessor)}" );
+
             Prefixes = prefixer.Prefixes;
 
             HelpKeys = new UniqueText(keyComp);
             HelpKeys.AddRange( helpKeys );
+
+            if( !IsInitialized )
+                _errors.AddError(null,
+                    null,
+                    "No help keys were specified");
 
             return prefixer.IsInitialized && IsInitialized;
         }
@@ -44,7 +62,10 @@ namespace J4JSoftware.CommandLine
         public virtual void Display( MappingResults result, IBindingTarget bindingTarget )
         {
             if( !IsInitialized )
-                throw new ApplicationException( $"{this.GetType()} is not initialized" );
+            {
+                _errors.AddError( bindingTarget, null, $"{nameof(HelpErrorProcessor)} is not initialized" );
+                return;
+            }
 
             Result = result;
             BindingTarget = bindingTarget;

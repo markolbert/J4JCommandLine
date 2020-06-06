@@ -11,7 +11,7 @@ namespace J4JSoftware.CommandLine
 
         public OptionEqual( T checkValue )
         {
-            _checkValue = checkValue ?? throw new NullReferenceException( nameof(checkValue) );
+            _checkValue = checkValue;
         }
 
         public override bool Validate( IBindingTarget bindingTarget, string key, T value )

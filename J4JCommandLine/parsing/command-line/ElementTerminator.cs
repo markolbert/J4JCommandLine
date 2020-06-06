@@ -11,6 +11,7 @@ namespace J4JSoftware.CommandLine
         private readonly List<char> _quotes = new List<char>();
 
         private StringComparison _textComp;
+        private CommandLineErrors _errors;
 
         public bool IsInitialized => ValueEnclosers != null;
 
@@ -19,10 +20,12 @@ namespace J4JSoftware.CommandLine
 
         public void Initialize( 
             StringComparison textComp,
+            CommandLineErrors errors,
             IEnumerable<string>? enclosers = null,
             IEnumerable<char>? quoteChars = null)
         {
             _textComp = textComp;
+            _errors = errors;
 
             if( quoteChars != null )
                 _quotes.AddRange( quoteChars );
@@ -35,9 +38,13 @@ namespace J4JSoftware.CommandLine
 
         public int GetMaxTerminatorLength( string text, bool isKey )
         {
-            if( !IsInitialized )
-                throw new ApplicationException( $"{this.GetType()} is not initialized" );
             var retVal = 0;
+
+            if( !IsInitialized )
+            {
+                _errors.AddError(null, null, $"{nameof(ElementTerminator)} is not initialized");
+                return retVal;
+            }
 
             if( string.IsNullOrEmpty( text ) )
                 return retVal;

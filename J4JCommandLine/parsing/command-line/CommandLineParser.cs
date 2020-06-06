@@ -6,7 +6,7 @@ using System.Text;
 
 namespace J4JSoftware.CommandLine
 {
-    public class CommandLineParser : ICommandLineTextParser
+    public class CommandLineParser : ICommandLineParser
     {
         private readonly IElementTerminator _terminator;
         
@@ -27,15 +27,16 @@ namespace J4JSoftware.CommandLine
 
         public bool Initialize( 
             StringComparison keyComp, 
+            CommandLineErrors errors,
             IEnumerable<string> prefixes, 
             IEnumerable<string>? enclosers = null,
             IEnumerable<char>? quoteChars = null )
         {
             _keyComp = keyComp;
 
-            Prefixer.Initialize( keyComp, prefixes.ToArray() );
+            Prefixer.Initialize( keyComp, errors, prefixes.ToArray() );
 
-            _terminator.Initialize(keyComp, enclosers, quoteChars);
+            _terminator.Initialize(keyComp, errors, enclosers, quoteChars);
 
             return Prefixer.IsInitialized && _terminator.IsInitialized;
         }

@@ -6,27 +6,35 @@ namespace J4JSoftware.CommandLine
     public class KeyPrefixer : IElementKey
     {
         private StringComparison _textComp;
+        private CommandLineErrors _errors;
 
         public bool IsInitialized => Prefixes?.Count() > 0;
 
         public UniqueText Prefixes { get; private set; }
 
-        public void Initialize( StringComparison textComp, params string[] prefixers )
+        public void Initialize( StringComparison textComp, CommandLineErrors errors, params string[] prefixers )
         {
             _textComp = textComp;
+            _errors = errors;
 
             Prefixes = new UniqueText( _textComp );
             Prefixes.AddRange( prefixers );
+
+            if( !IsInitialized )
+                _errors.AddError( null, null, $"No option prefixes were specified" );
         }
 
         public int GetMaxPrefixLength( string text )
         {
-            if( !IsInitialized )
-                throw new ApplicationException( $"{this.GetType()} is is not initialized" );
-
             var retVal = 0;
 
-            if( string.IsNullOrEmpty( text ) )
+            if( !IsInitialized )
+            {
+                _errors.AddError(null, null, $"{nameof(KeyPrefixer)} is not initialized");
+                return retVal;
+            }
+
+            if ( string.IsNullOrEmpty( text ) )
                 return retVal;
 
             foreach (var prefix in Prefixes)

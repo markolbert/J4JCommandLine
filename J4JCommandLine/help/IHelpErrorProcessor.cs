@@ -8,7 +8,7 @@ namespace J4JSoftware.CommandLine
         UniqueText HelpKeys { get; }
         bool IsInitialized { get; }
 
-        bool Initialize( StringComparison keyComp, IElementKey prefixer, params string[] helpKeys );
+        bool Initialize( StringComparison keyComp, CommandLineErrors errors, IElementKey prefixer, params string[] helpKeys );
         void Display( MappingResults results, IBindingTarget bindingTarget );
     }
 }
