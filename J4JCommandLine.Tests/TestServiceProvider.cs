@@ -13,7 +13,7 @@ namespace J4JCommandLine.Tests
         {
             var builder = new ContainerBuilder();
 
-            builder.RegisterType<SimpleHelpErrorProcessor>()
+            builder.RegisterType<SimpleConsole>()
                 .AsImplementedInterfaces();
 
             builder.AddJ4JCommandLine();

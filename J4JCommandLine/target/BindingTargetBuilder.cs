@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
+using System.Linq;
 
 namespace J4JSoftware.CommandLine
 {
@@ -8,7 +9,7 @@ namespace J4JSoftware.CommandLine
     {
         private readonly ICommandLineParser _parser;
         private readonly IEnumerable<ITextConverter> _converters;
-        private readonly IHelpErrorProcessor _helpErrorProcessor;
+        private readonly IConsoleOutput _consoleOutput;
 
         private StringComparison _caseSensitivity = StringComparison.OrdinalIgnoreCase;
         private string _progName;
@@ -21,12 +22,12 @@ namespace J4JSoftware.CommandLine
         public BindingTargetBuilder(
             ICommandLineParser parser,
             IEnumerable<ITextConverter> converters,
-            IHelpErrorProcessor helpErrorProcessor
+            IConsoleOutput consoleOutput
         )
         {
             _parser = parser;
             _converters = converters;
-            _helpErrorProcessor = helpErrorProcessor;
+            _consoleOutput = consoleOutput;
         }
 
         public BindingTargetBuilder CaseSensitivity( StringComparison textComp )
@@ -77,34 +78,64 @@ namespace J4JSoftware.CommandLine
             errors = new CommandLineErrors( _caseSensitivity );
             result = null;
 
-            if( !typeof(TValue).HasPublicParameterlessConstructor() )
+            if( _helpKeys == null || _helpKeys.Length == 0 )
+            {
+                errors.AddError(null, null, $"No help keys defined");
+                DisplayErrors(errors);
+
+                return false;
+            }
+
+            if ( !typeof(TValue).HasPublicParameterlessConstructor() )
             {
                 errors.AddError(null, null, $"{typeof(TValue)} does not have a public parameterless constructor");
+                DisplayErrors(errors);
+
                 return false;
             }
 
             value ??= Activator.CreateInstance<TValue>();
 
             if( !_parser.Initialize( _caseSensitivity, errors, _prefixes, _enclosers, _quotes ) )
-                return false;
-
-            if( !_helpErrorProcessor.Initialize( _caseSensitivity, errors, _parser.Prefixer, _helpKeys ) )
-                return false;
-
-            result = new BindingTarget<TValue>( value, 
-                _parser, 
-                _converters, 
-                _helpErrorProcessor, 
-                _caseSensitivity,
-                errors )
             {
-                ProgramName = _progName, 
+                DisplayErrors(errors);
+
+                return false;
+            }
+
+            result = new BindingTarget<TValue>( value,
+                _parser,
+                _converters,
+                _caseSensitivity,
+                errors,
+                _helpKeys.ToList(),
+                _consoleOutput )
+            {
+                ProgramName = _progName,
                 Description = _description
             };
 
             result.Initialize();
 
             return true;
+        }
+
+        private void DisplayErrors( CommandLineErrors errors )
+        {
+            _consoleOutput.Initialize();
+
+            if( !string.IsNullOrEmpty(_progName))
+                _consoleOutput.AddLine(ConsoleSection.Header, _progName);
+
+            if (!string.IsNullOrEmpty(_description))
+                _consoleOutput.AddLine(ConsoleSection.Header, _description);
+
+            foreach( var error in errors )
+            {
+                _consoleOutput.AddError( error.Errors );
+            }
+
+            _consoleOutput.Display();
         }
     }
 }

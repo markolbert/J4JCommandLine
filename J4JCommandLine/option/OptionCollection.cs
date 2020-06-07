@@ -10,10 +10,12 @@ namespace J4JSoftware.CommandLine
     {
         private readonly List<IOption> _options = new List<IOption>();
         private readonly StringComparison _keyComp;
+        private readonly List<string> _helpKeys;
 
-        public OptionCollection( StringComparison keyComp )
+        public OptionCollection( StringComparison keyComp, List<string> helpKeys )
         {
             _keyComp = keyComp;
+            _helpKeys = helpKeys;
         }
 
         public StringComparison KeyComparison { get; set; }
@@ -24,6 +26,9 @@ namespace J4JSoftware.CommandLine
         public bool HasKey( string key )
         {
             if( _options.Any( opt => opt.Keys.Any( k => string.Equals( k, key, _keyComp ) ) ) )
+                return true;
+
+            if (_helpKeys.Any(hk => string.Equals(hk, key, _keyComp)))
                 return true;
 
             return false;
@@ -41,8 +46,10 @@ namespace J4JSoftware.CommandLine
         public bool Add( IOption option )
         {
             foreach( var key in option.Keys )
-                if( _options.Any( opt => opt.Keys.Any( k => string.Equals( k, key, _keyComp ) ) ) )
+            {
+                if( HasKey(key) )
                     return false;
+            }
 
             _options.Add( option );
 

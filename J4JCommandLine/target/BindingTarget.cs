@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Linq.Expressions;
+using System.Security.Cryptography;
+using System.Text;
 
 namespace J4JSoftware.CommandLine
 {
@@ -13,9 +15,14 @@ namespace J4JSoftware.CommandLine
     {
         private readonly ICommandLineParser _parser;
         private readonly IEnumerable<ITextConverter> _converters;
-        private readonly IHelpErrorProcessor _helpErrorProcessor;
+        private readonly List<string> _helpKeys;
+        private readonly IConsoleOutput _consoleOutput;
         private readonly List<TargetedProperty> _properties = new List<TargetedProperty>();
         private readonly ITargetableTypeFactory _targetableTypeFactory;
+
+        private bool _headerDisplayed = false;
+        private bool _helpDisplayed = false;
+        private bool _outputPending = false;
 
         // creates an instance tied to the supplied instance of TValue. This allows for binding
         // to more complex objects which may require constructor parameters.
@@ -23,20 +30,22 @@ namespace J4JSoftware.CommandLine
             TValue value,
             ICommandLineParser parser,
             IEnumerable<ITextConverter> converters,
-            IHelpErrorProcessor helpErrorProcessor,
             StringComparison keyComp,
-            CommandLineErrors errors
+            CommandLineErrors errors,
+            List<string> helpKeys,
+            IConsoleOutput consoleOutput
         )
         {
             Value = value;
             _parser = parser;
             _converters = converters;
-            _helpErrorProcessor = helpErrorProcessor;
+            _helpKeys = helpKeys;
+            _consoleOutput = consoleOutput;
             KeyComparison = keyComp;
 
             _targetableTypeFactory = new TargetableTypeFactory( _converters );
 
-            Options = new OptionCollection( KeyComparison );
+            Options = new OptionCollection( KeyComparison, _helpKeys );
             Errors = errors;
         }
 
@@ -63,6 +72,9 @@ namespace J4JSoftware.CommandLine
             _properties.Clear();
             Errors.Clear();
             Options.Clear();
+            _headerDisplayed = false;
+            _outputPending = false;
+            _helpDisplayed = false;
         }
 
         // binds the selected property to a newly-created OptionBase instance. If all goes
@@ -160,14 +172,27 @@ namespace J4JSoftware.CommandLine
             }
 
             // safety net
-            if( retVal == MappingResults.Success && Errors.Count > 0 )
+            if ( retVal == MappingResults.Success && Errors.Count > 0 )
                 retVal |= MappingResults.UnspecifiedFailure;
 
+            if ( retVal != MappingResults.Success )
+            {
+                DisplayHeader();
+                DisplayErrors();
+                DisplayHelp();
+            }
+
             if( parseResults.Any(
-                pr => _helpErrorProcessor.HelpKeys.HasText( pr.Key ) ) )
+                pr => _helpKeys.Any(hk=>string.Equals(hk, pr.Key)) ) )
+            {
                 retVal |= MappingResults.HelpRequested;
 
-            _helpErrorProcessor.Display(retVal, this);
+                DisplayHeader();
+                DisplayHelp();
+            }
+
+            if( _outputPending )
+                _consoleOutput.Display();
 
             Errors.Clear();
 
@@ -179,6 +204,73 @@ namespace J4JSoftware.CommandLine
         public void AddError( string? key, string error )
         {
             Errors.AddError( this, key, error );
+        }
+
+        private void DisplayHeader()
+        {
+            if( _headerDisplayed )
+                return;
+
+            _consoleOutput.Initialize();
+
+            if( !string.IsNullOrEmpty( ProgramName ) )
+                _consoleOutput.AddLine( ConsoleSection.Header, ProgramName );
+
+            if( !string.IsNullOrEmpty( Description ) )
+                _consoleOutput.AddLine( ConsoleSection.Header, Description );
+
+            _headerDisplayed = true;
+            _outputPending = true;
+        }
+
+        private void DisplayErrors()
+        {
+            _consoleOutput.AddLine( ConsoleSection.Errors, "Error(s):" );
+
+            foreach (var error in Errors)
+            {
+                _consoleOutput.AddError( error.Errors, _parser.Prefixer.Prefixes.ConjugateKey( error.Source.Key ) );
+            }
+
+            _outputPending = true;
+        }
+
+        private void DisplayHelp()
+        {
+            if( _helpDisplayed )
+                return;
+
+            var sb = new StringBuilder();
+
+            sb.Append("Command line options");
+
+            switch (KeyComparison)
+            {
+                case StringComparison.Ordinal:
+                case StringComparison.InvariantCulture:
+                case StringComparison.CurrentCulture:
+                    sb.Append(" (case sensitive):");
+                    break;
+
+                default:
+                    sb.Append(":");
+                    break;
+            }
+
+            _consoleOutput.AddLine(ConsoleSection.Help, sb.ToString());
+
+            foreach (var option in Options
+                .OrderBy(opt => opt.FirstKey)
+                .Where(opt => opt.OptionType != OptionType.Null))
+            {
+                _consoleOutput.AddOption(
+                    option.ConjugateKeys(_parser.Prefixer.Prefixes), 
+                    option.Description, 
+                    option.DefaultValue?.ToString() );
+            }
+
+            _helpDisplayed = true;
+            _outputPending = true;
         }
 
         // allows retrieval of the TValue instance in a type-agnostic way

@@ -52,9 +52,8 @@ namespace ConsoleAppJ4JCmdLine
         {
             var builder = new ContainerBuilder();
 
-            builder.RegisterType<FancyHelpErrorProcessor>()
-                .AsImplementedInterfaces()
-                .SingleInstance();
+            builder.RegisterType<FancyConsole>()
+                .AsImplementedInterfaces();
 
             builder.AddJ4JCommandLine();
 
