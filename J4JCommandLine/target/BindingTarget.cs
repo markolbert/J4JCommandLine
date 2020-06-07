@@ -15,10 +15,13 @@ namespace J4JSoftware.CommandLine
     {
         private readonly ICommandLineParser _parser;
         private readonly IEnumerable<ITextConverter> _converters;
-        private readonly List<string> _helpKeys;
+        private readonly UniqueText _helpKeys;
         private readonly IConsoleOutput _consoleOutput;
         private readonly List<TargetedProperty> _properties = new List<TargetedProperty>();
         private readonly ITargetableTypeFactory _targetableTypeFactory;
+        private readonly OptionCollection _options;
+        private readonly CommandLineErrors _errors;
+        private readonly StringComparison _keyComp;
 
         private bool _headerDisplayed = false;
         private bool _helpDisplayed = false;
@@ -39,39 +42,30 @@ namespace J4JSoftware.CommandLine
             Value = value;
             _parser = parser;
             _converters = converters;
-            _helpKeys = helpKeys;
             _consoleOutput = consoleOutput;
-            KeyComparison = keyComp;
+            _keyComp = keyComp;
 
             _targetableTypeFactory = new TargetableTypeFactory( _converters );
 
-            Options = new OptionCollection( KeyComparison, _helpKeys );
-            Errors = errors;
+            _helpKeys = new UniqueText( _keyComp );
+            _helpKeys.AddRange(helpKeys);
+
+            _options = new OptionCollection( _keyComp, _helpKeys );
+            _errors = errors;
         }
 
         // The instance of TValue being bound to, which was either supplied in the constructor to 
         // this instance or created by it if TValue has a public parameterless constructor
         public TValue Value { get; }
 
-        public StringComparison KeyComparison { get; }
-
         public string ProgramName { get; internal set; }
         public string Description { get; internal set; }
-
-        // the properties targeted by this binding operation (i.e., ones tied to particular OptionBase objects)
-        public ReadOnlyCollection<TargetedProperty> TargetedProperties => _properties.ToList().AsReadOnly();
-
-        // the IOption objects created by binding properties to TValue
-        public IOptionCollection Options { get; }
-
-        // Errors encountered during the binding or parsing operations
-        public CommandLineErrors Errors { get; }
 
         public void Initialize()
         {
             _properties.Clear();
-            Errors.Clear();
-            Options.Clear();
+            _errors.Clear();
+            _options.Clear();
             _headerDisplayed = false;
             _outputPending = false;
             _helpDisplayed = false;
@@ -86,7 +80,7 @@ namespace J4JSoftware.CommandLine
         // to an Option object. Examples: the property is not publicly read- and write-able; 
         // the property has a null value and does not have a public parameterless constructor
         // to create an instance of it. Check the error output after parsing for details.
-        public OptionBase Bind<TProp>(
+        public Option Bind<TProp>(
             Expression<Func<TValue, TProp>> propertySelector,
             params string[] keys )
         {
@@ -106,13 +100,13 @@ namespace J4JSoftware.CommandLine
                     Value,
                     property,
                     _targetableTypeFactory,
-                    KeyComparison
+                    _keyComp
                 );
             }
 
             // create an OptionBase object to bind to the "final" property (i.e., the one
             // we're trying to bind to)
-            OptionBase? option = null;
+            Option? option = null;
 
             if( property != null )
             {
@@ -120,7 +114,7 @@ namespace J4JSoftware.CommandLine
 
                 option = property.TargetableType.Converter == null
                     ? null
-                    : new Option( Options, property.TargetableType );
+                    : new TargetedOption( _options, property.TargetableType );
             }
             // next condition should never be met because there should always be
             // at least one PropertyInfo object and hence one TargetedProperty
@@ -128,16 +122,16 @@ namespace J4JSoftware.CommandLine
 
             // determine whether we were given at least one valid, unique (i.e., so far
             // unused) key
-            keys = Options.GetUniqueKeys(keys);
+            keys = _options.GetUniqueKeys(keys);
 
             // if something went wrong create a NullOption to return. These cannot be
             // bound to commandline parameters but serve to capture error information
             if (keys.Length == 0 || option == null || property == null)
-                option = new NullOption(Options);
+                option = new UntargetedOption(_options);
 
             option.AddKeys(keys);
 
-            Options.Add(option);
+            _options.Add(option);
 
             if (property != null)
                 property.BoundOption = option;
@@ -172,7 +166,7 @@ namespace J4JSoftware.CommandLine
             }
 
             // safety net
-            if ( retVal == MappingResults.Success && Errors.Count > 0 )
+            if ( retVal == MappingResults.Success && _errors.Count > 0 )
                 retVal |= MappingResults.UnspecifiedFailure;
 
             if ( retVal != MappingResults.Success )
@@ -194,7 +188,7 @@ namespace J4JSoftware.CommandLine
             if( _outputPending )
                 _consoleOutput.Display();
 
-            Errors.Clear();
+            _errors.Clear();
 
             return retVal;
         }
@@ -203,7 +197,7 @@ namespace J4JSoftware.CommandLine
         // option key (e.g., the 'x' in '-x') is associated with the error.
         public void AddError( string? key, string error )
         {
-            Errors.AddError( this, key, error );
+            _errors.AddError( this, key, error );
         }
 
         private void DisplayHeader()
@@ -227,7 +221,7 @@ namespace J4JSoftware.CommandLine
         {
             _consoleOutput.AddLine( ConsoleSection.Errors, "Error(s):" );
 
-            foreach (var error in Errors)
+            foreach (var error in _errors)
             {
                 _consoleOutput.AddError( error.Errors, _parser.Prefixer.Prefixes.ConjugateKey( error.Source.Key ) );
             }
@@ -244,7 +238,7 @@ namespace J4JSoftware.CommandLine
 
             sb.Append("Command line options");
 
-            switch (KeyComparison)
+            switch (_keyComp)
             {
                 case StringComparison.Ordinal:
                 case StringComparison.InvariantCulture:
@@ -259,7 +253,7 @@ namespace J4JSoftware.CommandLine
 
             _consoleOutput.AddLine(ConsoleSection.Help, sb.ToString());
 
-            foreach (var option in Options
+            foreach (var option in _options
                 .OrderBy(opt => opt.FirstKey)
                 .Where(opt => opt.OptionType != OptionType.Null))
             {

@@ -1,173 +1,129 @@
-﻿using System;
-using System.Collections;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
+using System.Linq;
 
 namespace J4JSoftware.CommandLine
 {
-    public class Option : OptionBase
+    // the abstract base class of Option and NullOption.
+    public abstract class Option
     {
-        private readonly ITextConverter _converter;
+        private object? _defaultValue;
 
-        public Option(
-            IOptionCollection options,
-            ITargetableType targetableType
+        protected Option(
+            OptionType optionType,
+            ITargetableType targetableType,
+            OptionCollection options
         )
-            : base( OptionType.Mappable, targetableType, options )
         {
-            _converter = targetableType.Converter!;
+            OptionType = optionType;
+            TargetableType = targetableType;
+            Options = options;
         }
+
+        // the collection of Options used by the parsing activity
+        protected internal OptionCollection Options { get; }
+
+        // Information about the targetability of the type of the TargetProperty to
+        // which the option is bound. Options can be bound to un-targetable properties.
+        public ITargetableType TargetableType { get; }
+
+        // an optional description of the Option, used in displaying help or error information
+        public string Description { get; internal set; }
+        
+        // the first key defined for an option, sorted alphabetically (Options can define multiple keys
+        // but they must be unique within the scope of all Options)
+        public List<string> Keys { get; } = new List<string>();
+
+        // the first key defined for an option, sorted alphabetically (Options can define multiple keys
+        // but they must be unique within the scope of all Options)
+        public string FirstKey => Keys.Count == 0 ? string.Empty : Keys.OrderBy( k => k ).First();
+
+        // the type of the Option, currently either Mappable or Null
+        public OptionType OptionType { get; }
+
+        // flag indicating whether or not the option must be specified on the command line
+        public bool IsRequired { get; internal set; }
+
+        // the minimum number of parameters to a command line option
+        public int MinParameters { get; internal set; }
+
+        // the maximum number of parameters to a command line option
+        public int MaxParameters { get; internal set; } = int.MaxValue;
+
+        // the validator for the Option
+        public IOptionValidator Validator { get; internal set; }
+        
+        // the optional default value assigned to the Option
+        public object? DefaultValue
+        {
+            get
+            {
+                if( _defaultValue == null && TargetableType.IsCreatable )
+                    _defaultValue = TargetableType.GetDefaultValue();
+
+                return _defaultValue;
+            }
+
+            internal set => _defaultValue = value;
+        }
+
+
+        // the method called to validate the specified value within the expectations
+        // defined for the Option
+        public bool Validate( IBindingTarget bindingTarget, string key, object value )
+        {
+            if( Validator == null )
+                return true;
+
+            if( value.GetType() == Validator.SupportedType )
+                return Validator?.Validate( bindingTarget, key, value ) ?? true;
+
+            bindingTarget.AddError( 
+                key,
+                $"Object to be validated is a {value.GetType()} but should be a {Validator.SupportedType}, rejecting" );
+
+            return false;
+        }
+
 
         // the method called to convert the parsing results for a particular command
         // line key to a option value. Return values other than MappingResults.Success
         // indicate one or more problems were encountered in the conversion and validation
         // process
-        public override MappingResults Convert(
-            IBindingTarget bindingTarget,
-            IParseResult parseResult,
+        public abstract MappingResults Convert( 
+            IBindingTarget bindingTarget, 
+            IParseResult parseResult, 
             ITargetableType targetType,
-            out object? result )
+            out object? result );
+
+        // validates whether or not a valid number of parameters are included in the specified
+        // IParseResult
+        protected virtual bool ValidParameterCount(IBindingTarget bindingTarget, IParseResult parseResult, out MappingResults result)
         {
-            var retVal = MappingResults.Success;
-
-            switch( targetType.Multiplicity )
+            if (parseResult.NumParameters < MinParameters)
             {
-                case Multiplicity.Array:
-                    retVal = ConvertToArray( bindingTarget, parseResult, out var arrayResult );
-                    result = arrayResult;
+                bindingTarget.AddError( 
+                    parseResult.Key,
+                    $"Expected {MinParameters} parameters, got {parseResult.NumParameters}" );
 
-                    break;
+                result = MappingResults.TooFewParameters;
 
-                case Multiplicity.List:
-                    retVal = ConvertToList( bindingTarget, parseResult, out var listResult );
-                    result = listResult;
-                    break;
-
-                case Multiplicity.SimpleValue:
-                    retVal = ConvertToSimpleValue( bindingTarget, parseResult, out var singleResult );
-                    result = singleResult;
-                    break;
-
-                default:
-                    result = null;
-                    retVal = MappingResults.UnsupportedMultiplicity;
-                    break;
+                return false;
             }
 
-            return retVal;
-        }
-
-        // attempts to convert a text value using the defined ITextConverter property
-        private object? Convert(IBindingTarget bindingTarget, string key, string text)
-        {
-            if (_converter.Convert(text, out var innerResult))
-                return innerResult;
-
-            bindingTarget.AddError(
-                key,
-                $"Couldn't convert '{text}' to {_converter.SupportedType}");
-
-            return null;
-        }
-
-        // checks to see if the provided IParseResult contains an allowable number of parameters and, if so,
-        // attempts to convert them to a simple value (i.e., a single object, an IValueType, a string)
-        private MappingResults ConvertToSimpleValue( IBindingTarget bindingTarget, IParseResult parseResult,
-            out object? result )
-        {
-            if( !ValidParameterCount(bindingTarget, parseResult, out var paramResult ) )
+            if (parseResult.NumParameters > MaxParameters)
             {
-                result = null;
-                return paramResult;
+                bindingTarget.AddError(
+                    parseResult.Key,
+                    $"Expected {MinParameters} parameters, got {parseResult.NumParameters}" );
+
+                result = MappingResults.TooManyParameters;
+
+                return false;
             }
 
-            // handle boolean flag parameters which don't have a parameter
-            var text = TargetableType.SupportedType == typeof( bool )
-                       && parseResult.NumParameters == 0
-                ? "true"
-                : parseResult.Parameters[ 0 ];
+            result = MappingResults.Success;
 
-            result = Convert( bindingTarget, parseResult.Key, text );
-
-            if( result != null )
-                return MappingResults.Success;
-
-            bindingTarget.AddError( parseResult.Key, $"Couldn't convert '{text}' to {TargetableType}" );
-
-            return MappingResults.ConversionFailed;
-        }
-
-        // checks to see if the provided IParseResult contains an allowable number of parameters and, if so,
-        // attempts to convert them to an array of simple values (i.e., a single object, an IValueType, a string)
-        private MappingResults ConvertToArray( IBindingTarget bindingTarget, IParseResult parseResult, out Array? result )
-        {
-            if( !ValidParameterCount( bindingTarget, parseResult, out var paramResult ) )
-            {
-                result = null;
-                return paramResult;
-            }
-
-            result = Array.CreateInstance( TargetableType.SupportedType, parseResult.NumParameters );
-
-            var allOkay = true;
-
-            for( var idx = 0; idx < parseResult.NumParameters; idx++ )
-            {
-                var item = Convert( bindingTarget, parseResult.Key, parseResult.Parameters[ idx ] );
-
-                if( item == null )
-                {
-                    bindingTarget.AddError(
-                        parseResult.Key,
-                        $"Couldn't convert '{parseResult.Parameters[ idx ]}' to {_converter.SupportedType}" );
-
-                    allOkay = false;
-
-                    result = null;
-                    break;
-                }
-                else result.SetValue( item, idx );
-            }
-
-            return allOkay ? MappingResults.Success : MappingResults.ConversionFailed;
-        }
-
-        // checks to see if the provided IParseResult contains an allowable number of parameters and, if so,
-        // attempts to convert them to a generic list of simple values (i.e., a single object, an IValueType, a string)
-        private MappingResults ConvertToList( IBindingTarget bindingTarget, IParseResult parseResult, out IList? result )
-        {
-            if (!ValidParameterCount( bindingTarget, parseResult, out var paramResult))
-            {
-                result = null;
-                return paramResult;
-            }
-
-            // create a list of the Type we're converting to
-            var listType = typeof(List<>);
-            var genericListType = listType.MakeGenericType( _converter.SupportedType );
-
-            result = ( Activator.CreateInstance( genericListType ) as IList )!;
-
-            var allOkay = true;
-
-            for( var idx = 0; idx < parseResult.NumParameters; idx++ )
-            {
-                var item = Convert( bindingTarget, parseResult.Key, parseResult.Parameters[ idx ] );
-
-                if( item == null )
-                {
-                    bindingTarget.AddError(
-                        parseResult.Key,
-                        $"Couldn't convert '{parseResult.Parameters[idx]}' to {_converter.SupportedType}");
-
-                    allOkay = false;
-
-                    result = null;
-                    break;
-                }
-                else result.Add( item );
-            }
-
-            return allOkay ? MappingResults.Success : MappingResults.ConversionFailed;
+            return true;
         }
     }
 }

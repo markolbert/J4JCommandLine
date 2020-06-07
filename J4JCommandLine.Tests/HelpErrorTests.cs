@@ -45,9 +45,8 @@ namespace J4JCommandLine.Tests
             parseResult.Should().Be( result );
         }
 
-        [Theory]
-        [InlineData(MappingResults.UnspecifiedFailure)]
-        public void No_help_keys( MappingResults result )
+        [Fact]
+        public void No_help_keys()
         {
             var builder = TestServiceProvider.Instance.GetRequiredService<BindingTargetBuilder>();
 
@@ -60,6 +59,23 @@ namespace J4JCommandLine.Tests
 
             target.Should().BeNull();
             errors.Count.Should().BeGreaterThan( 0 );
+        }
+
+        [Fact]
+        public void Duplicate_help_keys()
+        {
+            var builder = TestServiceProvider.Instance.GetRequiredService<BindingTargetBuilder>();
+
+            builder.Prefixes("-", "--", "/")
+                .Quotes('\'', '"')
+                .HelpKeys("h","h","h")
+                .Description("a test program for exercising J4JCommandLine")
+                .ProgramName($"{this.GetType()}");
+
+            builder.Build<RootProperties>(null, out var target, out var errors);
+
+            target.Should().NotBeNull();
+            errors.Count.Should().Be( 0 );
         }
     }
 }

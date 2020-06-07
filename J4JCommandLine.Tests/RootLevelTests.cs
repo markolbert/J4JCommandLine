@@ -146,7 +146,7 @@ namespace J4JCommandLine.Tests
             target.Should().NotBeNull();
 
             var option = target!.Bind(x => x.IntList, "x");
-            option.Should().BeAssignableTo<Option>();
+            option.Should().BeAssignableTo<TargetedOption>();
 
             option.ArgumentCount(minArgs, maxArgs);
 
@@ -186,7 +186,7 @@ namespace J4JCommandLine.Tests
             target.Should().NotBeNull();
 
             var option = target!.Bind(x => x.IntArray, "x");
-            option.Should().BeAssignableTo<Option>();
+            option.Should().BeAssignableTo<TargetedOption>();
 
             option.ArgumentCount(minArgs, maxArgs);
 

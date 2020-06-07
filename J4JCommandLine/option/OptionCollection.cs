@@ -6,20 +6,17 @@ using System.Linq;
 
 namespace J4JSoftware.CommandLine
 {
-    public class OptionCollection : IOptionCollection
+    public class OptionCollection : IEnumerable<Option> 
     {
-        private readonly List<IOption> _options = new List<IOption>();
+        private readonly List<Option> _options = new List<Option>();
         private readonly StringComparison _keyComp;
-        private readonly List<string> _helpKeys;
+        private readonly UniqueText _helpKeys;
 
-        public OptionCollection( StringComparison keyComp, List<string> helpKeys )
+        public OptionCollection( StringComparison keyComp, UniqueText helpKeys )
         {
             _keyComp = keyComp;
             _helpKeys = helpKeys;
         }
-
-        public StringComparison KeyComparison { get; set; }
-        public ReadOnlyCollection<IOption> Options => _options.AsReadOnly();
 
         // determines whether or not a key is being used by an existing option, honoring whatever
         // case sensitivity is in use
@@ -28,7 +25,7 @@ namespace J4JSoftware.CommandLine
             if( _options.Any( opt => opt.Keys.Any( k => string.Equals( k, key, _keyComp ) ) ) )
                 return true;
 
-            if (_helpKeys.Any(hk => string.Equals(hk, key, _keyComp)))
+            if( _helpKeys.HasText( key ) )
                 return true;
 
             return false;
@@ -39,11 +36,11 @@ namespace J4JSoftware.CommandLine
             keys.Where( k => !HasKey( k ) )
                 .ToArray();
 
-        public IOption? this[ string key ] =>
+        public Option? this[ string key ] =>
             _options.FirstOrDefault( opt =>
                 opt.Keys.Any( k => string.Equals( k, key, _keyComp ) ) );
 
-        public bool Add( IOption option )
+        public bool Add( Option option )
         {
             foreach( var key in option.Keys )
             {
@@ -58,7 +55,7 @@ namespace J4JSoftware.CommandLine
 
         public void Clear() => _options.Clear();
 
-        public IEnumerator<IOption> GetEnumerator()
+        public IEnumerator<Option> GetEnumerator()
         {
             foreach( var option in _options ) yield return option;
         }

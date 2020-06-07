@@ -2,9 +2,9 @@
 {
     // defines an IOption which always returns null when used as the target of a parsing
     // operation. Used to capture error information about an invalid parsing.
-    public class NullOption : OptionBase
+    public class UntargetedOption : Option
     {
-        public NullOption(IOptionCollection options )
+        public UntargetedOption(OptionCollection options )
             : base( OptionType.Null, new UntargetableType(), options )
         {
         }

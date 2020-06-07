@@ -112,7 +112,7 @@ namespace J4JSoftware.CommandLine
         // An unsupported TargetedProperty (i.e., one which is not targetable) will always
         // be bound to an instance of NullOption, which is used to capture error information
         // during parsing.
-        public IOption? BoundOption { get; set; }
+        public Option? BoundOption { get; set; }
 
         // When getting or setting the value of the property described by this TargetedProperty
         // you have to have access to the container object which owns the property. GetContainer()
