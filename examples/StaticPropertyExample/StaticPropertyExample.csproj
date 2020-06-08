@@ -12,9 +12,9 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\AutofacCommandLine\AutofacCommandLine.csproj" />
-    <ProjectReference Include="..\FancyHelpError\FancyHelpError.csproj" />
-    <ProjectReference Include="..\J4JCommandLine\J4JCommandLine.csproj" />
+    <ProjectReference Include="..\..\AutofacCommandLine\AutofacCommandLine.csproj" />
+    <ProjectReference Include="..\..\FancyHelpError\FancyHelpError.csproj" />
+    <ProjectReference Include="..\..\J4JCommandLine\J4JCommandLine.csproj" />
   </ItemGroup>
 
 </Project>
