@@ -8,32 +8,22 @@ namespace J4JSoftware.CommandLine
 {
     public class ElementTerminator : IElementTerminator
     {
-        private readonly List<char> _quotes = new List<char>();
-
         private StringComparison _textComp;
         private CommandLineErrors _errors;
+        private MasterTextCollection _masterText;
 
-        public bool IsInitialized => ValueEnclosers != null;
-
-        public UniqueText ValueEnclosers { get; private set; }
-        public ReadOnlyCollection<char> QuoteCharacters => _quotes.AsReadOnly();
+        public bool IsInitialized {get; private set; }
 
         public void Initialize( 
             StringComparison textComp,
             CommandLineErrors errors,
-            IEnumerable<string>? enclosers = null,
-            IEnumerable<char>? quoteChars = null)
+            MasterTextCollection masterText )
         {
             _textComp = textComp;
             _errors = errors;
+            _masterText = masterText;
 
-            if( quoteChars != null )
-                _quotes.AddRange( quoteChars );
-
-            ValueEnclosers = new UniqueText(_textComp);
-
-            if( enclosers != null )
-                ValueEnclosers.AddRange( enclosers );
+            IsInitialized = true;
         }
 
         public int GetMaxTerminatorLength( string text, bool isKey )
@@ -53,9 +43,9 @@ namespace J4JSoftware.CommandLine
             // or has an even number of allowable quotes (i.e., the quotes are 'closed')
             var closedQuotes = true;
 
-            foreach( var quoteChar in _quotes )
+            foreach( var quoteChar in _masterText[TextUsageType.Quote] )
             {
-                closedQuotes &= text.Count( c => c == quoteChar ) % 2 == 0;
+                closedQuotes &= text.Count( c => c == quoteChar[0] ) % 2 == 0;
             }
 
             if( closedQuotes )
@@ -68,7 +58,7 @@ namespace J4JSoftware.CommandLine
             // a key
             if( isKey )
             {
-                foreach( var terminator in ValueEnclosers )
+                foreach( var terminator in _masterText[TextUsageType.ValueEncloser] )
                 {
                     var termLen = terminator.Length;
 

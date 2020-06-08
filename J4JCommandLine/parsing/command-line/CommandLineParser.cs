@@ -28,15 +28,13 @@ namespace J4JSoftware.CommandLine
         public bool Initialize( 
             StringComparison keyComp, 
             CommandLineErrors errors,
-            IEnumerable<string> prefixes, 
-            IEnumerable<string>? enclosers = null,
-            IEnumerable<char>? quoteChars = null )
+            MasterTextCollection masterText )
         {
             _keyComp = keyComp;
 
-            Prefixer.Initialize( keyComp, errors, prefixes.ToArray() );
+            Prefixer.Initialize( keyComp, errors, masterText );
 
-            _terminator.Initialize(keyComp, errors, enclosers, quoteChars);
+            _terminator.Initialize(keyComp, errors, masterText);
 
             return Prefixer.IsInitialized && _terminator.IsInitialized;
         }

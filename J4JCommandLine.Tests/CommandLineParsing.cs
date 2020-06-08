@@ -16,12 +16,17 @@ namespace J4JCommandLine.Tests
             _cmdLineParser = TestServiceProvider.Instance.GetRequiredService<ICommandLineParser>();
             _errors = new CommandLineErrors( StringComparison.OrdinalIgnoreCase );
 
+            var masterText = new MasterTextCollection(StringComparison.OrdinalIgnoreCase);
+
+            masterText.AddRange(TextUsageType.HelpOptionKey, "h", "?");
+            masterText.AddRange(TextUsageType.Prefix, "-", "--", "/");
+            masterText.AddRange(TextUsageType.ValueEncloser, ":");
+            masterText.AddRange( TextUsageType.Quote, "'", "\"" );
+
             if( !_cmdLineParser.Initialize(
                 StringComparison.OrdinalIgnoreCase,
                 _errors,
-                new string[] { "-", "--", "/" },
-                new string[]{":"},
-                new char[] { '\'', '"' } ) )
+                masterText ) )
                 throw new ApplicationException( $"{nameof(CommandLineParser)} initialization failed" );
         }
 

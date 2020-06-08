@@ -6,15 +6,12 @@ namespace J4JSoftware.CommandLine
 {
     public interface IElementTerminator
     {
-        UniqueText ValueEnclosers { get; }
-        ReadOnlyCollection<char> QuoteCharacters { get; }
         bool IsInitialized { get; }
 
         void Initialize(
             StringComparison textComp,
             CommandLineErrors errors,
-            IEnumerable<string>? enclosers = null,
-            IEnumerable<char>? quoteChars = null );
+            MasterTextCollection masterText );
 
         int GetMaxTerminatorLength( string text, bool isKey );
     }

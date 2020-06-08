@@ -15,7 +15,7 @@ namespace J4JSoftware.CommandLine
     {
         private readonly ICommandLineParser _parser;
         private readonly IEnumerable<ITextConverter> _converters;
-        private readonly UniqueText _helpKeys;
+        private readonly MasterTextCollection _masterText;
         private readonly IConsoleOutput _consoleOutput;
         private readonly List<TargetedProperty> _properties = new List<TargetedProperty>();
         private readonly ITargetableTypeFactory _targetableTypeFactory;
@@ -35,7 +35,7 @@ namespace J4JSoftware.CommandLine
             IEnumerable<ITextConverter> converters,
             StringComparison keyComp,
             CommandLineErrors errors,
-            List<string> helpKeys,
+            MasterTextCollection masterText,
             IConsoleOutput consoleOutput
         )
         {
@@ -47,10 +47,9 @@ namespace J4JSoftware.CommandLine
 
             _targetableTypeFactory = new TargetableTypeFactory( _converters );
 
-            _helpKeys = new UniqueText( _keyComp );
-            _helpKeys.AddRange(helpKeys);
+            _masterText = masterText;
 
-            _options = new OptionCollection( _keyComp, _helpKeys );
+            _options = new OptionCollection( _masterText );
             _errors = errors;
         }
 
@@ -177,7 +176,7 @@ namespace J4JSoftware.CommandLine
             }
 
             if( parseResults.Any(
-                pr => _helpKeys.Any(hk=>string.Equals(hk, pr.Key)) ) )
+                pr => _masterText[TextUsageType.HelpOptionKey].Any(hk=>string.Equals(hk, pr.Key)) ) )
             {
                 retVal |= MappingResults.HelpRequested;
 
@@ -223,7 +222,7 @@ namespace J4JSoftware.CommandLine
 
             foreach (var error in _errors)
             {
-                _consoleOutput.AddError( error.Errors, _parser.Prefixer.Prefixes.ConjugateKey( error.Source.Key ) );
+                _consoleOutput.AddError( error.Errors, _masterText.ConjugateKey( error.Source.Key ) );
             }
 
             _outputPending = true;
@@ -258,7 +257,7 @@ namespace J4JSoftware.CommandLine
                 .Where(opt => opt.OptionType != OptionType.Null))
             {
                 _consoleOutput.AddOption(
-                    option.ConjugateKeys(_parser.Prefixer.Prefixes), 
+                    option.ConjugateKeys(_masterText), 
                     option.Description, 
                     option.DefaultValue?.ToString() );
             }

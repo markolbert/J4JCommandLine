@@ -9,23 +9,20 @@ namespace J4JSoftware.CommandLine
     public class OptionCollection : IEnumerable<Option> 
     {
         private readonly List<Option> _options = new List<Option>();
-        private readonly StringComparison _keyComp;
-        private readonly UniqueText _helpKeys;
+        private readonly MasterTextCollection _masterText;
 
-        public OptionCollection( StringComparison keyComp, UniqueText helpKeys )
+        public OptionCollection( MasterTextCollection masterText )
         {
-            _keyComp = keyComp;
-            _helpKeys = helpKeys;
+            _masterText = masterText;
         }
 
         // determines whether or not a key is being used by an existing option, honoring whatever
         // case sensitivity is in use
         public bool HasKey( string key )
         {
-            if( _options.Any( opt => opt.Keys.Any( k => string.Equals( k, key, _keyComp ) ) ) )
-                return true;
-
-            if( _helpKeys.HasText( key ) )
+            //if( _options.Any( opt => opt.Keys.Any( k => string.Equals( k, key, _keyComp ) ) ) )
+            //    return true;
+            if( _masterText.Contains( key, TextUsageType.OptionKey ) )
                 return true;
 
             return false;
@@ -38,17 +35,18 @@ namespace J4JSoftware.CommandLine
 
         public Option? this[ string key ] =>
             _options.FirstOrDefault( opt =>
-                opt.Keys.Any( k => string.Equals( k, key, _keyComp ) ) );
+                opt.Keys.Any( k => string.Equals( k, key, _masterText.TextComparison ) ) );
 
         public bool Add( Option option )
         {
             foreach( var key in option.Keys )
             {
-                if( HasKey(key) )
+                if( _masterText.Contains(key) )
                     return false;
             }
 
             _options.Add( option );
+            _masterText.AddRange( TextUsageType.OptionKey, option.Keys );
 
             return true;
         }

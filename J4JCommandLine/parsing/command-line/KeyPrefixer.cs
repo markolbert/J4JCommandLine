@@ -7,18 +7,15 @@ namespace J4JSoftware.CommandLine
     {
         private StringComparison _textComp;
         private CommandLineErrors _errors;
+        private MasterTextCollection _masterText;
 
-        public bool IsInitialized => Prefixes?.Count() > 0;
+        public bool IsInitialized => _masterText[TextUsageType.Prefix]?.Count() > 0;
 
-        public UniqueText Prefixes { get; private set; }
-
-        public void Initialize( StringComparison textComp, CommandLineErrors errors, params string[] prefixers )
+        public void Initialize( StringComparison textComp, CommandLineErrors errors, MasterTextCollection masterText )
         {
             _textComp = textComp;
             _errors = errors;
-
-            Prefixes = new UniqueText( _textComp );
-            Prefixes.AddRange( prefixers );
+            _masterText = masterText;
 
             if( !IsInitialized )
                 _errors.AddError( null, null, $"No option prefixes were specified" );
@@ -37,7 +34,7 @@ namespace J4JSoftware.CommandLine
             if ( string.IsNullOrEmpty( text ) )
                 return retVal;
 
-            foreach (var prefix in Prefixes)
+            foreach (var prefix in _masterText[TextUsageType.Prefix])
             {
                 var prefixLen = prefix.Length;
 

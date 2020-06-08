@@ -12,9 +12,7 @@ namespace J4JSoftware.CommandLine
         bool Initialize(
             StringComparison keyComp,
             CommandLineErrors errors,
-            IEnumerable<string> prefixes,
-            IEnumerable<string>? enclosers = null,
-            IEnumerable<char>? quoteChars = null );
+            MasterTextCollection masterText );
         
         ParseResults Parse( string[] args );
         ParseResults Parse( string cmdLine );

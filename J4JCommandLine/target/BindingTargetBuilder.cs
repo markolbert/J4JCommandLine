@@ -78,6 +78,8 @@ namespace J4JSoftware.CommandLine
             errors = new CommandLineErrors( _caseSensitivity );
             result = null;
 
+            var masterText = new MasterTextCollection( _caseSensitivity );
+
             if( _helpKeys == null || _helpKeys.Length == 0 )
             {
                 errors.AddError(null, null, $"No help keys defined");
@@ -85,6 +87,11 @@ namespace J4JSoftware.CommandLine
 
                 return false;
             }
+
+            masterText.AddRange( TextUsageType.HelpOptionKey, _helpKeys );
+            masterText.AddRange( TextUsageType.Prefix, _prefixes );
+            masterText.AddRange( TextUsageType.ValueEncloser, _enclosers );
+            masterText.AddRange( TextUsageType.Quote, _quotes.Select( q => q.ToString() ) );
 
             if ( !typeof(TValue).HasPublicParameterlessConstructor() )
             {
@@ -96,7 +103,7 @@ namespace J4JSoftware.CommandLine
 
             value ??= Activator.CreateInstance<TValue>();
 
-            if( !_parser.Initialize( _caseSensitivity, errors, _prefixes, _enclosers, _quotes ) )
+            if ( !_parser.Initialize( _caseSensitivity, errors, masterText ) )
             {
                 DisplayErrors(errors);
 
@@ -108,7 +115,7 @@ namespace J4JSoftware.CommandLine
                 _converters,
                 _caseSensitivity,
                 errors,
-                _helpKeys.ToList(),
+                masterText,
                 _consoleOutput )
             {
                 ProgramName = _progName,

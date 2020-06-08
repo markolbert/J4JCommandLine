@@ -65,7 +65,10 @@ namespace J4JSoftware.CommandLine
 
         public void AddError( List<string> errors, List<string>? keys = null )
         {
-            _grid.Children.Add( new Cell( keys ?? new List<string>() )
+            keys ??= new List<string>();
+            var keyText = string.Join( ", ", keys );
+
+            _grid.Children.Add( new Cell( keyText )
             {
                 Align = KeyAlignment,
                 Color = ErrorColor,
@@ -83,7 +86,9 @@ namespace J4JSoftware.CommandLine
 
         public void AddOption( List<string> keys, string? description = null, string? defaultText = null )
         {
-            _grid.Children.Add(new Cell(keys)
+            var keyText = string.Join(", ", keys);
+
+            _grid.Children.Add(new Cell(keyText)
             {
                 Align = KeyAlignment,
                 Color = HelpColor,

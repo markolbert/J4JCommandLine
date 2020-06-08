@@ -9,10 +9,10 @@ namespace J4JSoftware.CommandLine
         public static string[] DefaultEnclosers = { "=", ":" };
         public static string[] DefaultHelpKeys = { "h", "?" };
 
-        private UniqueText? _prefixes = null;
-        private UniqueText? _enclosers = null;
-        private UniqueText? _delimiters = null;
-        private UniqueText? _helpKeys = null;
+        private ImmutableTextCollection? _prefixes = null;
+        private ImmutableTextCollection? _enclosers = null;
+        private ImmutableTextCollection? _delimiters = null;
+        private ImmutableTextCollection? _helpKeys = null;
         private bool _textCompChanged = false;
 
         // an optional description
@@ -22,13 +22,13 @@ namespace J4JSoftware.CommandLine
         public string? ProgramName { get; set; }
 
         // the strings used to introduce a key (e.g., "-, --" in "-x --y")
-        public UniqueText Prefixes
+        public ImmutableTextCollection Prefixes
         {
             get
             {
                 if( _textCompChanged || _prefixes == null )
                 {
-                    var newCollection = new UniqueText(TextComparison);
+                    var newCollection = new ImmutableTextCollection(TextComparison);
 
                     if( _prefixes == null )
                         newCollection.AddRange( DefaultPrefixes );
@@ -43,13 +43,13 @@ namespace J4JSoftware.CommandLine
 
         // the strings used to enclose parameters in a command line option
         // (e.g., the ':' in "-x:somevalue")
-        public UniqueText ValueEnclosers
+        public ImmutableTextCollection ValueEnclosers
         {
             get
             {
                 if (_textCompChanged || _enclosers == null)
                 {
-                    var newCollection = new UniqueText(TextComparison);
+                    var newCollection = new ImmutableTextCollection(TextComparison);
 
                     if (_enclosers == null)
                         newCollection.AddRange(DefaultEnclosers);
@@ -63,13 +63,13 @@ namespace J4JSoftware.CommandLine
         }
 
         // the text delimiters (usually a " or ')
-        public UniqueText TextDelimiters
+        public ImmutableTextCollection TextDelimiters
         {
             get
             {
                 if (_textCompChanged || _delimiters == null)
                 {
-                    var newCollection = new UniqueText(TextComparison);
+                    var newCollection = new ImmutableTextCollection(TextComparison);
 
                     if (_delimiters== null)
                         newCollection.AddRange(DefaultTextDelimiters);
@@ -83,13 +83,13 @@ namespace J4JSoftware.CommandLine
         }
 
         // the keys which indicate help was requested
-        public UniqueText HelpKeys
+        public ImmutableTextCollection HelpKeys
         {
             get
             {
                 if( _textCompChanged || _helpKeys == null )
                 {
-                    var newCollection = new UniqueText( TextComparison );
+                    var newCollection = new ImmutableTextCollection( TextComparison );
 
                     if( _helpKeys == null )
                         newCollection.AddRange( DefaultHelpKeys );
