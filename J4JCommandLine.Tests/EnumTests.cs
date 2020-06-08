@@ -38,7 +38,7 @@ namespace J4JCommandLine.Tests
             MappingResults result,
             PlainEnum desiredValue )
         {
-            _builder.Build<RootProperties>(null, out var target, out var _);
+            _builder.Build<RootProperties>(null, out var target );
 
             target.Should().NotBeNull();
 
@@ -69,7 +69,7 @@ namespace J4JCommandLine.Tests
             MappingResults result,
             FlagsEnum desiredValue)
         {
-            _builder.Build<RootProperties>(null, out var target, out var _);
+            _builder.Build<RootProperties>(null, out var target);
 
             target.Should().NotBeNull();
 
@@ -100,7 +100,7 @@ namespace J4JCommandLine.Tests
             MappingResults result,
             UnconvertibleEnum desiredValue)
         {
-            _builder.Build<RootProperties>(null, out var target, out var _);
+            _builder.Build<RootProperties>(null, out var target);
 
             target.Should().NotBeNull();
 

@@ -72,10 +72,10 @@ namespace J4JSoftware.CommandLine
             return this;
         }
 
-        public bool Build<TValue>( TValue? value, out BindingTarget<TValue>? result, out CommandLineErrors errors )
+        public bool Build<TValue>( TValue? value, out BindingTarget<TValue>? result )
             where TValue : class
         {
-            errors = new CommandLineErrors( _caseSensitivity );
+            var errors = new CommandLineErrors( _caseSensitivity );
             result = null;
 
             var masterText = new MasterTextCollection( _caseSensitivity );

@@ -59,7 +59,7 @@ namespace J4JCommandLine.Tests
             MappingResults result,
             int desiredValue )
         {
-            _builder.Build<RootProperties>(null, out var target, out var _);
+            _builder.Build<RootProperties>(null, out var target);
 
             target.Should().NotBeNull();
 
@@ -93,7 +93,7 @@ namespace J4JCommandLine.Tests
         {
             var desired = desiredValues == null ? new List<int>() : new List<int>(desiredValues);
 
-            _builder.Build<RootProperties>(null, out var target, out var _);
+            _builder.Build<RootProperties>(null, out var target);
 
             target.Should().NotBeNull();
 
@@ -128,7 +128,7 @@ namespace J4JCommandLine.Tests
         {
             var desired = desiredValues == null ? new List<int>() : new List<int>( desiredValues );
 
-            _builder.Build<RootProperties>(null, out var target, out var _);
+            _builder.Build<RootProperties>(null, out var target);
 
             target.Should().NotBeNull();
 
@@ -156,7 +156,7 @@ namespace J4JCommandLine.Tests
             string key,
             string arg)
         {
-            _builder.Build<RootProperties>(null, out var target, out var _);
+            _builder.Build<RootProperties>(null, out var target);
 
             target.Should().NotBeNull();
 
@@ -177,7 +177,7 @@ namespace J4JCommandLine.Tests
             string key,
             string arg )
         {
-            _builder.Build<RootProperties>(null, out var target, out var _);
+            _builder.Build<RootProperties>(null, out var target);
 
             target.Should().NotBeNull();
 
@@ -202,7 +202,7 @@ namespace J4JCommandLine.Tests
             int maxArgs,
             MappingResults result)
         {
-            _builder.Build<RootProperties>(null, out var target, out var _);
+            _builder.Build<RootProperties>(null, out var target);
 
             target.Should().NotBeNull();
 
@@ -242,7 +242,7 @@ namespace J4JCommandLine.Tests
             int maxArgs,
             MappingResults result)
         {
-            _builder.Build<RootProperties>(null, out var target, out var _);
+            _builder.Build<RootProperties>(null, out var target);
 
             target.Should().NotBeNull();
 

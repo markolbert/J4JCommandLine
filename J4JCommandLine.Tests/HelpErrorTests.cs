@@ -36,7 +36,7 @@ namespace J4JCommandLine.Tests
             string key,
             MappingResults result )
         {
-            _builder.Build<RootProperties>(null, out var target, out var _);
+            _builder.Build<RootProperties>( null, out var target );
 
             target.Should().NotBeNull();
 
@@ -55,10 +55,9 @@ namespace J4JCommandLine.Tests
                 .Description("a test program for exercising J4JCommandLine")
                 .ProgramName($"{this.GetType()}");
 
-            builder.Build<RootProperties>(null, out var target, out var errors);
+            builder.Build<RootProperties>(null, out var target);
 
             target.Should().BeNull();
-            errors.Count.Should().BeGreaterThan( 0 );
         }
 
         [Fact]
@@ -72,10 +71,9 @@ namespace J4JCommandLine.Tests
                 .Description("a test program for exercising J4JCommandLine")
                 .ProgramName($"{this.GetType()}");
 
-            builder.Build<RootProperties>(null, out var target, out var errors);
+            _builder.Build<RootProperties>(null, out var target);
 
             target.Should().NotBeNull();
-            errors.Count.Should().Be( 0 );
         }
     }
 }

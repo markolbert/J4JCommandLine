@@ -16,7 +16,7 @@ builder.Prefixes( "-", "--", "/" )
     .HelpKeys( "h", "?" );
 
 // create an instance of BindingTarget
-builder.Build<Program>(null, out var binder, out var _);
+builder.Build<Program>( null, out var binder );
 
 if( binder == null )
     throw new NullReferenceException( nameof(Program) );
@@ -43,14 +43,12 @@ Console.WriteLine($"TextValue is {TextValue}");
 - [Goal and Concept](docs/goal-concept.md)
 - [Usage](docs/usage.md)
 - Examples
-  - [Binding to static properties]
-  - [Binding to a configuration object]
-  - [Indirectly binding to a method]
+  - [Binding to static properties](docs/example-static.md)
+  - [Binding to a configuration object](docs/example-instance.md)
 - [Architectural Notes](docs/diagrams.md)
-- Extending the Framework
-  - [Text Converters]
-- Notes
-  - [Command line parser]
+- [Autofac Dependency Injection Support](docs/di.md)
+- [Adding Text Converters](docs/text-converters.md)
+- [Notes on the first-stage command line parser](docs/parser.md)
 
 #### Inspiration and Dedication
 
