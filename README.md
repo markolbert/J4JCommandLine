@@ -46,7 +46,7 @@ Console.WriteLine($"TextValue is {TextValue}");
   - [Binding to static properties]
   - [Binding to a configuration object]
   - [Indirectly binding to a method]
-- [Structural Diagram]
+- [Architectural Notes](docs/diagrams.md)
 - Extending the Framework
   - [Text Converters]
 - Notes

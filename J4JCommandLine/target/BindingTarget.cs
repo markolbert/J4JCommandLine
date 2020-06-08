@@ -123,7 +123,7 @@ namespace J4JSoftware.CommandLine
             // unused) key
             keys = _options.GetUniqueKeys(keys);
 
-            // if something went wrong create a NullOption to return. These cannot be
+            // if something went wrong create an UntargetedOption to return. These cannot be
             // bound to commandline parameters but serve to capture error information
             if (keys.Length == 0 || option == null || property == null)
                 option = new UntargetedOption(_options);
