@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices.ComTypes;
 using System.Text;
 
@@ -9,7 +10,8 @@ namespace J4JSoftware.CommandLine
     public class CommandLineParser : ICommandLineParser
     {
         private readonly IElementTerminator _terminator;
-        
+        private readonly IElementKey _prefixer;
+
         private StringComparison _keyComp;
 
         public CommandLineParser( 
@@ -18,12 +20,10 @@ namespace J4JSoftware.CommandLine
             )
         {
             _terminator = terminator;
-            Prefixer = prefixer;
+            _prefixer = prefixer;
         }
 
-        public IElementKey Prefixer { get; }
-
-        public bool IsInitialized => Prefixer.IsInitialized && _terminator.IsInitialized;
+        public bool IsInitialized => _prefixer.IsInitialized && _terminator.IsInitialized;
 
         public bool Initialize( 
             StringComparison keyComp, 
@@ -32,11 +32,11 @@ namespace J4JSoftware.CommandLine
         {
             _keyComp = keyComp;
 
-            Prefixer.Initialize( keyComp, errors, masterText );
+            _prefixer.Initialize( keyComp, errors, masterText );
 
             _terminator.Initialize(keyComp, errors, masterText);
 
-            return Prefixer.IsInitialized && _terminator.IsInitialized;
+            return _prefixer.IsInitialized && _terminator.IsInitialized;
         }
 
         public ParseResults Parse( string[] args ) => Parse( string.Join( " ", args ) );
@@ -59,7 +59,7 @@ namespace J4JSoftware.CommandLine
 
                 // analyze the sequence as it currently stands to see if it includes
                 // a prefixed key and/or has been terminated
-                var maxPrefix = Prefixer.GetMaxPrefixLength(element);
+                var maxPrefix = _prefixer.GetMaxPrefixLength(element);
                 var maxTerminator = _terminator.GetMaxTerminatorLength(element, maxPrefix > 0);
 
                 // keep adding characters unless we've encountered a termination 
@@ -86,7 +86,7 @@ namespace J4JSoftware.CommandLine
                     // ParseResult if the key isn't already stored
                     if( !retVal.Contains( element ) )
                     {
-                        var newResult = new ParseResult{Key = element};
+                        var newResult = new ParseResult( retVal ) { Key = element };
 
                         // if we're adding an new option/key at the end of the command line
                         // it must be a switch (parameterless option), so add "true" to its
@@ -108,8 +108,11 @@ namespace J4JSoftware.CommandLine
                     // parameter. We store it into curResult because curResult is the
                     // instance associated with the last key value
                     // if curResult is null it's because we haven't encountered our first
-                    // key, in which case we just ignore the parsed text
-                    curResult?.Parameters.Add( element );
+                    // key, in which case the parsed text gets assigned to the return values
+                    // Unkeyed collection
+                    if( curResult == null )
+                            retVal.Unkeyed.Parameters.Add( element );
+                    else curResult.Parameters.Add( element );
                 }
 
                 // clear the accumulator so we can start processing the next character sequence

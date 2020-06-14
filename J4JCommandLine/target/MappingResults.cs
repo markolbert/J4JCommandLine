@@ -19,6 +19,8 @@ namespace J4JSoftware.CommandLine
         NotDefinedOrCreatable = 1 << 8,
         NotPublicReadWrite = 1 << 9,
         UnspecifiedFailure = 1 << 10,
+        BindingTargetNotConfigured = 1 << 11,
+        UnprocessedUnKeyedParameters = 1 << 12,
 
         Success = 0
     }

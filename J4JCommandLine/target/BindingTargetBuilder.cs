@@ -11,7 +11,8 @@ namespace J4JSoftware.CommandLine
         private readonly IEnumerable<ITextConverter> _converters;
         private readonly IConsoleOutput _consoleOutput;
 
-        private StringComparison _caseSensitivity = StringComparison.OrdinalIgnoreCase;
+        private StringComparison _textComp = StringComparison.OrdinalIgnoreCase;
+        private bool _ignoreUnprocesssed = true;
         private string _progName;
         private string _description;
         private string[] _prefixes;
@@ -32,7 +33,13 @@ namespace J4JSoftware.CommandLine
 
         public BindingTargetBuilder CaseSensitivity( StringComparison textComp )
         {
-            _caseSensitivity = textComp;
+            _textComp = textComp;
+            return this;
+        }
+
+        public BindingTargetBuilder IgnoreUnprocessedUnkeyedParameters( bool ignore )
+        {
+            _ignoreUnprocesssed = ignore;
             return this;
         }
 
@@ -75,10 +82,10 @@ namespace J4JSoftware.CommandLine
         public bool Build<TValue>( TValue? value, out BindingTarget<TValue>? result )
             where TValue : class
         {
-            var errors = new CommandLineErrors( _caseSensitivity );
+            var errors = new CommandLineErrors( _textComp );
             result = null;
 
-            var masterText = new MasterTextCollection( _caseSensitivity );
+            var masterText = new MasterTextCollection( _textComp );
 
             if( _helpKeys == null || _helpKeys.Length == 0 )
             {
@@ -103,26 +110,36 @@ namespace J4JSoftware.CommandLine
 
             value ??= Activator.CreateInstance<TValue>();
 
-            if ( !_parser.Initialize( _caseSensitivity, errors, masterText ) )
+            if ( !_parser.Initialize( _textComp, errors, masterText ) )
             {
                 DisplayErrors(errors);
 
                 return false;
             }
 
-            result = new BindingTarget<TValue>( value,
-                _parser,
-                _converters,
-                _caseSensitivity,
-                errors,
-                masterText,
-                _consoleOutput )
+            result = new BindingTarget<TValue>()
             {
+                Value = value,
+                Parser = _parser,
+                Converters = _converters,
+                TypeFactory = new TargetableTypeFactory(_converters),
+                IgnoreUnprocessedUnkeyedParameters = _ignoreUnprocesssed,
+                Options = new OptionCollection(masterText),
+                Errors = errors,
+                TextComparison = _textComp,
+                MasterText = masterText,
+                ConsoleOutput = _consoleOutput,
                 ProgramName = _progName,
                 Description = _description
             };
 
-            result.Initialize();
+            if( !result.Initialize() )
+            {
+                errors.AddError(null, null, $"{result.GetType().Name} is not configured");
+                DisplayErrors(errors);
+
+                return false;
+            }
 
             return true;
         }

@@ -44,10 +44,10 @@ namespace J4JSoftware.CommandLine
         public bool IsRequired { get; internal set; }
 
         // the minimum number of parameters to a command line option
-        public int MinParameters { get; internal set; }
+        public int MinParameters { get; internal set; } = 1;
 
         // the maximum number of parameters to a command line option
-        public int MaxParameters { get; internal set; } = int.MaxValue;
+        public int MaxParameters { get; internal set; } = 1;
 
         // the validator for the Option
         public IOptionValidator Validator { get; internal set; }
@@ -84,7 +84,6 @@ namespace J4JSoftware.CommandLine
             return false;
         }
 
-
         // the method called to convert the parsing results for a particular command
         // line key to a option value. Return values other than MappingResults.Success
         // indicate one or more problems were encountered in the conversion and validation
@@ -97,7 +96,10 @@ namespace J4JSoftware.CommandLine
 
         // validates whether or not a valid number of parameters are included in the specified
         // IParseResult
-        protected virtual bool ValidParameterCount(IBindingTarget bindingTarget, IParseResult parseResult, out MappingResults result)
+        protected virtual bool ValidParameterCount(
+            IBindingTarget bindingTarget, 
+            IParseResult parseResult, 
+            out MappingResults result )
         {
             if (parseResult.NumParameters < MinParameters)
             {
@@ -110,15 +112,20 @@ namespace J4JSoftware.CommandLine
                 return false;
             }
 
-            if (parseResult.NumParameters > MaxParameters)
+            if( parseResult.NumParameters > MaxParameters )
             {
-                bindingTarget.AddError(
-                    parseResult.Key,
-                    $"Expected {MinParameters} parameters, got {parseResult.NumParameters}" );
+                if( parseResult.IsLastResult )
+                    parseResult.MoveExcessParameters(MaxParameters);
+                else
+                {
+                    bindingTarget.AddError(
+                        parseResult.Key,
+                        $"Expected no more than {MaxParameters} parameters, got {parseResult.NumParameters}");
 
-                result = MappingResults.TooManyParameters;
+                    result = MappingResults.TooManyParameters;
 
-                return false;
+                    return false;
+                }
             }
 
             result = MappingResults.Success;

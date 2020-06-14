@@ -36,13 +36,13 @@ namespace J4JSoftware.CommandLine
             return option;
         }
 
-        // Checks to see if the specified OptionBase is an Option (and not a NullOption, which has no
+        // Checks to see if the specified Option is an Option (and not a NullOption, which has no
         // need of a default value) and that the proposed default value matches the type the Option is
         // working with and, if both conditions are met, sets Option's default value
         public static T SetDefaultValue<T>(this T option, object defaultValue)
             where T : Option
         {
-            if (option.OptionType != OptionType.Mappable)
+            if (option.OptionType != OptionType.Keyed)
                 return option;
 
             if (defaultValue.GetType() != option.TargetableType.SupportedType)
@@ -53,12 +53,12 @@ namespace J4JSoftware.CommandLine
             return option;
         }
 
-        // marks the specified OptionBase as being required (i.e, must appear in the command line
+        // marks the specified Option as being required (i.e, must appear in the command line
         // arguments) provided it's an Option and not a NullOption
         public static T Required<T>( this T option )
             where T : Option
         {
-            if( option.OptionType != OptionType.Mappable )
+            if( option.OptionType != OptionType.Keyed )
                 return option;
 
             option.IsRequired = true;
@@ -66,12 +66,12 @@ namespace J4JSoftware.CommandLine
             return option;
         }
 
-        // marks the specified OptionBase as being optional (which is the default) provided
+        // marks the specified Option as being optional (which is the default) provided
         // it's an Option and not a NullOption
         public static T Optional<T>( this T option )
             where T : Option
         {
-            if( option.OptionType != OptionType.Mappable )
+            if( option.OptionType != OptionType.Keyed )
                 return option;
 
             option.IsRequired = false;
@@ -80,32 +80,33 @@ namespace J4JSoftware.CommandLine
         }
 
         // sets the minimum and maximum, if specified, allowed number of parameters that can appear
-        // after a key on the command line for an Option. Ignored if the specified OptionBase object is
+        // after a key on the command line for an Option. Ignored if the specified Option object is
         // a NullOption.
-        public static T ArgumentCount<T>( this T option, int minimum, int maximum = int.MaxValue )
+        public static T ArgumentCount<T>( this T option, int minimum, int? maximum = null )
             where T : Option
         {
-            if( option.OptionType != OptionType.Mappable )
+            if( option.OptionType != OptionType.Keyed )
                 return option;
 
             minimum = minimum < 0 ? 0 : minimum;
-            maximum = maximum < 0 ? int.MaxValue : maximum;
+            var modMax = maximum ?? minimum;
+            maximum = modMax < 0 ? minimum : modMax;
 
-            if( minimum > maximum )
+            if( minimum > modMax )
             {
-                var temp = maximum;
+                var temp = modMax;
 
-                maximum = minimum;
+                modMax = minimum;
                 minimum = temp;
             }
 
             option.MinParameters = minimum;
-            option.MaxParameters = maximum;
+            option.MaxParameters = modMax;
 
             return option;
         }
 
-        // sets the optional description for an Option. Ignored if the specified OptionBase object is
+        // sets the optional description for an Option. Ignored if the specified Option object is
         // a NullOption.
         public static T SetDescription<T>( this T option, string description )
             where T : Option
@@ -118,12 +119,12 @@ namespace J4JSoftware.CommandLine
             return option;
         }
 
-        // sets the validator for an Option. Ignored if the specified OptionBase object is
+        // sets the validator for an Option. Ignored if the specified Option object is
         // a NullOption.
         public static T SetValidator<T>( this T option, IOptionValidator validator )
             where T : Option
         {
-            if( option.OptionType != OptionType.Mappable )
+            if( option.OptionType != OptionType.Keyed )
                 return option;
 
             if( validator.SupportedType != option.TargetableType.SupportedType )

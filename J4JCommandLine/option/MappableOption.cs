@@ -4,15 +4,16 @@ using System.Collections.Generic;
 
 namespace J4JSoftware.CommandLine
 {
-    public class TargetedOption : Option
+    public class MappableOption : Option
     {
         private readonly ITextConverter _converter;
 
-        public TargetedOption(
+        public MappableOption(
             OptionCollection options,
-            ITargetableType targetableType
+            ITargetableType targetableType,
+            bool isKeyed
         )
-            : base( OptionType.Mappable, targetableType, options )
+            : base( isKeyed ? OptionType.Keyed : OptionType.Unkeyed, targetableType, options )
         {
             _converter = targetableType.Converter!;
         }
@@ -38,18 +39,21 @@ namespace J4JSoftware.CommandLine
                     break;
 
                 case Multiplicity.List:
-                    retVal = ConvertToList( bindingTarget, parseResult, out var listResult );
+                    retVal = ConvertToList( bindingTarget, parseResult, out var listResult);
                     result = listResult;
+
                     break;
 
                 case Multiplicity.SimpleValue:
-                    retVal = ConvertToSimpleValue( bindingTarget, parseResult, out var singleResult );
+                    retVal = ConvertToSimpleValue( bindingTarget, parseResult, out var singleResult);
                     result = singleResult;
+
                     break;
 
                 default:
                     result = null;
                     retVal = MappingResults.UnsupportedMultiplicity;
+
                     break;
             }
 
@@ -71,10 +75,12 @@ namespace J4JSoftware.CommandLine
 
         // checks to see if the provided IParseResult contains an allowable number of parameters and, if so,
         // attempts to convert them to a simple value (i.e., a single object, an IValueType, a string)
-        private MappingResults ConvertToSimpleValue( IBindingTarget bindingTarget, IParseResult parseResult,
+        private MappingResults ConvertToSimpleValue( 
+            IBindingTarget bindingTarget, 
+            IParseResult parseResult,
             out object? result )
         {
-            if( !ValidParameterCount(bindingTarget, parseResult, out var paramResult ) )
+            if ( !ValidParameterCount(bindingTarget, parseResult, out var paramResult ) )
             {
                 result = null;
                 return paramResult;
@@ -98,7 +104,10 @@ namespace J4JSoftware.CommandLine
 
         // checks to see if the provided IParseResult contains an allowable number of parameters and, if so,
         // attempts to convert them to an array of simple values (i.e., a single object, an IValueType, a string)
-        private MappingResults ConvertToArray( IBindingTarget bindingTarget, IParseResult parseResult, out Array? result )
+        private MappingResults ConvertToArray( 
+            IBindingTarget bindingTarget, 
+            IParseResult parseResult, 
+            out Array? result )
         {
             if( !ValidParameterCount( bindingTarget, parseResult, out var paramResult ) )
             {
@@ -133,9 +142,12 @@ namespace J4JSoftware.CommandLine
 
         // checks to see if the provided IParseResult contains an allowable number of parameters and, if so,
         // attempts to convert them to a generic list of simple values (i.e., a single object, an IValueType, a string)
-        private MappingResults ConvertToList( IBindingTarget bindingTarget, IParseResult parseResult, out IList? result )
+        private MappingResults ConvertToList( 
+            IBindingTarget bindingTarget, 
+            IParseResult parseResult, 
+            out IList? result )
         {
-            if (!ValidParameterCount( bindingTarget, parseResult, out var paramResult))
+            if (!ValidParameterCount( bindingTarget, parseResult, out var paramResult ))
             {
                 result = null;
                 return paramResult;

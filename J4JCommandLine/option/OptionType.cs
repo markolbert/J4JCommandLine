@@ -4,7 +4,8 @@
     // error information but cannot be mapped to target properties.
     public enum OptionType
     {
-        Mappable,
+        Keyed,
+        Unkeyed,
         Null
     }
 }

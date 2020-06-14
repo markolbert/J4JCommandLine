@@ -84,6 +84,8 @@ namespace J4JCommandLine.Tests
             if( required )
                 option.Required();
 
+            option.ArgumentCount( desired.Count );
+
             var cmdLineArgs = new List<string> { $"-{key}" };
             cmdLineArgs.AddRange( args );
 
@@ -118,6 +120,8 @@ namespace J4JCommandLine.Tests
             if( required )
                 option.Required();
 
+            option.ArgumentCount(desired.Count);
+
             var cmdLineArgs = new List<string> { $"-{key}" };
             cmdLineArgs.AddRange( args );
 
@@ -133,7 +137,7 @@ namespace J4JCommandLine.Tests
         [ Theory ]
         [ InlineData( new string[] { "32" }, 0, Int32.MaxValue, MappingResults.Success ) ]
         [ InlineData( new string[] { "32" }, 2, Int32.MaxValue, MappingResults.TooFewParameters ) ]
-        [ InlineData( new string[] { "32" }, 0, 0, MappingResults.TooManyParameters ) ]
+        [ InlineData( new string[] { "32" }, 0, 0, MappingResults.Success ) ]
         public void Num_parameters_list(
             string[] rawArgs,
             int minArgs,
@@ -145,7 +149,7 @@ namespace J4JCommandLine.Tests
             target.Should().NotBeNull();
 
             var option = target!.Bind( x => RootProperties.IntList, "x" );
-            option.Should().BeAssignableTo<TargetedOption>();
+            option.Should().BeAssignableTo<MappableOption>();
 
             option.ArgumentCount( minArgs, maxArgs );
 
@@ -173,7 +177,7 @@ namespace J4JCommandLine.Tests
         [ Theory ]
         [ InlineData( new string[] { "32" }, 0, Int32.MaxValue, MappingResults.Success ) ]
         [ InlineData( new string[] { "32" }, 2, Int32.MaxValue, MappingResults.TooFewParameters ) ]
-        [ InlineData( new string[] { "32" }, 0, 0, MappingResults.TooManyParameters ) ]
+        [ InlineData( new string[] { "32" }, 0, 0, MappingResults.Success ) ]
         public void Num_parameters_array(
             string[] rawArgs,
             int minArgs,
@@ -185,7 +189,7 @@ namespace J4JCommandLine.Tests
             target.Should().NotBeNull();
 
             var option = target!.Bind( x => RootProperties.IntArray, "x" );
-            option.Should().BeAssignableTo<TargetedOption>();
+            option.Should().BeAssignableTo<MappableOption>();
 
             option.ArgumentCount( minArgs, maxArgs );
 

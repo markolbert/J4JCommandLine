@@ -45,6 +45,18 @@ namespace J4JSoftware.CommandLine
                     return false;
             }
 
+            // only one unkeyed option is allowed because it corresponds to all of the
+            // un-prefixed/unkeyed parameters
+            if( option.OptionType == OptionType.Unkeyed )
+            {
+                var existing = _options.Where( opt => opt.OptionType == OptionType.Unkeyed )
+                    .Select( ( opt, idx ) => (opt,idx) )
+                    .FirstOrDefault();
+
+                if( existing.opt != null )
+                    _options.RemoveAt( existing.idx );
+            }
+
             _options.Add( option );
             _masterText.AddRange( TextUsageType.OptionKey, option.Keys );
 
