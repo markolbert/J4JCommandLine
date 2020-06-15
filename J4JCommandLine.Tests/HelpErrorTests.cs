@@ -17,27 +17,13 @@ namespace J4JCommandLine.Tests
             public int[] IntArray { get; set; }
         }
 
-        private readonly BindingTargetBuilder _builder;
-
-        public HelpErrorTests()
-        {
-            _builder = TestServiceProvider.Instance.GetRequiredService<BindingTargetBuilder>();
-
-            _builder.Prefixes("-", "--", "/")
-                .Quotes('\'', '"')
-                .HelpKeys("h", "?")
-                .Description("a test program for exercising J4JCommandLine")
-                .ProgramName($"{this.GetType()}");
-        }
-
         [ Theory ]
         [ InlineData( "h", MappingResults.HelpRequested ) ]
         public void Trigger_help(
             string key,
             MappingResults result )
         {
-            _builder.Build<RootProperties>( null, out var target );
-
+            var target = ServiceProvider.GetBindingTarget<RootProperties>(true);
             target.Should().NotBeNull();
 
             var parseResult = target!.Parse( new string[] { $"-{key}" } );
@@ -48,7 +34,7 @@ namespace J4JCommandLine.Tests
         [Fact]
         public void No_help_keys()
         {
-            var builder = TestServiceProvider.Instance.GetRequiredService<BindingTargetBuilder>();
+            var builder = ServiceProvider.Instance.GetRequiredService<BindingTargetBuilder>();
 
             builder.Prefixes("-", "--", "/")
                 .Quotes('\'', '"')
@@ -63,7 +49,7 @@ namespace J4JCommandLine.Tests
         [Fact]
         public void Duplicate_help_keys()
         {
-            var builder = TestServiceProvider.Instance.GetRequiredService<BindingTargetBuilder>();
+            var builder = ServiceProvider.Instance.GetRequiredService<BindingTargetBuilder>();
 
             builder.Prefixes("-", "--", "/")
                 .Quotes('\'', '"')
@@ -71,7 +57,7 @@ namespace J4JCommandLine.Tests
                 .Description("a test program for exercising J4JCommandLine")
                 .ProgramName($"{this.GetType()}");
 
-            _builder.Build<RootProperties>(null, out var target);
+            builder.Build<RootProperties>(null, out var target);
 
             target.Should().NotBeNull();
         }

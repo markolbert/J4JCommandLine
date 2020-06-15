@@ -16,7 +16,7 @@ namespace J4JCommandLine.Tests
 
         public ParsingTests()
         {
-            _cmdLineParser = TestServiceProvider.Instance.GetRequiredService<ICommandLineParser>();
+            _cmdLineParser = ServiceProvider.Instance.GetRequiredService<ICommandLineParser>();
             _errors = new CommandLineErrors(StringComparison.OrdinalIgnoreCase);
 
             var masterText = new MasterTextCollection(StringComparison.OrdinalIgnoreCase);

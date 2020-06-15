@@ -14,19 +14,6 @@ namespace J4JCommandLine.Tests
             public UnconvertibleEnum Unconvertible { get; set; }
         }
 
-        private readonly BindingTargetBuilder _builder;
-
-        public EnumTests()
-        {
-            _builder = TestServiceProvider.Instance.GetRequiredService<BindingTargetBuilder>();
-
-            _builder.Prefixes("-", "--", "/")
-                .Quotes('\'', '"')
-                .HelpKeys("h", "?")
-                .Description("a test program for exercising J4JCommandLine")
-                .ProgramName($"{this.GetType()}");
-        }
-
         [ Theory ]
         [ InlineData( "z", "B", true, MappingResults.MissingRequired, PlainEnum.A ) ]
         [ InlineData( "x", "B", true, MappingResults.Success, PlainEnum.B ) ]
@@ -38,8 +25,7 @@ namespace J4JCommandLine.Tests
             MappingResults result,
             PlainEnum desiredValue )
         {
-            _builder.Build<RootProperties>(null, out var target );
-
+            var target = ServiceProvider.GetBindingTarget<RootProperties>( true );
             target.Should().NotBeNull();
 
             var option = target!.Bind( x => x.Plain, "x" );
@@ -69,8 +55,7 @@ namespace J4JCommandLine.Tests
             MappingResults result,
             FlagsEnum desiredValue)
         {
-            _builder.Build<RootProperties>(null, out var target);
-
+            var target = ServiceProvider.GetBindingTarget<RootProperties>(true);
             target.Should().NotBeNull();
 
             var option = target!.Bind(x => x.Flags, "x");
@@ -100,8 +85,7 @@ namespace J4JCommandLine.Tests
             MappingResults result,
             UnconvertibleEnum desiredValue)
         {
-            _builder.Build<RootProperties>(null, out var target);
-
+            var target = ServiceProvider.GetBindingTarget<RootProperties>(true);
             target.Should().NotBeNull();
 
             var option = target!.Bind(x => x.Unconvertible, "x");

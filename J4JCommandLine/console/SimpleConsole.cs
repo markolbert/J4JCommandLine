@@ -97,7 +97,10 @@ namespace J4JSoftware.CommandLine
 
         public void Display()
         {
-            foreach (var line in _lines)
+            // the call to ToList() is done to keep xUnit, which runs tests in parallel, from
+            // causing this routine to throw an InvalidOperationException because the _lines
+            // collection gets modified by each separate test process
+            foreach (var line in _lines.ToList())
             {
                 Console.WriteLine(line);
             }
