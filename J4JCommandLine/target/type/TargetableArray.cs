@@ -8,7 +8,7 @@ namespace J4JSoftware.CommandLine
     public class TargetableArray : TargetableType
     {
         internal TargetableArray( Type type, List<ITextConverter> converters )
-            : base( type.GetElementType()!, Multiplicity.Array )
+            : base( type.GetElementType()!, PropertyMultiplicity.Array )
         {
             if( type.IsArray )
             {

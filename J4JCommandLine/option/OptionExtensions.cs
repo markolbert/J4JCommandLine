@@ -79,20 +79,6 @@ namespace J4JSoftware.CommandLine
             return option;
         }
 
-        // sets the minimum and maximum, if specified, allowed number of parameters that can appear
-        // after a key on the command line for an Option. Ignored if the specified Option object is
-        // a NullOption.
-        public static T Switch<T>( this T option, bool isSwitch = true )
-            where T : Option
-        {
-            if( option.OptionType != OptionType.Keyed )
-                return option;
-
-            option.IsSwitch = isSwitch;
-
-            return option;
-        }
-
         // sets the optional description for an Option. Ignored if the specified Option object is
         // a NullOption.
         public static T SetDescription<T>( this T option, string description )

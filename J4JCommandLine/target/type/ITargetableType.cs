@@ -11,12 +11,13 @@ namespace J4JSoftware.CommandLine
         Type SupportedType { get; }
 
         bool HasPublicParameterlessConstructor { get; }
-        Multiplicity Multiplicity { get; }
+        PropertyMultiplicity Multiplicity { get; }
 
         // the ITextConverter used to create an instance of the SupportedType (or collection of
         // SupportedType) from text value(s)
         ITextConverter? Converter { get; }
         bool IsCreatable { get; }
+        bool IsCollection { get; }
 
         object? GetDefaultValue();
     }

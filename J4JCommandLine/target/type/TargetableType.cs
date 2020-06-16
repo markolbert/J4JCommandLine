@@ -8,7 +8,7 @@ namespace J4JSoftware.CommandLine
     {
         protected TargetableType( 
             Type type, 
-            Multiplicity multiplicity
+            PropertyMultiplicity multiplicity
             )
         {
             SupportedType = type;
@@ -22,8 +22,11 @@ namespace J4JSoftware.CommandLine
         // the Type supported/described by this instance
         public Type SupportedType { get; }
 
+        public bool IsCollection =>
+            Multiplicity == PropertyMultiplicity.Array || Multiplicity == PropertyMultiplicity.List;
+
         public bool HasPublicParameterlessConstructor => ParameterlessConstructor != null;
-        public Multiplicity Multiplicity { get; }
+        public PropertyMultiplicity Multiplicity { get; }
 
         // the ITextConverter used to create an instance of the SupportedType (or collection of
         // SupportedType) from text value(s)

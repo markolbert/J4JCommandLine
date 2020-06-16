@@ -99,11 +99,11 @@ namespace J4JSoftware.CommandLine
         }
 
         public bool IsPubliclyReadWrite { get; private set; }
-        public Multiplicity Multiplicity => TargetableType.Multiplicity;
+        public PropertyMultiplicity Multiplicity => TargetableType.Multiplicity;
 
         public bool IsTargetable => ( IsCreateable || IsPreAssigned )
                                     && IsPubliclyReadWrite
-                                    && Multiplicity != Multiplicity.Unsupported;
+                                    && Multiplicity != PropertyMultiplicity.Unsupported;
 
         // The IOption bound to this TargetedProperty. This should never be null for 
         // a configured TargetedProperty but assignment of the Option being bound to is
@@ -270,7 +270,7 @@ namespace J4JSoftware.CommandLine
             // store the option key that we matched on for later use in displaying context-sensitive help
             var optionKey = parseResult == null ? BoundOption.Keys.First() : parseResult.Key;
 
-            if (Multiplicity == Multiplicity.Unsupported)
+            if (Multiplicity == PropertyMultiplicity.Unsupported)
             {
                 bindingTarget.AddError(optionKey, $"Property '{PropertyInfo.Name}' has an unsupported Multiplicity");
 

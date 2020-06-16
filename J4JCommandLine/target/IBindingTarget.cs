@@ -7,7 +7,7 @@ namespace J4JSoftware.CommandLine
 {
     public interface IBindingTarget
     {
-        bool IgnoreUnprocessedUnkeyedParameters { get; }
+        bool IgnoreUnkeyedParameters { get; }
         bool IsConfigured { get; }
 
         // Utility method for adding errors to the error collection. These are keyed by whatever

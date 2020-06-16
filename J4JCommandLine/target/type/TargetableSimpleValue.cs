@@ -9,7 +9,7 @@ namespace J4JSoftware.CommandLine
     public class TargetableSimpleValue : TargetableType
     {
         internal TargetableSimpleValue( Type type, List<ITextConverter> converters )
-            : base( type, Multiplicity.SimpleValue )
+            : base( type, PropertyMultiplicity.SimpleValue )
         {
             Converter = converters.FirstOrDefault( c => c.SupportedType == type );
 

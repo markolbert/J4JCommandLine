@@ -123,7 +123,7 @@ namespace J4JSoftware.CommandLine
                 Parser = _parser,
                 Converters = _converters,
                 TypeFactory = new TargetableTypeFactory(_converters),
-                IgnoreUnprocessedUnkeyedParameters = _ignoreUnprocesssed,
+                IgnoreUnkeyedParameters = _ignoreUnprocesssed,
                 Options = new OptionCollection(masterText),
                 Errors = errors,
                 TextComparison = _textComp,

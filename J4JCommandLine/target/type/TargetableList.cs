@@ -9,7 +9,7 @@ namespace J4JSoftware.CommandLine
     public class TargetableList : TargetableType
     {
         internal TargetableList( Type type, List<ITextConverter> converters )
-            : base(type, Multiplicity.List)
+            : base(type, PropertyMultiplicity.List)
         {
             if (typeof(ICollection).IsAssignableFrom(type) )
             {

@@ -35,10 +35,10 @@ namespace J4JSoftware.CommandLine
         internal MasterTextCollection MasterText { get; set; }
         internal IConsoleOutput ConsoleOutput { get; set; }
 
-        public bool IsConfigured => Parser != null && Converters != null && TypeFactory != null && Options != null &&
-                                    Errors != null && MasterText != null && ConsoleOutput != null;
+        public bool IsConfigured => Parser != null && Converters != null && TypeFactory != null && Options != null 
+                                    && Errors != null && MasterText != null && ConsoleOutput != null;
 
-        public bool IgnoreUnprocessedUnkeyedParameters { get; internal set; }
+        public bool IgnoreUnkeyedParameters { get; internal set; }
 
         // The instance of TValue being bound to, which was either supplied in the constructor to 
         // this instance or created by it if TValue has a public parameterless constructor
@@ -75,15 +75,28 @@ namespace J4JSoftware.CommandLine
             params string[] keys )
         {
             if( !IsConfigured )
-                return GetUntargetedOption( keys, $"{this.GetType().Name} is not configured" );
+                return GetUntargetedOption( keys, null, $"{this.GetType().Name} is not configured" );
 
             // determine whether we were given at least one valid, unique (i.e., so far
             // unused) key
             keys = Options.GetUniqueKeys(keys);
 
-            return keys.Length == 0
-                ? GetUntargetedOption( keys, $"No unique keys defined" )
-                : GetOption<TProp>( propertySelector.GetPropertyPathInfo(), keys );
+            if( keys.Length == 0 )
+                return GetUntargetedOption( keys, null, $"No unique keys defined" );
+
+            var property = GetTargetedProperty(propertySelector.GetPropertyPathInfo());
+
+            if( property.TargetableType.Converter == null )
+                return GetUntargetedOption( 
+                    keys, 
+                    property,
+                    $"No converter for {property.TargetableType.SupportedType.Name}" );
+            
+            var retVal = GetOption( property, true );
+
+            retVal.AddKeys( keys );
+
+            return retVal;
         }
 
         // binds the selected property to a newly-created Option instance which will enable
@@ -100,11 +113,17 @@ namespace J4JSoftware.CommandLine
         public Option BindUnkeyed<TProp>( Expression<Func<TValue, TProp>> propertySelector )
         {
             if( !IsConfigured )
-                return GetUntargetedOption( null, $"{this.GetType().Name} is not configured" );
+                return GetUntargetedOption( null, null, $"{this.GetType().Name} is not configured" );
 
-            var retVal = GetOption<TProp>( propertySelector.GetPropertyPathInfo(), null );
+            var property = GetTargetedProperty(propertySelector.GetPropertyPathInfo());
 
-            return retVal;
+            if( property.TargetableType.Converter == null )
+                return GetUntargetedOption( 
+                    null, 
+                    property,
+                    $"No converter for {property.TargetableType.SupportedType.Name}" );
+
+            return GetOption( property, false );
         }
 
         // Parses the command line arguments against the Option objects bound to 
@@ -162,7 +181,7 @@ namespace J4JSoftware.CommandLine
 
             if( unkeyed == null )
             {
-                if( !IgnoreUnprocessedUnkeyedParameters && parseResults.Unkeyed.NumParameters > 0 )
+                if( !IgnoreUnkeyedParameters && parseResults.Unkeyed.NumParameters > 0 )
                 {
                     retVal |= MappingResults.UnprocessedUnKeyedParameters;
                     AddError( null, $"{parseResults.Unkeyed.NumParameters:n0} unprocessed parameter(s)" );
@@ -205,54 +224,60 @@ namespace J4JSoftware.CommandLine
             Errors.AddError( this, key, error );
         }
 
-        private Option GetOption<TProp>(List<PropertyInfo> pathElements, string[]? keys )
+        private TargetedProperty GetTargetedProperty( List<PropertyInfo> pathElements )
         {
-            TargetedProperty? property = null;
+            TargetedProperty? retVal = null;
 
             // walk through the chain of PropertyInfo objects creating TargetedProperty objects
             // for each property. These objects define whether a property is targetable and, if 
             // so, how to bind an Option to it.
             foreach (var pathElement in pathElements)
             {
-                property = new TargetedProperty(
+                retVal = new TargetedProperty(
                     pathElement,
                     Value,
-                    property,
+                    retVal,
                     TypeFactory,
                     TextComparison
                 );
             }
 
-            if( property == null )
+            if (retVal == null)
                 throw new NullReferenceException($"Could not create final TargetedProperty");
 
-            Option retVal;
+            _properties.Add(retVal);
 
-            if( property.TargetableType.Converter == null )
-                retVal = GetUntargetedOption( keys, $"No converter for {property.TargetableType.SupportedType.Name}" );
+            return retVal;
+        }
+
+        private Option GetOption( TargetedProperty property, bool isKeyed )
+        {
+            var style = OptionStyle.SingleValued;
+
+            if( property.TargetableType.IsCollection )
+                style = OptionStyle.Collection;
             else
             {
-                if( keys == null )
-                    retVal = new MappableOption(Options, property.TargetableType, false );
-                else
-                {
-                    retVal = new MappableOption(Options, property.TargetableType, true);
-                    retVal.AddKeys(keys);
-                }
+                if( property.PropertyInfo.PropertyType == typeof(bool) )
+                    style = OptionStyle.Switch;
             }
+
+            var retVal = new MappableOption( Options, property.TargetableType, isKeyed )
+            {
+                OptionStyle = style
+            };
 
             // create an Option object to bind to the "final" property (i.e., the one
             // we're trying to bind to)
-            _properties.Add(property);
 
-            Options.Add(retVal);
+            Options.Add( retVal );
 
             property.BoundOption = retVal;
 
             return retVal;
         }
 
-        private Option GetUntargetedOption( string[]? keys, string error )
+        private Option GetUntargetedOption( string[]? keys, TargetedProperty? property, string error )
         {
             var retVal = new UntargetedOption( Options );
 
@@ -260,6 +285,9 @@ namespace J4JSoftware.CommandLine
                 retVal.AddKeys( keys );
 
             Options.Add( retVal );
+
+            if( property != null )
+                property.BoundOption = retVal;
 
             Errors.AddError( this, keys.FirstOrDefault(), error );
 

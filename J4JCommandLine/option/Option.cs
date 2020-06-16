@@ -1,8 +1,16 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 
 namespace J4JSoftware.CommandLine
 {
+    public enum OptionStyle
+    {
+        Switch,
+        SingleValued,
+        Collection
+    }
+
     // the abstract base class of Option and NullOption.
     public abstract class Option
     {
@@ -43,8 +51,10 @@ namespace J4JSoftware.CommandLine
         // flag indicating whether or not the option must be specified on the command line
         public bool IsRequired { get; internal set; }
 
-        // flag indicating whether or not an option requires a parameter. Switches do not.
-        public bool IsSwitch { get; internal set; }
+        // flag indicating whether or not an option requires a parameter and whether or not
+        // multiple parameters are allowed. Switches do not have parameters. Collections
+        // require multiple parameters to be allowed.
+        public OptionStyle OptionStyle { get; internal set; }
 
         // the validator for the Option
         public IOptionValidator Validator { get; internal set; }
@@ -93,37 +103,44 @@ namespace J4JSoftware.CommandLine
 
         // validates whether or not a valid number of parameters are included in the specified
         // IParseResult
-        protected MappingResults ValidParameterCount( IBindingTarget bindingTarget,  IParseResult parseResult, bool isCollection )
+        protected MappingResults ValidParameterCount( IBindingTarget bindingTarget,  IParseResult parseResult )
         {
             // The UnkeyedOption allows for any number of parameters
             if( OptionType == OptionType.Unkeyed )
                 return MappingResults.Success;
 
-            if( IsSwitch )
+            switch( OptionStyle )
             {
-                if( parseResult.NumParameters > 0 )
-                    parseResult.MoveExcessParameters(0);
-            }
-            else
-            {
-                switch( parseResult.NumParameters )
-                {
-                    case 0:
-                        bindingTarget.AddError(parseResult.Key, $"Expected one parameter, got none");
-                        return MappingResults.MissingParameter;
+                case OptionStyle.Switch:
+                    if (parseResult.NumParameters > 0)
+                        parseResult.MoveExcessParameters(0);
 
-                    case 1:
-                        // no op
-                        break;
+                    break;
 
-                    default:
-                        // keep only one parameter unless we're a collection
-                        // in which case keep them all
-                        if( !isCollection )
+                case OptionStyle.SingleValued:
+                    switch( parseResult.NumParameters )
+                    {
+                        case 0:
+                            bindingTarget.AddError(parseResult.Key, $"Expected one parameter, got none");
+                            return MappingResults.MissingParameter;
+
+                        case 1:
+                            // no op; desired situation
+                            break;
+
+                        default:
                             parseResult.MoveExcessParameters(1);
+                            break;
+                    }
 
-                        break;
-                }
+                    break;
+
+                case OptionStyle.Collection:
+                    // any number of a parameters is okay
+                    break;
+
+                default:
+                    throw new NotSupportedException( $"Unsupported {nameof(OptionStyle)} '{OptionStyle}'" );
             }
 
             return MappingResults.Success;

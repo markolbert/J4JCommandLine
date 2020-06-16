@@ -32,19 +32,19 @@ namespace J4JSoftware.CommandLine
 
             switch( targetType.Multiplicity )
             {
-                case Multiplicity.Array:
+                case PropertyMultiplicity.Array:
                     retVal = ConvertToArray( bindingTarget, parseResult, out var arrayResult );
                     result = arrayResult;
 
                     break;
 
-                case Multiplicity.List:
+                case PropertyMultiplicity.List:
                     retVal = ConvertToList( bindingTarget, parseResult, out var listResult);
                     result = listResult;
 
                     break;
 
-                case Multiplicity.SimpleValue:
+                case PropertyMultiplicity.SimpleValue:
                     retVal = ConvertToSimpleValue( bindingTarget, parseResult, out var singleResult);
                     result = singleResult;
 
@@ -81,13 +81,13 @@ namespace J4JSoftware.CommandLine
             out object? result )
         {
             result = null;
-            var retVal = ValidParameterCount( bindingTarget, parseResult, false );
+            var retVal = ValidParameterCount( bindingTarget, parseResult );
 
             if( retVal != MappingResults.Success )
                 return retVal;
 
             // handle boolean flag parameters which don't have a parameter
-            var text = IsSwitch && parseResult.NumParameters == 0
+            var text = OptionStyle == OptionStyle.Switch && parseResult.NumParameters == 0
                 ? "true"
                 : parseResult.Parameters[ 0 ];
 
@@ -109,7 +109,7 @@ namespace J4JSoftware.CommandLine
             out Array? result )
         {
             result = null;
-            var retVal = ValidParameterCount(bindingTarget, parseResult, true);
+            var retVal = ValidParameterCount(bindingTarget, parseResult );
 
             if (retVal != MappingResults.Success)
                 return retVal;
@@ -147,7 +147,7 @@ namespace J4JSoftware.CommandLine
             out IList? result )
         {
             result = null;
-            var retVal = ValidParameterCount(bindingTarget, parseResult, true);
+            var retVal = ValidParameterCount(bindingTarget, parseResult);
 
             if (retVal != MappingResults.Success)
                 return retVal;
