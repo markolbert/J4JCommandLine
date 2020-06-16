@@ -33,7 +33,7 @@ namespace ConsoleAppJ4JCmdLine
                 .SetDescription( "a text value" )
                 .SetDefaultValue( "some text value" );
 
-            if( binder.Parse( args ) != MappingResults.Success )
+            if( binder.Parse( args ) != MappingResult.Success )
             {
                 Environment.ExitCode = 1;
                 return;

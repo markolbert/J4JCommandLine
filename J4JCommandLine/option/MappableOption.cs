@@ -19,16 +19,16 @@ namespace J4JSoftware.CommandLine
         }
 
         // the method called to convert the parsing results for a particular command
-        // line key to a option value. Return values other than MappingResults.Success
+        // line key to a option value. Return values other than MappingResult.Success
         // indicate one or more problems were encountered in the conversion and validation
         // process
-        public override MappingResults Convert(
+        public override MappingResult Convert(
             IBindingTarget bindingTarget,
             IParseResult parseResult,
             ITargetableType targetType,
             out object? result )
         {
-            var retVal = MappingResults.Success;
+            var retVal = MappingResult.Success;
 
             switch( targetType.Multiplicity )
             {
@@ -52,7 +52,7 @@ namespace J4JSoftware.CommandLine
 
                 default:
                     result = null;
-                    retVal = MappingResults.UnsupportedMultiplicity;
+                    retVal = MappingResult.UnsupportedMultiplicity;
 
                     break;
             }
@@ -75,7 +75,7 @@ namespace J4JSoftware.CommandLine
 
         // checks to see if the provided IParseResult contains an allowable number of parameters and, if so,
         // attempts to convert them to a simple value (i.e., a single object, an IValueType, a string)
-        private MappingResults ConvertToSimpleValue( 
+        private MappingResult ConvertToSimpleValue( 
             IBindingTarget bindingTarget, 
             IParseResult parseResult,
             out object? result )
@@ -83,7 +83,7 @@ namespace J4JSoftware.CommandLine
             result = null;
             var retVal = ValidParameterCount( bindingTarget, parseResult );
 
-            if( retVal != MappingResults.Success )
+            if( retVal != MappingResult.Success )
                 return retVal;
 
             // handle boolean flag parameters which don't have a parameter
@@ -94,16 +94,16 @@ namespace J4JSoftware.CommandLine
             result = Convert( bindingTarget, parseResult.Key, text );
 
             if( result != null )
-                return MappingResults.Success;
+                return MappingResult.Success;
 
             bindingTarget.AddError( parseResult.Key, $"Couldn't convert '{text}' to {TargetableType}" );
 
-            return MappingResults.ConversionFailed;
+            return MappingResult.ConversionFailed;
         }
 
         // checks to see if the provided IParseResult contains an allowable number of parameters and, if so,
         // attempts to convert them to an array of simple values (i.e., a single object, an IValueType, a string)
-        private MappingResults ConvertToArray( 
+        private MappingResult ConvertToArray( 
             IBindingTarget bindingTarget, 
             IParseResult parseResult, 
             out Array? result )
@@ -111,7 +111,7 @@ namespace J4JSoftware.CommandLine
             result = null;
             var retVal = ValidParameterCount(bindingTarget, parseResult );
 
-            if (retVal != MappingResults.Success)
+            if (retVal != MappingResult.Success)
                 return retVal;
 
             result = Array.CreateInstance( TargetableType.SupportedType, parseResult.NumParameters );
@@ -136,12 +136,12 @@ namespace J4JSoftware.CommandLine
                 else result.SetValue( item, idx );
             }
 
-            return allOkay ? MappingResults.Success : MappingResults.ConversionFailed;
+            return allOkay ? MappingResult.Success : MappingResult.ConversionFailed;
         }
 
         // checks to see if the provided IParseResult contains an allowable number of parameters and, if so,
         // attempts to convert them to a generic list of simple values (i.e., a single object, an IValueType, a string)
-        private MappingResults ConvertToList( 
+        private MappingResult ConvertToList( 
             IBindingTarget bindingTarget, 
             IParseResult parseResult, 
             out IList? result )
@@ -149,7 +149,7 @@ namespace J4JSoftware.CommandLine
             result = null;
             var retVal = ValidParameterCount(bindingTarget, parseResult);
 
-            if (retVal != MappingResults.Success)
+            if (retVal != MappingResult.Success)
                 return retVal;
 
             // create a list of the Type we're converting to
@@ -178,7 +178,7 @@ namespace J4JSoftware.CommandLine
                 else result.Add( item );
             }
 
-            return allOkay ? MappingResults.Success : MappingResults.ConversionFailed;
+            return allOkay ? MappingResult.Success : MappingResult.ConversionFailed;
         }
     }
 }

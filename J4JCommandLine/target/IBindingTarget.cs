@@ -18,7 +18,7 @@ namespace J4JSoftware.CommandLine
 
         // Parses the command line arguments against the Option objects bound to 
         // targeted properties, or to NullOption objects to collect error information.
-        MappingResults Parse(string[] args);
+        MappingResult Parse(string[] args);
 
         // allows retrieval of the TValue instance in a type-agnostic way
         object GetValue();

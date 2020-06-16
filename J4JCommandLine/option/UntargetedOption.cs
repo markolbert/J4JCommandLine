@@ -11,7 +11,7 @@ namespace J4JSoftware.CommandLine
         {
         }
 
-        public override MappingResults Convert(
+        public override MappingResult Convert(
             IBindingTarget bindingTarget,
             IParseResult parseResult,
             ITargetableType targetType,
@@ -19,7 +19,7 @@ namespace J4JSoftware.CommandLine
         {
             result = null;
 
-            return MappingResults.Unbound;
+            return MappingResult.Unbound;
         }
     }
 }

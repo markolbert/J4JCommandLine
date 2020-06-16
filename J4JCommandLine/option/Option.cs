@@ -92,10 +92,10 @@ namespace J4JSoftware.CommandLine
         }
 
         // the method called to convert the parsing results for a particular command
-        // line key to a option value. Return values other than MappingResults.Success
+        // line key to a option value. Return values other than MappingResult.Success
         // indicate one or more problems were encountered in the conversion and validation
         // process
-        public abstract MappingResults Convert( 
+        public abstract MappingResult Convert( 
             IBindingTarget bindingTarget, 
             IParseResult parseResult, 
             ITargetableType targetType,
@@ -103,11 +103,11 @@ namespace J4JSoftware.CommandLine
 
         // validates whether or not a valid number of parameters are included in the specified
         // IParseResult
-        protected MappingResults ValidParameterCount( IBindingTarget bindingTarget,  IParseResult parseResult )
+        protected MappingResult ValidParameterCount( IBindingTarget bindingTarget,  IParseResult parseResult )
         {
             // The UnkeyedOption allows for any number of parameters
             if( OptionType == OptionType.Unkeyed )
-                return MappingResults.Success;
+                return MappingResult.Success;
 
             switch( OptionStyle )
             {
@@ -122,7 +122,7 @@ namespace J4JSoftware.CommandLine
                     {
                         case 0:
                             bindingTarget.AddError(parseResult.Key, $"Expected one parameter, got none");
-                            return MappingResults.MissingParameter;
+                            return MappingResult.MissingParameter;
 
                         case 1:
                             // no op; desired situation
@@ -143,7 +143,7 @@ namespace J4JSoftware.CommandLine
                     throw new NotSupportedException( $"Unsupported {nameof(OptionStyle)} '{OptionStyle}'" );
             }
 
-            return MappingResults.Success;
+            return MappingResult.Success;
         }
     }
 }

@@ -8,14 +8,14 @@ namespace J4JCommandLine.Tests
     public class EnumTests
     {
         [ Theory ]
-        [ InlineData( "z", "B", true, MappingResults.MissingRequired, PlainEnum.A ) ]
-        [ InlineData( "x", "B", true, MappingResults.Success, PlainEnum.B ) ]
-        [ InlineData( "z", "B", false, MappingResults.Success, PlainEnum.A ) ]
+        [ InlineData( "z", "B", true, MappingResult.MissingRequired, PlainEnum.A ) ]
+        [ InlineData( "x", "B", true, MappingResult.Success, PlainEnum.B ) ]
+        [ InlineData( "z", "B", false, MappingResult.Success, PlainEnum.A ) ]
         public void Plain_enum(
             string key,
             string arg,
             bool required,
-            MappingResults result,
+            MappingResult result,
             PlainEnum desiredValue )
         {
             var target = ServiceProvider.GetBindingTarget<EnumProperties>( true );
@@ -38,14 +38,14 @@ namespace J4JCommandLine.Tests
         }
 
         [Theory]
-        [InlineData("z", "A,B", true, MappingResults.MissingRequired, FlagsEnum.A)]
-        [InlineData("x", "A,B", true, MappingResults.Success, FlagsEnum.A | FlagsEnum.B)]
-        [InlineData("z", "A,B", false, MappingResults.Success, FlagsEnum.A)]
+        [InlineData("z", "A,B", true, MappingResult.MissingRequired, FlagsEnum.A)]
+        [InlineData("x", "A,B", true, MappingResult.Success, FlagsEnum.A | FlagsEnum.B)]
+        [InlineData("z", "A,B", false, MappingResult.Success, FlagsEnum.A)]
         public void Flags_enum(
             string key,
             string arg,
             bool required,
-            MappingResults result,
+            MappingResult result,
             FlagsEnum desiredValue)
         {
             var target = ServiceProvider.GetBindingTarget<EnumProperties>(true);
@@ -68,14 +68,14 @@ namespace J4JCommandLine.Tests
         }
 
         [Theory]
-        [InlineData("z", "A", true, MappingResults.Unbound, UnconvertibleEnum.A)]
-        [InlineData("x", "B", true, MappingResults.Unbound, UnconvertibleEnum.A)]
-        [InlineData("z", "A", false, MappingResults.Unbound, UnconvertibleEnum.A)]
+        [InlineData("z", "A", true, MappingResult.Unbound, UnconvertibleEnum.A)]
+        [InlineData("x", "B", true, MappingResult.Unbound, UnconvertibleEnum.A)]
+        [InlineData("z", "A", false, MappingResult.Unbound, UnconvertibleEnum.A)]
         public void Unconvertible_enum(
             string key,
             string arg,
             bool required,
-            MappingResults result,
+            MappingResult result,
             UnconvertibleEnum desiredValue)
         {
             var target = ServiceProvider.GetBindingTarget<EnumProperties>(true);

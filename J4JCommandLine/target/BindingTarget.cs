@@ -128,7 +128,7 @@ namespace J4JSoftware.CommandLine
 
         // Parses the command line arguments against the Option objects bound to 
         // targeted properties, or to NullOption objects to collect error information.
-        public MappingResults Parse( string[] args )
+        public MappingResult Parse( string[] args )
         {
             if( !IsConfigured )
             {
@@ -138,10 +138,10 @@ namespace J4JSoftware.CommandLine
                 DisplayErrors();
                 DisplayHelp();
 
-                return MappingResults.BindingTargetNotConfigured;
+                return MappingResult.BindingTargetNotConfigured;
             }
 
-            var retVal = MappingResults.Success;
+            var retVal = MappingResult.Success;
 
             // parse the arguments into a collection of arguments keyed by the option key
             // note that there can be multiple arguments associated with any option key
@@ -171,7 +171,7 @@ namespace J4JSoftware.CommandLine
                         break;
 
                     case OptionType.Null:
-                        retVal |= MappingResults.Unbound;
+                        retVal |= MappingResult.Unbound;
                         break;
                 }
             }
@@ -183,17 +183,17 @@ namespace J4JSoftware.CommandLine
             {
                 if( !IgnoreUnkeyedParameters && parseResults.Unkeyed.NumParameters > 0 )
                 {
-                    retVal |= MappingResults.UnprocessedUnKeyedParameters;
+                    retVal |= MappingResult.UnprocessedUnKeyedParameters;
                     AddError( null, $"{parseResults.Unkeyed.NumParameters:n0} unprocessed parameter(s)" );
                 }
             }
             else retVal |= unkeyed.MapParseResult( this, parseResults.Unkeyed );
 
             // safety net
-            if ( retVal == MappingResults.Success && Errors.Count > 0 )
-                retVal |= MappingResults.UnspecifiedFailure;
+            if ( retVal == MappingResult.Success && Errors.Count > 0 )
+                retVal |= MappingResult.UnspecifiedFailure;
 
-            if( retVal != MappingResults.Success )
+            if( retVal != MappingResult.Success )
             {
                 DisplayHeader();
                 DisplayErrors();
@@ -203,7 +203,7 @@ namespace J4JSoftware.CommandLine
             if( parseResults.Any(
                 pr => MasterText[ TextUsageType.HelpOptionKey ].Any( hk => string.Equals( hk, pr.Key ) ) ) )
             {
-                retVal |= MappingResults.HelpRequested;
+                retVal |= MappingResult.HelpRequested;
 
                 DisplayHeader();
                 DisplayHelp();

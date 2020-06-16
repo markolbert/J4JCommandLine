@@ -8,14 +8,14 @@ namespace J4JCommandLine.Tests
     public class ListPropertyTest
     {
         [Theory]
-        [InlineData("-z 32 33", true, MappingResults.MissingRequired, new int[] { }, new int[] { 33 })]
-        [InlineData("-x 32 33", true, MappingResults.Success, new int[] { 32 }, new int[] { 33 })]
-        [InlineData("-z 32 33", false, MappingResults.Success, new int[] { }, new int[] { 33 })]
-        [InlineData("-x 32 -x 33", true, MappingResults.Success, new int[] { 32, 33 }, new int[] { })]
+        [InlineData("-z 32 33", true, MappingResult.MissingRequired, new int[] { }, new int[] { 33 })]
+        [InlineData("-x 32 33", true, MappingResult.Success, new int[] { 32 }, new int[] { 33 })]
+        [InlineData("-z 32 33", false, MappingResult.Success, new int[] { }, new int[] { 33 })]
+        [InlineData("-x 32 -x 33", true, MappingResult.Success, new int[] { 32, 33 }, new int[] { })]
         public void root_properties(
             string cmdLine,
             bool required,
-            MappingResults result,
+            MappingResult result,
             int[] optValue,
             int[] unkeyedValues)
         {
@@ -28,14 +28,14 @@ namespace J4JCommandLine.Tests
         }
 
         [Theory]
-        [InlineData("-z 32 33", true, MappingResults.MissingRequired, new int[] { }, new int[] { 33 })]
-        [InlineData("-x 32 33", true, MappingResults.Success, new int[] { 32 }, new int[] { 33 })]
-        [InlineData("-z 32 33", false, MappingResults.Success, new int[] { }, new int[] { 33 })]
-        [InlineData("-x 32 -x 33", true, MappingResults.Success, new int[] { 32, 33 }, new int[] { })]
+        [InlineData("-z 32 33", true, MappingResult.MissingRequired, new int[] { }, new int[] { 33 })]
+        [InlineData("-x 32 33", true, MappingResult.Success, new int[] { 32 }, new int[] { 33 })]
+        [InlineData("-z 32 33", false, MappingResult.Success, new int[] { }, new int[] { 33 })]
+        [InlineData("-x 32 -x 33", true, MappingResult.Success, new int[] { 32, 33 }, new int[] { })]
         public void parameterless_properties(
             string cmdLine,
             bool required,
-            MappingResults result,
+            MappingResult result,
             int[] optValue,
             int[] unkeyedValues)
         {
@@ -48,14 +48,14 @@ namespace J4JCommandLine.Tests
         }
 
         [Theory]
-        [InlineData("-z 32 33", true, MappingResults.MissingRequired, new int[] { }, new int[] { 33 })]
-        [InlineData("-x 32 33", true, MappingResults.Success, new int[] { 32 }, new int[] { 33 })]
-        [InlineData("-z 32 33", false, MappingResults.Success, new int[] { }, new int[] { 33 })]
-        [InlineData("-x 32 -x 33", true, MappingResults.Success, new int[] { 32, 33 }, new int[] { })]
+        [InlineData("-z 32 33", true, MappingResult.MissingRequired, new int[] { }, new int[] { 33 })]
+        [InlineData("-x 32 33", true, MappingResult.Success, new int[] { 32 }, new int[] { 33 })]
+        [InlineData("-z 32 33", false, MappingResult.Success, new int[] { }, new int[] { 33 })]
+        [InlineData("-x 32 -x 33", true, MappingResult.Success, new int[] { 32, 33 }, new int[] { })]
         public void parametered_properties(
             string cmdLine,
             bool required,
-            MappingResults result,
+            MappingResult result,
             int[] optValue,
             int[] unkeyedValues)
         {
@@ -77,7 +77,7 @@ namespace J4JCommandLine.Tests
             BindingTarget<T> target,
             Option option,
             Option unkeyed,
-            MappingResults desiredParseResults,
+            MappingResult desiredParseResult,
             Func<TestProperties> results,
             int[] optValue,
             int[] unkeyedValues)
@@ -92,7 +92,7 @@ namespace J4JCommandLine.Tests
                 option.Required();
 
             var parseResults = target.Parse(new string[] { cmdLine });
-            parseResults.Should().Be(desiredParseResults);
+            parseResults.Should().Be(desiredParseResult);
 
             results().IntList.Should().BeEquivalentTo(optValue);
             results().Unkeyed.Should().BeEquivalentTo(unkeyedValues);
