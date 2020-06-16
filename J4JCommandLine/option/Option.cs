@@ -43,11 +43,8 @@ namespace J4JSoftware.CommandLine
         // flag indicating whether or not the option must be specified on the command line
         public bool IsRequired { get; internal set; }
 
-        // the minimum number of parameters to a command line option
-        public int MinParameters { get; internal set; } = 1;
-
-        // the maximum number of parameters to a command line option
-        public int MaxParameters { get; internal set; } = 1;
+        // flag indicating whether or not an option requires a parameter. Switches do not.
+        public bool IsSwitch { get; internal set; }
 
         // the validator for the Option
         public IOptionValidator Validator { get; internal set; }
@@ -96,41 +93,40 @@ namespace J4JSoftware.CommandLine
 
         // validates whether or not a valid number of parameters are included in the specified
         // IParseResult
-        protected virtual bool ValidParameterCount(
-            IBindingTarget bindingTarget, 
-            IParseResult parseResult, 
-            out MappingResults result )
+        protected MappingResults ValidParameterCount( IBindingTarget bindingTarget,  IParseResult parseResult, bool isCollection )
         {
-            if (parseResult.NumParameters < MinParameters)
+            // The UnkeyedOption allows for any number of parameters
+            if( OptionType == OptionType.Unkeyed )
+                return MappingResults.Success;
+
+            if( IsSwitch )
             {
-                bindingTarget.AddError( 
-                    parseResult.Key,
-                    $"Expected {MinParameters} parameters, got {parseResult.NumParameters}" );
-
-                result = MappingResults.TooFewParameters;
-
-                return false;
+                if( parseResult.NumParameters > 0 )
+                    parseResult.MoveExcessParameters(0);
             }
-
-            if( parseResult.NumParameters > MaxParameters )
+            else
             {
-                if( parseResult.IsLastResult )
-                    parseResult.MoveExcessParameters(MaxParameters);
-                else
+                switch( parseResult.NumParameters )
                 {
-                    bindingTarget.AddError(
-                        parseResult.Key,
-                        $"Expected no more than {MaxParameters} parameters, got {parseResult.NumParameters}");
+                    case 0:
+                        bindingTarget.AddError(parseResult.Key, $"Expected one parameter, got none");
+                        return MappingResults.MissingParameter;
 
-                    result = MappingResults.TooManyParameters;
+                    case 1:
+                        // no op
+                        break;
 
-                    return false;
+                    default:
+                        // keep only one parameter unless we're a collection
+                        // in which case keep them all
+                        if( !isCollection )
+                            parseResult.MoveExcessParameters(1);
+
+                        break;
                 }
             }
 
-            result = MappingResults.Success;
-
-            return true;
+            return MappingResults.Success;
         }
     }
 }

@@ -55,6 +55,6 @@ namespace J4JSoftware.CommandLine
         // to an Option object. Examples: the property is not publicly read- and write-able; 
         // the property has a null value and does not have a public parameterless constructor
         // to create an instance of it. Check the error output after parsing for details.
-        Option BindNonOptions<TProp>(Expression<Func<TValue, TProp>> propertySelector);
+        Option BindUnkeyed<TProp>(Expression<Func<TValue, TProp>> propertySelector);
     }
 }

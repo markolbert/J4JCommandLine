@@ -80,15 +80,14 @@ namespace J4JSoftware.CommandLine
             IParseResult parseResult,
             out object? result )
         {
-            if ( !ValidParameterCount(bindingTarget, parseResult, out var paramResult ) )
-            {
-                result = null;
-                return paramResult;
-            }
+            result = null;
+            var retVal = ValidParameterCount( bindingTarget, parseResult, false );
+
+            if( retVal != MappingResults.Success )
+                return retVal;
 
             // handle boolean flag parameters which don't have a parameter
-            var text = TargetableType.SupportedType == typeof( bool )
-                       && parseResult.NumParameters == 0
+            var text = IsSwitch && parseResult.NumParameters == 0
                 ? "true"
                 : parseResult.Parameters[ 0 ];
 
@@ -109,11 +108,11 @@ namespace J4JSoftware.CommandLine
             IParseResult parseResult, 
             out Array? result )
         {
-            if( !ValidParameterCount( bindingTarget, parseResult, out var paramResult ) )
-            {
-                result = null;
-                return paramResult;
-            }
+            result = null;
+            var retVal = ValidParameterCount(bindingTarget, parseResult, true);
+
+            if (retVal != MappingResults.Success)
+                return retVal;
 
             result = Array.CreateInstance( TargetableType.SupportedType, parseResult.NumParameters );
 
@@ -147,11 +146,11 @@ namespace J4JSoftware.CommandLine
             IParseResult parseResult, 
             out IList? result )
         {
-            if (!ValidParameterCount( bindingTarget, parseResult, out var paramResult ))
-            {
-                result = null;
-                return paramResult;
-            }
+            result = null;
+            var retVal = ValidParameterCount(bindingTarget, parseResult, true);
+
+            if (retVal != MappingResults.Success)
+                return retVal;
 
             // create a list of the Type we're converting to
             var listType = typeof(List<>);

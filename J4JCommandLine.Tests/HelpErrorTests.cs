@@ -41,7 +41,7 @@ namespace J4JCommandLine.Tests
                 .Description("a test program for exercising J4JCommandLine")
                 .ProgramName($"{this.GetType()}");
 
-            builder.Build<RootProperties>(null, out var target);
+            var target = builder.Build<RootProperties>( null );
 
             target.Should().BeNull();
         }
@@ -57,7 +57,7 @@ namespace J4JCommandLine.Tests
                 .Description("a test program for exercising J4JCommandLine")
                 .ProgramName($"{this.GetType()}");
 
-            builder.Build<RootProperties>(null, out var target);
+            var target = builder.Build<RootProperties>(null);
 
             target.Should().NotBeNull();
         }

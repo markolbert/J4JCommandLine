@@ -22,7 +22,8 @@ namespace InstancePropertyExample
                 .Description("a test program for exercising J4JCommandLine")
                 .ProgramName($"{nameof(Program)}.exe");
 
-            if( !builder.Build<Configuration>(null, out var binder) )
+            var binder = builder.Build<Configuration>( null );
+            if( binder == null )
                 throw new NullReferenceException(nameof(Program));
 
             binder!.Bind(x => x.IntValue, "i")

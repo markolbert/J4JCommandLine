@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Linq.Expressions;
+using System.Reflection;
 using System.Security.Cryptography;
 using System.Text;
 
@@ -80,12 +81,9 @@ namespace J4JSoftware.CommandLine
             // unused) key
             keys = Options.GetUniqueKeys(keys);
 
-            if ( keys.Length == 0 )
-                return GetUntargetedOption( keys, $"No unique keys defined" );
-
-            var retVal = GetOption<TProp>( propertySelector, keys );
-
-            return retVal;
+            return keys.Length == 0
+                ? GetUntargetedOption( keys, $"No unique keys defined" )
+                : GetOption<TProp>( propertySelector.GetPropertyPathInfo(), keys );
         }
 
         // binds the selected property to a newly-created Option instance which will enable
@@ -99,12 +97,12 @@ namespace J4JSoftware.CommandLine
         // to an Option object. Examples: the property is not publicly read- and write-able; 
         // the property has a null value and does not have a public parameterless constructor
         // to create an instance of it. Check the error output after parsing for details.
-        public Option BindNonOptions<TProp>( Expression<Func<TValue, TProp>> propertySelector )
+        public Option BindUnkeyed<TProp>( Expression<Func<TValue, TProp>> propertySelector )
         {
             if( !IsConfigured )
                 return GetUntargetedOption( null, $"{this.GetType().Name} is not configured" );
 
-            var retVal = GetOption<TProp>( propertySelector, null );
+            var retVal = GetOption<TProp>( propertySelector.GetPropertyPathInfo(), null );
 
             return retVal;
         }
@@ -207,12 +205,8 @@ namespace J4JSoftware.CommandLine
             Errors.AddError( this, key, error );
         }
 
-        private Option GetOption<TProp>(Expression<Func<TValue, TProp>> propertySelector, string[]? keys )
+        private Option GetOption<TProp>(List<PropertyInfo> pathElements, string[]? keys )
         {
-            // get the PropertyInfo objects defining the path between the binding target's Type
-            // and the property we're trying to bind to
-            var pathElements = propertySelector.GetPropertyPathInfo();
-
             TargetedProperty? property = null;
 
             // walk through the chain of PropertyInfo objects creating TargetedProperty objects

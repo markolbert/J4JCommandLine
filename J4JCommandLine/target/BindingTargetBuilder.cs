@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
+using System.Reflection;
 
 namespace J4JSoftware.CommandLine
 {
@@ -79,11 +80,10 @@ namespace J4JSoftware.CommandLine
             return this;
         }
 
-        public bool Build<TValue>( TValue? value, out BindingTarget<TValue>? result )
+        public BindingTarget<TValue>? Build<TValue>( TValue? value )
             where TValue : class
         {
             var errors = new CommandLineErrors( _textComp );
-            result = null;
 
             var masterText = new MasterTextCollection( _textComp );
 
@@ -92,7 +92,7 @@ namespace J4JSoftware.CommandLine
                 errors.AddError(null, null, $"No help keys defined");
                 DisplayErrors(errors);
 
-                return false;
+                return null;
             }
 
             masterText.AddRange( TextUsageType.HelpOptionKey, _helpKeys );
@@ -100,12 +100,12 @@ namespace J4JSoftware.CommandLine
             masterText.AddRange( TextUsageType.ValueEncloser, _enclosers );
             masterText.AddRange( TextUsageType.Quote, _quotes.Select( q => q.ToString() ) );
 
-            if ( !typeof(TValue).HasPublicParameterlessConstructor() )
+            if ( value == null && !typeof(TValue).HasPublicParameterlessConstructor() )
             {
                 errors.AddError(null, null, $"{typeof(TValue)} does not have a public parameterless constructor");
                 DisplayErrors(errors);
 
-                return false;
+                return null;
             }
 
             value ??= Activator.CreateInstance<TValue>();
@@ -114,10 +114,10 @@ namespace J4JSoftware.CommandLine
             {
                 DisplayErrors(errors);
 
-                return false;
+                return null;
             }
 
-            result = new BindingTarget<TValue>()
+            var retVal = new BindingTarget<TValue>()
             {
                 Value = value,
                 Parser = _parser,
@@ -133,15 +133,15 @@ namespace J4JSoftware.CommandLine
                 Description = _description
             };
 
-            if( !result.Initialize() )
+            if( !retVal.Initialize() )
             {
-                errors.AddError(null, null, $"{result.GetType().Name} is not configured");
+                errors.AddError(null, null, $"{retVal.GetType().Name} is not configured");
                 DisplayErrors(errors);
 
-                return false;
+                return null;
             }
 
-            return true;
+            return retVal;
         }
 
         private void DisplayErrors( CommandLineErrors errors )

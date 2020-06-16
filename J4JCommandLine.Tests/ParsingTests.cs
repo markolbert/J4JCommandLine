@@ -34,7 +34,7 @@ namespace J4JCommandLine.Tests
         }
 
         [ Theory ]
-        [ InlineData( "x", new string[] { "-x" }, new string[] { "true" } ) ]
+        [ InlineData( "x", new string[] { "-x" }, new string[] { } ) ]
         [ InlineData( "x", new string[] { "-x 7" }, new string[] { "7" } ) ]
         [ InlineData( "x", new string[] { "-x -7" }, new string[] { "-7" } ) ]
         [ InlineData( "", new string[] { "value" }, null ) ]
@@ -58,28 +58,19 @@ namespace J4JCommandLine.Tests
         }
 
         [Theory]
-        [InlineData(new string[] {"x", "y", "z"}, "-x -y 7 -z -12", new int[] {1,1,1}, new string[] { "true", "7", "-12" })]
-        [InlineData(new string[] { "x", "y", "z" }, "-x -y 7 8 -z -12", new int[] { 1, 2, 1 }, new string[] { "true", "7", "8", "-12" })]
-        public void Command_line_string(string[] keys, string cmdLine, int[] rowLengths, string[] output)
+        [InlineData("-x -y 7 -z -12", 3, new string[] { "7", "-12" }, new string[]{})]
+        [InlineData("-x -y 7 8 -z -12", 3, new string[] { "7", "-12" }, new string[]{"8"})]
+        [InlineData("abc -x -y 7 8 -z -12", 3, new string[] { "7", "-12" }, new string[] { "abc", "8" })]
+        public void Command_line_string(string cmdLine, int numKeys, string[] keyedOutput, string[] unkeyedOutput )
         {
-            if( keys.Length != rowLengths.Length)
-                throw new ArgumentException("Mismatch between keys and output row lengths");
-
             var results = _cmdLineParser.Parse(cmdLine);
 
-            results.Count.Should().Be(keys.Length);
+            results.Count.Should().Be(numKeys);
 
-            for( var idx = 0; idx < results.Count; idx++ )
-            {
-                results[idx].Key.Should().Be(keys[idx]);
-                results[ idx ].NumParameters.Should().Be( rowLengths[ idx ] );
+            var consolidatedOutput = results.SelectMany( r => r.Parameters ).ToArray();
+            consolidatedOutput.Should().BeEquivalentTo( keyedOutput );
 
-                var rowLength = rowLengths[ idx ];
-                var rowOffset = rowLengths.Where( ( rl, i ) => i < idx ).Select( rl => rl ).Sum();
-                var rowOutput = output[ rowOffset..( rowOffset + rowLength ) ];
-
-                results[ idx ].Parameters.Should().BeEquivalentTo( rowOutput );
-            }
+            results.Unkeyed.Parameters.Should().BeEquivalentTo(unkeyedOutput);
         }
     }
 }

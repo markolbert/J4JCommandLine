@@ -12,15 +12,13 @@ namespace J4JCommandLine.Tests
 
         public static IServiceProvider Instance { get; }
 
-        public static BindingTarget<TValue>? GetBindingTarget<TValue>( bool ignoreUnkeyed )
+        public static BindingTarget<TValue> GetBindingTarget<TValue>( bool ignoreUnkeyed, TValue? value = null )
             where TValue : class
         {
             _btBuilder.ProgramName( $"{typeof(TValue)}" )
                 .IgnoreUnprocessedUnkeyedParameters( ignoreUnkeyed );
-
-            _btBuilder.Build<TValue>( null, out var retVal );
-
-            return retVal;
+            
+            return _btBuilder.Build<TValue>( value )!;
         }
 
         static ServiceProvider()

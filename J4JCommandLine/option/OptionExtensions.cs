@@ -82,26 +82,13 @@ namespace J4JSoftware.CommandLine
         // sets the minimum and maximum, if specified, allowed number of parameters that can appear
         // after a key on the command line for an Option. Ignored if the specified Option object is
         // a NullOption.
-        public static T ArgumentCount<T>( this T option, int minimum, int? maximum = null )
+        public static T Switch<T>( this T option, bool isSwitch = true )
             where T : Option
         {
             if( option.OptionType != OptionType.Keyed )
                 return option;
 
-            minimum = minimum < 0 ? 0 : minimum;
-            var modMax = maximum ?? minimum;
-            maximum = modMax < 0 ? minimum : modMax;
-
-            if( minimum > modMax )
-            {
-                var temp = modMax;
-
-                modMax = minimum;
-                minimum = temp;
-            }
-
-            option.MinParameters = minimum;
-            option.MaxParameters = modMax;
+            option.IsSwitch = isSwitch;
 
             return option;
         }

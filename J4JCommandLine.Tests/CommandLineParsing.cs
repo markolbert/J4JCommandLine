@@ -31,35 +31,37 @@ namespace J4JCommandLine.Tests
         }
 
         [ Theory ]
-        [ InlineData( new string[] { "-x", "hello" }, "x", new string[] { "hello" } ) ]
-        [ InlineData( new string[] { "-x", "hello", "goodbye" }, "x", new string[] { "hello", "goodbye" } ) ]
-        [ InlineData( new string[] { "-x" }, "x", new string[] { "true" } ) ]
-        [ InlineData( new string[] { "-x:abc" }, "x", new string[] { "abc" } ) ]
-        [ InlineData( new string[] { "-x:\"abc\"" }, "x", new string[] { "\"abc\"" } ) ]
-        public void parse_one_item( string[] toParse, string key, string[] args )
+        [ InlineData( "-x hello", new string[] { "hello" }, new string[] { } ) ]
+        [ InlineData( "-x hello goodbye", new string[] { "hello" }, new string[] { "goodbye" } ) ]
+        [ InlineData( "-x", new string[] { }, new string[] { } ) ]
+        [ InlineData( "-x:abc", new string[] { "abc" }, new string[] { } ) ]
+        [ InlineData( "-x:\"abc\"", new string[] { "\"abc\"" }, new string[] { } ) ]
+        public void parse_one_item( string cmdLine, string[] optValue, string[] unkeyedValue )
         {
-            var parsed = _cmdLineParser.Parse( toParse );
+            var parsed = _cmdLineParser.Parse( cmdLine );
 
             parsed.Count.Should().Be( 1 );
-            parsed.Contains( key ).Should().BeTrue();
+            parsed.Contains( "x" ).Should().BeTrue();
 
-            parsed[ key ].Parameters.Should().BeEquivalentTo( args );
+            parsed[ "x" ].Parameters.Should().BeEquivalentTo( optValue );
+            parsed.Unkeyed.Parameters.Should().BeEquivalentTo( unkeyedValue );
         }
 
         [ Theory ]
-        [ InlineData( new string[] { "-x", "hello", "-y", "goodbye" }, new string[] { "x", "y" },
-            new string[] { "hello" }, new string[] { "goodbye" } ) ]
-        [InlineData(new string[] { "-x", "hello", "-y" }, new string[] { "x", "y" },
-            new string[] { "hello" }, new string[] { "true" })]
-        [InlineData(new string[] { "-x", "hello", "goodbye", "-y" }, new string[] { "x", "y" },
-            new string[] { "hello", "goodbye" }, new string[] { "true" })]
-        [InlineData(new string[] { "-x", "hello", "-x", "goodbye" }, new string[] { "x" },
-            new string[] { "hello", "goodbye" }, new string[] {})]
-        public void parse_two_items( string[] toParse, string[] keys, string[] results1, string[] results2 )
+        [ InlineData( "-x hello -y goodbye", new string[] { "x", "y" }, new string[] { "hello" },
+            new string[] { "goodbye" }, new string[] { } ) ]
+        [ InlineData( "-x hello -y", new string[] { "x", "y" }, new string[] { "hello" }, new string[] { },
+            new string[] { } ) ]
+        [ InlineData( "-x hello goodbye -y", new string[] { "x", "y" },
+            new string[] { "hello" }, new string[] { }, new string[] { "goodbye" } ) ]
+        [ InlineData( "-x hello -x goodbye", new string[] { "x" }, new string[] { "hello", "goodbye" },
+            new string[] { }, new string[] { } ) ]
+        public void parse_two_items( string cmdLine, string[] keys, string[] results1, string[] results2,
+            string[] unkeyedResults )
         {
             var results = new string[][] { results1, results2 };
 
-            var parsed = _cmdLineParser.Parse( toParse );
+            var parsed = _cmdLineParser.Parse( cmdLine );
 
             parsed.Count.Should().Be( keys.Length );
 
@@ -68,6 +70,8 @@ namespace J4JCommandLine.Tests
                 parsed.Contains( keys[ idx ] ).Should().BeTrue();
                 parsed[ keys[ idx ] ].Parameters.Should().BeEquivalentTo( results[ idx ] );
             }
+
+            parsed.Unkeyed.Parameters.Should().BeEquivalentTo(unkeyedResults);
         }
     }
 }
