@@ -1,6 +1,6 @@
 {
   "profiles": {
-    "ConsoleAppJ4JCmdLine": {
+    "InstancePropertyExample": {
       "commandName": "Project",
       "commandLineArgs": "-i 5 -h abc def"
     }

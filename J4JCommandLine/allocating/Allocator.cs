@@ -13,6 +13,7 @@ namespace J4JSoftware.CommandLine
         private readonly IElementKey _prefixer;
 
         private StringComparison _keyComp;
+        private MasterTextCollection _masterText;
 
         public Allocator( 
             IElementTerminator terminator,
@@ -31,10 +32,11 @@ namespace J4JSoftware.CommandLine
             MasterTextCollection masterText )
         {
             _keyComp = keyComp;
+            _masterText = masterText;
 
-            _prefixer.Initialize( keyComp, logger, masterText );
+            _prefixer.Initialize( keyComp, logger, _masterText );
 
-            _terminator.Initialize(keyComp, logger, masterText);
+            _terminator.Initialize(keyComp, logger, _masterText);
 
             return _prefixer.IsInitialized && _terminator.IsInitialized;
         }
@@ -79,10 +81,15 @@ namespace J4JSoftware.CommandLine
                     if( !retVal.Contains( element ) )
                         retVal.Add( new Allocation( retVal ) { Key = element } );
 
-                    // store a reference to the current/active Allocation
-                    curResult = retVal[ element ];
-
-                    lastElementWasKey = true;
+                    // store a reference to the current/active Allocation unless the
+                    // element is a request for help (because help options cannot have
+                    // parameters)
+                    if( !_masterText.Contains( element, TextUsageType.HelpOptionKey ) )
+                    {
+                        curResult = retVal[ element ];
+                        lastElementWasKey = true;
+                    }
+                    else lastElementWasKey = false;
                 }
                 else
                 {

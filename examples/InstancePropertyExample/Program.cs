@@ -35,6 +35,8 @@ namespace InstancePropertyExample
                 .SetDescription("a text value")
                 .SetDefaultValue("some text value");
 
+            binder.BindUnkeyed(x => x.Unkeyed);
+
             if (!binder.Parse(args))
             {
                 Environment.ExitCode = 1;
@@ -43,6 +45,10 @@ namespace InstancePropertyExample
 
             Console.WriteLine($"IntValue is {binder.Value.IntValue}");
             Console.WriteLine($"TextValue is {binder.Value.TextValue}");
+
+            Console.WriteLine(binder.Value.Unkeyed.Count == 0
+                ? "No unkeyed parameters"
+                : $"Unkeyed parameters: {string.Join(", ", binder.Value.Unkeyed)}");
         }
 
         private static void InitializeServiceProvider()

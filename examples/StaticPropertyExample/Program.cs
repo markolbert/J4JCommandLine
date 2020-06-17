@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections.Generic;
+using Alba.CsConsoleFormat;
 using Autofac;
 using Autofac.Extensions.DependencyInjection;
 using J4JSoftware.CommandLine;
@@ -33,6 +35,8 @@ namespace ConsoleAppJ4JCmdLine
                 .SetDescription( "a text value" )
                 .SetDefaultValue( "some text value" );
 
+            binder.BindUnkeyed( x => Program.Unkeyed );
+
             if( !binder.Parse( args ) )
             {
                 Environment.ExitCode = 1;
@@ -41,11 +45,16 @@ namespace ConsoleAppJ4JCmdLine
 
             Console.WriteLine($"IntValue is {IntValue}");
             Console.WriteLine($"TextValue is {TextValue}");
+
+            Console.WriteLine( Unkeyed.Count == 0
+                ? "No unkeyed parameters"
+                : $"Unkeyed parameters: {string.Join( ", ", Unkeyed )}" );
         }
 
         public static IServiceProvider ServiceProvider { get; set; }
         public static int IntValue { get; set; }
         public static string TextValue { get; set; }
+        public static List<string> Unkeyed { get; set; }
 
         private static void InitializeServiceProvider()
         {
