@@ -1,4 +1,4 @@
-### The First Stage Command Line Parser
+### The First Stage Allocator
 
 **IAllocator** defines how the allocator -- the object that
 allocates elements from the command line into a collection of text values 
