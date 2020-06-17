@@ -7,14 +7,14 @@ using System.Text;
 
 namespace J4JSoftware.CommandLine
 {
-    public class CommandLineParser : ICommandLineParser
+    public class Allocator : IAllocator
     {
         private readonly IElementTerminator _terminator;
         private readonly IElementKey _prefixer;
 
         private StringComparison _keyComp;
 
-        public CommandLineParser( 
+        public Allocator( 
             IElementTerminator terminator,
             IElementKey prefixer
             )
@@ -27,26 +27,26 @@ namespace J4JSoftware.CommandLine
 
         public bool Initialize( 
             StringComparison keyComp, 
-            CommandLineErrors errors,
+            CommandLineLogger logger,
             MasterTextCollection masterText )
         {
             _keyComp = keyComp;
 
-            _prefixer.Initialize( keyComp, errors, masterText );
+            _prefixer.Initialize( keyComp, logger, masterText );
 
-            _terminator.Initialize(keyComp, errors, masterText);
+            _terminator.Initialize(keyComp, logger, masterText);
 
             return _prefixer.IsInitialized && _terminator.IsInitialized;
         }
 
-        public ParseResults Parse( string[] args ) => Parse( string.Join( " ", args ) );
+        public Allocations AllocateCommandLine( string[] args ) => AllocateCommandLine( string.Join( " ", args ) );
 
-        public ParseResults Parse( string cmdLine )
+        public Allocations AllocateCommandLine( string cmdLine )
         {
-            var retVal = new ParseResults(_keyComp);
+            var retVal = new Allocations(_keyComp);
 
             var accumulator = new StringBuilder();
-            IParseResult? curResult = null;
+            IAllocation? curResult = null;
             var charsProcessed = 0;
             var lastElementWasKey = false;
 
@@ -75,11 +75,11 @@ namespace J4JSoftware.CommandLine
                 {
                     // because multiple key references are allowed (e.g., "-x abc -x def") check
                     // to see if the key is already recorded. We only create and store a new
-                    // ParseResult if the key isn't already stored
+                    // Allocation if the key isn't already stored
                     if( !retVal.Contains( element ) )
-                        retVal.Add( new ParseResult( retVal ) { Key = element } );
+                        retVal.Add( new Allocation( retVal ) { Key = element } );
 
-                    // store a reference to the current/active ParseResult
+                    // store a reference to the current/active Allocation
                     curResult = retVal[ element ];
 
                     lastElementWasKey = true;

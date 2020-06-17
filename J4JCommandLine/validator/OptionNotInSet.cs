@@ -23,7 +23,7 @@ namespace J4JSoftware.CommandLine
             _checkValues = checkValues;
         }
 
-        public override bool Validate( IBindingTarget bindingTarget, string key, T value )
+        public override bool Validate( Option option, T value, CommandLineLogger logger )
         {
             if( !_checkValues.Any( v => v.Equals( value ) ) )
                 return true;
@@ -39,7 +39,7 @@ namespace J4JSoftware.CommandLine
                 },
                 sb => sb.ToString() );
 
-            bindingTarget.AddError( key, $"'{value}' is in set '{validValues}'" );
+            logger.LogError( ProcessingPhase.Validating, $"'{value}' is in set '{validValues}'", option: option );
 
             return false;
         }

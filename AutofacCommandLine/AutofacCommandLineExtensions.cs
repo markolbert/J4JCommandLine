@@ -14,7 +14,7 @@ namespace J4JSoftware.CommandLine
             builder.RegisterType<ElementTerminator>()
                 .AsImplementedInterfaces();
 
-            builder.RegisterType<CommandLineParser>()
+            builder.RegisterType<Allocator>()
                 .AsImplementedInterfaces();
 
             builder.RegisterType<BindingTargetBuilder>()

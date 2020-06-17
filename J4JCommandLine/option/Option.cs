@@ -19,16 +19,19 @@ namespace J4JSoftware.CommandLine
         protected Option(
             OptionType optionType,
             ITargetableType targetableType,
-            OptionCollection options
+            OptionCollection options,
+            CommandLineLogger logger
         )
         {
             OptionType = optionType;
             TargetableType = targetableType;
             Options = options;
+            Logger = logger;
         }
 
         // the collection of Options used by the parsing activity
-        protected internal OptionCollection Options { get; }
+        public OptionCollection Options { get; }
+        protected CommandLineLogger Logger { get; }
 
         // Information about the targetability of the type of the TargetProperty to
         // which the option is bound. Options can be bound to un-targetable properties.
@@ -76,17 +79,18 @@ namespace J4JSoftware.CommandLine
 
         // the method called to validate the specified value within the expectations
         // defined for the Option
-        public bool Validate( IBindingTarget bindingTarget, string key, object value )
+        public bool Validate( string key, object value )
         {
             if( Validator == null )
                 return true;
 
             if( value.GetType() == Validator.SupportedType )
-                return Validator?.Validate( bindingTarget, key, value ) ?? true;
+                return Validator?.Validate( this, value, Logger ) ?? true;
 
-            bindingTarget.AddError( 
-                key,
-                $"Object to be validated is a {value.GetType()} but should be a {Validator.SupportedType}, rejecting" );
+            Logger.LogError(
+                ProcessingPhase.Parsing,
+                $"Object to be validated is a {value.GetType()} but should be a {Validator.SupportedType}, rejecting",
+                option : this );
 
             return false;
         }
@@ -95,41 +99,41 @@ namespace J4JSoftware.CommandLine
         // line key to a option value. Return values other than MappingResult.Success
         // indicate one or more problems were encountered in the conversion and validation
         // process
-        public abstract MappingResult Convert( 
-            IBindingTarget bindingTarget, 
-            IParseResult parseResult, 
-            ITargetableType targetType,
-            out object? result );
+        public abstract object? Convert( IAllocation allocation, ITargetableType targetType );
 
         // validates whether or not a valid number of parameters are included in the specified
-        // IParseResult
-        protected MappingResult ValidParameterCount( IBindingTarget bindingTarget,  IParseResult parseResult )
+        // IAllocation
+        protected bool ValidParameterCount( IAllocation allocation )
         {
             // The UnkeyedOption allows for any number of parameters
             if( OptionType == OptionType.Unkeyed )
-                return MappingResult.Success;
+                return true;
 
             switch( OptionStyle )
             {
                 case OptionStyle.Switch:
-                    if (parseResult.NumParameters > 0)
-                        parseResult.MoveExcessParameters(0);
+                    if (allocation.NumParameters > 0)
+                        allocation.MoveExcessParameters(0);
 
                     break;
 
                 case OptionStyle.SingleValued:
-                    switch( parseResult.NumParameters )
+                    switch( allocation.NumParameters )
                     {
                         case 0:
-                            bindingTarget.AddError(parseResult.Key, $"Expected one parameter, got none");
-                            return MappingResult.MissingParameter;
+                            Logger.LogError( 
+                                ProcessingPhase.Parsing, 
+                                $"Expected one parameter, got none",
+                                option : this );
+
+                            return false;
 
                         case 1:
                             // no op; desired situation
                             break;
 
                         default:
-                            parseResult.MoveExcessParameters(1);
+                            allocation.MoveExcessParameters(1);
                             break;
                     }
 
@@ -143,7 +147,7 @@ namespace J4JSoftware.CommandLine
                     throw new NotSupportedException( $"Unsupported {nameof(OptionStyle)} '{OptionStyle}'" );
             }
 
-            return MappingResult.Success;
+            return true;
         }
     }
 }

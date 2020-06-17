@@ -10,7 +10,7 @@ namespace J4JSoftware.CommandLine
 
         void Initialize(
             StringComparison textComp,
-            CommandLineErrors errors,
+            CommandLineLogger logger,
             MasterTextCollection masterText );
 
         int GetMaxTerminatorLength( string text, bool isKey );

@@ -11,13 +11,13 @@ namespace J4JCommandLine.Tests
 {
     public class ParsingTests
     {
-        private readonly ICommandLineParser _cmdLineParser;
-        private readonly CommandLineErrors _errors;
+        private readonly IAllocator _cmdLineParser;
+        private readonly CommandLineLogger _logger;
 
         public ParsingTests()
         {
-            _cmdLineParser = ServiceProvider.Instance.GetRequiredService<ICommandLineParser>();
-            _errors = new CommandLineErrors(StringComparison.OrdinalIgnoreCase);
+            _cmdLineParser = ServiceProvider.Instance.GetRequiredService<IAllocator>();
+            _logger = new CommandLineLogger(StringComparison.OrdinalIgnoreCase);
 
             var masterText = new MasterTextCollection(StringComparison.OrdinalIgnoreCase);
 
@@ -28,9 +28,9 @@ namespace J4JCommandLine.Tests
 
             if (!_cmdLineParser.Initialize(
                 StringComparison.OrdinalIgnoreCase,
-                _errors,
+                _logger,
                 masterText))
-                throw new ApplicationException($"{nameof(CommandLineParser)} initialization failed");
+                throw new ApplicationException($"{nameof(Allocator)} initialization failed");
         }
 
         [ Theory ]
@@ -44,7 +44,7 @@ namespace J4JCommandLine.Tests
         {
             var numResults = string.IsNullOrEmpty( key ) ? 0 : 1;
 
-            var results = _cmdLineParser.Parse( input );
+            var results = _cmdLineParser.AllocateCommandLine( input );
 
             results.Count.Should().Be( numResults );
 
@@ -63,7 +63,7 @@ namespace J4JCommandLine.Tests
         [InlineData("abc -x -y 7 8 -z -12", 3, new string[] { "7", "-12" }, new string[] { "abc", "8" })]
         public void Command_line_string(string cmdLine, int numKeys, string[] keyedOutput, string[] unkeyedOutput )
         {
-            var results = _cmdLineParser.Parse(cmdLine);
+            var results = _cmdLineParser.AllocateCommandLine(cmdLine);
 
             results.Count.Should().Be(numKeys);
 

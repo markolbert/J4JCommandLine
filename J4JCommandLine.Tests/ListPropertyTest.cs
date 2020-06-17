@@ -8,14 +8,14 @@ namespace J4JCommandLine.Tests
     public class ListPropertyTest
     {
         [Theory]
-        [InlineData("-z 32 33", true, MappingResult.MissingRequired, new int[] { }, new int[] { 33 })]
-        [InlineData("-x 32 33", true, MappingResult.Success, new int[] { 32 }, new int[] { 33 })]
-        [InlineData("-z 32 33", false, MappingResult.Success, new int[] { }, new int[] { 33 })]
-        [InlineData("-x 32 -x 33", true, MappingResult.Success, new int[] { 32, 33 }, new int[] { })]
+        [InlineData("-z 32 33", true, false, new int[] { }, new int[] { 33 })]
+        [InlineData("-x 32 33", true, true, new int[] { 32 }, new int[] { 33 })]
+        [InlineData("-z 32 33", false, true, new int[] { }, new int[] { 33 })]
+        [InlineData("-x 32 -x 33", true, true, new int[] { 32, 33 }, new int[] { })]
         public void root_properties(
             string cmdLine,
             bool required,
-            MappingResult result,
+            bool result,
             int[] optValue,
             int[] unkeyedValues)
         {
@@ -28,14 +28,14 @@ namespace J4JCommandLine.Tests
         }
 
         [Theory]
-        [InlineData("-z 32 33", true, MappingResult.MissingRequired, new int[] { }, new int[] { 33 })]
-        [InlineData("-x 32 33", true, MappingResult.Success, new int[] { 32 }, new int[] { 33 })]
-        [InlineData("-z 32 33", false, MappingResult.Success, new int[] { }, new int[] { 33 })]
-        [InlineData("-x 32 -x 33", true, MappingResult.Success, new int[] { 32, 33 }, new int[] { })]
+        [InlineData("-z 32 33", true, false, new int[] { }, new int[] { 33 })]
+        [InlineData("-x 32 33", true, true, new int[] { 32 }, new int[] { 33 })]
+        [InlineData("-z 32 33", false, true, new int[] { }, new int[] { 33 })]
+        [InlineData("-x 32 -x 33", true, true, new int[] { 32, 33 }, new int[] { })]
         public void parameterless_properties(
             string cmdLine,
             bool required,
-            MappingResult result,
+            bool result,
             int[] optValue,
             int[] unkeyedValues)
         {
@@ -48,14 +48,14 @@ namespace J4JCommandLine.Tests
         }
 
         [Theory]
-        [InlineData("-z 32 33", true, MappingResult.MissingRequired, new int[] { }, new int[] { 33 })]
-        [InlineData("-x 32 33", true, MappingResult.Success, new int[] { 32 }, new int[] { 33 })]
-        [InlineData("-z 32 33", false, MappingResult.Success, new int[] { }, new int[] { 33 })]
-        [InlineData("-x 32 -x 33", true, MappingResult.Success, new int[] { 32, 33 }, new int[] { })]
+        [InlineData("-z 32 33", true, false, new int[] { }, new int[] { 33 })]
+        [InlineData("-x 32 33", true, true, new int[] { 32 }, new int[] { 33 })]
+        [InlineData("-z 32 33", false, true, new int[] { }, new int[] { 33 })]
+        [InlineData("-x 32 -x 33", true, true, new int[] { 32, 33 }, new int[] { })]
         public void parametered_properties(
             string cmdLine,
             bool required,
-            MappingResult result,
+            bool result,
             int[] optValue,
             int[] unkeyedValues)
         {
@@ -77,7 +77,7 @@ namespace J4JCommandLine.Tests
             BindingTarget<T> target,
             Option option,
             Option unkeyed,
-            MappingResult desiredParseResult,
+            bool desiredParseResult,
             Func<TestProperties> results,
             int[] optValue,
             int[] unkeyedValues)

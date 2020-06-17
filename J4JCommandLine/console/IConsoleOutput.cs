@@ -6,7 +6,7 @@ namespace J4JSoftware.CommandLine
     {
         void Initialize();
         void AddLine( ConsoleSection section, string? text = null );
-        void AddError( List<string> errors, List<string>? keys = null );
+        void AddError( CommandLineLogger.ConsolidatedLog consolidatedLog );
         void AddOption( List<string> keys, string? description = null, string? defaultText = null );
         void Display();
     }

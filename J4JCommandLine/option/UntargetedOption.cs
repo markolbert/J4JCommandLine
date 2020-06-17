@@ -6,20 +6,18 @@ namespace J4JSoftware.CommandLine
     // operation. Used to capture error information about an invalid parsing.
     public class UntargetedOption : Option
     {
-        public UntargetedOption(OptionCollection options )
-            : base( OptionType.Null, new UntargetableType(), options )
+        public UntargetedOption(OptionCollection options, CommandLineLogger logger )
+            : base( OptionType.Null, new UntargetableType(), options, logger )
         {
         }
 
-        public override MappingResult Convert(
-            IBindingTarget bindingTarget,
-            IParseResult parseResult,
-            ITargetableType targetType,
-            out object? result)
+        public override object? Convert( IAllocation allocation, ITargetableType targetType )
         {
-            result = null;
+            Logger.LogError( ProcessingPhase.Parsing, 
+                "Option is not bound to a property",
+                option : this );
 
-            return MappingResult.Unbound;
+            return null;
         }
     }
 }

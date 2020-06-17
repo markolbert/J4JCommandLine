@@ -8,11 +8,11 @@ namespace J4JCommandLine.Tests
     public class SwitchPropertyTest
     {
         [Theory]
-        [InlineData("-x 32", MappingResult.Success, true, new int[] { 32 })]
-        [InlineData("-x", MappingResult.Success, true, new int[] { })]
+        [InlineData("-x 32", true, true, new int[] { 32 })]
+        [InlineData("-x", true, true, new int[] { })]
         public void root_properties(
             string cmdLine,
-            MappingResult result,
+            bool result,
             bool optValue,
             int[] unkeyedValues)
         {
@@ -25,11 +25,11 @@ namespace J4JCommandLine.Tests
         }
 
         [Theory]
-        [InlineData("-x 32", MappingResult.Success, true, new int[] { 32 })]
-        [InlineData("-x", MappingResult.Success, true, new int[] { })]
+        [InlineData("-x 32", true, true, new int[] { 32 })]
+        [InlineData("-x", true, true, new int[] { })]
         public void parameterless_properties(
             string cmdLine,
-            MappingResult result,
+            bool result,
             bool optValue,
             int[] unkeyedValues)
         {
@@ -42,11 +42,11 @@ namespace J4JCommandLine.Tests
         }
 
         [Theory]
-        [InlineData("-x 32", MappingResult.Success, true, new int[] { 32 })]
-        [InlineData("-x", MappingResult.Success, true, new int[] { })]
+        [InlineData("-x 32", true, true, new int[] { 32 })]
+        [InlineData("-x", true, true, new int[] { })]
         public void parametered_properties(
             string cmdLine,
-            MappingResult result,
+            bool result,
             bool optValue,
             int[] unkeyedValues)
         {
@@ -67,7 +67,7 @@ namespace J4JCommandLine.Tests
             BindingTarget<T> target,
             Option option,
             Option unkeyed,
-            MappingResult desiredParseResult,
+            bool desiredParseResult,
             Func<TestProperties> results,
             bool optValue,
             int[] unkeyedValues)

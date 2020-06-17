@@ -14,12 +14,12 @@ namespace J4JSoftware.CommandLine
             _checkValue = checkValue;
         }
 
-        public override bool Validate( IBindingTarget bindingTarget, string key, T value )
+        public override bool Validate( Option option, T value, CommandLineLogger logger )
         {
             if( !value.Equals( _checkValue ) )
                 return true;
 
-            bindingTarget.AddError( key, $"'{value}' equals '{_checkValue}'" );
+            logger.LogError( ProcessingPhase.Validating, $"'{value}' equals '{_checkValue}'", option : option );
 
             return false;
         }

@@ -9,16 +9,17 @@ namespace J4JSoftware.CommandLine
     {
         bool IgnoreUnkeyedParameters { get; }
         bool IsConfigured { get; }
+        CommandLineLogger Logger { get; }
 
-        // Utility method for adding errors to the error collection. These are keyed by whatever
-        // option key (e.g., the 'x' in '-x') is associated with the error.
-        void AddError( string? key, string error );
+        //// Utility method for adding logger to the error collection. These are keyed by whatever
+        //// option key (e.g., the 'x' in '-x') is associated with the error.
+        //void LogError( string? key, string error );
 
         bool Initialize();
 
         // Parses the command line arguments against the Option objects bound to 
         // targeted properties, or to NullOption objects to collect error information.
-        MappingResult Parse(string[] args);
+        bool Parse(string[] args);
 
         // allows retrieval of the TValue instance in a type-agnostic way
         object GetValue();

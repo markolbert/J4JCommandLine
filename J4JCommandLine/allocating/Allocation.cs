@@ -3,14 +3,14 @@ using System.Linq;
 
 namespace J4JSoftware.CommandLine
 {
-    public class ParseResult : IParseResult
+    public class Allocation : IAllocation
     {
-        public ParseResult( IParseResults container )
+        public Allocation( IAllocations container )
         {
             Container = container;
         }
 
-        public IParseResults Container { get; }
+        public IAllocations Container { get; }
 
         public bool IsLastResult => Container.Where( ( pr, i ) => pr == this && i == Container.Count - 1 )
             .FirstOrDefault() != null;

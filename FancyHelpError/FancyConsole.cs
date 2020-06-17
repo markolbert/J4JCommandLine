@@ -63,10 +63,9 @@ namespace J4JSoftware.CommandLine
             _grid.Children.Add( cell );
         }
 
-        public void AddError( List<string> errors, List<string>? keys = null )
+        public void AddError( CommandLineLogger.ConsolidatedLog consolidatedLog )
         {
-            keys ??= new List<string>();
-            var keyText = string.Join( ", ", keys );
+            var keyText = string.Join( ", ", consolidatedLog.Keys );
 
             _grid.Children.Add( new Cell( keyText )
             {
@@ -76,7 +75,7 @@ namespace J4JSoftware.CommandLine
                 Margin = Margin
             } );
 
-            _grid.Children.Add( new Cell( string.Join( "\n", errors ) )
+            _grid.Children.Add( new Cell( string.Join( "\n", consolidatedLog.Texts ) )
             {
                 Color = ErrorColor,
                 Stroke = GridThickness,

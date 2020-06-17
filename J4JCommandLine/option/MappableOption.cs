@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Runtime.InteropServices;
 
 namespace J4JSoftware.CommandLine
 {
@@ -11,9 +12,10 @@ namespace J4JSoftware.CommandLine
         public MappableOption(
             OptionCollection options,
             ITargetableType targetableType,
+            CommandLineLogger logger,
             bool isKeyed
         )
-            : base( isKeyed ? OptionType.Keyed : OptionType.Unkeyed, targetableType, options )
+            : base( isKeyed ? OptionType.Keyed : OptionType.Unkeyed, targetableType, options, logger )
         {
             _converter = targetableType.Converter!;
         }
@@ -22,163 +24,126 @@ namespace J4JSoftware.CommandLine
         // line key to a option value. Return values other than MappingResult.Success
         // indicate one or more problems were encountered in the conversion and validation
         // process
-        public override MappingResult Convert(
-            IBindingTarget bindingTarget,
-            IParseResult parseResult,
-            ITargetableType targetType,
-            out object? result )
+        public override object? Convert(
+            IAllocation allocation,
+            ITargetableType targetType )
         {
-            var retVal = MappingResult.Success;
-
             switch( targetType.Multiplicity )
             {
                 case PropertyMultiplicity.Array:
-                    retVal = ConvertToArray( bindingTarget, parseResult, out var arrayResult );
-                    result = arrayResult;
-
-                    break;
+                    return ConvertToArray( allocation );
 
                 case PropertyMultiplicity.List:
-                    retVal = ConvertToList( bindingTarget, parseResult, out var listResult);
-                    result = listResult;
-
-                    break;
+                    return ConvertToList( allocation );
 
                 case PropertyMultiplicity.SimpleValue:
-                    retVal = ConvertToSimpleValue( bindingTarget, parseResult, out var singleResult);
-                    result = singleResult;
-
-                    break;
+                    return ConvertToSimpleValue( allocation );
 
                 default:
-                    result = null;
-                    retVal = MappingResult.UnsupportedMultiplicity;
-
-                    break;
+                    return null;
             }
-
-            return retVal;
         }
 
         // attempts to convert a text value using the defined ITextConverter property
-        private object? Convert(IBindingTarget bindingTarget, string key, string text)
+        private object? Convert(string key, string text)
         {
             if (_converter.Convert(text, out var innerResult))
                 return innerResult;
 
-            bindingTarget.AddError(
-                key,
-                $"Couldn't convert '{text}' to {_converter.SupportedType}");
+            Logger.LogError(
+                ProcessingPhase.Parsing,
+                $"Couldn't convert '{text}' to {_converter.SupportedType}",
+                option : this );
 
             return null;
         }
 
-        // checks to see if the provided IParseResult contains an allowable number of parameters and, if so,
+        // checks to see if the provided IAllocation contains an allowable number of parameters and, if so,
         // attempts to convert them to a simple value (i.e., a single object, an IValueType, a string)
-        private MappingResult ConvertToSimpleValue( 
-            IBindingTarget bindingTarget, 
-            IParseResult parseResult,
-            out object? result )
+        private object? ConvertToSimpleValue( IAllocation allocation )
         {
-            result = null;
-            var retVal = ValidParameterCount( bindingTarget, parseResult );
-
-            if( retVal != MappingResult.Success )
-                return retVal;
+            if( !ValidParameterCount( allocation ) )
+                return null;
 
             // handle boolean flag parameters which don't have a parameter
-            var text = OptionStyle == OptionStyle.Switch && parseResult.NumParameters == 0
+            var text = OptionStyle == OptionStyle.Switch && allocation.NumParameters == 0
                 ? "true"
-                : parseResult.Parameters[ 0 ];
+                : allocation.Parameters[ 0 ];
 
-            result = Convert( bindingTarget, parseResult.Key, text );
+            var retVal = Convert( allocation.Key, text );
 
-            if( result != null )
-                return MappingResult.Success;
-
-            bindingTarget.AddError( parseResult.Key, $"Couldn't convert '{text}' to {TargetableType}" );
-
-            return MappingResult.ConversionFailed;
-        }
-
-        // checks to see if the provided IParseResult contains an allowable number of parameters and, if so,
-        // attempts to convert them to an array of simple values (i.e., a single object, an IValueType, a string)
-        private MappingResult ConvertToArray( 
-            IBindingTarget bindingTarget, 
-            IParseResult parseResult, 
-            out Array? result )
-        {
-            result = null;
-            var retVal = ValidParameterCount(bindingTarget, parseResult );
-
-            if (retVal != MappingResult.Success)
+            if( retVal != null )
                 return retVal;
 
-            result = Array.CreateInstance( TargetableType.SupportedType, parseResult.NumParameters );
+            Logger.LogError( ProcessingPhase.Parsing, $"Couldn't convert '{text}' to {TargetableType}", option : this );
+
+            return null;
+        }
+
+        // checks to see if the provided IAllocation contains an allowable number of parameters and, if so,
+        // attempts to convert them to an array of simple values (i.e., a single object, an IValueType, a string)
+        private Array? ConvertToArray( IAllocation allocation )
+        {
+            if( !ValidParameterCount( allocation ) )
+                return null;
+
+            var retVal = Array.CreateInstance( TargetableType.SupportedType, allocation.NumParameters );
 
             var allOkay = true;
 
-            for( var idx = 0; idx < parseResult.NumParameters; idx++ )
+            for( var idx = 0; idx < allocation.NumParameters; idx++ )
             {
-                var item = Convert( bindingTarget, parseResult.Key, parseResult.Parameters[ idx ] );
+                var item = Convert( allocation.Key, allocation.Parameters[ idx ] );
 
                 if( item == null )
                 {
-                    bindingTarget.AddError(
-                        parseResult.Key,
-                        $"Couldn't convert '{parseResult.Parameters[ idx ]}' to {_converter.SupportedType}" );
+                    Logger.LogError(
+                        ProcessingPhase.Parsing,
+                        $"Couldn't convert '{allocation.Parameters[ idx ]}' to {_converter.SupportedType}",
+                        option: this);
 
                     allOkay = false;
-
-                    result = null;
                     break;
                 }
-                else result.SetValue( item, idx );
+                else retVal.SetValue( item, idx );
             }
 
-            return allOkay ? MappingResult.Success : MappingResult.ConversionFailed;
+            return allOkay ? retVal : null;
         }
 
-        // checks to see if the provided IParseResult contains an allowable number of parameters and, if so,
+        // checks to see if the provided IAllocation contains an allowable number of parameters and, if so,
         // attempts to convert them to a generic list of simple values (i.e., a single object, an IValueType, a string)
-        private MappingResult ConvertToList( 
-            IBindingTarget bindingTarget, 
-            IParseResult parseResult, 
-            out IList? result )
+        private IList? ConvertToList( IAllocation allocation )
         {
-            result = null;
-            var retVal = ValidParameterCount(bindingTarget, parseResult);
-
-            if (retVal != MappingResult.Success)
-                return retVal;
+            if( !ValidParameterCount( allocation ) )
+                return null;
 
             // create a list of the Type we're converting to
             var listType = typeof(List<>);
             var genericListType = listType.MakeGenericType( _converter.SupportedType );
 
-            result = ( Activator.CreateInstance( genericListType ) as IList )!;
+            var retVal = ( Activator.CreateInstance( genericListType ) as IList )!;
 
             var allOkay = true;
 
-            for( var idx = 0; idx < parseResult.NumParameters; idx++ )
+            for( var idx = 0; idx < allocation.NumParameters; idx++ )
             {
-                var item = Convert( bindingTarget, parseResult.Key, parseResult.Parameters[ idx ] );
+                var item = Convert( allocation.Key, allocation.Parameters[ idx ] );
 
                 if( item == null )
                 {
-                    bindingTarget.AddError(
-                        parseResult.Key,
-                        $"Couldn't convert '{parseResult.Parameters[idx]}' to {_converter.SupportedType}");
+                    Logger.LogError(
+                        ProcessingPhase.Parsing,
+                        $"Couldn't convert '{allocation.Parameters[ idx ]}' to {_converter.SupportedType}",
+                        option : this );
 
                     allOkay = false;
-
-                    result = null;
                     break;
                 }
-                else result.Add( item );
+                else retVal.Add( item );
             }
 
-            return allOkay ? MappingResult.Success : MappingResult.ConversionFailed;
+            return allOkay ? retVal : null;
         }
     }
 }

@@ -18,10 +18,10 @@ namespace J4JCommandLine.Tests
         }
 
         [ Theory ]
-        [ InlineData( "h", MappingResult.HelpRequested ) ]
+        [ InlineData( "h", true ) ]
         public void Trigger_help(
             string key,
-            MappingResult result )
+            bool result )
         {
             var target = ServiceProvider.GetBindingTarget<RootProperties>(true);
             target.Should().NotBeNull();

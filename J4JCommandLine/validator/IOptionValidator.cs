@@ -8,12 +8,12 @@ namespace J4JSoftware.CommandLine
         // the Type the validator can validate
         Type SupportedType { get; }
 
-        bool Validate( IBindingTarget bindingTarget, string key, object value );
+        bool Validate( Option option, object value, CommandLineLogger logger );
     }
 
     // the non-generic interface for validating an IOption's value
-    public interface IOptionValidator<in TOption> : IOptionValidator
+    public interface IOptionValidator<in T> : IOptionValidator
     {
-        bool Validate( IBindingTarget bindingTarget, string key, TOption value );
+        bool Validate( Option option, T value, CommandLineLogger logger );
     }
 }

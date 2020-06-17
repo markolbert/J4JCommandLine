@@ -156,21 +156,21 @@ namespace J4JSoftware.CommandLine
 
         //// maps the parsed information contained in parsedResults to Option bound to this TargetedProperty by matching
         //// keys. Performs various checks to ensure the conversion and binding process is valid, storing
-        //// errors when it's not.
+        //// logger when it's not.
         //public MappingResult MapParseResult(
         //    IBindingTarget bindingTarget,
-        //    ParseResults parseResults )
+        //    Allocations parseResults )
         //{
         //    // validate parameters and state
         //    if( BoundOption == null )
         //    {
-        //        bindingTarget.AddError( "?", $"Property '{PropertyInfo.Name}' is unbound" );
+        //        bindingTarget.LogError( "?", $"Property '{PropertyInfo.Name}' is unbound" );
 
         //        return MappingResult.Unbound;
         //    }
 
         //    // see if our BoundOption's keys match a key in the parse results so we can retrieve a
-        //    // specific IParseResult
+        //    // specific IAllocation
         //    var (parseResult, lastOption) = parseResults
         //        .Where( pr =>
         //            BoundOption.Keys.Any( k => string.Equals( k, pr.Key, _keyComp ) ) )
@@ -182,14 +182,14 @@ namespace J4JSoftware.CommandLine
 
         //    if( Multiplicity == Multiplicity.Unsupported )
         //    {
-        //        bindingTarget.AddError( optionKey, $"Property '{PropertyInfo.Name}' has an unsupported Multiplicity" );
+        //        bindingTarget.LogError( optionKey, $"Property '{PropertyInfo.Name}' has an unsupported Multiplicity" );
 
         //        return MappingResult.UnsupportedMultiplicity;
         //    }
 
         //    if( !IsPreAssigned && !IsCreateable )
         //    {
-        //        bindingTarget.AddError( optionKey,
+        //        bindingTarget.LogError( optionKey,
         //            $"Property '{PropertyInfo.Name}' was not pre-assigned and is not creatable" );
 
         //        return MappingResult.NotDefinedOrCreatable;
@@ -197,7 +197,7 @@ namespace J4JSoftware.CommandLine
 
         //    if( !IsPubliclyReadWrite )
         //    {
-        //        bindingTarget.AddError( optionKey,
+        //        bindingTarget.LogError( optionKey,
         //            $"Property '{PropertyInfo.Name}' is not publicly readable/writeable" );
 
         //        return MappingResult.NotPublicReadWrite;
@@ -214,7 +214,7 @@ namespace J4JSoftware.CommandLine
         //        // if the option isn't required we'll just use the previously-determined default value
         //        if( BoundOption.IsRequired )
         //        {
-        //            bindingTarget.AddError( optionKey, $"Missing required option '{optionKey}'" );
+        //            bindingTarget.LogError( optionKey, $"Missing required option '{optionKey}'" );
         //            retVal |= MappingResult.MissingRequired;
         //        }
         //    }
@@ -254,17 +254,15 @@ namespace J4JSoftware.CommandLine
 
         // maps the parsed information contained in parsedResults to Option bound to this TargetedProperty by matching
         // keys. Performs various checks to ensure the conversion and binding process is valid, storing
-        // errors when it's not.
-        public MappingResult MapParseResult(
-            IBindingTarget bindingTarget,
-            IParseResult? parseResult )
+        // logger when it's not.
+        public bool MapParseResult( IBindingTarget bindingTarget, IAllocation? parseResult )
         {
             // validate parameters and state
             if (BoundOption == null)
             {
-                bindingTarget.AddError("?", $"Property '{PropertyInfo.Name}' is unbound");
+                bindingTarget.Logger.LogError( ProcessingPhase.Parsing, $"Property '{PropertyInfo.Name}' is unbound" );
 
-                return MappingResult.Unbound;
+                return false;
             }
 
             // store the option key that we matched on for later use in displaying context-sensitive help
@@ -272,28 +270,35 @@ namespace J4JSoftware.CommandLine
 
             if (Multiplicity == PropertyMultiplicity.Unsupported)
             {
-                bindingTarget.AddError(optionKey, $"Property '{PropertyInfo.Name}' has an unsupported Multiplicity");
+                bindingTarget.Logger.LogError( 
+                    ProcessingPhase.Parsing,
+                    $"Property '{PropertyInfo.Name}' has an unsupported Multiplicity",
+                    option : BoundOption );
 
-                return MappingResult.UnsupportedMultiplicity;
+                return false;
             }
 
             if (!IsPreAssigned && !IsCreateable)
             {
-                bindingTarget.AddError(optionKey,
-                    $"Property '{PropertyInfo.Name}' was not pre-assigned and is not creatable");
+                bindingTarget.Logger.LogError(
+                    ProcessingPhase.Parsing,
+                    $"Property '{PropertyInfo.Name}' was not pre-assigned and is not creatable",
+                    option: BoundOption);
 
-                return MappingResult.NotDefinedOrCreatable;
+                return false;
             }
 
             if (!IsPubliclyReadWrite)
             {
-                bindingTarget.AddError(optionKey,
-                    $"Property '{PropertyInfo.Name}' is not publicly readable/writeable");
+                bindingTarget.Logger.LogError(
+                    ProcessingPhase.Parsing,
+                    $"Property '{PropertyInfo.Name}' is not publicly readable/writeable",
+                    option:BoundOption);
 
-                return MappingResult.NotPublicReadWrite;
+                return false;
             }
 
-            var retVal = MappingResult.Success;
+            var retVal = true;
 
             // start by setting the value we're going to set on our bound property to 
             // whatever default was specified for our BoundOption.
@@ -304,34 +309,29 @@ namespace J4JSoftware.CommandLine
                 // if the option isn't required we'll just use the previously-determined default value
                 if (BoundOption.IsRequired)
                 {
-                    bindingTarget.AddError(optionKey, $"Missing required option '{optionKey}'");
-                    retVal |= MappingResult.MissingRequired;
+                    bindingTarget.Logger.LogError(
+                        ProcessingPhase.Parsing, 
+                        $"Missing required option '{optionKey}'",
+                        option: BoundOption);
+
+                    retVal = false;
                 }
             }
             else
             {
-                retVal = BoundOption.Convert(
-                    bindingTarget,
-                    parseResult,
-                    TargetableType,
-                    out var convResult);
+                var convResult = BoundOption.Convert( parseResult, TargetableType);
 
-                if (retVal == MappingResult.Success)
-                {
+                if (convResult != null )
                     propValue = convResult;
-
-                    // store the 
-                }
             }
 
-            if (propValue != null && !BoundOption.Validate(bindingTarget, optionKey, propValue))
+            if (propValue != null && !BoundOption.Validate(optionKey!, propValue))
             {
                 // revert to our default value (which we presume is valid but don't actually know
                 // or care)
                 propValue = BoundOption.DefaultValue;
 
-                // set a flag to record the validation failure
-                retVal |= MappingResult.ValidationFailed;
+                retVal = false;
             }
 
             // finally, set the target property's value

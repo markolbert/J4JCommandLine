@@ -9,18 +9,18 @@ namespace J4JSoftware.CommandLine
     public class ElementTerminator : IElementTerminator
     {
         private StringComparison _textComp;
-        private CommandLineErrors _errors;
+        private CommandLineLogger _logger;
         private MasterTextCollection _masterText;
 
         public bool IsInitialized {get; private set; }
 
         public void Initialize( 
             StringComparison textComp,
-            CommandLineErrors errors,
+            CommandLineLogger logger,
             MasterTextCollection masterText )
         {
             _textComp = textComp;
-            _errors = errors;
+            _logger = logger;
             _masterText = masterText;
 
             IsInitialized = true;
@@ -32,7 +32,7 @@ namespace J4JSoftware.CommandLine
 
             if( !IsInitialized )
             {
-                _errors.AddError(null, null, $"{nameof(ElementTerminator)} is not initialized");
+                _logger.LogError( ProcessingPhase.Allocating, $"{nameof(ElementTerminator)} is not initialized" );
                 return retVal;
             }
 

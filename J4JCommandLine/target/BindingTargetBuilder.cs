@@ -8,7 +8,7 @@ namespace J4JSoftware.CommandLine
 {
     public class BindingTargetBuilder
     {
-        private readonly ICommandLineParser _parser;
+        private readonly IAllocator _parser;
         private readonly IEnumerable<ITextConverter> _converters;
         private readonly IConsoleOutput _consoleOutput;
 
@@ -22,7 +22,7 @@ namespace J4JSoftware.CommandLine
         private char[] _quotes;
 
         public BindingTargetBuilder(
-            ICommandLineParser parser,
+            IAllocator parser,
             IEnumerable<ITextConverter> converters,
             IConsoleOutput consoleOutput
         )
@@ -83,27 +83,28 @@ namespace J4JSoftware.CommandLine
         public BindingTarget<TValue>? Build<TValue>( TValue? value )
             where TValue : class
         {
-            var errors = new CommandLineErrors( _textComp );
+            var errors = new CommandLineLogger( _textComp );
 
             var masterText = new MasterTextCollection( _textComp );
 
-            if( _helpKeys == null || _helpKeys.Length == 0 )
+            masterText.AddRange(TextUsageType.Prefix, _prefixes);
+            masterText.AddRange(TextUsageType.ValueEncloser, _enclosers);
+            masterText.AddRange(TextUsageType.Quote, _quotes.Select(q => q.ToString()));
+
+            if ( _helpKeys == null || _helpKeys.Length == 0 )
             {
-                errors.AddError(null, null, $"No help keys defined");
-                DisplayErrors(errors);
+                errors.LogError(ProcessingPhase.Initializing, $"No help keys defined");
+                DisplayErrors(errors, masterText);
 
                 return null;
             }
 
             masterText.AddRange( TextUsageType.HelpOptionKey, _helpKeys );
-            masterText.AddRange( TextUsageType.Prefix, _prefixes );
-            masterText.AddRange( TextUsageType.ValueEncloser, _enclosers );
-            masterText.AddRange( TextUsageType.Quote, _quotes.Select( q => q.ToString() ) );
 
             if ( value == null && !typeof(TValue).HasPublicParameterlessConstructor() )
             {
-                errors.AddError(null, null, $"{typeof(TValue)} does not have a public parameterless constructor");
-                DisplayErrors(errors);
+                errors.LogError(ProcessingPhase.Initializing,$"{typeof(TValue)} does not have a public parameterless constructor");
+                DisplayErrors(errors, masterText);
 
                 return null;
             }
@@ -112,7 +113,7 @@ namespace J4JSoftware.CommandLine
 
             if ( !_parser.Initialize( _textComp, errors, masterText ) )
             {
-                DisplayErrors(errors);
+                DisplayErrors(errors, masterText);
 
                 return null;
             }
@@ -120,12 +121,12 @@ namespace J4JSoftware.CommandLine
             var retVal = new BindingTarget<TValue>()
             {
                 Value = value,
-                Parser = _parser,
+                Allocator = _parser,
                 Converters = _converters,
                 TypeFactory = new TargetableTypeFactory(_converters),
                 IgnoreUnkeyedParameters = _ignoreUnprocesssed,
                 Options = new OptionCollection(masterText),
-                Errors = errors,
+                Logger = errors,
                 TextComparison = _textComp,
                 MasterText = masterText,
                 ConsoleOutput = _consoleOutput,
@@ -135,8 +136,8 @@ namespace J4JSoftware.CommandLine
 
             if( !retVal.Initialize() )
             {
-                errors.AddError(null, null, $"{retVal.GetType().Name} is not configured");
-                DisplayErrors(errors);
+                errors.LogError(ProcessingPhase.Initializing, $"{retVal.GetType().Name} is not configured");
+                DisplayErrors(errors, masterText);
 
                 return null;
             }
@@ -144,7 +145,7 @@ namespace J4JSoftware.CommandLine
             return retVal;
         }
 
-        private void DisplayErrors( CommandLineErrors errors )
+        private void DisplayErrors( CommandLineLogger logger, MasterTextCollection masterText )
         {
             _consoleOutput.Initialize();
 
@@ -154,9 +155,9 @@ namespace J4JSoftware.CommandLine
             if (!string.IsNullOrEmpty(_description))
                 _consoleOutput.AddLine(ConsoleSection.Header, _description);
 
-            foreach( var error in errors )
+            foreach( var consolidatedError in logger.ConsolidateLogEvents(masterText) )
             {
-                _consoleOutput.AddError( error.Errors );
+                _consoleOutput.AddError( consolidatedError );
             }
 
             _consoleOutput.Display();

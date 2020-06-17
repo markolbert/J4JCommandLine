@@ -8,13 +8,13 @@ namespace J4JCommandLine.Tests
     public class SimplePropertyTest
     {
         [Theory]
-        [InlineData("-z 32", true, MappingResult.MissingRequired, -1, new int[] { })]
-        [InlineData("-x 32", true, MappingResult.Success, 32, new int[] { })]
-        [InlineData("-z 32", false, MappingResult.Success, -1, new int[] { })]
+        [InlineData("-z 32", true, false, -1, new int[] { })]
+        [InlineData("-x 32", true, true, 32, new int[] { })]
+        [InlineData("-z 32", false, true, -1, new int[] { })]
         public void root_properties(
             string cmdLine,
             bool required,
-            MappingResult result,
+            bool result,
             int optValue,
             int[] unkeyedValues)
         {
@@ -27,13 +27,13 @@ namespace J4JCommandLine.Tests
         }
 
         [Theory]
-        [InlineData("-z 32", true, MappingResult.MissingRequired, -1, new int[] { })]
-        [InlineData("-x 32", true, MappingResult.Success, 32, new int[] { })]
-        [InlineData("-z 32", false, MappingResult.Success, -1, new int[] { })]
+        [InlineData("-z 32", true, false, -1, new int[] { })]
+        [InlineData("-x 32", true, true, 32, new int[] { })]
+        [InlineData("-z 32", false, true, -1, new int[] { })]
         public void parameterless_properties(
             string cmdLine,
             bool required,
-            MappingResult result,
+            bool result,
             int optValue,
             int[] unkeyedValues)
         {
@@ -46,13 +46,13 @@ namespace J4JCommandLine.Tests
         }
 
         [Theory]
-        [InlineData("-z 32", true, MappingResult.MissingRequired, -1, new int[] { })]
-        [InlineData("-x 32", true, MappingResult.Success, 32, new int[] { })]
-        [InlineData("-z 32", false, MappingResult.Success, -1, new int[] { })]
+        [InlineData("-z 32", true, false, -1, new int[] { })]
+        [InlineData("-x 32", true, true, 32, new int[] { })]
+        [InlineData("-z 32", false, true, -1, new int[] { })]
         public void parametered_properties(
             string cmdLine,
             bool required,
-            MappingResult result,
+            bool result,
             int optValue,
             int[] unkeyedValues)
         {
@@ -74,7 +74,7 @@ namespace J4JCommandLine.Tests
             BindingTarget<T> target, 
             Option option, 
             Option unkeyed,
-            MappingResult desiredParseResult,
+            bool desiredParseResult,
             Func<TestProperties> results,
             int optValue,
             int[] unkeyedValues )

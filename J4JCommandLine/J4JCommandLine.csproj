@@ -15,8 +15,8 @@
 
   <ItemGroup>
     <Compile Remove="ImmutableTextCollections.cs" />
-    <Compile Remove="parsing\IParsingConfiguration.cs" />
-    <Compile Remove="parsing\ParsingConfiguration.cs" />
+    <Compile Remove="allocating\IParsingConfiguration.cs" />
+    <Compile Remove="allocating\ParsingConfiguration.cs" />
   </ItemGroup>
 
   <ItemGroup>

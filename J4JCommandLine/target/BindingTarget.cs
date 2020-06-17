@@ -26,17 +26,17 @@ namespace J4JSoftware.CommandLine
         {
         }
 
-        internal ICommandLineParser Parser { get; set; }
+        internal IAllocator Allocator { get; set; }
         internal IEnumerable<ITextConverter> Converters { get; set; }
         internal ITargetableTypeFactory TypeFactory { get; set; }
         internal OptionCollection Options { get; set; }
-        internal CommandLineErrors Errors { get; set; }
+        public CommandLineLogger Logger { get; internal set; }
         internal StringComparison TextComparison { get; set; }
         internal MasterTextCollection MasterText { get; set; }
         internal IConsoleOutput ConsoleOutput { get; set; }
 
-        public bool IsConfigured => Parser != null && Converters != null && TypeFactory != null && Options != null 
-                                    && Errors != null && MasterText != null && ConsoleOutput != null;
+        public bool IsConfigured => Allocator != null && Converters != null && TypeFactory != null && Options != null 
+                                    && Logger != null && MasterText != null && ConsoleOutput != null;
 
         public bool IgnoreUnkeyedParameters { get; internal set; }
 
@@ -51,7 +51,7 @@ namespace J4JSoftware.CommandLine
         {
             _properties.Clear();
             
-            Errors.Clear();
+            Logger.Clear();
             Options.Clear();
 
             _headerDisplayed = false;
@@ -128,52 +128,38 @@ namespace J4JSoftware.CommandLine
 
         // Parses the command line arguments against the Option objects bound to 
         // targeted properties, or to NullOption objects to collect error information.
-        public MappingResult Parse( string[] args )
+        public bool Parse( string[] args )
         {
             if( !IsConfigured )
             {
-                Errors.AddError( this, null, $"{this.GetType().Name} is not configured" );
+                Logger.LogError( ProcessingPhase.Parsing, $"{this.GetType().Name} is not configured" );
 
                 DisplayHeader();
                 DisplayErrors();
                 DisplayHelp();
 
-                return MappingResult.BindingTargetNotConfigured;
+                return false;
             }
 
-            var retVal = MappingResult.Success;
+            var retVal = true;
 
             // parse the arguments into a collection of arguments keyed by the option key
             // note that there can be multiple arguments associated with any option key
-            var parseResults = Parser.Parse( args );
+            var parseResults = Allocator.AllocateCommandLine( args );
 
             // scan all the bound options that aren't tied to NullOptions, which are only
             // "bound" in error
-            foreach( var property in _properties )
+            foreach( var property in _properties.Where( p =>
+                p.BoundOption != null && p.BoundOption.OptionType == OptionType.Keyed ) )
             {
-                switch ( property.BoundOption!.OptionType )
-                {
-                    case OptionType.Keyed:
-                        // see if our BoundOption's keys match a key in the parse results so we can retrieve a
-                        // specific IParseResult
-                        var parseResult = parseResults
-                            .FirstOrDefault( pr => property.BoundOption
-                                .Keys.Any(k => string.Equals(k, pr.Key, TextComparison)) 
-                            );
+                // see if our BoundOption's keys match a key in the parse results so we can retrieve a
+                // specific IAllocation
+                var parseResult = parseResults
+                    .FirstOrDefault( pr => property.BoundOption!
+                        .Keys.Any( k => string.Equals( k, pr.Key, TextComparison ) )
+                    );
 
-                        retVal |= property.MapParseResult( this, parseResult );
-
-                        break;
-
-                    case OptionType.Unkeyed:
-                        // no op, for now; we want to process the single unkeyed option last because that gives
-                        // the last keyed option a chance to dump its excess parameters to the unkeyed option
-                        break;
-
-                    case OptionType.Null:
-                        retVal |= MappingResult.Unbound;
-                        break;
-                }
+                retVal &= property.MapParseResult( this, parseResult );
             }
 
             // now process the unkeyed parameters, if any, provided they were bound to a targeted property
@@ -183,17 +169,17 @@ namespace J4JSoftware.CommandLine
             {
                 if( !IgnoreUnkeyedParameters && parseResults.Unkeyed.NumParameters > 0 )
                 {
-                    retVal |= MappingResult.UnprocessedUnKeyedParameters;
-                    AddError( null, $"{parseResults.Unkeyed.NumParameters:n0} unprocessed parameter(s)" );
+                    retVal = false;
+
+                    Logger.LogError( ProcessingPhase.Parsing, $"{parseResults.Unkeyed.NumParameters:n0} unprocessed parameter(s)" );
                 }
             }
-            else retVal |= unkeyed.MapParseResult( this, parseResults.Unkeyed );
+            else retVal &= unkeyed.MapParseResult( this, parseResults.Unkeyed );
 
             // safety net
-            if ( retVal == MappingResult.Success && Errors.Count > 0 )
-                retVal |= MappingResult.UnspecifiedFailure;
+            retVal = retVal && Logger.Count == 0;
 
-            if( retVal != MappingResult.Success )
+            if( !retVal )
             {
                 DisplayHeader();
                 DisplayErrors();
@@ -203,8 +189,6 @@ namespace J4JSoftware.CommandLine
             if( parseResults.Any(
                 pr => MasterText[ TextUsageType.HelpOptionKey ].Any( hk => string.Equals( hk, pr.Key ) ) ) )
             {
-                retVal |= MappingResult.HelpRequested;
-
                 DisplayHeader();
                 DisplayHelp();
             }
@@ -212,17 +196,17 @@ namespace J4JSoftware.CommandLine
             if( _outputPending )
                 ConsoleOutput.Display();
 
-            Errors.Clear();
+            Logger.Clear();
 
             return retVal;
         }
 
-        // Utility method for adding errors to the error collection. These are keyed by whatever
-        // option key (e.g., the 'x' in '-x') is associated with the error.
-        public void AddError( string? key, string error )
-        {
-            Errors.AddError( this, key, error );
-        }
+        //// Utility method for adding logger to the error collection. These are keyed by whatever
+        //// option key (e.g., the 'x' in '-x') is associated with the error.
+        //public void LogError( string? key, string error )
+        //{
+        //    Logger.LogError( this, key, error );
+        //}
 
         private TargetedProperty GetTargetedProperty( List<PropertyInfo> pathElements )
         {
@@ -262,7 +246,7 @@ namespace J4JSoftware.CommandLine
                     style = OptionStyle.Switch;
             }
 
-            var retVal = new MappableOption( Options, property.TargetableType, isKeyed )
+            var retVal = new MappableOption( Options, property.TargetableType, Logger, isKeyed )
             {
                 OptionStyle = style
             };
@@ -279,7 +263,7 @@ namespace J4JSoftware.CommandLine
 
         private Option GetUntargetedOption( string[]? keys, TargetedProperty? property, string error )
         {
-            var retVal = new UntargetedOption( Options );
+            var retVal = new UntargetedOption( Options, Logger );
 
             if( keys != null )
                 retVal.AddKeys( keys );
@@ -289,7 +273,7 @@ namespace J4JSoftware.CommandLine
             if( property != null )
                 property.BoundOption = retVal;
 
-            Errors.AddError( this, keys.FirstOrDefault(), error );
+            Logger.LogError( ProcessingPhase.Initializing, error, option : retVal );
 
             return retVal;
         }
@@ -315,9 +299,9 @@ namespace J4JSoftware.CommandLine
         {
             ConsoleOutput.AddLine( ConsoleSection.Errors, "Error(s):" );
 
-            foreach( var error in Errors )
+            foreach( var consolidatedError in Logger.ConsolidateLogEvents(MasterText) )
             {
-                ConsoleOutput.AddError( error.Errors, MasterText.ConjugateKey( error.Source.Key ) );
+                ConsoleOutput.AddError( consolidatedError );
             }
 
             _outputPending = true;

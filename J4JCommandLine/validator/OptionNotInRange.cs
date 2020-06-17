@@ -24,7 +24,7 @@ namespace J4JSoftware.CommandLine
         public bool IncludeMaximumEqual { get; private set; }
         protected bool MaximumSet { get; set; }
 
-        public override bool Validate( IBindingTarget bindingTarget, string key, T value )
+        public override bool Validate( Option option, T value, CommandLineLogger logger )
         {
             if( IsValid( value ) )
                 return true;
@@ -47,7 +47,7 @@ namespace J4JSoftware.CommandLine
                 sb.Append( $" {Maximum}" );
             }
 
-            bindingTarget.AddError( key, sb.ToString() );
+            logger.LogError( ProcessingPhase.Validating, sb.ToString(), option: option );
 
             return false;
         }

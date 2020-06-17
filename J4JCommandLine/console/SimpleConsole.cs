@@ -60,13 +60,13 @@ namespace J4JSoftware.CommandLine
             _lines.Add( text ?? string.Empty );
         }
 
-        public void AddError( List<string> errors, List<string>? keys = null )
+        public void AddError( CommandLineLogger.ConsolidatedLog consolidatedLog )
         {
-            keys = keys == null ? new List<string>() : MergeWords( keys, KeyAreaWidth, ", " );
+            var keys = MergeWords( consolidatedLog.Keys, KeyAreaWidth, ", " );
 
             var errorLines = new List<string>();
 
-            foreach (var error in errors)
+            foreach (var error in consolidatedLog.Texts)
             {
                 if (errorLines.Count > 0)
                     errorLines.Add("\n");
@@ -179,7 +179,7 @@ namespace J4JSoftware.CommandLine
             return retVal;
         }
 
-        // outputs a block of key-focused information, either help or errors, ensuring that
+        // outputs a block of key-focused information, either help or logger, ensuring that
         // blank lines are added when necessary to either block to make both blocks take up
         // the same number of lines
         private void OutputToConsole(List<string> keyLines, List<string> detailLines)

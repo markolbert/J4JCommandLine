@@ -6,19 +6,19 @@ namespace J4JSoftware.CommandLine
     public class KeyPrefixer : IElementKey
     {
         private StringComparison _textComp;
-        private CommandLineErrors _errors;
+        private CommandLineLogger _logger;
         private MasterTextCollection _masterText;
 
         public bool IsInitialized => _masterText[TextUsageType.Prefix]?.Count() > 0;
 
-        public void Initialize( StringComparison textComp, CommandLineErrors errors, MasterTextCollection masterText )
+        public void Initialize( StringComparison textComp, CommandLineLogger logger, MasterTextCollection masterText )
         {
             _textComp = textComp;
-            _errors = errors;
+            _logger = logger;
             _masterText = masterText;
 
             if( !IsInitialized )
-                _errors.AddError( null, null, $"No option prefixes were specified" );
+                _logger.LogError( ProcessingPhase.Initializing, $"No option prefixes were specified" );
         }
 
         public int GetMaxPrefixLength( string text )
@@ -27,7 +27,7 @@ namespace J4JSoftware.CommandLine
 
             if( !IsInitialized )
             {
-                _errors.AddError(null, null, $"{nameof(KeyPrefixer)} is not initialized");
+                _logger.LogError(ProcessingPhase.Parsing, $"{nameof(KeyPrefixer)} is not initialized");
                 return retVal;
             }
 

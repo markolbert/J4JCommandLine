@@ -8,13 +8,13 @@ namespace J4JCommandLine.Tests
 {
     public class CommandLineParsing
     {
-        private readonly ICommandLineParser _cmdLineParser;
-        private readonly CommandLineErrors _errors;
+        private readonly IAllocator _cmdLineParser;
+        private readonly CommandLineLogger _logger;
 
         public CommandLineParsing()
         {
-            _cmdLineParser = ServiceProvider.Instance.GetRequiredService<ICommandLineParser>();
-            _errors = new CommandLineErrors( StringComparison.OrdinalIgnoreCase );
+            _cmdLineParser = ServiceProvider.Instance.GetRequiredService<IAllocator>();
+            _logger = new CommandLineLogger( StringComparison.OrdinalIgnoreCase );
 
             var masterText = new MasterTextCollection(StringComparison.OrdinalIgnoreCase);
 
@@ -25,9 +25,9 @@ namespace J4JCommandLine.Tests
 
             if( !_cmdLineParser.Initialize(
                 StringComparison.OrdinalIgnoreCase,
-                _errors,
+                _logger,
                 masterText ) )
-                throw new ApplicationException( $"{nameof(CommandLineParser)} initialization failed" );
+                throw new ApplicationException( $"{nameof(Allocator)} initialization failed" );
         }
 
         [ Theory ]
@@ -38,7 +38,7 @@ namespace J4JCommandLine.Tests
         [ InlineData( "-x:\"abc\"", new string[] { "\"abc\"" }, new string[] { } ) ]
         public void parse_one_item( string cmdLine, string[] optValue, string[] unkeyedValue )
         {
-            var parsed = _cmdLineParser.Parse( cmdLine );
+            var parsed = _cmdLineParser.AllocateCommandLine( cmdLine );
 
             parsed.Count.Should().Be( 1 );
             parsed.Contains( "x" ).Should().BeTrue();
@@ -61,7 +61,7 @@ namespace J4JCommandLine.Tests
         {
             var results = new string[][] { results1, results2 };
 
-            var parsed = _cmdLineParser.Parse( cmdLine );
+            var parsed = _cmdLineParser.AllocateCommandLine( cmdLine );
 
             parsed.Count.Should().Be( keys.Length );
 
