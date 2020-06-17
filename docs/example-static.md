@@ -33,6 +33,7 @@ namespace ConsoleAppJ4JCmdLine
         
         public static int IntValue { get; set; }
         public static string TextValue { get; set; }
+        public static List<string> Unkeyed { get; set; }
 
         private static void InitializeServiceProvider()
         {
@@ -49,8 +50,10 @@ namespace ConsoleAppJ4JCmdLine
 }
 ```
 
-The two public static properties, **IntValue** and **TextValue** are bound
-to command line options in code I'll show below. Otherwise there's nothing
+Two of the public static properties, **IntValue** and **TextValue** are bound
+to command line options in code I'll show below. The third property, **Unkeyed**,
+will be bound to any "unkeyed" options -- plain old command line parameters --
+found on the command line. Otherwise there's nothing
 special about them. They're just regular static properties with public get
 and set accessors.
 
@@ -83,16 +86,14 @@ static void Main(string[] args)
     // to be continued
 ```
 Then create an instance of **BindingTarget<Program>** by calling the builder's
-**Build()** method. Here I check **binder** to be sure it's not null, but
-you can also check the boolean return value of the **Build()** method:
+**Build()** method, checking to make sure it's not null:
 
 ```
     // see above for details...
 
-    builder.Build<Program>( null, out var binder );
-
+    var binder = builder.Build<Configuration>( null );
     if( binder == null )
-        throw new NullReferenceException( nameof(Program) );
+        throw new NullReferenceException(nameof(Program));
 
     // to be continued
 ```
@@ -109,6 +110,8 @@ Next you bind the options to the public static properties:
         .SetDescription( "a text value" )
         .SetDefaultValue( "some text value" );
 
+    binder.BindUnkeyed( x => Program.Unkeyed );
+
     // to be continued
 ```
 You don't have to set descriptions, default values or validators but that's how
@@ -118,7 +121,7 @@ Finally, you parse the command line arguments supplied to **Main()**:
 ```
     // see above for details...
 
-    if( binder.Parse( args ) != MappingResults.Success )
+    if( !binder.Parse( args ) )
     {
         Environment.ExitCode = 1;
         return;
@@ -126,5 +129,9 @@ Finally, you parse the command line arguments supplied to **Main()**:
 
     Console.WriteLine($"IntValue is {IntValue}");
     Console.WriteLine($"TextValue is {TextValue}");
+
+    Console.WriteLine( Unkeyed.Count == 0
+        ? "No unkeyed parameters"
+        : $"Unkeyed parameters: {string.Join( ", ", Unkeyed )}" );
 }
 ```

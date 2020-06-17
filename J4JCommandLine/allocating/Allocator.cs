@@ -41,9 +41,9 @@ namespace J4JSoftware.CommandLine
             return _prefixer.IsInitialized && _terminator.IsInitialized;
         }
 
-        public Allocations AllocateCommandLine( string[] args ) => AllocateCommandLine( string.Join( " ", args ) );
+        public IAllocations AllocateCommandLine( string[] args ) => AllocateCommandLine( string.Join( " ", args ) );
 
-        public Allocations AllocateCommandLine( string cmdLine )
+        public IAllocations AllocateCommandLine( string cmdLine )
         {
             var retVal = new Allocations(_keyComp);
 

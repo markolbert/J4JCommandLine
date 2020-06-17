@@ -11,7 +11,7 @@ get a better feel for how to implement them.
 But there was a bigger reason. I view C# as a type-centered
 language. While it has many other characteristics at its core
 everything seems to revolve around types. Because of that I
-tend to thing of "parsing a command line" as "converting a
+tend to think of "parsing a command line" as "converting a
 bunch of text into an instance of a configuration type". I 
 wanted a library that was centered around types.
 
@@ -26,11 +26,12 @@ command line values, etc.).
 
 I also wanted the library to work with dependency injection.
 Initially that was a very pervasive design consideration but ultimately
-it ended up being fairly trivial. The primary library has a related 
-Autofac support library (I love Autofac -- it's worth checking out).
+it ended up being fairly trivial. There's an add-on library which
+provides [Autofac](https://autofac.org) support (I love Autofac -- 
+it's worth checking out).
 
 Finally, I wanted the library to be relatively easily extensible and
-customizable. Consequently, most of its core revolve around key
+customizable. Consequently, most of its core revolves around key
 interfaces. The guts of the code implement those interfaces and glue
 them together into a functioning whole. But you should be able to 
 customize the bits and just drop them into the overall framework (that's

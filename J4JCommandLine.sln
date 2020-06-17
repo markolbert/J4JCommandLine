@@ -15,16 +15,18 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FancyHelpError", "FancyHelp
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "docs", "docs", "{473DDAC4-C8B9-4FBC-97C9-51AB11F038EF}"
 	ProjectSection(SolutionItems) = preProject
+		docs\allocator.md = docs\allocator.md
 		docs\di.md = docs\di.md
 		docs\diagrams.md = docs\diagrams.md
 		docs\example-instance.md = docs\example-instance.md
 		docs\example-static.md = docs\example-static.md
 		docs\goal-concept.md = docs\goal-concept.md
 		LICENSE.md = LICENSE.md
-		docs\parser.md = docs\parser.md
 		README.md = README.md
+		docs\terminology.md = docs\terminology.md
 		docs\text-converters.md = docs\text-converters.md
 		docs\usage.md = docs\usage.md
+		docs\validators.md = docs\validators.md
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "assets", "assets", "{9CABC5BB-C8B6-4BF4-97F2-0B9BC53A88BB}"

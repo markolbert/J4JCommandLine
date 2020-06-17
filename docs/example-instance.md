@@ -6,7 +6,7 @@ separate configuration class to hold the configuration information. The
 properties.
 
 Here's an example of such a class/app (the source code is in 
-examples/StaticPropertyExample). It's using [Autofac](https://autofac.org) as
+examples/InstancePropertyExample). It's using [Autofac](https://autofac.org) as
 the dependency injection system and the extension library *AutofacCommandLine*
 that's available in the repository. It uses a simple configuration
 object:
@@ -15,11 +15,14 @@ public class Configuration
 {
     public int IntValue { get; set; }
     public string TextValue { get; set; }
+    public List<string> Unkeyed { get; set; }
 }
 ```
 
-The two public properties, **IntValue** and **TextValue** are bound
-to command line options in code I'll show below. Otherwise there's nothing
+Two of the public properties, **IntValue** and **TextValue** are bound
+to command line options in code I'll show below. The third property, **Unkeyed**,
+will be bound to any "unkeyed" options -- plain old command line parameters --
+found on the command line. Otherwise there's nothing
 special about them. They're just regular properties with public get
 and set accessors.
 
@@ -59,11 +62,12 @@ namespace InstancePropertyExample
 
 The **InitializeServiceProvider()** method is where the dependency injection
 resolver is configured. For details on what **AddJ4JCommandLine()** does
-see [this article](di.md). Note that I explicitly register **FancyConsole**. It's
-the implementation I'm using of **IConsoleOutput**. **BindingTargetBuilder**
-requires access to an implementation of **IConsoleOutput** to work. This
-registration lets an instance of **BindingTargetBuilder** be retrieved from
-the dependency injection resolver used in the **Main()** method.
+see [this article](di.md). Note that I explicitly register **FancyConsole**. 
+It's the implementation I'm using of **IConsoleOutput**. 
+**BindingTargetBuilder** requires access to an implementation of 
+**IConsoleOutput** to work. This registration lets an instance of 
+**BindingTargetBuilder** be retrieved from the dependency injection resolver 
+used in the **Main()** method.
 
 The setup, binding and parsing code is very simple. First you create an
 instance of **BindingTargetBuilder** and configure it (done here through
@@ -86,28 +90,31 @@ static void Main(string[] args)
     // to be continued
 ```
 Then create an instance of **BindingTarget<Configuration>** by calling the builder's
-**Build()** method:
+**Build()** method, checking to make sure it's not null:
 
 ```
     // see above for details...
 
-    if( !builder.Build<Configuration>(null, out var binder) )
+    var binder = builder.Build<Configuration>( null );
+    if( binder == null )
         throw new NullReferenceException(nameof(Program));
 
     // to be continued
 ```
-Next you bind the options to the public static properties:
+Next you bind the options to `Configuration`'s public properties:
 ```
     // see above for details...
 
-    binder.Bind( x => x.IntValue, "i" )
-        .SetDescription( "an integer value" )
-        .SetDefaultValue( 1 )
-        .SetValidator( OptionInRange<int>.GreaterThan( 0 ) );
+    binder!.Bind(x => x.IntValue, "i")
+        .SetDescription("an integer value")
+        .SetDefaultValue(1)
+        .SetValidator(OptionInRange<int>.GreaterThan(0));
 
-    binder.Bind( x => x.TextValue, "t" )
-        .SetDescription( "a text value" )
-        .SetDefaultValue( "some text value" );
+    binder.Bind(x => x.TextValue, "t")
+        .SetDescription("a text value")
+        .SetDefaultValue("some text value");
+
+    binder.BindUnkeyed(x => x.Unkeyed);
 
     // to be continued
 ```
@@ -121,7 +128,7 @@ field or property you can access wherever you need it:
 ```
     // see above for details...
 
-    if( binder.Parse( args ) != MappingResults.Success )
+    if( !binder.Parse(args) )
     {
         Environment.ExitCode = 1;
         return;
@@ -129,5 +136,9 @@ field or property you can access wherever you need it:
 
     Console.WriteLine($"IntValue is {binder.Value.IntValue}");
     Console.WriteLine($"TextValue is {binder.Value.TextValue}");
+
+    Console.WriteLine(binder.Value.Unkeyed.Count == 0
+        ? "No unkeyed parameters"
+        : $"Unkeyed parameters: {string.Join(", ", binder.Value.Unkeyed)}");
 }
 ```

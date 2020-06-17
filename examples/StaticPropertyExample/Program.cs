@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using Alba.CsConsoleFormat;
 using Autofac;
 using Autofac.Extensions.DependencyInjection;
 using J4JSoftware.CommandLine;

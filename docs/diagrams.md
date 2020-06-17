@@ -86,12 +86,30 @@ a pre-existing **Grandparent** instance -- which has already created its
 **Parent** child property -- the framework will allow you to bind to
 **IntValue**.
 
-### The Parsing Process
+### The Allocating and Parsing Process
 
 ![Property Binding Process](assets/binding.png)
 *This section pertains to the lower part of the above diagram.*
 
-When the parsing process runs it may or may not succeed and the user may or
+What most people think of as "parsing" is, within this library, actually a 
+combination of the **allocating** process and a **conversion/validation/assignment** 
+process. Because the latter term is too long I refer to it here as
+"parsing"...which is admittedly somewhat confusing. Sorry about that.
+
+"Parsing" takes place after allocation. Converting, validating
+and assigning property values to bound properties is inextricably linked
+to configuration information about what an option should be (e.g., a text
+value, a double, a binary switch). That's what most people think of as the
+entirety of parsing a command line.
+
+Allocation doesn't concern itself with any of that detail. It focuses on
+breaking up a command line into pieces, determining which pieces are keys
+(indicating that an option is being declared) and which are simply text
+values.
+
+For more information about this please read [Terminology](terminology.md).
+
+When the overall parsing process runs it may or may not succeed and the user may or
 may not have requested help. Requesting help is considered a "failure" but it's
 possible the rest of the parsing process succeeded. That means you could continue
 with the execution of your program after help is requested...but that'd be odd.

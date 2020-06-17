@@ -1,11 +1,11 @@
 ### Usage
 
 Using the library is straightforward. Here's the code from the 
-ConsoleAppJ4JCmdLine project which I use to examine how information and
-errors get displayed when a console app is run:
+StaticPropertyExample project:
 
 ```
 using System;
+using System.Collections.Generic;
 using Autofac;
 using Autofac.Extensions.DependencyInjection;
 using J4JSoftware.CommandLine;
@@ -27,9 +27,8 @@ namespace ConsoleAppJ4JCmdLine
                 .Description( "a test program for exercising J4JCommandLine" )
                 .ProgramName( $"{nameof(Program)}.exe" );
 
-            builder.Build<Program>( null, out var binder );
-
-            if( binder == null )
+            var binder = builder.Build<Program>(null);
+            if (binder == null)
                 throw new NullReferenceException( nameof(Program) );
 
             binder.Bind( x => Program.IntValue, "i" )
@@ -41,7 +40,9 @@ namespace ConsoleAppJ4JCmdLine
                 .SetDescription( "a text value" )
                 .SetDefaultValue( "some text value" );
 
-            if( binder.Parse( args ) != MappingResults.Success )
+            binder.BindUnkeyed( x => Program.Unkeyed );
+
+            if( !binder.Parse( args ) )
             {
                 Environment.ExitCode = 1;
                 return;
@@ -49,19 +50,23 @@ namespace ConsoleAppJ4JCmdLine
 
             Console.WriteLine($"IntValue is {IntValue}");
             Console.WriteLine($"TextValue is {TextValue}");
+
+            Console.WriteLine( Unkeyed.Count == 0
+                ? "No unkeyed parameters"
+                : $"Unkeyed parameters: {string.Join( ", ", Unkeyed )}" );
         }
 
         public static IServiceProvider ServiceProvider { get; set; }
         public static int IntValue { get; set; }
         public static string TextValue { get; set; }
+        public static List<string> Unkeyed { get; set; }
 
         private static void InitializeServiceProvider()
         {
             var builder = new ContainerBuilder();
 
-            builder.RegisterType<FancyHelpErrorProcessor>()
-                .AsImplementedInterfaces()
-                .SingleInstance();
+            builder.RegisterType<FancyConsole>()
+                .AsImplementedInterfaces();
 
             builder.AddJ4JCommandLine();
 
@@ -74,8 +79,8 @@ namespace ConsoleAppJ4JCmdLine
 All you do is invoke an instance of BindingTargetBuilder to create
 a BindingTarget for your configuration type, bind properties of the
 configuration type to option keys and call Parse() on the BindingTarget.
-If the result is anything other than MappingResults.Success there was
-a problem (and you should probably abort the app).
+If the result is false there was a problem (and you should probably abort 
+the app).
 
 Along the way you can set option descriptions, default values and 
 validators. The subsystem for displaying errors and help is defined

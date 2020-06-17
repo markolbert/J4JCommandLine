@@ -13,7 +13,7 @@ namespace J4JSoftware.CommandLine
             CommandLineLogger logger,
             MasterTextCollection masterText );
         
-        Allocations AllocateCommandLine( string[] args );
-        Allocations AllocateCommandLine( string cmdLine );
+        IAllocations AllocateCommandLine( string[] args );
+        IAllocations AllocateCommandLine( string cmdLine );
     }
 }
