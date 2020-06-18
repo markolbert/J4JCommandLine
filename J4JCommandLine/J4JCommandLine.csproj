@@ -1,26 +1,28 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
-  <PropertyGroup>
-    <TargetFramework>netcoreapp3.1</TargetFramework>
-    <Nullable>enable</Nullable>
-    <AssemblyName>J4JSoftware.CommandLine</AssemblyName>
-    <RootNamespace>J4JSoftware.CommandLine</RootNamespace>
-    <Version>0.1.0.0</Version>
-    <Authors>Mark A. Olbert</Authors>
-    <Company>Jump for Joy Software</Company>
-    <Product>J4JSoftware Command Line Processor</Product>
-    <Description>object-focused command line processing</Description>
-    <Copyright>© Mark A. Olbert all rights reserved</Copyright>
-  </PropertyGroup>
+	<PropertyGroup>
+		<TargetFramework>netcoreapp3.1</TargetFramework>
+		<Nullable>enable</Nullable>
+		<AssemblyName>J4JSoftware.CommandLine</AssemblyName>
+		<RootNamespace>J4JSoftware.CommandLine</RootNamespace>
+		<Version>0.1.0.0</Version>
+		<Authors>Mark A. Olbert</Authors>
+		<Company>Jump for Joy Software</Company>
+		<Product>J4JSoftware Command Line Processor</Product>
+		<Description>object-focused command line processing</Description>
+		<Copyright>© Mark A. Olbert all rights reserved</Copyright>
+		<PackageDescription>adds the J4JSoftware Command Line Processor</PackageDescription>
+		<RepositoryUrl>https://github.com/markolbert/J4JCommandLine</RepositoryUrl>
+	</PropertyGroup>
 
-  <ItemGroup>
-    <Compile Remove="ImmutableTextCollections.cs" />
-    <Compile Remove="allocating\IParsingConfiguration.cs" />
-    <Compile Remove="allocating\ParsingConfiguration.cs" />
-  </ItemGroup>
+	<ItemGroup>
+		<Compile Remove="ImmutableTextCollections.cs" />
+		<Compile Remove="allocating\IParsingConfiguration.cs" />
+		<Compile Remove="allocating\ParsingConfiguration.cs" />
+	</ItemGroup>
 
-  <ItemGroup>
-    <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="3.1.4" />
-  </ItemGroup>
+	<ItemGroup>
+		<PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="3.1.4" />
+	</ItemGroup>
 
 </Project>
