@@ -15,6 +15,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FancyHelpError", "FancyHelp
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "docs", "docs", "{473DDAC4-C8B9-4FBC-97C9-51AB11F038EF}"
 	ProjectSection(SolutionItems) = preProject
+		docs\allocation.md = docs\allocation.md
 		docs\allocator.md = docs\allocator.md
 		docs\di.md = docs\di.md
 		docs\diagrams.md = docs\diagrams.md

@@ -51,6 +51,7 @@ Console.WriteLine( Unkeyed.Count == 0
 - [Goal and Concept](docs/goal-concept.md)
 - [Terminology](docs/terminology.md)
 - [Usage](docs/usage.md)
+- [How Command Lines Are Allocated](docs/allocation.md)
 - Examples
   - [Binding to static properties](docs/example-static.md)
   - [Binding to a configuration object](docs/example-instance.md)
