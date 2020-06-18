@@ -18,7 +18,7 @@ namespace J4JCommandLine.Tests
         }
 
         [ Theory ]
-        [ InlineData( "h", true ) ]
+        [ InlineData( "h", false ) ]
         public void Trigger_help(
             string key,
             bool result )

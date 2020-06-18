@@ -110,6 +110,10 @@ namespace J4JSoftware.CommandLine
             } );
         }
 
-        public void Display() => ConsoleRenderer.RenderDocument( _document );
+        public void Display()
+        {
+            ConsoleRenderer.RenderDocument( _document );
+            Initialize();
+        }
     }
 }

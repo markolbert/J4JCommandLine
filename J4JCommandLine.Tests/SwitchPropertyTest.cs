@@ -20,8 +20,12 @@ namespace J4JCommandLine.Tests
             var option = target!.Bind(x => x.Switch, "x");
             var unkeyed = target!.BindUnkeyed(x => x.Unkeyed);
 
-            ProcessTest(cmdLine, target, option, unkeyed, result, () => target.Value, optValue,
-                unkeyedValues);
+            ValidateSetup( target, option, unkeyed );
+
+            target.Parse( new string[] { cmdLine } ).Should().Be( result );
+
+            target.Value.Switch.Should().Be(optValue);
+            target.Value.Unkeyed.Should().BeEquivalentTo(unkeyedValues);
         }
 
         [Theory]
@@ -37,8 +41,12 @@ namespace J4JCommandLine.Tests
             var option = target!.Bind(x => x.TestProperties.Switch, "x");
             var unkeyed = target!.BindUnkeyed(x => x.TestProperties.Unkeyed);
 
-            ProcessTest(cmdLine, target, option, unkeyed, result, () => target.Value.TestProperties, optValue,
-                unkeyedValues);
+            ValidateSetup(target, option, unkeyed);
+
+            target.Parse(new string[] { cmdLine }).Should().Be(result);
+
+            target.Value.TestProperties.Switch.Should().Be(optValue);
+            target.Value.TestProperties.Unkeyed.Should().BeEquivalentTo(unkeyedValues);
         }
 
         [Theory]
@@ -58,31 +66,20 @@ namespace J4JCommandLine.Tests
             var option = target!.Bind(x => x.TestProperties.Switch, "x");
             var unkeyed = target!.BindUnkeyed(x => x.TestProperties.Unkeyed);
 
-            ProcessTest(cmdLine, target, option, unkeyed, result, () => target.Value.TestProperties, optValue,
-                unkeyedValues);
+            ValidateSetup(target, option, unkeyed);
+
+            target.Parse(new string[] { cmdLine }).Should().Be(result);
+
+            target.Value.TestProperties.Switch.Should().Be(optValue);
+            target.Value.TestProperties.Unkeyed.Should().BeEquivalentTo(unkeyedValues);
         }
 
-        private void ProcessTest<T>(
-            string cmdLine,
-            BindingTarget<T> target,
-            Option option,
-            Option unkeyed,
-            bool desiredParseResult,
-            Func<TestProperties> results,
-            bool optValue,
-            int[] unkeyedValues)
+        private void ValidateSetup<T>( BindingTarget<T> target, Option option, Option unkeyed )
             where T : class
         {
             target.Should().NotBeNull();
-
             option.Should().BeAssignableTo<MappableOption>();
             unkeyed.Should().BeAssignableTo<MappableOption>();
-
-            var parseResults = target.Parse(new string[] { cmdLine });
-            parseResults.Should().Be(desiredParseResult);
-
-            results().Switch.Should().Be(optValue);
-            results().Unkeyed.Should().BeEquivalentTo(unkeyedValues);
         }
     }
 }

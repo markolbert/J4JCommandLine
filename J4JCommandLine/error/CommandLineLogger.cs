@@ -23,7 +23,14 @@ namespace J4JSoftware.CommandLine
             _keyComp = keyComp;
         }
 
-        public void Clear() => _events.Clear();
+        public void Clear( params ProcessingPhase[] phases )
+        {
+            if( phases == null || phases.Length == 0 )
+                _events.Clear();
+            else
+                _events.RemoveAll( e => phases.Any( p => p == e.Phase ) );
+        }
+
         public int Count => _events.Count;
 
         public void LogError( 

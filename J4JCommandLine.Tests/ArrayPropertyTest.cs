@@ -23,8 +23,12 @@ namespace J4JCommandLine.Tests
             var option = target!.Bind(x => x.IntArray, "x");
             var unkeyed = target!.BindUnkeyed(x => x.Unkeyed);
 
-            ProcessTest(cmdLine, required, target, option, unkeyed, result, () => target.Value, optValue,
-                unkeyedValues);
+            ValidateSetup(target, option, unkeyed, required);
+
+            target.Parse( new string[] { cmdLine } ).Should().Be( result );
+
+            target.Value.IntArray.Should().BeEquivalentTo(optValue);
+            target.Value.Unkeyed.Should().BeEquivalentTo(unkeyedValues);
         }
 
         [Theory]
@@ -43,8 +47,12 @@ namespace J4JCommandLine.Tests
             var option = target!.Bind(x => x.TestProperties.IntArray, "x");
             var unkeyed = target!.BindUnkeyed(x => x.TestProperties.Unkeyed);
 
-            ProcessTest(cmdLine, required, target, option, unkeyed, result, () => target.Value.TestProperties, optValue,
-                unkeyedValues);
+            ValidateSetup(target, option, unkeyed, required);
+
+            target.Parse(new string[] { cmdLine }).Should().Be(result);
+
+            target.Value.TestProperties.IntArray.Should().BeEquivalentTo(optValue);
+            target.Value.TestProperties.Unkeyed.Should().BeEquivalentTo(unkeyedValues);
         }
 
         [Theory]
@@ -67,20 +75,15 @@ namespace J4JCommandLine.Tests
             var option = target!.Bind(x => x.TestProperties.IntArray, "x");
             var unkeyed = target!.BindUnkeyed(x => x.TestProperties.Unkeyed);
 
-            ProcessTest(cmdLine, required, target, option, unkeyed, result, () => target.Value.TestProperties, optValue,
-                unkeyedValues);
+            ValidateSetup(target, option, unkeyed, required);
+
+            target.Parse(new string[] { cmdLine }).Should().Be(result);
+
+            target.Value.TestProperties.IntArray.Should().BeEquivalentTo(optValue);
+            target.Value.TestProperties.Unkeyed.Should().BeEquivalentTo(unkeyedValues);
         }
 
-        private void ProcessTest<T>(
-            string cmdLine,
-            bool required,
-            BindingTarget<T> target,
-            Option option,
-            Option unkeyed,
-            bool desiredParseResult,
-            Func<TestProperties> results,
-            int[] optValue,
-            int[] unkeyedValues)
+        private void ValidateSetup<T>( BindingTarget<T> target, Option option, Option unkeyed, bool required )
             where T : class
         {
             target.Should().NotBeNull();
@@ -90,12 +93,6 @@ namespace J4JCommandLine.Tests
 
             if (required)
                 option.Required();
-
-            var parseResults = target.Parse(new string[] { cmdLine });
-            parseResults.Should().Be(desiredParseResult);
-
-            results().IntArray.Should().BeEquivalentTo(optValue);
-            results().Unkeyed.Should().BeEquivalentTo(unkeyedValues);
         }
     }
 }

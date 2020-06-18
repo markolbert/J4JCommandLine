@@ -9,6 +9,7 @@ namespace J4JSoftware.CommandLine
     {
         bool IgnoreUnkeyedParameters { get; }
         bool IsConfigured { get; }
+        bool HelpRequested { get; }
         CommandLineLogger Logger { get; }
 
         //// Utility method for adding logger to the error collection. These are keyed by whatever

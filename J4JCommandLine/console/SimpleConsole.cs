@@ -104,6 +104,8 @@ namespace J4JSoftware.CommandLine
             {
                 Console.WriteLine(line);
             }
+
+            Initialize();
         }
 
         private void OutputOptionBlock( List<string> keys, string text )

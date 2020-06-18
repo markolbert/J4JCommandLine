@@ -79,7 +79,7 @@ namespace J4JSoftware.CommandLine
 
         // the method called to validate the specified value within the expectations
         // defined for the Option
-        public bool Validate( string key, object value )
+        public bool Validate( object value )
         {
             if( Validator == null )
                 return true;

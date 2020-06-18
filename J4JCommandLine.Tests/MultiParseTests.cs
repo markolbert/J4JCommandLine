@@ -5,7 +5,7 @@ using Xunit;
 
 namespace J4JCommandLine.Tests
 {
-    public class SimplePropertyTest
+    public class MultiParseTests
     {
         [Theory]
         [InlineData("-z 32", true, false, -1, new int[] { })]
@@ -24,9 +24,12 @@ namespace J4JCommandLine.Tests
 
             ValidateSetup(target, option, unkeyed, required);
 
-            target.Parse( new string[] { cmdLine } ).Should().Be( result );
-            target.Value.IntProperty.Should().Be( optValue );
-            target.Value.Unkeyed.Should().BeEquivalentTo( unkeyedValues );
+            for( var idx = 0; idx < 3; idx++ )
+            {
+                target.Parse( new string[] { cmdLine } ).Should().Be( result );
+                target.Value.IntProperty.Should().Be( optValue );
+                target.Value.Unkeyed.Should().BeEquivalentTo( unkeyedValues );
+            }
         }
 
         [Theory]
@@ -46,9 +49,12 @@ namespace J4JCommandLine.Tests
 
             ValidateSetup(target, option, unkeyed, required);
 
-            target.Parse(new string[] { cmdLine }).Should().Be(result);
-            target.Value.TestProperties.IntProperty.Should().Be(optValue);
-            target.Value.TestProperties.Unkeyed.Should().BeEquivalentTo(unkeyedValues);
+            for (var idx = 0; idx < 3; idx++)
+            {
+                target.Parse(new string[] { cmdLine }).Should().Be(result);
+                target.Value.TestProperties.IntProperty.Should().Be(optValue);
+                target.Value.TestProperties.Unkeyed.Should().BeEquivalentTo(unkeyedValues);
+            }
         }
 
         [Theory]
@@ -72,9 +78,12 @@ namespace J4JCommandLine.Tests
 
             ValidateSetup(target, option, unkeyed, required);
 
-            target.Parse(new string[] { cmdLine }).Should().Be(result);
-            target.Value.TestProperties.IntProperty.Should().Be(optValue);
-            target.Value.TestProperties.Unkeyed.Should().BeEquivalentTo(unkeyedValues);
+            for (var idx = 0; idx < 3; idx++)
+            {
+                target.Parse(new string[] { cmdLine }).Should().Be(result);
+                target.Value.TestProperties.IntProperty.Should().Be(optValue);
+                target.Value.TestProperties.Unkeyed.Should().BeEquivalentTo(unkeyedValues);
+            }
         }
 
         private void ValidateSetup<T>( BindingTarget<T> target, Option option, Option unkeyed, bool required )

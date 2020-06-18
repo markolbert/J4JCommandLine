@@ -16,10 +16,6 @@ namespace J4JSoftware.CommandLine
     {
         private readonly List<TargetedProperty> _properties = new List<TargetedProperty>();
 
-        private bool _headerDisplayed = false;
-        private bool _helpDisplayed = false;
-        private bool _outputPending = false;
-
         // creates an instance tied to the supplied instance of TValue. This allows for binding
         // to more complex objects which may require constructor parameters.
         internal BindingTarget()
@@ -38,6 +34,8 @@ namespace J4JSoftware.CommandLine
         public bool IsConfigured => Allocator != null && Converters != null && TypeFactory != null && Options != null 
                                     && Logger != null && MasterText != null && ConsoleOutput != null;
 
+        public bool HelpRequested { get; private set; }
+
         public bool IgnoreUnkeyedParameters { get; internal set; }
 
         // The instance of TValue being bound to, which was either supplied in the constructor to 
@@ -53,10 +51,6 @@ namespace J4JSoftware.CommandLine
             
             Logger.Clear();
             Options.Clear();
-
-            _headerDisplayed = false;
-            _outputPending = false;
-            _helpDisplayed = false;
 
             return IsConfigured;
         }
@@ -130,7 +124,11 @@ namespace J4JSoftware.CommandLine
         // targeted properties, or to NullOption objects to collect error information.
         public bool Parse( string[] args )
         {
-            if( !IsConfigured )
+            HelpRequested = false;
+            Logger.Clear( ProcessingPhase.Allocating, ProcessingPhase.Parsing, ProcessingPhase.Initializing );
+            ConsoleOutput.Initialize();
+
+            if ( !IsConfigured )
             {
                 Logger.LogError( ProcessingPhase.Parsing, $"{this.GetType().Name} is not configured" );
 
@@ -141,25 +139,59 @@ namespace J4JSoftware.CommandLine
                 return false;
             }
 
-            var retVal = true;
-
             // parse the arguments into a collection of arguments keyed by the option key
             // note that there can be multiple arguments associated with any option key
-            var parseResults = Allocator.AllocateCommandLine( args );
+            var allocations = Allocator.AllocateCommandLine( args );
+
+            // check to see if help was requested. If so, display help and "fail"
+            if (allocations.Any(
+                pr => MasterText[TextUsageType.HelpOptionKey].Any(hk => string.Equals(hk, pr.Key))))
+            {
+                DisplayHeader();
+                DisplayHelp();
+                ConsoleOutput.Display();
+
+                HelpRequested = true;
+
+                return false;
+            }
+
+            var retVal = true;
 
             // scan all the bound options that aren't tied to NullOptions, which are only
             // "bound" in error
-            foreach( var property in _properties.Where( p =>
-                p.BoundOption != null && p.BoundOption.OptionType == OptionType.Keyed ) )
+            foreach ( var property in _properties.Where( p => p.BoundOption != null && p.BoundOption.OptionType != OptionType.Unkeyed  ) )
             {
                 // see if our BoundOption's keys match a key in the parse results so we can retrieve a
                 // specific IAllocation
-                var parseResult = parseResults
+                var allocation = allocations
                     .FirstOrDefault( pr => property.BoundOption!
                         .Keys.Any( k => string.Equals( k, pr.Key, TextComparison ) )
                     );
 
-                retVal &= property.MapParseResult( this, parseResult );
+                object? propValue = null;
+
+                // if no allocation is associated with this property work get the option's default value
+                if( allocation == null )
+                {
+                    if( property.GetDefaultValue( out var defaultValue ) )
+                    {
+                        propValue = defaultValue;
+
+                        // it's a failure if the option is required but we had to use its default value
+                        retVal = !property.BoundOption!.IsRequired;
+                    }
+                    else retVal = false;
+                }
+                else
+                {
+                    if( property.GetValueFromAllocation( allocation, out var allocValue ) )
+                        propValue = allocValue;
+                    else retVal = false;
+                }
+
+                // set the target property's value
+                property.SetValue( this, propValue );
             }
 
             // now process the unkeyed parameters, if any, provided they were bound to a targeted property
@@ -167,14 +199,19 @@ namespace J4JSoftware.CommandLine
 
             if( unkeyed == null )
             {
-                if( !IgnoreUnkeyedParameters && parseResults.Unkeyed.NumParameters > 0 )
+                if( !IgnoreUnkeyedParameters && allocations.Unkeyed.NumParameters > 0 )
                 {
                     retVal = false;
 
-                    Logger.LogError( ProcessingPhase.Parsing, $"{parseResults.Unkeyed.NumParameters:n0} unprocessed parameter(s)" );
+                    Logger.LogError( ProcessingPhase.Parsing, $"{allocations.Unkeyed.NumParameters:n0} unprocessed parameter(s)" );
                 }
             }
-            else retVal &= unkeyed.MapParseResult( this, parseResults.Unkeyed );
+            else
+            {
+                if( unkeyed.GetValueFromAllocation( allocations.Unkeyed, out var unkeyedValue ) )
+                    unkeyed.SetValue( this, unkeyedValue );
+                else retVal = false;
+            }
 
             // safety net
             retVal = retVal && Logger.Count == 0;
@@ -184,29 +221,14 @@ namespace J4JSoftware.CommandLine
                 DisplayHeader();
                 DisplayErrors();
                 DisplayHelp();
-            }
 
-            if( parseResults.Any(
-                pr => MasterText[ TextUsageType.HelpOptionKey ].Any( hk => string.Equals( hk, pr.Key ) ) ) )
-            {
-                DisplayHeader();
-                DisplayHelp();
-            }
-
-            if( _outputPending )
                 ConsoleOutput.Display();
+            }
 
             Logger.Clear();
 
             return retVal;
         }
-
-        //// Utility method for adding logger to the error collection. These are keyed by whatever
-        //// option key (e.g., the 'x' in '-x') is associated with the error.
-        //public void LogError( string? key, string error )
-        //{
-        //    Logger.LogError( this, key, error );
-        //}
 
         private TargetedProperty GetTargetedProperty( List<PropertyInfo> pathElements )
         {
@@ -222,8 +244,8 @@ namespace J4JSoftware.CommandLine
                     Value,
                     retVal,
                     TypeFactory,
-                    TextComparison
-                );
+                    TextComparison,
+                    Logger);
             }
 
             if (retVal == null)
@@ -280,19 +302,11 @@ namespace J4JSoftware.CommandLine
 
         private void DisplayHeader()
         {
-            if( _headerDisplayed )
-                return;
-
-            ConsoleOutput.Initialize();
-
             if( !string.IsNullOrEmpty( ProgramName ) )
                 ConsoleOutput.AddLine( ConsoleSection.Header, ProgramName );
 
             if( !string.IsNullOrEmpty( Description ) )
                 ConsoleOutput.AddLine( ConsoleSection.Header, Description );
-
-            _headerDisplayed = true;
-            _outputPending = true;
         }
 
         private void DisplayErrors()
@@ -303,15 +317,10 @@ namespace J4JSoftware.CommandLine
             {
                 ConsoleOutput.AddError( consolidatedError );
             }
-
-            _outputPending = true;
         }
 
         private void DisplayHelp()
         {
-            if( _helpDisplayed )
-                return;
-
             var sb = new StringBuilder();
 
             sb.Append( "Command line options" );
@@ -333,16 +342,13 @@ namespace J4JSoftware.CommandLine
 
             foreach( var option in Options
                 .OrderBy( opt => opt.FirstKey )
-                .Where( opt => opt.OptionType != OptionType.Null ) )
+                .Where( opt => opt.OptionType == OptionType.Keyed ) )
             {
                 ConsoleOutput.AddOption(
                     option.ConjugateKeys( MasterText ),
                     option.Description,
                     option.DefaultValue?.ToString() );
             }
-
-            _helpDisplayed = true;
-            _outputPending = true;
         }
 
         // allows retrieval of the TValue instance in a type-agnostic way
