@@ -1,12 +1,14 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
-using System.Linq;
 using System.Reflection;
+using System.Linq;
+using System.Security.Cryptography;
 
 namespace J4JSoftware.CommandLine
 {
-    public class BindingTargetBuilder
+    public partial class BindingTargetBuilder
     {
         private readonly IAllocator _parser;
         private readonly IEnumerable<ITextConverter> _converters;
@@ -83,37 +85,19 @@ namespace J4JSoftware.CommandLine
         public BindingTarget<TValue>? Build<TValue>( TValue? value )
             where TValue : class
         {
-            var errors = new CommandLineLogger( _textComp );
+            var config = new Configuration();
 
-            var masterText = new MasterTextCollection( _textComp );
-
-            masterText.AddRange(TextUsageType.Prefix, _prefixes);
-            masterText.AddRange(TextUsageType.ValueEncloser, _enclosers);
-            masterText.AddRange(TextUsageType.Quote, _quotes.Select(q => q.ToString()));
-
-            if ( _helpKeys == null || _helpKeys.Length == 0 )
+            if( !config.Initialize( this, value ) )
             {
-                errors.LogError(ProcessingPhase.Initializing, $"No help keys defined");
-                DisplayErrors(errors, masterText);
-
-                return null;
-            }
-
-            masterText.AddRange( TextUsageType.HelpOptionKey, _helpKeys );
-
-            if ( value == null && !typeof(TValue).HasPublicParameterlessConstructor() )
-            {
-                errors.LogError(ProcessingPhase.Initializing,$"{typeof(TValue)} does not have a public parameterless constructor");
-                DisplayErrors(errors, masterText);
-
+                DisplayErrors( config.Logger, config.MasterText );
                 return null;
             }
 
             value ??= Activator.CreateInstance<TValue>();
 
-            if ( !_parser.Initialize( _textComp, errors, masterText ) )
+            if ( !_parser.Initialize( _textComp, config.Logger, config.MasterText) )
             {
-                DisplayErrors(errors, masterText);
+                DisplayErrors(config.Logger, config.MasterText);
 
                 return null;
             }
@@ -125,10 +109,10 @@ namespace J4JSoftware.CommandLine
                 Converters = _converters,
                 TypeFactory = new TargetableTypeFactory(_converters),
                 IgnoreUnkeyedParameters = _ignoreUnprocesssed,
-                Options = new OptionCollection(masterText),
-                Logger = errors,
+                Options = new OptionCollection(config.MasterText),
+                Logger = config.Logger,
                 TextComparison = _textComp,
-                MasterText = masterText,
+                MasterText = config.MasterText,
                 ConsoleOutput = _consoleOutput,
                 ProgramName = _progName,
                 Description = _description
@@ -136,13 +120,111 @@ namespace J4JSoftware.CommandLine
 
             if( !retVal.Initialize() )
             {
-                errors.LogError(ProcessingPhase.Initializing, $"{retVal.GetType().Name} is not configured");
-                DisplayErrors(errors, masterText);
+                config.Logger.LogError(ProcessingPhase.Initializing, $"{retVal.GetType().Name} is not configured");
+                DisplayErrors(config.Logger, config.MasterText);
 
                 return null;
             }
 
             return retVal;
+        }
+
+        public BindingTarget<TValue>? AutoBind<TValue>()
+            where TValue : class
+        {
+            var config = new Configuration();
+
+            if (!config.Initialize<TValue>(this, null))
+            {
+                DisplayErrors(config.Logger, config.MasterText);
+                return null;
+            }
+
+            if (!_parser.Initialize(_textComp, config.Logger, config.MasterText))
+            {
+                DisplayErrors(config.Logger, config.MasterText);
+                return null;
+            }
+
+            var boundProps = new List<OptionConfiguration>();
+            var propStack = new Stack<PropertyInfo>();
+
+            FindBoundProperties(typeof(TValue), ref propStack, ref boundProps);
+
+            if( boundProps.Count( bp => bp.Unkeyed ) > 1 )
+            {
+                config.Logger.LogError(ProcessingPhase.Initializing, "Multiple unkeyed Options specified");
+
+                DisplayErrors(config.Logger, config.MasterText);
+                return null;
+            }
+
+            var value = Activator.CreateInstance<TValue>();
+
+            var retVal = new BindingTarget<TValue>()
+            {
+                Value = value,
+                Allocator = _parser,
+                Converters = _converters,
+                TypeFactory = new TargetableTypeFactory(_converters),
+                IgnoreUnkeyedParameters = _ignoreUnprocesssed,
+                Options = new OptionCollection(config.MasterText),
+                Logger = config.Logger,
+                TextComparison = _textComp,
+                MasterText = config.MasterText,
+                ConsoleOutput = _consoleOutput,
+                ProgramName = _progName,
+                Description = _description
+            };
+
+            if (!retVal.Initialize())
+            {
+                config.Logger.LogError(ProcessingPhase.Initializing, $"{retVal.GetType().Name} is not configured");
+                DisplayErrors(config.Logger, config.MasterText);
+
+                return null;
+            }
+
+            foreach( var boundProp in boundProps )
+            {
+                retVal.Bind( boundProp );
+            }
+
+            if( config.Logger.Count > 0 )
+            {
+                config.Logger.LogError(ProcessingPhase.Initializing, $"{retVal.GetType().Name} is not configured");
+                DisplayErrors(config.Logger, config.MasterText);
+
+                return null;
+            }
+
+            return retVal;
+        }
+
+        private void FindBoundProperties(
+            Type toScan,
+            ref Stack<PropertyInfo> propertyStack,
+            ref List<OptionConfiguration> boundProps )
+        {
+            // search all public readable/writeable properties looking for OptionKeysAttributes
+            foreach( var propInfo in toScan.GetProperties(
+                BindingFlags.Instance | BindingFlags.Static | BindingFlags.Public ) )
+            {
+                var keysAttr = propInfo.GetCustomAttribute<OptionKeysAttribute>();
+
+                if( keysAttr == null || !propInfo.CanRead || !propInfo.CanWrite )
+                    continue;
+
+                // found an OptionKeysAttribute so create a new OptionConfiguration object
+                boundProps.Add( new OptionConfiguration( propInfo, propertyStack, keysAttr.Keys ) );
+
+                // recurse
+                propertyStack.Push( propInfo );
+                FindBoundProperties( propInfo.PropertyType, ref propertyStack, ref boundProps );
+            }
+
+            if( propertyStack.Count > 0 )
+                propertyStack.Pop();
         }
 
         private void DisplayErrors( CommandLineLogger logger, MasterTextCollection masterText )

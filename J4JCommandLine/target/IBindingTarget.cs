@@ -7,6 +7,7 @@ namespace J4JSoftware.CommandLine
 {
     public interface IBindingTarget
     {
+        OptionCollection Options { get; }
         bool IgnoreUnkeyedParameters { get; }
         bool IsConfigured { get; }
         bool HelpRequested { get; }

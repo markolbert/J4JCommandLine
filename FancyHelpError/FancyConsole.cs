@@ -100,7 +100,7 @@ namespace J4JSoftware.CommandLine
             optionLines.Add( description ?? "*** no description provided ***" );
 
             if( defaultText != null )
-                optionLines.Add( defaultText );
+                optionLines.Add( $"default: {defaultText}" );
 
             _grid.Children.Add( new Cell( string.Join( "\n", optionLines ) )
             {

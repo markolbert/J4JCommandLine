@@ -25,7 +25,6 @@ namespace J4JSoftware.CommandLine
         internal IAllocator Allocator { get; set; }
         internal IEnumerable<ITextConverter> Converters { get; set; }
         internal ITargetableTypeFactory TypeFactory { get; set; }
-        internal OptionCollection Options { get; set; }
         public CommandLineLogger Logger { get; internal set; }
         internal StringComparison TextComparison { get; set; }
         internal MasterTextCollection MasterText { get; set; }
@@ -34,8 +33,8 @@ namespace J4JSoftware.CommandLine
         public bool IsConfigured => Allocator != null && Converters != null && TypeFactory != null && Options != null 
                                     && Logger != null && MasterText != null && ConsoleOutput != null;
 
+        public OptionCollection Options { get; internal set; }
         public bool HelpRequested { get; private set; }
-
         public bool IgnoreUnkeyedParameters { get; internal set; }
 
         // The instance of TValue being bound to, which was either supplied in the constructor to 
@@ -71,24 +70,27 @@ namespace J4JSoftware.CommandLine
             if( !IsConfigured )
                 return GetUntargetedOption( keys, null, $"{this.GetType().Name} is not configured" );
 
-            // determine whether we were given at least one valid, unique (i.e., so far
-            // unused) key
-            keys = Options.GetUniqueKeys(keys);
+            return GetKeyedOption( propertySelector.GetPropertyPathInfo(), keys );
+        }
 
-            if( keys.Length == 0 )
-                return GetUntargetedOption( keys, null, $"No unique keys defined" );
+        internal Option Bind( OptionConfiguration optConfig )
+        {
+            if( !IsConfigured )
+                return GetUntargetedOption( optConfig.Keys, null, $"{this.GetType().Name} is not configured" );
 
-            var property = GetTargetedProperty(propertySelector.GetPropertyPathInfo());
+            var retVal = optConfig.Unkeyed
+                ? GetUnkeyedOption( optConfig.PropertyInfoPath )
+                : GetKeyedOption( optConfig.PropertyInfoPath, optConfig.Keys! );
 
-            if( property.TargetableType.Converter == null )
-                return GetUntargetedOption( 
-                    keys, 
-                    property,
-                    $"No converter for {property.TargetableType.SupportedType.Name}" );
-            
-            var retVal = GetOption( property, true );
+            if( !string.IsNullOrEmpty( optConfig.Description ) )
+                retVal.SetDescription( optConfig.Description );
 
-            retVal.AddKeys( keys );
+            if( optConfig.DefaultValue != null )
+                retVal.SetDefaultValue( optConfig.DefaultValue );
+
+            if( optConfig.IsRequired )
+                retVal.Required();
+            else retVal.Optional();
 
             return retVal;
         }
@@ -106,18 +108,9 @@ namespace J4JSoftware.CommandLine
         // to create an instance of it. Check the error output after parsing for details.
         public Option BindUnkeyed<TProp>( Expression<Func<TValue, TProp>> propertySelector )
         {
-            if( !IsConfigured )
-                return GetUntargetedOption( null, null, $"{this.GetType().Name} is not configured" );
-
-            var property = GetTargetedProperty(propertySelector.GetPropertyPathInfo());
-
-            if( property.TargetableType.Converter == null )
-                return GetUntargetedOption( 
-                    null, 
-                    property,
-                    $"No converter for {property.TargetableType.SupportedType.Name}" );
-
-            return GetOption( property, false );
+            return !IsConfigured
+                ? GetUntargetedOption( null, null, $"{this.GetType().Name} is not configured" )
+                : GetUnkeyedOption( propertySelector.GetPropertyPathInfo() );
         }
 
         // Parses the command line arguments against the Option objects bound to 
@@ -254,6 +247,42 @@ namespace J4JSoftware.CommandLine
             _properties.Add(retVal);
 
             return retVal;
+        }
+
+        private Option GetKeyedOption(List<PropertyInfo> propertyPath, string[] keys)
+        {
+            // determine whether we were given at least one valid, unique (i.e., so far
+            // unused) key
+            keys = Options.GetUniqueKeys(keys);
+
+            if (keys.Length == 0)
+                return GetUntargetedOption(keys, null, $"No unique keys defined");
+
+            var property = GetTargetedProperty(propertyPath);
+
+            if (property.TargetableType.Converter == null)
+                return GetUntargetedOption(
+                    keys,
+                    property,
+                    $"No converter for {property.TargetableType.SupportedType.Name}");
+
+            var retVal = GetOption(property, true);
+            retVal.AddKeys(keys);
+
+            return retVal;
+        }
+
+        private Option GetUnkeyedOption(List<PropertyInfo> propertyPath)
+        {
+            var property = GetTargetedProperty(propertyPath);
+
+            if (property.TargetableType.Converter == null)
+                return GetUntargetedOption(
+                    null,
+                    property,
+                    $"No converter for {property.TargetableType.SupportedType.Name}");
+
+            return GetOption(property, false);
         }
 
         private Option GetOption( TargetedProperty property, bool isKeyed )

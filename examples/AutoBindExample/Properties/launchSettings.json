@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "AutoBindExample": {
+      "commandName": "Project",
+      "commandLineArgs": "-i 57 abc def ghi"
+    }
+  }
+}
