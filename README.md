@@ -16,23 +16,13 @@ builder.Prefixes( "-", "--", "/" )
     .Quotes( '\'', '"' )
     .HelpKeys( "h", "?" );
 
-// create an instance of BindingTarget
-var binder = builder.Build<Program>(null);
+var binder = builder.AutoBind<Program>();
 if (binder == null)
-    throw new NullReferenceException( nameof(Program) );
+    throw new NullReferenceException(nameof(Program));
 
-// define your options (here they're bound to public static properties)
-// there are fluent calls you can make to add default values, 
-// validators, descriptions, etc.
-binder.Bind( x => Program.IntValue, "i" );
-binder.Bind( x => Program.TextValue, "t" );
+binder.Options[ "i" ]!.SetValidator( OptionInRange<int>.GreaterThan( 0 ) );
 
-// bind the unkeyed parameters -- command line arguments that are
-// not options -- if you want to retrieve them (optional but commonly done)
-binder.BindUnkeyed( x => Program.Unkeyed );
-
-// parse the command line
-if( !binder.Parse( args ) )
+if (!binder.Parse(args))
 {
     Environment.ExitCode = 1;
     return;
@@ -41,16 +31,18 @@ if( !binder.Parse( args ) )
 Console.WriteLine($"IntValue is {IntValue}");
 Console.WriteLine($"TextValue is {TextValue}");
 
-Console.WriteLine( Unkeyed.Count == 0
+Console.WriteLine(Unkeyed.Count == 0
     ? "No unkeyed parameters"
-    : $"Unkeyed parameters: {string.Join( ", ", Unkeyed )}" );
+    : $"Unkeyed parameters: {string.Join(", ", Unkeyed)}");
 ```
 
 ### Table of Contents
 
 - [Goal and Concept](docs/goal-concept.md)
 - [Terminology](docs/terminology.md)
-- [Usage](docs/usage.md)
+- Usage
+  - [Autobinding](docs/usage-auto.md)
+  - [Explicit binding](docs/usage-explicit.md)
 - [How Command Lines Are Allocated](docs/allocation.md)
 - Examples
   - [Binding to static properties](docs/example-static.md)

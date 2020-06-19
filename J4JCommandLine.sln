@@ -26,7 +26,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "docs", "docs", "{473DDAC4-C
 		README.md = README.md
 		docs\terminology.md = docs\terminology.md
 		docs\text-converters.md = docs\text-converters.md
-		docs\usage.md = docs\usage.md
+		docs\usage-auto.md = docs\usage-auto.md
+		docs\usage-explicit.md = docs\usage-explicit.md
 		docs\validators.md = docs\validators.md
 	EndProjectSection
 EndProject
@@ -41,7 +42,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "StaticPropertyExample", "ex
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "InstancePropertyExample", "examples\InstancePropertyExample\InstancePropertyExample.csproj", "{6DA4542E-A31A-422C-815F-ABEFB4F00295}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AutoBindExample", "examples\AutoBindExample\AutoBindExample.csproj", "{C5400387-BD0A-4E24-80B7-C532A8D1A216}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AutoBindExample", "examples\AutoBindExample\AutoBindExample.csproj", "{C5400387-BD0A-4E24-80B7-C532A8D1A216}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

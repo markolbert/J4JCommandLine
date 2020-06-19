@@ -1,6 +1,7 @@
-### Usage
+### Usage: Explicit Binding
 
-Using the library is straightforward. Here's the code from the 
+With explicit binding you have to declare which properties are bound
+to which properties in your startup code. Here's an example, from the 
 StaticPropertyExample project:
 
 ```
