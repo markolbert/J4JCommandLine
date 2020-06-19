@@ -3,21 +3,21 @@
 	<PropertyGroup>
 		<TargetFramework>netcoreapp3.1</TargetFramework>
 		<Nullable>enable</Nullable>
-		<AssemblyName>J4JSoftware.CommandLine.Autofac</AssemblyName>
+		<AssemblyName>J4JSoftware.CommandLine.FancyConsole</AssemblyName>
 		<RootNamespace>J4JSoftware.CommandLine</RootNamespace>
 		<Version>0.1.0.0</Version>
 		<Authors>Mark A. Olbert</Authors>
 		<Company>Jump for Joy Software</Company>
-		<Product>J4JSoftware Command Line Processor</Product>
-		<Description>Autofac support for J4JCommandLine</Description>
+		<Product>J4JSoftware Command Line Processor: Help/Error Console Output</Product>
+		<Description>Fancy Help/Error Console Output for J4JSoftware Command Line Processor</Description>
 		<Copyright>© Mark A. Olbert all rights reserved</Copyright>
-		<PackageDescription>Add on to J4JCommandLine to simplify using Autofac dependency injection .</PackageDescription>
+		<PackageDescription>Add on to J4JCommandLine to support a more colorful and nicely formatted output.</PackageDescription>
 		<RepositoryUrl>https://github.com/markolbert/J4JCommandLine</RepositoryUrl>
 	</PropertyGroup>
 
 	<ItemGroup>
-		<PackageReference Include="Autofac" Version="5.2.0" />
-		<PackageReference Include="Autofac.Extensions.DependencyInjection" Version="6.0.0" />
+		<PackageReference Include="Alba.CsConsoleFormat-NoXaml" Version="1.0.0" />
+		<PackageReference Include="Alba.CsConsoleFormat.ColorfulConsole-NoXaml" Version="1.0.0" />
 	</ItemGroup>
 
 	<ItemGroup>

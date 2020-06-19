@@ -11,8 +11,6 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "J4JCommandLine.Tests", "J4J
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AutofacCommandLine", "AutofacCommandLine\AutofacCommandLine.csproj", "{15200685-21A4-4BEC-8A55-751AF6963FB2}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FancyHelpError", "FancyHelpError\FancyHelpError.csproj", "{B8501AFB-7D56-426F-AF46-45297E754826}"
-EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "docs", "docs", "{473DDAC4-C8B9-4FBC-97C9-51AB11F038EF}"
 	ProjectSection(SolutionItems) = preProject
 		docs\allocation.md = docs\allocation.md
@@ -44,6 +42,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "InstancePropertyExample", "
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AutoBindExample", "examples\AutoBindExample\AutoBindExample.csproj", "{C5400387-BD0A-4E24-80B7-C532A8D1A216}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FancyConsole", "FancyConsole\FancyConsole.csproj", "{972D7E96-1318-488A-A3B4-6EBF3C228DD5}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -62,10 +62,6 @@ Global
 		{15200685-21A4-4BEC-8A55-751AF6963FB2}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{15200685-21A4-4BEC-8A55-751AF6963FB2}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{15200685-21A4-4BEC-8A55-751AF6963FB2}.Release|Any CPU.Build.0 = Release|Any CPU
-		{B8501AFB-7D56-426F-AF46-45297E754826}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{B8501AFB-7D56-426F-AF46-45297E754826}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{B8501AFB-7D56-426F-AF46-45297E754826}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{B8501AFB-7D56-426F-AF46-45297E754826}.Release|Any CPU.Build.0 = Release|Any CPU
 		{F6C3D411-BE5F-4B06-9BC7-2C03E6904F29}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{F6C3D411-BE5F-4B06-9BC7-2C03E6904F29}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{F6C3D411-BE5F-4B06-9BC7-2C03E6904F29}.Release|Any CPU.ActiveCfg = Release|Any CPU
@@ -78,6 +74,10 @@ Global
 		{C5400387-BD0A-4E24-80B7-C532A8D1A216}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{C5400387-BD0A-4E24-80B7-C532A8D1A216}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{C5400387-BD0A-4E24-80B7-C532A8D1A216}.Release|Any CPU.Build.0 = Release|Any CPU
+		{972D7E96-1318-488A-A3B4-6EBF3C228DD5}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{972D7E96-1318-488A-A3B4-6EBF3C228DD5}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{972D7E96-1318-488A-A3B4-6EBF3C228DD5}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{972D7E96-1318-488A-A3B4-6EBF3C228DD5}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

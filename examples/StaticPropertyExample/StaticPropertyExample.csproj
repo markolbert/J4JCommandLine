@@ -13,7 +13,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\AutofacCommandLine\AutofacCommandLine.csproj" />
-    <ProjectReference Include="..\..\FancyHelpError\FancyHelpError.csproj" />
+    <ProjectReference Include="..\..\FancyConsole\FancyConsole.csproj" />
     <ProjectReference Include="..\..\J4JCommandLine\J4JCommandLine.csproj" />
   </ItemGroup>
 
