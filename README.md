@@ -2,6 +2,8 @@
 A Net Core 3.1 library for parsing command line arguments 
 in a flexible fashion.
 
+[![Nuget](https://img.shields.io/nuget/v/J4JSoftware.CommandLine?style=flat-square)](https://www.nuget.org/packages/J4JSoftware.CommandLine/)
+
 ### TL;DR
 
 ```
