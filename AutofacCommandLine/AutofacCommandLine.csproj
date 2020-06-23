@@ -13,6 +13,7 @@
 		<Copyright>© Mark A. Olbert all rights reserved</Copyright>
 		<PackageDescription>Add on to J4JCommandLine to simplify using Autofac dependency injection .</PackageDescription>
 		<RepositoryUrl>https://github.com/markolbert/J4JCommandLine</RepositoryUrl>
+		<PackageLicenseExpression>MIT</PackageLicenseExpression>
 	</PropertyGroup>
 
 	<ItemGroup>

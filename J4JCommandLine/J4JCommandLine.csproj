@@ -13,6 +13,9 @@
 		<Copyright>© Mark A. Olbert all rights reserved</Copyright>
 		<PackageDescription>adds the J4JSoftware Command Line Processor</PackageDescription>
 		<RepositoryUrl>https://github.com/markolbert/J4JCommandLine</RepositoryUrl>
+		<PackageLicenseExpression>MIT</PackageLicenseExpression>
+		<PackageProjectUrl>https://github.com/markolbert/J4JCommandLine</PackageProjectUrl>
+		<AssemblyVersion>0.1.0.0</AssemblyVersion>
 	</PropertyGroup>
 
 	<ItemGroup>

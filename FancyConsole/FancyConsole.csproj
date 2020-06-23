@@ -13,6 +13,8 @@
 		<Copyright>© Mark A. Olbert all rights reserved</Copyright>
 		<PackageDescription>Add on to J4JCommandLine to support a more colorful and nicely formatted output.</PackageDescription>
 		<RepositoryUrl>https://github.com/markolbert/J4JCommandLine</RepositoryUrl>
+		<PackageLicenseExpression>MIT</PackageLicenseExpression>
+		<PackageProjectUrl>https://github.com/markolbert/J4JCommandLine</PackageProjectUrl>
 	</PropertyGroup>
 
 	<ItemGroup>
