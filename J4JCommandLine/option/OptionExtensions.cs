@@ -5,20 +5,6 @@ namespace J4JSoftware.CommandLine
 {
     public static class OptionExtensions
     {
-        //// adds the specified key to the collection of keys defined for the Option provided it
-        //// is not already in use by another Option
-        //public static T AddKey<T>( this T option, string key )
-        //    where T : Option
-        //{
-        //    if( option.OptionType == OptionType.Null )
-        //        return option;
-
-        //    if( !option.Options.HasKey( key ) )
-        //        option.Keys.Add( key );
-
-        //    return option;
-        //}
-
         // adds the specified keys to the collection of keys defined for the Option provided each one
         // is not already in use by another Option (skips duplicates)
         public static T AddKeys<T>(this T option, IEnumerable<string> keys)

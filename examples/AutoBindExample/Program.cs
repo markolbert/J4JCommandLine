@@ -3,10 +3,9 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using Autofac;
 using Autofac.Extensions.DependencyInjection;
-using J4JSoftware.CommandLine;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace AutoBindExample
+namespace J4JSoftware.CommandLine.Examples
 {
     class Program
     {
@@ -26,9 +25,7 @@ namespace AutoBindExample
             if (binder == null)
                 throw new NullReferenceException(nameof(Program));
 
-            var intOption = binder.Options[ "i" ];
-            if( intOption != null )
-                intOption.SetValidator( OptionInRange<int>.GreaterThan( 0 ) );
+            binder.SetValidator("i", OptionInRange<int>.GreaterThan( 0 ) );
 
             if (!binder.Parse(args))
             {

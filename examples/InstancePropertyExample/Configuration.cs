@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 
-namespace InstancePropertyExample
+namespace J4JSoftware.CommandLine.Examples
 {
     public class Configuration
     {

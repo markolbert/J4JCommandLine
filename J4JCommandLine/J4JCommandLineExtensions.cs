@@ -100,5 +100,21 @@ namespace J4JSoftware.CommandLine
                 _ => throw new NotImplementedException()
             };
         }
+
+        // sets the validator for an Option. 
+        public static IBindingTarget SetValidator(this IBindingTarget bindingTarget, string key, IOptionValidator validator)
+        {
+            var option = bindingTarget.Options[ key ];
+
+            if( option == null
+                || option.OptionType != OptionType.Keyed
+                || validator.SupportedType != option.TargetableType.SupportedType )
+                return bindingTarget;
+
+            option.Validator = validator;
+
+            return bindingTarget;
+        }
+
     }
 }

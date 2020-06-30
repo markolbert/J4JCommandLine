@@ -1,10 +1,9 @@
 ﻿using System;
 using Autofac;
 using Autofac.Extensions.DependencyInjection;
-using J4JSoftware.CommandLine;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace InstancePropertyExample
+namespace J4JSoftware.CommandLine.Examples
 {
     class Program
     {

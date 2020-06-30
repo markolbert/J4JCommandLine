@@ -2,10 +2,9 @@
 using System.Collections.Generic;
 using Autofac;
 using Autofac.Extensions.DependencyInjection;
-using J4JSoftware.CommandLine;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace ConsoleAppJ4JCmdLine
+namespace J4JSoftware.CommandLine.Examples
 {
     public class Program
     {

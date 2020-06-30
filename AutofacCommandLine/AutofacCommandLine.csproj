@@ -5,15 +5,19 @@
 		<Nullable>enable</Nullable>
 		<AssemblyName>J4JSoftware.CommandLine.Autofac</AssemblyName>
 		<RootNamespace>J4JSoftware.CommandLine</RootNamespace>
-		<Version>0.1.0.0</Version>
 		<Authors>Mark A. Olbert</Authors>
 		<Company>Jump for Joy Software</Company>
 		<Product>J4JSoftware Command Line Processor</Product>
 		<Description>Autofac support for J4JCommandLine</Description>
 		<Copyright>© Mark A. Olbert all rights reserved</Copyright>
-		<PackageDescription>Add on to J4JCommandLine to simplify using Autofac dependency injection .</PackageDescription>
+		<PackageDescription>Add on to J4JCommandLine to simplify using Autofac dependency injection.</PackageDescription>
 		<RepositoryUrl>https://github.com/markolbert/J4JCommandLine</RepositoryUrl>
 		<PackageLicenseExpression>MIT</PackageLicenseExpression>
+		<RepositoryType>git</RepositoryType>
+		<PackageIcon>Diego nuspec.png</PackageIcon>
+		<Version>0.5.0.0</Version>
+		<AssemblyVersion>0.5.0.0</AssemblyVersion>
+		<PackageReleaseNotes>added simpler way of specifying validators when using the autobind approach</PackageReleaseNotes>
 	</PropertyGroup>
 
 	<ItemGroup>
@@ -23,6 +27,13 @@
 
 	<ItemGroup>
 		<ProjectReference Include="..\J4JCommandLine\J4JCommandLine.csproj" />
+	</ItemGroup>
+
+	<ItemGroup>
+	  <None Include="E:\Pix\JumpForJoy\Diego nuspec.png">
+	    <Pack>True</Pack>
+	    <PackagePath></PackagePath>
+	  </None>
 	</ItemGroup>
 
 </Project>

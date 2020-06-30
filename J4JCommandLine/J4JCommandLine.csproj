@@ -5,7 +5,6 @@
 		<Nullable>enable</Nullable>
 		<AssemblyName>J4JSoftware.CommandLine</AssemblyName>
 		<RootNamespace>J4JSoftware.CommandLine</RootNamespace>
-		<Version>0.1.0.0</Version>
 		<Authors>Mark A. Olbert</Authors>
 		<Company>Jump for Joy Software</Company>
 		<Product>J4JSoftware Command Line Processor</Product>
@@ -15,7 +14,11 @@
 		<RepositoryUrl>https://github.com/markolbert/J4JCommandLine</RepositoryUrl>
 		<PackageLicenseExpression>MIT</PackageLicenseExpression>
 		<PackageProjectUrl>https://github.com/markolbert/J4JCommandLine</PackageProjectUrl>
-		<AssemblyVersion>0.1.0.0</AssemblyVersion>
+		<RepositoryType>git</RepositoryType>
+		<PackageIcon>Diego nuspec.png</PackageIcon>
+		<Version>0.5.0.0</Version>
+		<AssemblyVersion>0.5.0.0</AssemblyVersion>
+		<PackageReleaseNotes>added simpler way of specifying validators when using the autobind approach</PackageReleaseNotes>
 	</PropertyGroup>
 
 	<ItemGroup>
@@ -26,6 +29,13 @@
 
 	<ItemGroup>
 		<PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="3.1.5" />
+	</ItemGroup>
+
+	<ItemGroup>
+	  <None Include="E:\Pix\JumpForJoy\Diego nuspec.png">
+	    <Pack>True</Pack>
+	    <PackagePath></PackagePath>
+	  </None>
 	</ItemGroup>
 
 </Project>

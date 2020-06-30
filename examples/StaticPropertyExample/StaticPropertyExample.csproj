@@ -3,7 +3,14 @@
   <PropertyGroup>
     <OutputType>Exe</OutputType>
     <TargetFramework>netcoreapp3.1</TargetFramework>
-    <Nullable>enable</Nullable>
+	  <Nullable>enable</Nullable>
+	  <RootNamespace>J4JSoftware.CommandLine.Examples</RootNamespace>
+	  <Version>0.1.0.0</Version>
+	  <Authors>Mark A. Olbert</Authors>
+	  <Company>Jump for Joy Software</Company>
+	  <Product>J4JSoftware Command Line Processor</Product>
+	  <Description>static binding example for J4JCommandLine</Description>
+	  <Copyright>© Mark A. Olbert all rights reserved</Copyright>
   </PropertyGroup>
 
   <ItemGroup>
