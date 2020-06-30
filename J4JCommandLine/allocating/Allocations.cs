@@ -17,7 +17,7 @@ namespace J4JSoftware.CommandLine
 
         protected override string GetKeyForItem( IAllocation item )
         {
-            return item.Key;
+            return item.Key!;
         }
     }
 }

@@ -1,4 +1,6 @@
-﻿namespace J4JCommandLine.Tests
+﻿#pragma warning disable 8618
+
+namespace J4JCommandLine.Tests
 {
     public class ParameterlessConstructorParent
     {

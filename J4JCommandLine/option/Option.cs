@@ -38,7 +38,7 @@ namespace J4JSoftware.CommandLine
         public ITargetableType TargetableType { get; }
 
         // an optional description of the Option, used in displaying help or error information
-        public string Description { get; internal set; }
+        public string Description { get; internal set; } = string.Empty;
         
         // the first key defined for an option, sorted alphabetically (Options can define multiple keys
         // but they must be unique within the scope of all Options)
@@ -60,7 +60,7 @@ namespace J4JSoftware.CommandLine
         public OptionStyle OptionStyle { get; internal set; }
 
         // the validator for the Option
-        public IOptionValidator Validator { get; internal set; }
+        public IOptionValidator? Validator { get; internal set; }
         
         // the optional default value assigned to the Option
         public object? DefaultValue

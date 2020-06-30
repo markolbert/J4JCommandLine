@@ -4,6 +4,7 @@ using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices.ComTypes;
 using System.Text;
+#pragma warning disable 8618
 
 namespace J4JSoftware.CommandLine
 {

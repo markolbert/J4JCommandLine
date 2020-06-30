@@ -1,6 +1,5 @@
 ﻿using FluentAssertions;
 using J4JSoftware.CommandLine;
-using Microsoft.Extensions.DependencyInjection;
 using Xunit;
 
 namespace J4JCommandLine.Tests

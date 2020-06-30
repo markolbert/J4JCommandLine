@@ -1,5 +1,4 @@
-﻿using System;
-using FluentAssertions;
+﻿using FluentAssertions;
 using J4JSoftware.CommandLine;
 using Xunit;
 

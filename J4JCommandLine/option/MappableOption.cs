@@ -70,7 +70,7 @@ namespace J4JSoftware.CommandLine
                 ? "true"
                 : allocation.Parameters[ 0 ];
 
-            var retVal = Convert( allocation.Key, text );
+            var retVal = Convert( allocation.Key!, text );
 
             if( retVal != null )
                 return retVal;
@@ -93,7 +93,7 @@ namespace J4JSoftware.CommandLine
 
             for( var idx = 0; idx < allocation.NumParameters; idx++ )
             {
-                var item = Convert( allocation.Key, allocation.Parameters[ idx ] );
+                var item = Convert( allocation.Key!, allocation.Parameters[ idx ] );
 
                 if( item == null )
                 {

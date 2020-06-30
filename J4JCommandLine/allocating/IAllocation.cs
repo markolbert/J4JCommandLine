@@ -14,7 +14,7 @@ namespace J4JSoftware.CommandLine
         
         // the key defining which option is referenced by the result. If null
         // the IAllocation refers to the unkeyed/non-optioned parameters
-        string? Key { get; }
+        string Key { get; }
         
         // the number of parameters in the result (e.g., 2 for "-x param1 param2")
         int NumParameters { get; }

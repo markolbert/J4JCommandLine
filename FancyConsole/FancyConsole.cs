@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Text;
 using Alba.CsConsoleFormat;
+#pragma warning disable 8618
 
 namespace J4JSoftware.CommandLine
 {

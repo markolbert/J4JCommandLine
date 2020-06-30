@@ -5,6 +5,7 @@ using FluentAssertions;
 using J4JSoftware.CommandLine;
 using Microsoft.Extensions.DependencyInjection;
 using Xunit;
+#pragma warning disable 8618
 
 namespace J4JCommandLine.Tests
 {

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Text;
+#pragma warning disable 8618
 
 namespace J4JSoftware.CommandLine
 {
