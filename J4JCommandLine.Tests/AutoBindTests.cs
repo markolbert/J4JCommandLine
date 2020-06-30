@@ -40,7 +40,9 @@ namespace J4JCommandLine.Tests
 
         [Theory]
         [InlineData("-i 32 -t junk")]
+#pragma warning disable xUnit1026 // Theory methods should use all of their parameters
         public void broken( string cmdLine )
+#pragma warning restore xUnit1026 // Theory methods should use all of their parameters
         {
             var builder = ServiceProvider.Instance.GetRequiredService<BindingTargetBuilder>();
 

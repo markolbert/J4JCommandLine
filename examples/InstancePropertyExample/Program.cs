@@ -2,6 +2,7 @@
 using Autofac;
 using Autofac.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection;
+#pragma warning disable 8618
 
 namespace J4JSoftware.CommandLine.Examples
 {

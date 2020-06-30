@@ -4,6 +4,7 @@ using Alba.CsConsoleFormat;
 using FluentAssertions;
 using J4JSoftware.CommandLine;
 using Xunit;
+#pragma warning disable 8618
 
 namespace J4JCommandLine.Tests
 {
