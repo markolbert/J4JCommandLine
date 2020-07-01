@@ -40,9 +40,7 @@ namespace AutoBindExample
             if (binder == null)
                 throw new NullReferenceException(nameof(Program));
 
-            var intOption = binder.Options[ "i" ];
-            if( intOption != null )
-                intOption.SetValidator( OptionInRange<int>.GreaterThan( 0 ) );
+            binder.SetValidator("i", OptionInRange<int>.GreaterThan( 0 ) );
 
             if (!binder.Parse(args))
             {

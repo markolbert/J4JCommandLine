@@ -22,7 +22,7 @@ var binder = builder.AutoBind<Program>();
 if (binder == null)
     throw new NullReferenceException(nameof(Program));
 
-binder.Options[ "i" ]!.SetValidator( OptionInRange<int>.GreaterThan( 0 ) );
+binder.SetValidator("i", OptionInRange<int>.GreaterThan( 0 ) );
 
 if (!binder.Parse(args))
 {
