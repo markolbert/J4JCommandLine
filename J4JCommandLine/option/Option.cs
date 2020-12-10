@@ -4,13 +4,6 @@ using System.Linq;
 
 namespace J4JSoftware.CommandLine
 {
-    public enum OptionStyle
-    {
-        Switch,
-        SingleValued,
-        Collection
-    }
-
     // the abstract base class of Option and NullOption.
     public abstract class Option
     {

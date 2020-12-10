@@ -152,7 +152,9 @@ namespace J4JSoftware.CommandLine
 
             // scan all the bound options that aren't tied to NullOptions, which are only
             // "bound" in error
-            foreach ( var property in _properties.Where( p => p.BoundOption != null && p.BoundOption.OptionType != OptionType.Unkeyed  ) )
+            foreach( var property in _properties
+                .Where( p => p.BoundOption != null
+                             && p.BoundOption.OptionType != OptionType.Unkeyed ) )
             {
                 // see if our BoundOption's keys match a key in the parse results so we can retrieve a
                 // specific IAllocation
@@ -163,7 +165,7 @@ namespace J4JSoftware.CommandLine
 
                 object? propValue = null;
 
-                // if no allocation is associated with this property work get the option's default value
+                // if no allocation is associated with this property get the option's default value
                 if( allocation == null )
                 {
                     if( property.GetDefaultValue( out var defaultValue ) )
