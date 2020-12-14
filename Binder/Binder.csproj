@@ -1,0 +1,19 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net5.0</TargetFramework>
+    <AssemblyName>J4JSoftware.CommandLine.Binder</AssemblyName>
+    <RootNamespace>J4JSoftware.CommandLine</RootNamespace>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Remove="options\OptionConfiguration.cs" />
+    <Compile Remove="options\OptionRequiredAttribute.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\J4JLogging\J4JLogging\J4JLogging.csproj" />
+  </ItemGroup>
+
+</Project>

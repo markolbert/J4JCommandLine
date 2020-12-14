@@ -30,7 +30,7 @@ namespace J4JSoftware.CommandLine
                 if( enumValue != null )
                     values.Add( enumValue );
 
-            result = (TEnum) values.Min();
+            result = (TEnum) values.Min()!;
 
             return false;
         }

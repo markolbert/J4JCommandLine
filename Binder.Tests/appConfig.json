@@ -1,0 +1,11 @@
+{
+  "Logger": {
+    "SourceRootPath": "C:/Programming/J4JCommandLine/Binder.Tests",
+    "EventElements": "All",
+    "Channels": {
+      "Debug": {
+        "MinimumLevel": "Verbose"
+      }
+    }
+  }
+}
