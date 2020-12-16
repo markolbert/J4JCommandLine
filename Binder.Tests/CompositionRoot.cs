@@ -60,8 +60,8 @@ namespace Binder.Tests
                 } )
                 .AsSelf();
 
-            builder.RegisterType<DefaultTypeInitializer>()
-                .AsImplementedInterfaces();
+            //builder.RegisterType<DefaultTypeInitializer>()
+            //    .AsImplementedInterfaces();
 
             builder.RegisterType<Allocator>()
                 .AsImplementedInterfaces();

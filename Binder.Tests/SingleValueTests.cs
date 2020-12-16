@@ -12,13 +12,15 @@ using Xunit;
 
 namespace J4JSoftware.Binder.Tests
 {
-    public class SwitchTests : BaseTest
+    public class SingleValueTests : BaseTest
     {
         [Theory]
-        [InlineData("ASwitch", "x", "-x", true, 0, 0)]
-        [InlineData("ASwitch", "x", "-z", false, 1, 0)]
-        [InlineData("ASwitch", "x", "-x excess", true, 0, 1)]
-        [InlineData("ASwitch", "x", "-z excess", false, 1, 1)]
+        [InlineData("ASingleValue", "x", "-x", false, 0, 0)]
+        [InlineData("ASingleValue", "x", "-z", false, 1, 0)]
+        [InlineData("ASingleValue", "x", "-x expected", true, 0, 0)]
+        [InlineData("ASingleValue", "x", "-z expected", false, 1, 1)]
+        [InlineData("ASingleValue", "x", "-x expected excess", true, 0, 1)]
+        [InlineData("ASingleValue", "x", "-z expected excess", false, 1, 2)]
         public void ByContextDefinition( 
             string contextKey, 
             string cmdLineKey, 
@@ -32,7 +34,7 @@ namespace J4JSoftware.Binder.Tests
             var option = options.Add( contextKey );
 
             option.AddCommandLineKey( cmdLineKey )
-                .SetStyle( OptionStyle.Switch );
+                .SetStyle( OptionStyle.SingleValued );
 
             var allocator = CompositionRoot.Default.Allocator;
 

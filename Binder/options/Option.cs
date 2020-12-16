@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Linq;
+using System.Reflection.Metadata.Ecma335;
 
 namespace J4JSoftware.CommandLine
 {
@@ -12,16 +13,14 @@ namespace J4JSoftware.CommandLine
         private readonly List<string> _allocatedValues = new List<string>();
         private readonly MasterTextCollection _masterText;
 
-        private int _allowedNumValues;
-
         internal Option( 
-            Options container, 
-            IContextKey contextKey,
+            OptionsBase container, 
+            string contextPath,
             MasterTextCollection masterText 
             )
         {
             Container = container;
-            ContextKey = contextKey;
+            ContextPath = contextPath;
             _masterText = masterText;
 
             if( Container.UsesContextPath( ContextPath! ) )
@@ -29,45 +28,30 @@ namespace J4JSoftware.CommandLine
         }
 
         // the collection of Options used by the parsing activity
-        public Options Container { get; }
+        public OptionsBase Container { get; }
 
-        public IContextKey? ContextKey { get; }
-
-        public List<IContextKey>? ContextPath
-        {
-            get
-            {
-                if( Parent == null || ContextKey == null )
-                {
-                    if( ContextKey == null )
-                        return null;
-
-                    return new List<IContextKey> { ContextKey };
-                }
-
-                var retVal = Parent.ContextPath!;
-
-                retVal.Add( ContextKey );
-
-                return retVal;
-            }
-        }
-
-        public Option? Parent { get; private set; }
+        public string? ContextPath { get; }
 
         public ReadOnlyCollection<string> Keys => _cmdLineKeys.AsReadOnly();
 
-        // the first key defined for an option, sorted alphabetically (Options can define multiple keys
-        // but they must be unique within the scope of all Options)
-        public string FirstKey => _cmdLineKeys.OrderBy( k => k ).First();
-
         public string? CommandLineKeyProvided { get; set; }
 
-        public bool WasAssignedValue
+        public int MaxValues =>
+            Style switch
+            {
+                OptionStyle.Collection => int.MaxValue,
+                OptionStyle.SingleValued => 1,
+                OptionStyle.Switch => 0,
+                _ => throw new InvalidEnumArgumentException( $"Unsupported OptionStyle '{Style}'" )
+            };
+
+        public int NumValuesAllocated => _allocatedValues.Count;
+
+        public bool ValuesSatisfied
         {
             get
             {
-                if( string.IsNullOrEmpty( CommandLineKeyProvided ) )
+                if (string.IsNullOrEmpty(CommandLineKeyProvided))
                     return false;
 
                 var numValuesAlloc = _allocatedValues.Count;
@@ -81,7 +65,7 @@ namespace J4JSoftware.CommandLine
                 };
             }
         }
-        
+
         public ReadOnlyCollection<string> CommandLineValues => _allocatedValues.AsReadOnly();
 
         public OptionStyle Style { get; private set; }
@@ -114,14 +98,7 @@ namespace J4JSoftware.CommandLine
 
         public Option SetStyle( OptionStyle style )
         {
-            _allowedNumValues = style switch
-            {
-                OptionStyle.Collection => Int32.MaxValue,
-                OptionStyle.SingleValued => 1,
-                OptionStyle.Switch => 0,
-                _ => throw new InvalidEnumArgumentException( $"Unsupported OptionStyle '{style}'" )
-            };
-
+            Style = style;
             return this;
         }
 
@@ -140,14 +117,6 @@ namespace J4JSoftware.CommandLine
         public Option SetDescription(string description)
         {
             Description = description;
-            return this;
-        }
-
-        public Option ChildOf(Option parent)
-        {
-            if (parent != this)
-                Parent = parent;
-
             return this;
         }
     }

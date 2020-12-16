@@ -39,7 +39,6 @@ namespace J4JSoftware.CommandLine
             var accumulator = new StringBuilder();
             Option? curOption = null;
             var charsProcessed = 0;
-            var lastElementWasKey = false;
 
             for( var idx = 0; idx < cmdLine.Length; idx++ )
             {
@@ -72,8 +71,6 @@ namespace J4JSoftware.CommandLine
                     {
                         curOption = options[element];
                         curOption!.CommandLineKeyProvided = element;
-
-                        lastElementWasKey = true;
                     }
                     else
                     {
@@ -84,11 +81,10 @@ namespace J4JSoftware.CommandLine
                 else
                 {
                     // element is parameter value
-                    if( curOption == null || !lastElementWasKey )
+                    if( curOption == null 
+                        || curOption.NumValuesAllocated >= curOption.MaxValues )
                         retVal.UnkeyedParameters.Add( element );
                     else curOption.AddAllocatedValue( element );
-
-                    lastElementWasKey = false;
                 }
 
                 // clear the accumulator so we can start processing the next character sequence

@@ -7,15 +7,15 @@ namespace J4JSoftware.CommandLine
 {
     public static class OptionExtensions
     {
-        public static string ToTextPath( this List<IContextKey> contextKeys ) =>
+        public static string ToTextPath( this List<string> contextKeys ) =>
             contextKeys.Aggregate(
                 new StringBuilder(),
-                ( sb, ick ) =>
+                ( sb, t ) =>
                 {
                     if( sb.Length > 0 )
                         sb.Append( ":" );
 
-                    sb.Append( ick.Text );
+                    sb.Append( t );
 
                     return sb;
                 },

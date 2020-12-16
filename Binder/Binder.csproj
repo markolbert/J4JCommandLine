@@ -8,8 +8,16 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="type-initializer\**" />
+    <EmbeddedResource Remove="type-initializer\**" />
+    <None Remove="type-initializer\**" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Remove="options\IContextKey.cs" />
     <Compile Remove="options\OptionConfiguration.cs" />
     <Compile Remove="options\OptionRequiredAttribute.cs" />
+    <Compile Remove="options\SimpleContextKey.cs" />
   </ItemGroup>
 
   <ItemGroup>
