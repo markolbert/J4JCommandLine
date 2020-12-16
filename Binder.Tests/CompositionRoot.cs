@@ -51,15 +51,14 @@ namespace Binder.Tests
                 .AsSelf();
 
             builder.RegisterType<MasterTextCollection>()
-                .OnActivated( x =>
+                .OnActivating( x =>
                 {
                     x.Instance.Initialize( StringComparison.OrdinalIgnoreCase );
                     x.Instance.AddRange( TextUsageType.Prefix, "-", "--" );
                     x.Instance.AddRange( TextUsageType.Quote, "\"", "'" );
                     x.Instance.AddRange( TextUsageType.ValueEncloser, "=" );
                 } )
-                .AsSelf()
-                .SingleInstance();
+                .AsSelf();
 
             builder.RegisterType<DefaultTypeInitializer>()
                 .AsImplementedInterfaces();

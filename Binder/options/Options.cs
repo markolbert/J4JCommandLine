@@ -69,7 +69,7 @@ namespace J4JSoftware.CommandLine
 
         public Option Add(IContextKey contextKey )
         {
-            var retVal = new Option( this, contextKey );
+            var retVal = new Option( this, contextKey, _masterText );
 
             _options.Add(retVal);
 

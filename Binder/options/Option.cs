@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.ComponentModel;
 using System.Linq;
 
 namespace J4JSoftware.CommandLine
@@ -9,11 +10,19 @@ namespace J4JSoftware.CommandLine
     {
         private readonly List<string> _cmdLineKeys = new List<string>();
         private readonly List<string> _allocatedValues = new List<string>();
+        private readonly MasterTextCollection _masterText;
 
-        internal Option( Options container, IContextKey contextKey )
+        private int _allowedNumValues;
+
+        internal Option( 
+            Options container, 
+            IContextKey contextKey,
+            MasterTextCollection masterText 
+            )
         {
             Container = container;
             ContextKey = contextKey;
+            _masterText = masterText;
 
             if( Container.UsesContextPath( ContextPath! ) )
                 throw new ArgumentException( $"Duplicate context key path '{ContextPath}'" );
@@ -52,10 +61,31 @@ namespace J4JSoftware.CommandLine
         // but they must be unique within the scope of all Options)
         public string FirstKey => _cmdLineKeys.OrderBy( k => k ).First();
 
-        public string? CommandLineKeyUsed { get; set; }
+        public string? CommandLineKeyProvided { get; set; }
+
+        public bool WasAssignedValue
+        {
+            get
+            {
+                if( string.IsNullOrEmpty( CommandLineKeyProvided ) )
+                    return false;
+
+                var numValuesAlloc = _allocatedValues.Count;
+
+                return Style switch
+                {
+                    OptionStyle.Switch => numValuesAlloc == 0,
+                    OptionStyle.SingleValued => numValuesAlloc == 1,
+                    OptionStyle.Collection => numValuesAlloc > 0,
+                    _ => throw new InvalidEnumArgumentException($"Unsupported OptionStyle '{Style}'")
+                };
+            }
+        }
+        
         public ReadOnlyCollection<string> CommandLineValues => _allocatedValues.AsReadOnly();
 
-        public int AllowedNumberOfValues { get; private set; }
+        public OptionStyle Style { get; private set; }
+
         public bool Required { get; private set; }
         public string? Description { get; private set; }
 
@@ -63,8 +93,11 @@ namespace J4JSoftware.CommandLine
 
         public Option AddCommandLineKey(string cmdLineKey)
         {
-            if (!Container.UsesCommandLineKey(cmdLineKey))
+            if( !Container.UsesCommandLineKey( cmdLineKey ) )
+            {
                 _cmdLineKeys.Add(cmdLineKey);
+                _masterText.Add( TextUsageType.OptionKey, cmdLineKey );
+            }
 
             return this;
         }
@@ -79,21 +112,16 @@ namespace J4JSoftware.CommandLine
             return this;
         }
 
-        public Option IsSwitch()
+        public Option SetStyle( OptionStyle style )
         {
-            AllowedNumberOfValues = 0;
-            return this;
-        }
+            _allowedNumValues = style switch
+            {
+                OptionStyle.Collection => Int32.MaxValue,
+                OptionStyle.SingleValued => 1,
+                OptionStyle.Switch => 0,
+                _ => throw new InvalidEnumArgumentException( $"Unsupported OptionStyle '{style}'" )
+            };
 
-        public Option IsCollection()
-        {
-            AllowedNumberOfValues = Int32.MaxValue;
-            return this;
-        }
-
-        public Option IsSingleValue()
-        {
-            AllowedNumberOfValues = 1;
             return this;
         }
 
