@@ -86,7 +86,7 @@ namespace J4JSoftware.CommandLine
             if (propInfo.PropertyType.IsEnum)
             {
                 style = HasAttribute<FlagsAttribute>(propInfo.PropertyType)
-                    ? OptionStyle.Collection
+                    ? OptionStyle.ConcatenatedSingleValue
                     : OptionStyle.SingleValued;
 
                 return true;

@@ -1,4 +1,5 @@
-﻿using Microsoft.Extensions.Configuration;
+﻿using System.ComponentModel;
+using Microsoft.Extensions.Configuration;
 
 namespace J4JSoftware.CommandLine
 {
@@ -17,7 +18,43 @@ namespace J4JSoftware.CommandLine
             
             foreach( var option in Source.Options )
             {
-                Set( option.ContextPath, string.Join( ",", option.CommandLineValues ) );
+                switch( option.Style )
+                {
+                    case OptionStyle.Switch:
+                        Set( option.ContextPath,
+                            string.IsNullOrEmpty( option.CommandLineKeyProvided )
+                                ? "false"
+                                : "true" );
+                        
+                        break;
+
+                    case OptionStyle.SingleValued:
+                        if( option.NumValuesAllocated > 0)
+                            Set(option.ContextPath, option.CommandLineValues[0]);
+
+                        break;
+
+                    case OptionStyle.ConcatenatedSingleValue:
+                        // concatenated single value properties (e.g., flag enums) are
+                        // single valued from a target point of view (i.e., they're not
+                        // collections), but they contain multiple string values from
+                        // allocating the command line
+                        if (option.NumValuesAllocated > 0)
+                                Set( option.ContextPath, string.Join( ", ", option.CommandLineValues ) );
+
+                        break;
+
+                    case OptionStyle.Collection:
+                        for( var idx = 0; idx < option.NumValuesAllocated; idx++ )
+                        {
+                            Set( $"{option.ContextPath}:{idx}", option.CommandLineValues[ idx ] );
+                        }
+
+                        break;
+
+                    default:
+                        throw new InvalidEnumArgumentException( $"Unsupported OptionStyle '{option.Style}'" );
+                }
             }
         }
     }

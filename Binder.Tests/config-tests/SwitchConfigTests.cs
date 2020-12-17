@@ -1,4 +1,5 @@
-﻿using Binder.Tests;
+﻿using System;
+using Binder.Tests;
 using FluentAssertions;
 using J4JSoftware.CommandLine;
 using Microsoft.Extensions.Configuration;
@@ -39,15 +40,16 @@ namespace J4JSoftware.Binder.Tests
         }
 
         [Theory]
-        [InlineData(true, "x", "-x", true)]
-        [InlineData(true, "x", "-z", false)]
-        [InlineData(true, "x", "-x excess", true)]
-        [InlineData(true, "x", "-z excess", false)]
+        [InlineData(true, "x", "-x", true, false)]
+        [InlineData(true, "x", "-z", false, false)]
+        [InlineData(true, "x", "-x excess", true, false)]
+        [InlineData(true, "x", "-z excess", false, false)]
         public void TypeBound(
             bool shouldBind,
             string cmdLineKey,
             string cmdLine,
-            bool parsedValue
+            bool parsedValue,
+            bool throws
         )
         {
             var options = CompositionRoot.Default.GetTypeBoundOptions<ConfigTarget>();
@@ -66,6 +68,12 @@ namespace J4JSoftware.Binder.Tests
             var configBuilder = new ConfigurationBuilder();
             configBuilder.AddJ4JCommandLine(options, cmdLine, allocator);
             var config = configBuilder.Build();
+
+            if (throws)
+            {
+                var exception = Assert.Throws<InvalidOperationException>(() => config.Get<ConfigTarget>());
+                return;
+            }
 
             var result = config.Get<ConfigTarget>();
 

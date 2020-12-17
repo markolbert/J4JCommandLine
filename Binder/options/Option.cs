@@ -42,6 +42,7 @@ namespace J4JSoftware.CommandLine
             {
                 OptionStyle.Collection => int.MaxValue,
                 OptionStyle.SingleValued => 1,
+                OptionStyle.ConcatenatedSingleValue=> int.MaxValue,
                 OptionStyle.Switch => 0,
                 _ => throw new InvalidEnumArgumentException( $"Unsupported OptionStyle '{Style}'" )
             };
@@ -67,22 +68,8 @@ namespace J4JSoftware.CommandLine
             }
         }
 
-        public ReadOnlyCollection<string> CommandLineValues
-        {
-            get
-            {
-                return Style switch
-                {
-                    OptionStyle.Switch => CommandLineKeyProvided == null
-                        ? _switchFalse.AsReadOnly()
-                        : _switchTrue.AsReadOnly(),
-                    _ => _allocatedValues.AsReadOnly()
-                };
-            }
-        }
-
+        public ReadOnlyCollection<string> CommandLineValues => _allocatedValues.AsReadOnly();
         public OptionStyle Style { get; private set; } = OptionStyle.Undefined;
-
         public bool Required { get; private set; }
         public string? Description { get; private set; }
 
