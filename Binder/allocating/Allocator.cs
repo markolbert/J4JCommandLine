@@ -29,10 +29,7 @@ namespace J4JSoftware.CommandLine
             _logger.SetLoggedType( GetType() );
         }
 
-        public AllocationResult AllocateCommandLine( string[] args, Options options ) =>
-            AllocateCommandLine( string.Join( " ", args ), options );
-
-        public AllocationResult AllocateCommandLine( string cmdLine, Options options )
+        public AllocationResult AllocateCommandLine( string cmdLine, OptionsBase options )
         {
             var retVal = new AllocationResult();
             

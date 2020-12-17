@@ -9,6 +9,9 @@ namespace J4JSoftware.CommandLine
 {
     public class Option
     {
+        private static List<string> _switchTrue = new List<string> { "true" };
+        private static List<string> _switchFalse = new List<string> { "false" };
+
         private readonly List<string> _cmdLineKeys = new List<string>();
         private readonly List<string> _allocatedValues = new List<string>();
         private readonly MasterTextCollection _masterText;
@@ -27,13 +30,11 @@ namespace J4JSoftware.CommandLine
                 throw new ArgumentException( $"Duplicate context key path '{ContextPath}'" );
         }
 
+        public bool IsInitialized => !string.IsNullOrEmpty( ContextPath ) && _cmdLineKeys.Count > 0;
         // the collection of Options used by the parsing activity
         public OptionsBase Container { get; }
-
         public string? ContextPath { get; }
-
         public ReadOnlyCollection<string> Keys => _cmdLineKeys.AsReadOnly();
-
         public string? CommandLineKeyProvided { get; set; }
 
         public int MaxValues =>
@@ -66,9 +67,21 @@ namespace J4JSoftware.CommandLine
             }
         }
 
-        public ReadOnlyCollection<string> CommandLineValues => _allocatedValues.AsReadOnly();
+        public ReadOnlyCollection<string> CommandLineValues
+        {
+            get
+            {
+                return Style switch
+                {
+                    OptionStyle.Switch => CommandLineKeyProvided == null
+                        ? _switchFalse.AsReadOnly()
+                        : _switchTrue.AsReadOnly(),
+                    _ => _allocatedValues.AsReadOnly()
+                };
+            }
+        }
 
-        public OptionStyle Style { get; private set; }
+        public OptionStyle Style { get; private set; } = OptionStyle.Undefined;
 
         public bool Required { get; private set; }
         public string? Description { get; private set; }
@@ -86,7 +99,7 @@ namespace J4JSoftware.CommandLine
             return this;
         }
 
-        public Option AddCommandLineKeys(params string[] cmdLineKeys)
+        public Option AddCommandLineKeys(IEnumerable<string> cmdLineKeys)
         {
             foreach( var cmdLineKey in cmdLineKeys )
             {

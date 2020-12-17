@@ -1,10 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using Autofac;
-using Autofac.Extensions.DependencyInjection;
 using J4JSoftware.Binder.Tests;
 using J4JSoftware.CommandLine;
 using J4JSoftware.DependencyInjection;
@@ -12,8 +7,6 @@ using J4JSoftware.Logging;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using Twilio.Rest.Api.V2010.Account.Usage.Record;
-using Xunit.Sdk;
 
 namespace Binder.Tests
 {
@@ -50,6 +43,9 @@ namespace Binder.Tests
             builder.RegisterType<Options>()
                 .AsSelf();
 
+            builder.RegisterGeneric( typeof(TypeBoundOptions<>) )
+                .AsSelf();
+
             builder.RegisterType<MasterTextCollection>()
                 .OnActivating( x =>
                 {
@@ -59,9 +55,6 @@ namespace Binder.Tests
                     x.Instance.AddRange( TextUsageType.ValueEncloser, "=" );
                 } )
                 .AsSelf();
-
-            //builder.RegisterType<DefaultTypeInitializer>()
-            //    .AsImplementedInterfaces();
 
             builder.RegisterType<Allocator>()
                 .AsImplementedInterfaces();
@@ -75,6 +68,11 @@ namespace Binder.Tests
 
         public IJ4JLogger Logger => Host!.Services.GetRequiredService<IJ4JLogger>();
         public Options Options => Host!.Services.GetRequiredService<Options>();
+
+        public TypeBoundOptions<TTarget> GetTypeBoundOptions<TTarget>()
+            where TTarget : class, new() =>
+            Host!.Services.GetRequiredService<TypeBoundOptions<TTarget>>();
+
         public IAllocator Allocator => Host!.Services.GetRequiredService<IAllocator>();
     }
 }

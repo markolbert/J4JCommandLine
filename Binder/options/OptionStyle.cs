@@ -2,6 +2,7 @@
 {
     public enum OptionStyle
     {
+        Undefined,
         Switch,
         SingleValued,
         Collection
