@@ -1,0 +1,311 @@
+[
+  {
+    "CommandLine": "-x",
+    "UnkeyedParameters": 0,
+    "UnknownKeys": 0,
+    "OptionConfigurations": [
+      {
+        "ContextKey": "ASwitch",
+        "CommandLineKey": "x",
+        "Style": "Switch",
+        "ValuesSatisfied": true,
+        "CorrectText": "true"
+      }
+    ]
+  },
+  {
+    "CommandLine": "-z",
+    "UnkeyedParameters": 0,
+    "UnknownKeys": 1,
+    "OptionConfigurations": [
+      {
+        "ContextKey": "ASwitch",
+        "CommandLineKey": "x",
+        "Style": "Switch",
+        "CorrectText": "false"
+      }
+    ]
+  },
+  {
+    "CommandLine": "-x excess",
+    "UnkeyedParameters": 1,
+    "UnknownKeys": 0,
+    "OptionConfigurations": [
+      {
+        "ContextKey": "ASwitch",
+        "CommandLineKey": "x",
+        "Style": "Switch",
+        "ValuesSatisfied": true,
+        "CorrectText": "true"
+      }
+    ]
+  },
+  {
+    "CommandLine": "-z excess",
+    "UnkeyedParameters": 1,
+    "UnknownKeys": 1,
+    "OptionConfigurations": [
+      {
+        "ContextKey": "ASwitch",
+        "CommandLineKey": "x",
+        "Style": "Switch",
+        "CorrectText": "false"
+      }
+    ]
+  },
+  {
+    "CommandLine": "-x",
+    "UnkeyedParameters": 0,
+    "UnknownKeys": 0,
+    "OptionConfigurations": [
+      {
+        "ContextKey": "ASingleValue",
+        "CommandLineKey": "x",
+        "Style": "SingleValued"
+      }
+    ]
+  },
+  {
+    "CommandLine": "-z",
+    "UnkeyedParameters": 0,
+    "UnknownKeys": 1,
+    "OptionConfigurations": [
+      {
+        "ContextKey": "ASingleValue",
+        "CommandLineKey": "x",
+        "Style": "SingleValued"
+      }
+    ]
+  },
+  {
+    "CommandLine": "-x expected",
+    "UnkeyedParameters": 0,
+    "UnknownKeys": 0,
+    "OptionConfigurations": [
+      {
+        "ContextKey": "ASingleValue",
+        "CommandLineKey": "x",
+        "Style": "SingleValued",
+        "ValuesSatisfied": true,
+        "CorrectText": "expected"
+      }
+    ]
+  },
+  {
+    "CommandLine": "-z expected",
+    "UnkeyedParameters": 1,
+    "UnknownKeys": 1,
+    "OptionConfigurations": [
+      {
+        "ContextKey": "ASingleValue",
+        "CommandLineKey": "x",
+        "Style": "SingleValued"
+      }
+    ]
+  },
+  {
+    "CommandLine": "-x expected excess",
+    "UnkeyedParameters": 1,
+    "UnknownKeys": 0,
+    "OptionConfigurations": [
+      {
+        "ContextKey": "ASingleValue",
+        "CommandLineKey": "x",
+        "Style": "SingleValued",
+        "ValuesSatisfied": true,
+        "CorrectText": "expected"
+      }
+    ]
+  },
+  {
+    "CommandLine": "-z expected excess",
+    "UnkeyedParameters": 2,
+    "UnknownKeys": 1,
+    "OptionConfigurations": [
+      {
+        "ContextKey": "ASingleValue",
+        "CommandLineKey": "x",
+        "Style": "SingleValued"
+      }
+    ]
+  },
+  {
+    "CommandLine": "-x EnumValue1",
+    "UnkeyedParameters": 0,
+    "UnknownKeys": 0,
+    "OptionConfigurations": [
+      {
+        "ContextKey": "AnEnumValue",
+        "CommandLineKey": "x",
+        "Style": "SingleValued",
+        "ValuesSatisfied": true,
+        "CorrectText": "EnumValue1"
+      }
+    ]
+  },
+  {
+    "CommandLine": "-x EnumValue2",
+    "UnkeyedParameters": 0,
+    "UnknownKeys": 0,
+    "OptionConfigurations": [
+      {
+        "ContextKey": "AnEnumValue",
+        "CommandLineKey": "x",
+        "Style": "SingleValued",
+        "ValuesSatisfied": true,
+        "CorrectText": "EnumValue2"
+      }
+    ]
+  },
+  {
+    "CommandLine": "-x EnumValue3",
+    "UnkeyedParameters": 0,
+    "UnknownKeys": 0,
+    "OptionConfigurations": [
+      {
+        "ContextKey": "AnEnumValue",
+        "CommandLineKey": "x",
+        "Style": "SingleValued",
+        "ValuesSatisfied": true,
+        "ParsingWillFail":  true 
+      }
+    ]
+  },
+  {
+    "CommandLine": "-x enumvalue1",
+    "UnkeyedParameters": 0,
+    "UnknownKeys": 0,
+    "OptionConfigurations": [
+      {
+        "ContextKey": "AnEnumValue",
+        "CommandLineKey": "x",
+        "Style": "SingleValued",
+        "ValuesSatisfied": true,
+        "CorrectText": "EnumValue1"
+      }
+    ]
+  },
+  {
+    "CommandLine": "-x EnumValue1",
+    "UnkeyedParameters": 0,
+    "UnknownKeys": 0,
+    "OptionConfigurations": [
+      {
+        "ContextKey": "AFlagEnumValue",
+        "CommandLineKey": "x",
+        "Style": "ConcatenatedSingleValue",
+        "ValuesSatisfied": true,
+        "CorrectText": "EnumValue1"
+      }
+    ]
+  },
+  {
+    "CommandLine": "-x EnumValue2",
+    "UnkeyedParameters": 0,
+    "UnknownKeys": 0,
+    "OptionConfigurations": [
+      {
+        "ContextKey": "AFlagEnumValue",
+        "CommandLineKey": "x",
+        "Style": "ConcatenatedSingleValue",
+        "ValuesSatisfied": true,
+        "CorrectText": "EnumValue2"
+      }
+    ]
+  },
+  {
+    "CommandLine": "-x EnumValue1 EnumValue2",
+    "UnkeyedParameters": 0,
+    "UnknownKeys": 0,
+    "OptionConfigurations": [
+      {
+        "ContextKey": "AFlagEnumValue",
+        "CommandLineKey": "x",
+        "Style": "ConcatenatedSingleValue",
+        "ValuesSatisfied": true,
+        "CorrectText": "EnumValue1, EnumValue2"
+      }
+    ]
+  },
+  {
+    "CommandLine": "-x",
+    "UnkeyedParameters": 0,
+    "UnknownKeys": 0,
+    "OptionConfigurations": [
+      {
+        "ContextKey": "ACollection",
+        "CommandLineKey": "x",
+        "Style": "Collection"
+      }
+    ]
+  },
+  {
+    "CommandLine": "-z",
+    "UnkeyedParameters": 0,
+    "UnknownKeys": 1,
+    "OptionConfigurations": [
+      {
+        "ContextKey": "ACollection",
+        "CommandLineKey": "x",
+        "Style": "Collection"
+      }
+    ]
+  },
+  {
+    "CommandLine": "-x item1",
+    "UnkeyedParameters": 0,
+    "UnknownKeys": 0,
+    "OptionConfigurations": [
+      {
+        "ContextKey": "ACollection",
+        "CommandLineKey": "x",
+        "Style": "Collection",
+        "ValuesSatisfied": true,
+        "CorrectTextArray": [
+          "item1"
+        ]
+      }
+    ]
+  },
+  {
+    "CommandLine": "-z item1",
+    "UnkeyedParameters": 1,
+    "UnknownKeys": 1,
+    "OptionConfigurations": [
+      {
+        "ContextKey": "ACollection",
+        "CommandLineKey": "x",
+        "Style": "Collection"
+      }
+    ]
+  },
+  {
+    "CommandLine": "-x item1 item2",
+    "UnkeyedParameters": 0,
+    "UnknownKeys": 0,
+    "OptionConfigurations": [
+      {
+        "ContextKey": "ACollection",
+        "CommandLineKey": "x",
+        "Style": "Collection",
+        "ValuesSatisfied": true,
+        "CorrectTextArray": [
+          "item1",
+          "item2"
+        ]
+      }
+    ]
+  },
+  {
+    "CommandLine": "-z item1 item2",
+    "UnkeyedParameters": 2,
+    "UnknownKeys": 1,
+    "OptionConfigurations": [
+      {
+        "ContextKey": "ACollection",
+        "CommandLineKey": "x",
+        "Style": "Collection"
+      }
+    ]
+  }
+]

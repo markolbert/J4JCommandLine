@@ -1,6 +1,5 @@
 ﻿using System;
 using Autofac;
-using J4JSoftware.Binder.Tests;
 using J4JSoftware.CommandLine;
 using J4JSoftware.DependencyInjection;
 using J4JSoftware.Logging;
@@ -8,7 +7,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 
-namespace Binder.Tests
+namespace J4JSoftware.Binder.Tests
 {
     public class CompositionRoot : J4JCompositionRoot
     {
@@ -43,7 +42,7 @@ namespace Binder.Tests
             builder.RegisterType<Options>()
                 .AsSelf();
 
-            builder.RegisterGeneric( typeof(TypeBoundOptions<>) )
+            builder.RegisterType<TypeBoundOptions>()
                 .AsSelf();
 
             builder.RegisterType<MasterTextCollection>()
@@ -67,12 +66,11 @@ namespace Binder.Tests
         }
 
         public IJ4JLogger Logger => Host!.Services.GetRequiredService<IJ4JLogger>();
-        public Options Options => Host!.Services.GetRequiredService<Options>();
+        public Options GetOptions() => Host!.Services.GetRequiredService<Options>();
 
-        public TypeBoundOptions<TTarget> GetTypeBoundOptions<TTarget>()
-            where TTarget : class, new() =>
-            Host!.Services.GetRequiredService<TypeBoundOptions<TTarget>>();
+        public TypeBoundOptions GetTypeBoundOptions() =>
+            Host!.Services.GetRequiredService<TypeBoundOptions>();
 
-        public IAllocator Allocator => Host!.Services.GetRequiredService<IAllocator>();
+        public IAllocator GetAllocator() => Host!.Services.GetRequiredService<IAllocator>();
     }
 }

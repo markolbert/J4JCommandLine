@@ -31,9 +31,10 @@ namespace J4JSoftware.CommandLine
         }
 
         public bool IsInitialized => !string.IsNullOrEmpty( ContextPath ) && _cmdLineKeys.Count > 0;
+        
         // the collection of Options used by the parsing activity
         public OptionsBase Container { get; }
-        public string? ContextPath { get; }
+        public virtual string? ContextPath { get; }
         public ReadOnlyCollection<string> Keys => _cmdLineKeys.AsReadOnly();
         public string? CommandLineKeyProvided { get; set; }
 
@@ -63,7 +64,8 @@ namespace J4JSoftware.CommandLine
                     OptionStyle.Switch => numValuesAlloc == 0,
                     OptionStyle.SingleValued => numValuesAlloc == 1,
                     OptionStyle.Collection => numValuesAlloc > 0,
-                    _ => throw new InvalidEnumArgumentException($"Unsupported OptionStyle '{Style}'")
+                    OptionStyle.ConcatenatedSingleValue => numValuesAlloc > 0,
+                    _ => throw new InvalidEnumArgumentException( $"Unsupported OptionStyle '{Style}'" )
                 };
             }
         }

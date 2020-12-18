@@ -10,9 +10,29 @@ using Microsoft.Extensions.Options;
 
 namespace J4JSoftware.CommandLine
 {
-    public class TypeBoundOptions<TTarget> : OptionsBase
-        where TTarget: class, new()
+    public class TypeBoundOptions : OptionsBase
     {
+        private class TypeBoundOptionComparer: IEqualityComparer<ITypeBoundOption>
+        {
+            public bool Equals( ITypeBoundOption? x, ITypeBoundOption? y )
+            {
+                if( ReferenceEquals( x, y ) ) return true;
+                if( ReferenceEquals( x, null ) ) return false;
+                if( ReferenceEquals( y, null ) ) return false;
+                if( x.GetType() != y.GetType() ) return false;
+                
+                return x.TargetType.Equals( y.TargetType );
+            }
+
+            public int GetHashCode( ITypeBoundOption obj )
+            {
+                return obj.TargetType.GetHashCode();
+            }
+        }
+        
+        private readonly Dictionary<Type, string> _typePrefixes = new Dictionary<Type, string>();
+        private readonly TypeBoundOptionComparer _comparer = new TypeBoundOptionComparer();
+        
         public TypeBoundOptions(
             MasterTextCollection masterText,
             IJ4JLogger logger )
@@ -20,11 +40,35 @@ namespace J4JSoftware.CommandLine
         {
         }
 
-        public Type TargetType => typeof(TTarget);
+        public void SetTypeContextKeyPrefix<TTarget>( string prefix )
+            where TTarget : class, new()
+        {
+            var type = typeof(TTarget);
 
-        public bool Bind<TProp>( 
+            if( _typePrefixes.ContainsKey( type ) )
+                _typePrefixes.Remove( type );
+
+            _typePrefixes.Add( type, prefix );
+        }
+
+        public string GetContextPathPrefix<TTarget>()
+            where TTarget: class, new()
+        {
+            var type = typeof(TTarget);
+
+            if( _typePrefixes.ContainsKey( type ) )
+                return _typePrefixes[ type ];
+
+            return type.Name;
+        }
+
+        public bool TargetsMultipleTypes => Options.Cast<ITypeBoundOption>().Distinct( _comparer ).Count() > 1;
+
+        public bool Bind<TTarget, TProp>( 
             Expression<Func<TTarget, TProp>> propertySelector, 
-            out Option? result, bool bindNonPublic = false )
+            out Option? result, 
+            bool bindNonPublic = false )
+            where TTarget : class, new()
         {
             result = null;
 
@@ -67,8 +111,10 @@ namespace J4JSoftware.CommandLine
 
             propElements.Reverse();
 
-            result = AddInternal( GetContextPath( propElements ) );
-            result.SetStyle( style!.Value );
+            result = new TypeBoundOption<TTarget>(this, GetContextPath(propElements), MasterText);
+            result.SetStyle(style!.Value);
+
+            Options.Add(result);
 
             return true;
         }

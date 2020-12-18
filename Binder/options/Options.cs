@@ -16,6 +16,13 @@ namespace J4JSoftware.CommandLine
         {
         }
 
-        public Option Add( string contextPath ) => AddInternal( contextPath );
+        public Option Add( string contextPath )
+        {
+            var retVal = new Option(this, contextPath, MasterText);
+
+            Options.Add(retVal);
+
+            return retVal;
+        }
     }
 }

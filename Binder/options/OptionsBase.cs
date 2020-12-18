@@ -7,8 +7,6 @@ namespace J4JSoftware.CommandLine
 {
     public class OptionsBase : IEnumerable<Option>
     {
-        private readonly List<Option> _options = new List<Option>();
-
         protected OptionsBase( 
             MasterTextCollection masterText,
             IJ4JLogger logger
@@ -22,8 +20,9 @@ namespace J4JSoftware.CommandLine
 
         protected IJ4JLogger Logger { get; }
         protected MasterTextCollection MasterText { get; }
+        protected List<Option> Options { get; } = new();
 
-        public int Count => _options.Count;
+        public int Count => Options.Count;
 
         // determines whether or not a key is being used by an existing option, honoring whatever
         // case sensitivity is in use
@@ -37,7 +36,7 @@ namespace J4JSoftware.CommandLine
                 return false;
             }
 
-            return _options.Any( x =>
+            return Options.Any( x =>
                 x.ContextPath?.Equals( contextPath, MasterText.TextComparison!.Value ) ?? false );
         }
 
@@ -51,25 +50,16 @@ namespace J4JSoftware.CommandLine
                     return null;
                 }
 
-                return _options.FirstOrDefault( opt =>
+                return Options.FirstOrDefault( opt =>
                     opt.IsInitialized
                     && opt.Keys.Any( k => string.Equals( k, key, MasterText.TextComparison!.Value ) )
                 );
             }
         }
 
-        protected Option AddInternal(string contextPath )
-        {
-            var retVal = new Option( this, contextPath, MasterText );
-
-            _options.Add(retVal);
-
-            return retVal;
-        }
-
         public IEnumerator<Option> GetEnumerator()
         {
-            foreach( var option in _options ) yield return option;
+            foreach( var option in Options ) yield return option;
         }
 
         IEnumerator IEnumerable.GetEnumerator()

@@ -12,6 +12,13 @@
     <Nullable>enable</Nullable>
   </PropertyGroup>
 
+  <ItemGroup>
+    <Compile Remove="test-data\CollectionTests.cs" />
+    <Compile Remove="test-data\SingleValueTests.cs" />
+    <Compile Remove="test-data\SwitchTests.cs" />
+    <Compile Remove="EmbeddedTest.cs" />
+  </ItemGroup>
+
 	<ItemGroup>
 		<PackageReference Include="Autofac" Version="6.1.0" />
 		<PackageReference Include="Autofac.Extensions.DependencyInjection" Version="7.1.0" />
@@ -37,6 +44,9 @@
 
 	<ItemGroup>
 	  <None Update="appConfig.json">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </None>
+	  <None Update="singleProperties.json">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </None>
 	</ItemGroup>

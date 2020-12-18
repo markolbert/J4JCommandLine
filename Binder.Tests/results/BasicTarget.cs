@@ -1,8 +1,9 @@
 ﻿using System.Collections.Generic;
+#pragma warning disable 8618
 
 namespace J4JSoftware.Binder.Tests
 {
-    public class ConfigTarget
+    public class BasicTarget
     {
         public bool ASwitch { get; set; }
         public string ASingleValue { get; set; }
