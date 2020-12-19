@@ -29,12 +29,12 @@ namespace J4JSoftware.CommandLine
             _logger.SetLoggedType( GetType() );
         }
 
-        public AllocationResult AllocateCommandLine( string cmdLine, OptionsBase options )
+        public AllocationResult AllocateCommandLine( string cmdLine, OptionCollection options )
         {
             var retVal = new AllocationResult();
             
             var accumulator = new StringBuilder();
-            Option? curOption = null;
+            IOption? curOption = null;
             var charsProcessed = 0;
 
             for( var idx = 0; idx < cmdLine.Length; idx++ )

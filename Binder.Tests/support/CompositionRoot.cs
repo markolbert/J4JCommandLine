@@ -39,10 +39,7 @@ namespace J4JSoftware.Binder.Tests
                 } )
                 .As<IJ4JLoggerConfiguration>();
 
-            builder.RegisterType<Options>()
-                .AsSelf();
-
-            builder.RegisterType<TypeBoundOptions>()
+            builder.RegisterType<OptionCollection>()
                 .AsSelf();
 
             builder.RegisterType<MasterTextCollection>()
@@ -66,10 +63,8 @@ namespace J4JSoftware.Binder.Tests
         }
 
         public IJ4JLogger Logger => Host!.Services.GetRequiredService<IJ4JLogger>();
-        public Options GetOptions() => Host!.Services.GetRequiredService<Options>();
 
-        public TypeBoundOptions GetTypeBoundOptions() =>
-            Host!.Services.GetRequiredService<TypeBoundOptions>();
+        public OptionCollection GetOptions() => Host!.Services.GetRequiredService<OptionCollection>();
 
         public IAllocator GetAllocator() => Host!.Services.GetRequiredService<IAllocator>();
     }

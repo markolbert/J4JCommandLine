@@ -17,6 +17,14 @@ namespace J4JSoftware.Binder.Tests
             }
         }
 
+        public static IEnumerable<object[]> GetEmbeddedPropertyData()
+        {
+            foreach (var config in GetConfigurations("embeddedProperties.json"))
+            {
+                yield return new object[] { config };
+            }
+        }
+
         private static List<TestConfig> GetConfigurations( string jsonFile )
         {
             var text = File.ReadAllText(Path.Combine(Environment.CurrentDirectory, jsonFile));

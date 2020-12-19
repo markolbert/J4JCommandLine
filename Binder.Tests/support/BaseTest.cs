@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Reflection;
 using System.Text.Json;
 using FluentAssertions;
@@ -11,30 +12,48 @@ namespace J4JSoftware.Binder.Tests
 {
     public class BaseTest
     {
-        private Options? _options;
         private IAllocator? _allocator;
-        private TestConfig? _testConfig;
 
-        protected void Initialize( TestConfig config )
+        protected TestConfig? TestConfig { get; private set; }
+        protected OptionCollection? Options { get; private set; }
+
+        protected void Initialize( TestConfig testConfig )
         {
-            _options = CompositionRoot.Default.GetOptions();
+            Options = CompositionRoot.Default.GetOptions();
             _allocator = CompositionRoot.Default.GetAllocator();
-            _testConfig = config;
+            TestConfig = testConfig;
+        }
 
-            foreach( var optConfig in config.OptionConfigurations )
-            {
-                optConfig.CreateOption( _options! );
-            }
+        protected void Bind<TTarget, TProp>( Expression<Func<TTarget, TProp>> propSelector, bool bindNonPublic = false )
+            where TTarget : class, new()
+        {
+            Options!.Bind( propSelector, out var option, bindNonPublic )
+                .Should()
+                .BeTrue();
+
+            var optConfig = TestConfig!.OptionConfigurations
+                .FirstOrDefault( x =>
+                    option!.ContextPath!.Equals( x.ContextPath, StringComparison.OrdinalIgnoreCase ) );
+
+            optConfig.Should().NotBeNull();
+            
+            option!.AddCommandLineKey(optConfig!.CommandLineKey)
+                .SetStyle(optConfig.Style);
+
+            if (optConfig.Required) option.IsRequired();
+            else option.IsOptional();
+
+            optConfig.Option = option;
         }
 
         protected void ValidateAllocations()
         {
-            var result = _allocator!.AllocateCommandLine(_testConfig!.CommandLine!, _options!);
+            var result = _allocator!.AllocateCommandLine(TestConfig!.CommandLine!, Options!);
 
-            result.UnknownKeys.Count.Should().Be( _testConfig.UnknownKeys );
-            result.UnkeyedParameters.Count.Should().Be( _testConfig.UnkeyedParameters );
+            result.UnknownKeys.Count.Should().Be( TestConfig.UnknownKeys );
+            result.UnkeyedParameters.Count.Should().Be( TestConfig.UnkeyedParameters );
 
-            foreach( var optConfig in _testConfig.OptionConfigurations )
+            foreach( var optConfig in TestConfig.OptionConfigurations )
             {
                 optConfig.Option!.ValuesSatisfied.Should().Be( optConfig.ValuesSatisfied );
             }
@@ -44,12 +63,12 @@ namespace J4JSoftware.Binder.Tests
             where TParsed : class, new()
         {
             var configBuilder = new ConfigurationBuilder();
-            configBuilder.AddJ4JCommandLine( _options!, _testConfig!.CommandLine, _allocator! );
+            configBuilder.AddJ4JCommandLine( Options!, TestConfig!.CommandLine, _allocator! );
             var config = configBuilder.Build();
 
             TParsed? parsed = null;
 
-            if( _testConfig.OptionConfigurations.Any( x => x.ParsingWillFail ) )
+            if( TestConfig.OptionConfigurations.Any( x => x.ParsingWillFail ) )
             {
                 var exception = Assert.Throws<InvalidOperationException>( () => config.Get<TParsed>() );
                 return;
@@ -57,16 +76,16 @@ namespace J4JSoftware.Binder.Tests
             
             parsed = config.Get<TParsed>();
 
-            if( _testConfig.OptionConfigurations.TrueForAll( x => !x.ValuesSatisfied )
-                && _testConfig.OptionConfigurations.All( x => x.Style != OptionStyle.Switch ) )
+            if( TestConfig.OptionConfigurations.TrueForAll( x => !x.ValuesSatisfied )
+                && TestConfig.OptionConfigurations.All( x => x.Style != OptionStyle.Switch ) )
             {
                 parsed.Should().BeNull();
                 return;
             }
 
-            foreach( var optConfig in _testConfig.OptionConfigurations )
+            foreach( var optConfig in TestConfig.OptionConfigurations)
             {
-                GetPropertyValue<TParsed>( parsed, optConfig.ContextKey, out var result, out var resultType )
+                GetPropertyValue<TParsed>( parsed, optConfig.ContextPath, out var result, out var resultType )
                     .Should()
                     .BeTrue();
 

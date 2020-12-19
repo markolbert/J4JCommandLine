@@ -6,7 +6,7 @@ namespace J4JSoftware.CommandLine
         where TTarget : class, new()
     {
         internal TypeBoundOption(
-            TypeBoundOptions container,
+            OptionCollection container,
             string typeRelativeContextPath,
             MasterTextCollection masterText
         )
@@ -23,10 +23,8 @@ namespace J4JSoftware.CommandLine
                 if( base.ContextPath == null )
                     return null;
 
-                var castContainer = (TypeBoundOptions) Container;
-
-                return castContainer.TargetsMultipleTypes
-                    ? $"{castContainer.GetContextPathPrefix<TTarget>()}:{base.ContextPath}"
+                return Container.TargetsMultipleTypes
+                    ? $"{Container.GetContextPathPrefix<TTarget>()}:{base.ContextPath}"
                     : base.ContextPath;
             }
         }

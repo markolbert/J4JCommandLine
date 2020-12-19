@@ -12,7 +12,7 @@ namespace J4JSoftware.CommandLine
     public class J4JCommandLineSource : IConfigurationSource
     {
         public J4JCommandLineSource( 
-            OptionsBase options, 
+            OptionCollection options, 
             string cmdLine, 
             IAllocator allocator
             )
@@ -23,7 +23,7 @@ namespace J4JSoftware.CommandLine
         }
 
         public J4JCommandLineSource(
-            OptionsBase options,
+            OptionCollection options,
             string[] args,
             IAllocator allocator
         )
@@ -31,7 +31,7 @@ namespace J4JSoftware.CommandLine
         {
         }
 
-        public OptionsBase Options { get; }
+        public OptionCollection Options { get; }
         public string CommandLine { get; }
         public IAllocator Allocator { get; }
 

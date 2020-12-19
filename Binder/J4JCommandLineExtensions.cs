@@ -6,7 +6,7 @@ namespace J4JSoftware.CommandLine
     {
         public static IConfigurationBuilder AddJ4JCommandLine( 
             this IConfigurationBuilder builder, 
-            OptionsBase options,
+            OptionCollection options,
             string cmdLine, 
             IAllocator allocator)
         {

@@ -5,7 +5,7 @@
     "UnknownKeys": 0,
     "OptionConfigurations": [
       {
-        "ContextKey": "ASwitch",
+        "ContextPath": "ASwitch",
         "CommandLineKey": "x",
         "Style": "Switch",
         "ValuesSatisfied": true,
@@ -19,7 +19,7 @@
     "UnknownKeys": 1,
     "OptionConfigurations": [
       {
-        "ContextKey": "ASwitch",
+        "ContextPath": "ASwitch",
         "CommandLineKey": "x",
         "Style": "Switch",
         "CorrectText": "false"
@@ -32,7 +32,7 @@
     "UnknownKeys": 0,
     "OptionConfigurations": [
       {
-        "ContextKey": "ASwitch",
+        "ContextPath": "ASwitch",
         "CommandLineKey": "x",
         "Style": "Switch",
         "ValuesSatisfied": true,
@@ -46,7 +46,7 @@
     "UnknownKeys": 1,
     "OptionConfigurations": [
       {
-        "ContextKey": "ASwitch",
+        "ContextPath": "ASwitch",
         "CommandLineKey": "x",
         "Style": "Switch",
         "CorrectText": "false"
@@ -59,7 +59,7 @@
     "UnknownKeys": 0,
     "OptionConfigurations": [
       {
-        "ContextKey": "ASingleValue",
+        "ContextPath": "ASingleValue",
         "CommandLineKey": "x",
         "Style": "SingleValued"
       }
@@ -71,7 +71,7 @@
     "UnknownKeys": 1,
     "OptionConfigurations": [
       {
-        "ContextKey": "ASingleValue",
+        "ContextPath": "ASingleValue",
         "CommandLineKey": "x",
         "Style": "SingleValued"
       }
@@ -83,7 +83,7 @@
     "UnknownKeys": 0,
     "OptionConfigurations": [
       {
-        "ContextKey": "ASingleValue",
+        "ContextPath": "ASingleValue",
         "CommandLineKey": "x",
         "Style": "SingleValued",
         "ValuesSatisfied": true,
@@ -97,7 +97,7 @@
     "UnknownKeys": 1,
     "OptionConfigurations": [
       {
-        "ContextKey": "ASingleValue",
+        "ContextPath": "ASingleValue",
         "CommandLineKey": "x",
         "Style": "SingleValued"
       }
@@ -109,7 +109,7 @@
     "UnknownKeys": 0,
     "OptionConfigurations": [
       {
-        "ContextKey": "ASingleValue",
+        "ContextPath": "ASingleValue",
         "CommandLineKey": "x",
         "Style": "SingleValued",
         "ValuesSatisfied": true,
@@ -123,7 +123,7 @@
     "UnknownKeys": 1,
     "OptionConfigurations": [
       {
-        "ContextKey": "ASingleValue",
+        "ContextPath": "ASingleValue",
         "CommandLineKey": "x",
         "Style": "SingleValued"
       }
@@ -135,7 +135,7 @@
     "UnknownKeys": 0,
     "OptionConfigurations": [
       {
-        "ContextKey": "AnEnumValue",
+        "ContextPath": "AnEnumValue",
         "CommandLineKey": "x",
         "Style": "SingleValued",
         "ValuesSatisfied": true,
@@ -149,7 +149,7 @@
     "UnknownKeys": 0,
     "OptionConfigurations": [
       {
-        "ContextKey": "AnEnumValue",
+        "ContextPath": "AnEnumValue",
         "CommandLineKey": "x",
         "Style": "SingleValued",
         "ValuesSatisfied": true,
@@ -163,7 +163,7 @@
     "UnknownKeys": 0,
     "OptionConfigurations": [
       {
-        "ContextKey": "AnEnumValue",
+        "ContextPath": "AnEnumValue",
         "CommandLineKey": "x",
         "Style": "SingleValued",
         "ValuesSatisfied": true,
@@ -177,7 +177,7 @@
     "UnknownKeys": 0,
     "OptionConfigurations": [
       {
-        "ContextKey": "AnEnumValue",
+        "ContextPath": "AnEnumValue",
         "CommandLineKey": "x",
         "Style": "SingleValued",
         "ValuesSatisfied": true,
@@ -191,7 +191,7 @@
     "UnknownKeys": 0,
     "OptionConfigurations": [
       {
-        "ContextKey": "AFlagEnumValue",
+        "ContextPath": "AFlagEnumValue",
         "CommandLineKey": "x",
         "Style": "ConcatenatedSingleValue",
         "ValuesSatisfied": true,
@@ -205,7 +205,7 @@
     "UnknownKeys": 0,
     "OptionConfigurations": [
       {
-        "ContextKey": "AFlagEnumValue",
+        "ContextPath": "AFlagEnumValue",
         "CommandLineKey": "x",
         "Style": "ConcatenatedSingleValue",
         "ValuesSatisfied": true,
@@ -219,7 +219,7 @@
     "UnknownKeys": 0,
     "OptionConfigurations": [
       {
-        "ContextKey": "AFlagEnumValue",
+        "ContextPath": "AFlagEnumValue",
         "CommandLineKey": "x",
         "Style": "ConcatenatedSingleValue",
         "ValuesSatisfied": true,
@@ -233,7 +233,7 @@
     "UnknownKeys": 0,
     "OptionConfigurations": [
       {
-        "ContextKey": "ACollection",
+        "ContextPath": "ACollection",
         "CommandLineKey": "x",
         "Style": "Collection"
       }
@@ -245,7 +245,7 @@
     "UnknownKeys": 1,
     "OptionConfigurations": [
       {
-        "ContextKey": "ACollection",
+        "ContextPath": "ACollection",
         "CommandLineKey": "x",
         "Style": "Collection"
       }
@@ -257,7 +257,7 @@
     "UnknownKeys": 0,
     "OptionConfigurations": [
       {
-        "ContextKey": "ACollection",
+        "ContextPath": "ACollection",
         "CommandLineKey": "x",
         "Style": "Collection",
         "ValuesSatisfied": true,
@@ -273,7 +273,7 @@
     "UnknownKeys": 1,
     "OptionConfigurations": [
       {
-        "ContextKey": "ACollection",
+        "ContextPath": "ACollection",
         "CommandLineKey": "x",
         "Style": "Collection"
       }
@@ -285,7 +285,7 @@
     "UnknownKeys": 0,
     "OptionConfigurations": [
       {
-        "ContextKey": "ACollection",
+        "ContextPath": "ACollection",
         "CommandLineKey": "x",
         "Style": "Collection",
         "ValuesSatisfied": true,
@@ -302,7 +302,7 @@
     "UnknownKeys": 1,
     "OptionConfigurations": [
       {
-        "ContextKey": "ACollection",
+        "ContextPath": "ACollection",
         "CommandLineKey": "x",
         "Style": "Collection"
       }

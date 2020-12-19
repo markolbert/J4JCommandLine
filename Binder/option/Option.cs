@@ -7,7 +7,7 @@ using System.Reflection.Metadata.Ecma335;
 
 namespace J4JSoftware.CommandLine
 {
-    public class Option
+    public class Option : IOption
     {
         private static List<string> _switchTrue = new List<string> { "true" };
         private static List<string> _switchFalse = new List<string> { "false" };
@@ -17,7 +17,7 @@ namespace J4JSoftware.CommandLine
         private readonly MasterTextCollection _masterText;
 
         internal Option( 
-            OptionsBase container, 
+            OptionCollection container, 
             string contextPath,
             MasterTextCollection masterText 
             )
@@ -33,7 +33,7 @@ namespace J4JSoftware.CommandLine
         public bool IsInitialized => !string.IsNullOrEmpty( ContextPath ) && _cmdLineKeys.Count > 0;
         
         // the collection of Options used by the parsing activity
-        public OptionsBase Container { get; }
+        public OptionCollection Container { get; }
         public virtual string? ContextPath { get; }
         public ReadOnlyCollection<string> Keys => _cmdLineKeys.AsReadOnly();
         public string? CommandLineKeyProvided { get; set; }
@@ -75,7 +75,7 @@ namespace J4JSoftware.CommandLine
         public bool Required { get; private set; }
         public string? Description { get; private set; }
 
-        internal void AddAllocatedValue( string value ) => _allocatedValues.Add( value );
+        public void AddAllocatedValue( string value ) => _allocatedValues.Add( value );
 
         public Option AddCommandLineKey(string cmdLineKey)
         {

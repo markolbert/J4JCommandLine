@@ -9,6 +9,6 @@ namespace J4JSoftware.Binder.Tests
         public string CommandLine { get; set; }
         public int UnknownKeys { get; set; }
         public int UnkeyedParameters { get; set; }
-        public List<OptionConfig> OptionConfigurations { get; set; } = new List<OptionConfig>();
+        public List<OptionConfig> OptionConfigurations { get; set; }
     }
 }

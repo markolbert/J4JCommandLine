@@ -14,9 +14,10 @@
 
   <ItemGroup>
     <Compile Remove="test-data\CollectionTests.cs" />
+    <Compile Remove="test-data\OptionContextConfig.cs" />
+    <Compile Remove="test-data\OptionTypeBoundConfig.cs" />
     <Compile Remove="test-data\SingleValueTests.cs" />
     <Compile Remove="test-data\SwitchTests.cs" />
-    <Compile Remove="EmbeddedTest.cs" />
   </ItemGroup>
 
 	<ItemGroup>
@@ -46,8 +47,11 @@
 	  <None Update="appConfig.json">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </None>
+	  <None Update="embeddedProperties.json">
+	    <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+	  </None>
 	  <None Update="singleProperties.json">
-	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	    <CopyToOutputDirectory>Always</CopyToOutputDirectory>
 	  </None>
 	</ItemGroup>
 
