@@ -38,34 +38,8 @@ namespace J4JSoftware.Binder.Tests
                     return retVal;
                 } )
                 .As<IJ4JLoggerConfiguration>();
-
-            builder.RegisterType<OptionCollection>()
-                .AsSelf();
-
-            builder.RegisterType<MasterTextCollection>()
-                .OnActivating( x =>
-                {
-                    x.Instance.Initialize( StringComparison.OrdinalIgnoreCase );
-                    x.Instance.AddRange( TextUsageType.Prefix, "-", "--" );
-                    x.Instance.AddRange( TextUsageType.Quote, "\"", "'" );
-                    x.Instance.AddRange( TextUsageType.ValueEncloser, "=" );
-                } )
-                .AsSelf();
-
-            builder.RegisterType<Allocator>()
-                .AsImplementedInterfaces();
-
-            builder.RegisterType<ElementTerminator>()
-                .AsImplementedInterfaces();
-
-            builder.RegisterType<KeyPrefixer>()
-                .AsImplementedInterfaces();
         }
 
         public IJ4JLogger Logger => Host!.Services.GetRequiredService<IJ4JLogger>();
-
-        public OptionCollection GetOptions() => Host!.Services.GetRequiredService<OptionCollection>();
-
-        public IAllocator GetAllocator() => Host!.Services.GetRequiredService<IAllocator>();
     }
 }

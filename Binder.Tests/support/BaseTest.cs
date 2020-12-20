@@ -12,15 +12,23 @@ namespace J4JSoftware.Binder.Tests
 {
     public class BaseTest
     {
-        private IAllocator? _allocator;
-
+        private readonly CommandLineLogger _cmdLineErrors = new CommandLineLogger();
+        
         protected TestConfig? TestConfig { get; private set; }
+        protected IAllocator? Allocator { get; private set; }
         protected OptionCollection? Options { get; private set; }
 
         protected void Initialize( TestConfig testConfig )
         {
-            Options = CompositionRoot.Default.GetOptions();
-            _allocator = CompositionRoot.Default.GetAllocator();
+            TestConfig = testConfig;
+
+            Options = new OptionCollection( MasterTextCollection.WindowsDefault, _cmdLineErrors );
+            
+            Allocator = new Allocator(
+                new ElementTerminator( MasterTextCollection.WindowsDefault, _cmdLineErrors ),
+                new KeyPrefixer( MasterTextCollection.WindowsDefault, _cmdLineErrors ),
+                _cmdLineErrors );
+            
             TestConfig = testConfig;
         }
 
@@ -48,7 +56,7 @@ namespace J4JSoftware.Binder.Tests
 
         protected void ValidateAllocations()
         {
-            var result = _allocator!.AllocateCommandLine(TestConfig!.CommandLine!, Options!);
+            var result = Allocator!.AllocateCommandLine(TestConfig!.CommandLine!, Options!);
 
             result.UnknownKeys.Count.Should().Be( TestConfig.UnknownKeys );
             result.UnkeyedParameters.Count.Should().Be( TestConfig.UnkeyedParameters );
@@ -62,19 +70,19 @@ namespace J4JSoftware.Binder.Tests
         protected void ValidateConfiguration<TParsed>()
             where TParsed : class, new()
         {
-            var configBuilder = new ConfigurationBuilder();
-            configBuilder.AddJ4JCommandLine( TestConfig!.CommandLine, out var options, out var logger);
-            var config = configBuilder.Build();
+            var configBuilder = new ConfigurationBuilder()
+                .AddJ4JCommandLine( TestConfig!.CommandLine, MasterTextCollection.WindowsDefault, Allocator!,
+                    _cmdLineErrors, out var options );
 
             TParsed? parsed = null;
 
-            if( TestConfig.OptionConfigurations.Any( x => x.ParsingWillFail ) )
+            if( TestConfig!.OptionConfigurations.Any( x => x.ParsingWillFail ) )
             {
-                var exception = Assert.Throws<InvalidOperationException>( () => config.Get<TParsed>() );
+                var exception = Assert.Throws<InvalidOperationException>( () => _configRoot.Get<TParsed>() );
                 return;
             }
             
-            parsed = config.Get<TParsed>();
+            parsed = _configRoot.Get<TParsed>();
 
             if( TestConfig.OptionConfigurations.TrueForAll( x => !x.ValuesSatisfied )
                 && TestConfig.OptionConfigurations.All( x => x.Style != OptionStyle.Switch ) )

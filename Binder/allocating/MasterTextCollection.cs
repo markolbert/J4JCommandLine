@@ -11,6 +11,26 @@ namespace J4JSoftware.CommandLine
     // option key) used in the framework and ensures they are all used uniquely.
     public class MasterTextCollection
     {
+        static MasterTextCollection()
+        {
+            WindowsDefault = new MasterTextCollection();
+            WindowsDefault.AddRange( TextUsageType.Prefix, "/", "-", "--" );
+            WindowsDefault.Add( TextUsageType.Quote, "\"" );
+            WindowsDefault.Add( TextUsageType.ValueEncloser, "=" );
+            
+            WindowsDefault.Initialize(StringComparison.OrdinalIgnoreCase);
+
+            LinuxDefault = new MasterTextCollection();
+            LinuxDefault.AddRange( TextUsageType.Prefix, "-", "--" );
+            LinuxDefault.AddRange( TextUsageType.Quote, "\"", "'" );
+            LinuxDefault.Add( TextUsageType.ValueEncloser, "=" );
+
+            LinuxDefault.Initialize( StringComparison.Ordinal );
+        }
+
+        public static MasterTextCollection WindowsDefault { get; }
+        public static MasterTextCollection LinuxDefault { get; }
+        
         private readonly List<TextUsage> _items = new List<TextUsage>();
 
         public bool IsValid => TextComparer != null && TextComparison != null;
