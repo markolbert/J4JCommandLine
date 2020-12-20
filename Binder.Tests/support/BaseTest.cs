@@ -36,10 +36,10 @@ namespace J4JSoftware.Binder.Tests
             Allocator = allocator;
         }
 
-        protected void Bind<TTarget, TProp>( Expression<Func<TTarget, TProp>> propSelector, bool bindNonPublic = false )
+        protected void Bind<TTarget, TProp>( Expression<Func<TTarget, TProp>> propSelector )
             where TTarget : class, new()
         {
-            Options!.Bind( propSelector, out var option, bindNonPublic )
+            Options!.Bind( propSelector, out var option  )
                 .Should()
                 .BeTrue();
 

@@ -83,7 +83,7 @@ namespace J4JSoftware.CommandLine
         public bool Bind<TTarget, TProp>(
             Expression<Func<TTarget, TProp>> propertySelector,
             out Option? result,
-            bool bindNonPublic = false)
+            params string[] cmdLineKeys )
             where TTarget : class, new()
         {
             result = null;
@@ -101,7 +101,7 @@ namespace J4JSoftware.CommandLine
                     case MemberExpression memExpr:
                         var propInfo = (PropertyInfo) memExpr.Member;
 
-                        if( !ValidateProperty( propInfo, bindNonPublic, out var curStyle ) )
+                        if( !ValidateProperty( propInfo, out var curStyle ) )
                         {
                             Logger.Log( $"Property '{propInfo.Name}' is invalid");
                             return false;
@@ -121,7 +121,7 @@ namespace J4JSoftware.CommandLine
                         {
                             var propInfo2 = (PropertyInfo)unaryMemExpr.Member;
 
-                            if (!ValidateProperty(propInfo2, bindNonPublic, out var curStyle2))
+                            if (!ValidateProperty(propInfo2, out var curStyle2))
                             {
                                 Logger.Log($"Property '{propInfo2.Name}' is invalid");
                                 return false;
@@ -145,13 +145,16 @@ namespace J4JSoftware.CommandLine
                         break;
                 }
 
-            //if (!ValidateProperty(propElements.First(), bindNonPublic, out var style))
-            //    return false;
-
             propElements.Reverse();
 
             result = new TypeBoundOption<TTarget>(this, GetContextPath(propElements), MasterText);
+
             result.SetStyle(firstStyle!.Value);
+
+            foreach( var key in ValidateCommandLineKeys( cmdLineKeys ) )
+            {
+                result.AddCommandLineKey( key );
+            }
 
             Options.Add(result);
 
@@ -191,14 +194,14 @@ namespace J4JSoftware.CommandLine
             }
         }
 
-        private bool ValidateProperty(PropertyInfo propInfo, bool bindNonPublic, out OptionStyle? style)
+        private bool ValidateProperty(PropertyInfo propInfo, out OptionStyle? style)
         {
             style = null;
 
-            if (!ValidateAccessMethod(propInfo.GetMethod, bindNonPublic, propInfo.Name, 0))
+            if (!ValidateAccessMethod(propInfo.GetMethod, propInfo.Name, 0))
                 return false;
 
-            if (!ValidateAccessMethod(propInfo.SetMethod, bindNonPublic, propInfo.Name, 1))
+            if (!ValidateAccessMethod(propInfo.SetMethod, propInfo.Name, 1))
                 return false;
 
             if (propInfo.PropertyType.IsEnum)
@@ -272,7 +275,7 @@ namespace J4JSoftware.CommandLine
             return false;
         }
 
-        private bool ValidateAccessMethod(MethodInfo? methodInfo, bool bindNonPublic, string propName, int allowedParams)
+        private bool ValidateAccessMethod(MethodInfo? methodInfo, string propName, int allowedParams)
         {
             if (methodInfo == null)
             {
@@ -280,7 +283,7 @@ namespace J4JSoftware.CommandLine
                 return false;
             }
 
-            if (!methodInfo.IsPublic && !bindNonPublic)
+            if (!methodInfo.IsPublic )
             {
                 Logger.Log($"Property '{propName}::{methodInfo.Name}' is not bindable");
                 return false;
@@ -293,6 +296,15 @@ namespace J4JSoftware.CommandLine
             }
 
             return true;
+        }
+
+        private IEnumerable<string> ValidateCommandLineKeys( string[] cmdLineKeys )
+        {
+            foreach( var key in cmdLineKeys )
+            {
+                if( !UsesCommandLineKey( key ) )
+                    yield return key;
+            }
         }
 
         private string GetContextPath(List<PropertyInfo> propElements) =>
