@@ -2,6 +2,7 @@
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
+using System.Reflection.Metadata;
 using System.Text.Json;
 using FluentAssertions;
 using J4JSoftware.CommandLine;
@@ -12,7 +13,8 @@ namespace J4JSoftware.Binder.Tests
 {
     public class BaseTest
     {
-        private readonly CommandLineLogger _cmdLineErrors = new CommandLineLogger();
+        private CommandLineLogger? _cmdLineErrors;
+        private IConfigurationBuilder? _configBuilder;
         
         protected TestConfig? TestConfig { get; private set; }
         protected IAllocator? Allocator { get; private set; }
@@ -22,14 +24,16 @@ namespace J4JSoftware.Binder.Tests
         {
             TestConfig = testConfig;
 
-            Options = new OptionCollection( MasterTextCollection.WindowsDefault, _cmdLineErrors );
-            
-            Allocator = new Allocator(
-                new ElementTerminator( MasterTextCollection.WindowsDefault, _cmdLineErrors ),
-                new KeyPrefixer( MasterTextCollection.WindowsDefault, _cmdLineErrors ),
-                _cmdLineErrors );
-            
-            TestConfig = testConfig;
+            _configBuilder = new ConfigurationBuilder().AddJ4JCommandLineWindows(
+                TestConfig!.CommandLine,
+                out var options,
+                out var allocator,
+                out var errors );
+
+            errors.HasMessages.Should().BeFalse();
+
+            Options = options;
+            Allocator = allocator;
         }
 
         protected void Bind<TTarget, TProp>( Expression<Func<TTarget, TProp>> propSelector, bool bindNonPublic = false )
@@ -70,19 +74,17 @@ namespace J4JSoftware.Binder.Tests
         protected void ValidateConfiguration<TParsed>()
             where TParsed : class, new()
         {
-            var configBuilder = new ConfigurationBuilder()
-                .AddJ4JCommandLine( TestConfig!.CommandLine, MasterTextCollection.WindowsDefault, Allocator!,
-                    _cmdLineErrors, out var options );
-
+            var config = _configBuilder!.Build();
+            
             TParsed? parsed = null;
 
             if( TestConfig!.OptionConfigurations.Any( x => x.ParsingWillFail ) )
             {
-                var exception = Assert.Throws<InvalidOperationException>( () => _configRoot.Get<TParsed>() );
+                var exception = Assert.Throws<InvalidOperationException>( () => config.Get<TParsed>() );
                 return;
             }
             
-            parsed = _configRoot.Get<TParsed>();
+            parsed = config.Get<TParsed>();
 
             if( TestConfig.OptionConfigurations.TrueForAll( x => !x.ValuesSatisfied )
                 && TestConfig.OptionConfigurations.All( x => x.Style != OptionStyle.Switch ) )

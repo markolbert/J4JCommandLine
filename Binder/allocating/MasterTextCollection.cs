@@ -11,26 +11,32 @@ namespace J4JSoftware.CommandLine
     // option key) used in the framework and ensures they are all used uniquely.
     public class MasterTextCollection
     {
-        static MasterTextCollection()
+        public static MasterTextCollection GetWindowsDefault( StringComparison? comparison = null )
         {
-            WindowsDefault = new MasterTextCollection();
-            WindowsDefault.AddRange( TextUsageType.Prefix, "/", "-", "--" );
-            WindowsDefault.Add( TextUsageType.Quote, "\"" );
-            WindowsDefault.Add( TextUsageType.ValueEncloser, "=" );
-            
-            WindowsDefault.Initialize(StringComparison.OrdinalIgnoreCase);
+            var retVal = new MasterTextCollection();
 
-            LinuxDefault = new MasterTextCollection();
-            LinuxDefault.AddRange( TextUsageType.Prefix, "-", "--" );
-            LinuxDefault.AddRange( TextUsageType.Quote, "\"", "'" );
-            LinuxDefault.Add( TextUsageType.ValueEncloser, "=" );
+            retVal.AddRange( TextUsageType.Prefix, "/", "-", "--" );
+            retVal.Add( TextUsageType.Quote, "\"" );
+            retVal.Add( TextUsageType.ValueEncloser, "=" );
 
-            LinuxDefault.Initialize( StringComparison.Ordinal );
+            retVal.Initialize( comparison.HasValue ? comparison.Value : StringComparison.OrdinalIgnoreCase );
+
+            return retVal;
         }
 
-        public static MasterTextCollection WindowsDefault { get; }
-        public static MasterTextCollection LinuxDefault { get; }
-        
+        public static MasterTextCollection GetLinuxDefault( StringComparison? comparison = null )
+        {
+            var retVal = new MasterTextCollection();
+            
+            retVal.AddRange(TextUsageType.Prefix, "-", "--");
+            retVal.AddRange(TextUsageType.Quote, "\"", "'");
+            retVal.Add(TextUsageType.ValueEncloser, "=");
+
+            retVal.Initialize(comparison.HasValue ? comparison.Value : StringComparison.Ordinal);
+
+            return retVal;
+        }
+
         private readonly List<TextUsage> _items = new List<TextUsage>();
 
         public bool IsValid => TextComparer != null && TextComparison != null;

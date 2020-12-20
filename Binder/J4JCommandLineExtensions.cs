@@ -10,11 +10,9 @@ namespace J4JSoftware.CommandLine
             string cmdLine,
             MasterTextCollection masterText,
             IAllocator allocator,
-            CommandLineLogger logger,
-            out OptionCollection options )
+            OptionCollection options,
+            CommandLineLogger logger )
         {
-            options = new OptionCollection( masterText, logger );
-            
             builder.Add( new J4JCommandLineSource( options, cmdLine, allocator ) );
             
             return builder;
@@ -28,20 +26,22 @@ namespace J4JSoftware.CommandLine
             IAllocator? allocator = null )
         {
             logger = new CommandLineLogger();
+
+            var mt = MasterTextCollection.GetWindowsDefault();
             
             allocator ??= new Allocator(
-                new ElementTerminator( MasterTextCollection.WindowsDefault, logger ),
-                new KeyPrefixer( MasterTextCollection.WindowsDefault, logger ),
+                new ElementTerminator( mt, logger ),
+                new KeyPrefixer( mt, logger ),
                 logger );
-            
-            builder.AddJ4JCommandLine( 
-                cmdLine, 
-                MasterTextCollection.WindowsDefault, 
-                allocator,
-                logger,
-                out var innerOptions);
 
-            options = innerOptions;
+            options = new OptionCollection( mt, logger );
+
+            builder.AddJ4JCommandLine(
+                cmdLine,
+                mt,
+                allocator,
+                options,
+                logger );
 
             return builder;
         }
@@ -49,25 +49,27 @@ namespace J4JSoftware.CommandLine
         public static IConfigurationBuilder AddJ4JCommandLineWindows(
             this IConfigurationBuilder builder,
             string cmdLine,
-            out IAllocator allocator,
             out OptionCollection options,
-            out CommandLineLogger logger)
+            out IAllocator allocator,
+            out CommandLineLogger logger )
         {
             logger = new CommandLineLogger();
 
+            var mt = MasterTextCollection.GetWindowsDefault();
+
             allocator = new Allocator(
-                new ElementTerminator(MasterTextCollection.WindowsDefault, logger),
-                new KeyPrefixer(MasterTextCollection.WindowsDefault, logger),
+                new ElementTerminator(mt, logger),
+                new KeyPrefixer(mt, logger),
                 logger);
+
+            options = new OptionCollection(mt, logger);
 
             builder.AddJ4JCommandLine(
                 cmdLine,
-                MasterTextCollection.WindowsDefault,
+                mt,
                 allocator,
-                logger,
-                out var innerOptions);
-
-            options = innerOptions;
+                options,
+                logger);
 
             return builder;
         }
@@ -81,19 +83,21 @@ namespace J4JSoftware.CommandLine
         {
             logger = new CommandLineLogger();
 
+            var mt = MasterTextCollection.GetLinuxDefault();
+
             allocator ??= new Allocator(
-                new ElementTerminator(MasterTextCollection.LinuxDefault, logger),
-                new KeyPrefixer(MasterTextCollection.LinuxDefault, logger),
+                new ElementTerminator(mt, logger),
+                new KeyPrefixer(mt, logger),
                 logger);
+
+            options = new OptionCollection(mt, logger);
 
             builder.AddJ4JCommandLine(
                 cmdLine,
-                MasterTextCollection.LinuxDefault,
+                mt,
                 allocator,
-                logger,
-                out var innerOptions);
-
-            options = innerOptions;
+                options,
+                logger);
 
             return builder;
         }
@@ -101,27 +105,30 @@ namespace J4JSoftware.CommandLine
         public static IConfigurationBuilder AddJ4JCommandLineLinux(
             this IConfigurationBuilder builder,
             string cmdLine,
-            out IAllocator allocator,
             out OptionCollection options,
+            out IAllocator allocator,
             out CommandLineLogger logger)
         {
             logger = new CommandLineLogger();
 
+            var mt = MasterTextCollection.GetLinuxDefault();
+
             allocator = new Allocator(
-                new ElementTerminator(MasterTextCollection.LinuxDefault, logger),
-                new KeyPrefixer(MasterTextCollection.LinuxDefault, logger),
+                new ElementTerminator(mt, logger),
+                new KeyPrefixer(mt, logger),
                 logger);
+
+            options = new OptionCollection(mt, logger);
 
             builder.AddJ4JCommandLine(
                 cmdLine,
-                MasterTextCollection.LinuxDefault,
+                mt,
                 allocator,
-                logger,
-                out var innerOptions);
-
-            options = innerOptions;
+                options,
+                logger);
 
             return builder;
         }
+
     }
 }
