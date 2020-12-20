@@ -5,7 +5,6 @@ using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
 using System.Text;
-using J4JSoftware.Logging;
 
 namespace J4JSoftware.CommandLine
 {
@@ -34,16 +33,15 @@ namespace J4JSoftware.CommandLine
 
         public OptionCollection( 
             MasterTextCollection masterText,
-            IJ4JLogger logger
+            CommandLineLogger logger
         )
         {
             MasterText = masterText;
 
             Logger = logger;
-            Logger.SetLoggedType( GetType() );
         }
 
-        protected IJ4JLogger Logger { get; }
+        protected CommandLineLogger Logger { get; }
         protected MasterTextCollection MasterText { get; }
         protected List<IOption> Options { get; } = new();
 
@@ -105,7 +103,7 @@ namespace J4JSoftware.CommandLine
 
                         if( !ValidateProperty( propInfo, bindNonPublic, out var curStyle ) )
                         {
-                            Logger.Error<string>( "Property '{0}' is invalid", propInfo.Name );
+                            Logger.Log( $"Property '{propInfo.Name}' is invalid");
                             return false;
                         }
 
@@ -125,7 +123,7 @@ namespace J4JSoftware.CommandLine
 
                             if (!ValidateProperty(propInfo2, bindNonPublic, out var curStyle2))
                             {
-                                Logger.Error<string>("Property '{0}' is invalid", propInfo2.Name);
+                                Logger.Log($"Property '{propInfo2.Name}' is invalid");
                                 return false;
                             }
 
@@ -168,7 +166,7 @@ namespace J4JSoftware.CommandLine
         {
             if( !MasterText.IsValid )
             {
-                Logger.Error( "MasterTextCollection is not initialized" );
+                Logger.Log( "MasterTextCollection is not initialized" );
                 return false;
             }
 
@@ -182,7 +180,7 @@ namespace J4JSoftware.CommandLine
             {
                 if (!MasterText.IsValid)
                 {
-                    Logger.Error("MasterTextCollection is not initialized");
+                    Logger.Log("MasterTextCollection is not initialized");
                     return null;
                 }
 
@@ -238,7 +236,7 @@ namespace J4JSoftware.CommandLine
 
             if (genType.GenericTypeArguments.Length != 1)
             {
-                Logger.Error("Generic type '{0}' does not have just one generic Type argument", genType);
+                Logger.Log($"Generic type '{genType.Name}' does not have just one generic Type argument");
                 return false;
             }
 
@@ -247,7 +245,7 @@ namespace J4JSoftware.CommandLine
 
             if (!typeof(List<>).MakeGenericType(genType.GenericTypeArguments[0]).IsAssignableFrom(genType))
             {
-                Logger.Error("Generic type '{0}' is not a List<> type", genType);
+                Logger.Log($"Generic type '{genType}' is not a List<> type");
                 return false;
             }
 
@@ -269,7 +267,7 @@ namespace J4JSoftware.CommandLine
                 || toCheck.GetConstructors().Any( c => c.GetParameters().Length == 0 ) )
                 return true;
 
-            Logger.Error("Unsupported type '{0}'", toCheck);
+            Logger.Log($"Unsupported type '{toCheck}'");
 
             return false;
         }
@@ -278,19 +276,19 @@ namespace J4JSoftware.CommandLine
         {
             if (methodInfo == null)
             {
-                Logger.Error<string>("Property '{0}' does not have a get or set method", propName);
+                Logger.Log($"Property '{propName}' does not have a get or set method");
                 return false;
             }
 
             if (!methodInfo.IsPublic && !bindNonPublic)
             {
-                Logger.Error<string>("Property '{0}::{1}' is not bindable", propName, methodInfo.Name);
+                Logger.Log($"Property '{propName}::{methodInfo.Name}' is not bindable");
                 return false;
             }
 
             if (methodInfo.GetParameters().Length > allowedParams)
             {
-                Logger.Error<string>("Property '{0}::{1}' is indexed", propName, methodInfo.Name);
+                Logger.Log($"Property '{propName}::{methodInfo.Name}' is indexed");
                 return false;
             }
 

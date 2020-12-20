@@ -63,7 +63,7 @@ namespace J4JSoftware.Binder.Tests
             where TParsed : class, new()
         {
             var configBuilder = new ConfigurationBuilder();
-            configBuilder.AddJ4JCommandLine( Options!, TestConfig!.CommandLine, _allocator! );
+            configBuilder.AddJ4JCommandLine( TestConfig!.CommandLine, out var options, out var logger);
             var config = configBuilder.Build();
 
             TParsed? parsed = null;

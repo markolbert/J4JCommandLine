@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Linq;
-using J4JSoftware.Logging;
 
 #pragma warning disable 8618
 
@@ -9,23 +8,22 @@ namespace J4JSoftware.CommandLine
     public class KeyPrefixer : IKeyPrefixer
     {
         private readonly MasterTextCollection _masterText;
-        private readonly IJ4JLogger _logger;
+        private readonly CommandLineLogger _logger;
 
         public KeyPrefixer(
             MasterTextCollection masterText,
-            IJ4JLogger logger
+            CommandLineLogger logger
         )
         {
             _masterText = masterText;
 
             _logger = logger;
-            _logger.SetLoggedType(GetType());
 
             if( _masterText[ TextUsageType.Prefix ].Any() ) return;
 
             var mesg =
                 $"{nameof(masterText)} ({typeof(MasterTextCollection)}) does not define any {nameof(TextUsageType.Prefix)} entries";
-            _logger.Fatal( mesg );
+            _logger.Log( mesg );
 
             throw new ArgumentException( mesg );
         }
@@ -34,7 +32,7 @@ namespace J4JSoftware.CommandLine
         {
             if (!_masterText.IsValid)
             {
-                _logger.Error("MasterTextCollection is not initialized");
+                _logger.Log("MasterTextCollection is not initialized");
                 throw new TypeInitializationException("MasterTextCollection is not initialized", null);
             }
 

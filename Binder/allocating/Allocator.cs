@@ -3,7 +3,6 @@ using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices.ComTypes;
 using System.Text;
-using J4JSoftware.Logging;
 using Microsoft.VisualBasic;
 
 #pragma warning disable 8618
@@ -14,19 +13,18 @@ namespace J4JSoftware.CommandLine
     {
         private readonly IElementTerminator _terminator;
         private readonly IKeyPrefixer _prefixer;
-        private readonly IJ4JLogger _logger;
+        private readonly CommandLineLogger _logger;
 
         public Allocator( 
             IElementTerminator terminator,
             IKeyPrefixer prefixer,
-            IJ4JLogger logger
+            CommandLineLogger logger
             )
         {
             _terminator = terminator;
             _prefixer = prefixer;
 
             _logger = logger;
-            _logger.SetLoggedType( GetType() );
         }
 
         public AllocationResult AllocateCommandLine( string cmdLine, OptionCollection options )
@@ -72,7 +70,7 @@ namespace J4JSoftware.CommandLine
                     else
                     {
                         retVal.UnknownKeys.Add( element );
-                        _logger.Error<string>("Unknown key '{0}'", element);
+                        _logger.Log($"Unknown key '{element}'");
                     }
                 }
                 else

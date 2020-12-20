@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Text;
-using J4JSoftware.Logging;
 
 #pragma warning disable 8618
 
@@ -12,24 +11,23 @@ namespace J4JSoftware.CommandLine
     public class ElementTerminator : IElementTerminator
     {
         private readonly MasterTextCollection _masterText;
-        private readonly IJ4JLogger _logger;
+        private readonly CommandLineLogger _logger;
 
         public ElementTerminator( 
             MasterTextCollection masterText,
-            IJ4JLogger logger
+            CommandLineLogger logger
             )
         {
             _masterText = masterText;
 
             _logger = logger;
-            _logger.SetLoggedType( GetType() );
         }
 
         public int GetMaxTerminatorLength( string text, bool isKey )
         {
             if( !_masterText.IsValid )
             {
-                _logger.Error("MasterTextCollection is not initialized"  );
+                _logger.Log("MasterTextCollection is not initialized"  );
                 throw new TypeInitializationException( "MasterTextCollection is not initialized", null );
             }
 
