@@ -2,6 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.ComponentModel;
 using System.Linq;
 using System.Net.Sockets;
 
@@ -11,44 +12,44 @@ namespace J4JSoftware.CommandLine
     // option key) used in the framework and ensures they are all used uniquely.
     public class MasterTextCollection
     {
-        public static MasterTextCollection GetWindowsDefault( StringComparison? comparison = null )
+        public static MasterTextCollection GetDefault( CommandLineStyle cmdLineStyle, StringComparison? comparison = null )
         {
-            var retVal = new MasterTextCollection();
+            var retVal = new MasterTextCollection( comparison ?? StringComparison.OrdinalIgnoreCase );
 
-            retVal.AddRange( TextUsageType.Prefix, "/", "-", "--" );
-            retVal.Add( TextUsageType.Quote, "\"" );
-            retVal.Add( TextUsageType.ValueEncloser, "=" );
+            switch( cmdLineStyle )
+            {
+                case CommandLineStyle.Linux:
+                    retVal.AddRange(TextUsageType.Prefix, "-", "--");
+                    retVal.AddRange(TextUsageType.Quote, "\"", "'");
+                    retVal.Add(TextUsageType.ValueEncloser, "=");
 
-            retVal.Initialize( comparison.HasValue ? comparison.Value : StringComparison.OrdinalIgnoreCase );
+                    break;
+
+                case CommandLineStyle.Universal:
+                    retVal.AddRange(TextUsageType.Prefix, "-", "--", "/");
+                    retVal.AddRange(TextUsageType.Quote, "\"", "'");
+                    retVal.Add(TextUsageType.ValueEncloser, "=");
+
+                    break;
+
+                case CommandLineStyle.Windows:
+                    retVal.AddRange(TextUsageType.Prefix, "/", "-", "--");
+                    retVal.Add(TextUsageType.Quote, "\"");
+                    retVal.Add(TextUsageType.ValueEncloser, "=");
+
+                    break;
+            }
 
             return retVal;
         }
-
-        public static MasterTextCollection GetLinuxDefault( StringComparison? comparison = null )
-        {
-            var retVal = new MasterTextCollection();
-            
-            retVal.AddRange(TextUsageType.Prefix, "-", "--");
-            retVal.AddRange(TextUsageType.Quote, "\"", "'");
-            retVal.Add(TextUsageType.ValueEncloser, "=");
-
-            retVal.Initialize(comparison.HasValue ? comparison.Value : StringComparison.Ordinal);
-
-            return retVal;
-        }
-
+        
         private readonly List<TextUsage> _items = new List<TextUsage>();
 
-        public bool IsValid => TextComparer != null && TextComparison != null;
-
-        public StringComparison? TextComparison { get; private set; }
-        public IEqualityComparer<string>? TextComparer { get; private set; }
-
-        public void Initialize( StringComparison textComp )
+        public MasterTextCollection( StringComparison comparison )
         {
-            TextComparison = textComp;
+            TextComparison = comparison;
 
-            TextComparer = textComp switch
+            TextComparer = comparison switch
             {
                 StringComparison.CurrentCultureIgnoreCase => StringComparer.CurrentCultureIgnoreCase,
                 StringComparison.CurrentCulture => StringComparer.CurrentCulture,
@@ -60,13 +61,16 @@ namespace J4JSoftware.CommandLine
             };
         }
 
+        public StringComparison TextComparison { get; }
+        public IEqualityComparer<string> TextComparer { get; }
+
         // indicates whether the supplied text exists in the collection
         public bool Contains( string text )
-            => IsValid && _items.Any( x => string.Equals( x.Text, text, TextComparison!.Value ) );
+            => _items.Any( x => string.Equals( x.Text, text, TextComparison ) );
 
         // indicates whether the supplied text exists in the collection for the specified usage
         public bool Contains( string text, TextUsageType usage ) =>
-            IsValid && _items.Any( x => x.Usage == usage && string.Equals( x.Text, text, TextComparison!.Value ) );
+            _items.Any( x => x.Usage == usage && string.Equals( x.Text, text, TextComparison ) );
 
         // adds an item to the collection
         public bool Add( TextUsageType usage, string item )

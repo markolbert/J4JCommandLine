@@ -167,29 +167,17 @@ namespace J4JSoftware.CommandLine
 
         public bool UsesContextPath( string contextPath )
         {
-            if( !MasterText.IsValid )
-            {
-                Logger.Log( "MasterTextCollection is not initialized" );
-                return false;
-            }
-
             return Options.Any( x =>
-                x.ContextPath?.Equals( contextPath, MasterText.TextComparison!.Value ) ?? false );
+                x.ContextPath?.Equals( contextPath, MasterText.TextComparison ) ?? false );
         }
 
         public IOption? this[ string key ]
         {
             get
             {
-                if (!MasterText.IsValid)
-                {
-                    Logger.Log("MasterTextCollection is not initialized");
-                    return null;
-                }
-
                 return Options.FirstOrDefault( opt =>
                     opt.IsInitialized
-                    && opt.Keys.Any( k => string.Equals( k, key, MasterText.TextComparison!.Value ) )
+                    && opt.Keys.Any( k => string.Equals( k, key, MasterText.TextComparison ) )
                 );
             }
         }

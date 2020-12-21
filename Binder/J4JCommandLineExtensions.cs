@@ -27,7 +27,7 @@ namespace J4JSoftware.CommandLine
         {
             logger = new CommandLineLogger();
 
-            var mt = MasterTextCollection.GetWindowsDefault();
+            var mt = MasterTextCollection.GetDefault( CommandLineStyle.Windows );
             
             allocator ??= new Allocator(
                 new ElementTerminator( mt, logger ),
@@ -55,7 +55,7 @@ namespace J4JSoftware.CommandLine
         {
             logger = new CommandLineLogger();
 
-            var mt = MasterTextCollection.GetWindowsDefault();
+            var mt = MasterTextCollection.GetDefault(CommandLineStyle.Windows);
 
             allocator = new Allocator(
                 new ElementTerminator(mt, logger),
@@ -83,7 +83,7 @@ namespace J4JSoftware.CommandLine
         {
             logger = new CommandLineLogger();
 
-            var mt = MasterTextCollection.GetLinuxDefault();
+            var mt = MasterTextCollection.GetDefault( CommandLineStyle.Linux );
 
             allocator ??= new Allocator(
                 new ElementTerminator(mt, logger),
@@ -111,7 +111,7 @@ namespace J4JSoftware.CommandLine
         {
             logger = new CommandLineLogger();
 
-            var mt = MasterTextCollection.GetLinuxDefault();
+            var mt = MasterTextCollection.GetDefault(CommandLineStyle.Linux);
 
             allocator = new Allocator(
                 new ElementTerminator(mt, logger),

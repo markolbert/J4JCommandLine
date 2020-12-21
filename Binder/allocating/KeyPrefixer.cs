@@ -30,12 +30,6 @@ namespace J4JSoftware.CommandLine
 
         public int GetMaxPrefixLength( string text )
         {
-            if (!_masterText.IsValid)
-            {
-                _logger.Log("MasterTextCollection is not initialized");
-                throw new TypeInitializationException("MasterTextCollection is not initialized", null);
-            }
-
             var retVal = 0;
 
             if ( string.IsNullOrEmpty( text ) )
@@ -49,7 +43,7 @@ namespace J4JSoftware.CommandLine
                     ? text.Substring(0, prefixLen)
                     : string.Empty;
 
-                if (!string.Equals(prefix, start, _masterText.TextComparison!.Value))
+                if (!string.Equals(prefix, start, _masterText.TextComparison))
                     continue;
 
                 if (prefixLen > retVal)

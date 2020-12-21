@@ -25,12 +25,6 @@ namespace J4JSoftware.CommandLine
 
         public int GetMaxTerminatorLength( string text, bool isKey )
         {
-            if( !_masterText.IsValid )
-            {
-                _logger.Log("MasterTextCollection is not initialized"  );
-                throw new TypeInitializationException( "MasterTextCollection is not initialized", null );
-            }
-
             var retVal = 0;
 
             if( string.IsNullOrEmpty( text ) )
@@ -63,7 +57,7 @@ namespace J4JSoftware.CommandLine
                         ? text.Substring( text.Length - termLen, termLen )
                         : string.Empty;
 
-                    if( !string.Equals( terminator, tail, _masterText.TextComparison!.Value ) )
+                    if( !string.Equals( terminator, tail, _masterText.TextComparison ) )
                         continue;
 
                     if( termLen > retVal )
