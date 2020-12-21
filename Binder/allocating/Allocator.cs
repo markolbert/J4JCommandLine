@@ -1,4 +1,5 @@
-﻿using System.Text;
+﻿using System.Linq;
+using System.Text;
 
 #pragma warning disable 8618
 
@@ -8,16 +9,19 @@ namespace J4JSoftware.CommandLine
     {
         private readonly IElementTerminator _terminator;
         private readonly IKeyPrefixer _prefixer;
+        private readonly MasterTextCollection _masterText;
         private readonly CommandLineLogger _logger;
 
         public Allocator( 
             IElementTerminator terminator,
             IKeyPrefixer prefixer,
+            MasterTextCollection masterText,
             CommandLineLogger logger
             )
         {
             _terminator = terminator;
             _prefixer = prefixer;
+            _masterText = masterText;
 
             _logger = logger;
         }
@@ -71,7 +75,17 @@ namespace J4JSoftware.CommandLine
                 else
                 {
                     // element is parameter value
-                    if( curOption == null 
+
+                    // strip off any containing quotes
+                    var firstQuoteChar = element.Where(c =>
+                            _masterText[TextUsageType.Quote].Any(x => x == c.ToString()))
+                        .Select(c => c)
+                        .FirstOrDefault();
+
+                    if( firstQuoteChar != char.MinValue )
+                        element = element.Replace( firstQuoteChar.ToString(), "" );
+
+                    if ( curOption == null 
                         || curOption.NumValuesAllocated >= curOption.MaxValues )
                         retVal.UnkeyedParameters.Add( element );
                     else curOption.AddAllocatedValue( element );

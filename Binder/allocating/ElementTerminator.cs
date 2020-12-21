@@ -29,13 +29,13 @@ namespace J4JSoftware.CommandLine
             // spaces are terminators only if the text contains no paired allowable quotes 
             // or has an even number of allowable quotes (i.e., the quotes are 'closed')
             var closedQuotes = true;
-
-            foreach( var quoteChar in _masterText[TextUsageType.Quote] )
+            
+            foreach (var quoteChar in _masterText[TextUsageType.Quote])
             {
-                closedQuotes &= text.Count( c => c == quoteChar[0] ) % 2 == 0;
+                closedQuotes &= text.Count(c => c == quoteChar[0]) % 2 == 0;
             }
 
-            if( closedQuotes )
+            if ( closedQuotes )
             {
                 if( text[ ^1 ] == ' ' )
                     retVal = 1;

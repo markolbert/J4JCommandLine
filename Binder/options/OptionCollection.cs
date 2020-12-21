@@ -45,7 +45,7 @@ namespace J4JSoftware.CommandLine
             MasterText = MasterTextCollection.GetDefault(cmdLineStyle);
             ElementTerminator = _elementTerminator ?? new ElementTerminator(MasterText, Log);
             KeyPrefixer = _keyPrefixer ?? new KeyPrefixer(MasterText, Log);
-            Allocator = allocator ?? new Allocator(ElementTerminator, KeyPrefixer, Log);
+            Allocator = allocator ?? new Allocator(ElementTerminator, KeyPrefixer, MasterText, Log);
         }
 
         public OptionCollection(
@@ -60,7 +60,7 @@ namespace J4JSoftware.CommandLine
             MasterText = mt;
             ElementTerminator = _elementTerminator ?? new ElementTerminator(MasterText, Log);
             KeyPrefixer = _keyPrefixer ?? new KeyPrefixer(MasterText, Log);
-            Allocator = allocator ?? new Allocator(ElementTerminator, KeyPrefixer, Log);
+            Allocator = allocator ?? new Allocator(ElementTerminator, KeyPrefixer, MasterText, Log);
         }
 
         public CommandLineStyle CommandLineStyle { get; }
