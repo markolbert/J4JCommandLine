@@ -1,5 +1,4 @@
-﻿using System.Linq;
-using Xunit;
+﻿using Xunit;
 
 namespace J4JSoftware.Binder.Tests
 {
@@ -11,7 +10,7 @@ namespace J4JSoftware.Binder.Tests
         {
             Initialize( config );
             
-            Options!.CreateOptionsFromContextKeys( TestConfig!.OptionConfigurations);
+            Options.CreateOptionsFromContextKeys( config.OptionConfigurations);
 
             ValidateAllocations();
         }
@@ -22,7 +21,7 @@ namespace J4JSoftware.Binder.Tests
         {
             Initialize( config );
 
-            Options!.CreateOptionsFromContextKeys(TestConfig!.OptionConfigurations);
+            Options.CreateOptionsFromContextKeys(config.OptionConfigurations);
 
             ValidateConfiguration<BasicTarget>();
         }

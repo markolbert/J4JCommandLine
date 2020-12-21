@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Collections.ObjectModel;
-
-namespace J4JSoftware.CommandLine
+﻿namespace J4JSoftware.CommandLine
 {
     public interface IElementTerminator
     {

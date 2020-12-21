@@ -1,5 +1,4 @@
-﻿using System;
-using System.Linq;
+﻿using System.Linq;
 
 #pragma warning disable 8618
 
@@ -21,11 +20,8 @@ namespace J4JSoftware.CommandLine
 
             if( _masterText[ TextUsageType.Prefix ].Any() ) return;
 
-            var mesg =
-                $"{nameof(masterText)} ({typeof(MasterTextCollection)}) does not define any {nameof(TextUsageType.Prefix)} entries";
-            _logger.Log( mesg );
-
-            throw new ArgumentException( mesg );
+            _logger.LogError(
+                $"{nameof(masterText)} ({typeof(MasterTextCollection)}) does not define any {nameof(TextUsageType.Prefix)} entries" );
         }
 
         public int GetMaxPrefixLength( string text )

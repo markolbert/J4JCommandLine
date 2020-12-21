@@ -14,7 +14,7 @@ namespace J4JSoftware.CommandLine
 
         public override void Load()
         {
-            Source.Allocator.AllocateCommandLine( Source.CommandLine, Source.Options );
+            Source.Options.Allocator.AllocateCommandLine( Source.CommandLine, Source.Options );
             
             foreach( var option in Source.Options )
             {

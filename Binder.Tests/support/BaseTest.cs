@@ -1,9 +1,6 @@
 ﻿using System;
 using System.Linq;
 using System.Linq.Expressions;
-using System.Reflection;
-using System.Reflection.Metadata;
-using System.Text.Json;
 using FluentAssertions;
 using J4JSoftware.CommandLine;
 using Microsoft.Extensions.Configuration;
@@ -13,33 +10,19 @@ namespace J4JSoftware.Binder.Tests
 {
     public class BaseTest
     {
-        private CommandLineLogger? _cmdLineErrors;
-        private IConfigurationBuilder? _configBuilder;
-        
         protected TestConfig? TestConfig { get; private set; }
-        protected IAllocator? Allocator { get; private set; }
-        protected OptionCollection? Options { get; private set; }
+        protected OptionCollection Options { get; } = new();
 
         protected void Initialize( TestConfig testConfig )
         {
             TestConfig = testConfig;
-
-            _configBuilder = new ConfigurationBuilder().AddJ4JCommandLineWindows(
-                TestConfig!.CommandLine,
-                out var options,
-                out var allocator,
-                out var errors );
-
-            errors.HasMessages.Should().BeFalse();
-
-            Options = options;
-            Allocator = allocator;
+            Options.Log.HasMessages().Should().BeFalse();
         }
 
         protected void Bind<TTarget, TProp>( Expression<Func<TTarget, TProp>> propSelector )
             where TTarget : class, new()
         {
-            Options!.Bind( propSelector, out var option  )
+            Options.Bind( propSelector, out var option  )
                 .Should()
                 .BeTrue();
 
@@ -60,7 +43,7 @@ namespace J4JSoftware.Binder.Tests
 
         protected void ValidateAllocations()
         {
-            var result = Allocator!.AllocateCommandLine(TestConfig!.CommandLine!, Options!);
+            var result = Options.Allocator.AllocateCommandLine(TestConfig!.CommandLine!, Options!);
 
             result.UnknownKeys.Count.Should().Be( TestConfig.UnknownKeys );
             result.UnkeyedParameters.Count.Should().Be( TestConfig.UnkeyedParameters );
@@ -74,8 +57,12 @@ namespace J4JSoftware.Binder.Tests
         protected void ValidateConfiguration<TParsed>()
             where TParsed : class, new()
         {
-            var config = _configBuilder!.Build();
-            
+            var config = new ConfigurationBuilder()
+                .AddJ4JCommandLine( TestConfig!.CommandLine, Options )
+                .Build();
+
+            Options.Log.HasMessages().Should().BeFalse();
+
             TParsed? parsed = null;
 
             if( TestConfig!.OptionConfigurations.Any( x => x.ParsingWillFail ) )

@@ -1,5 +1,4 @@
-﻿using System.Collections;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 #pragma warning disable 8618
 
 namespace J4JSoftware.Binder.Tests

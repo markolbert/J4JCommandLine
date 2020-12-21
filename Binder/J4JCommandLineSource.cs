@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.Primitives;
+﻿using Microsoft.Extensions.Configuration;
 
 namespace J4JSoftware.CommandLine
 {
@@ -12,27 +6,23 @@ namespace J4JSoftware.CommandLine
     {
         public J4JCommandLineSource( 
             OptionCollection options, 
-            string cmdLine, 
-            IAllocator allocator
+            string cmdLine 
             )
         {
             Options = options;
             CommandLine = cmdLine;
-            Allocator = allocator;
         }
 
         public J4JCommandLineSource(
             OptionCollection options,
-            string[] args,
-            IAllocator allocator
+            string[] args
         )
-            : this( options, string.Join( " ", args ), allocator )
+            : this( options, string.Join( " ", args ) )
         {
         }
 
         public OptionCollection Options { get; }
         public string CommandLine { get; }
-        public IAllocator Allocator { get; }
 
         public IConfigurationProvider Build( IConfigurationBuilder builder )
         {

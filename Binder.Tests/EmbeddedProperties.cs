@@ -1,5 +1,4 @@
 ﻿using System.Collections.Generic;
-using FluentAssertions;
 using Xunit;
 
 namespace J4JSoftware.Binder.Tests

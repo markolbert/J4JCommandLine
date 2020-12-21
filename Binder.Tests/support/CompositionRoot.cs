@@ -1,6 +1,5 @@
 ﻿using System;
 using Autofac;
-using J4JSoftware.CommandLine;
 using J4JSoftware.DependencyInjection;
 using J4JSoftware.Logging;
 using Microsoft.Extensions.Configuration;

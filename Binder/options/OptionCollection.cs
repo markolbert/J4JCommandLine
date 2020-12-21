@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
@@ -30,22 +31,46 @@ namespace J4JSoftware.CommandLine
 
         private readonly Dictionary<Type, string> _typePrefixes = new Dictionary<Type, string>();
         private readonly TypeBoundOptionComparer _comparer = new TypeBoundOptionComparer();
+        private readonly List<IOption> _options = new();
 
-        public OptionCollection( 
-            MasterTextCollection masterText,
-            CommandLineLogger logger
+        public OptionCollection(
+            CommandLineStyle cmdLineStyle = CommandLineStyle.Windows,
+            IAllocator? allocator = null,
+            IElementTerminator? _elementTerminator = null,
+            IKeyPrefixer? _keyPrefixer = null
         )
         {
-            MasterText = masterText;
-
-            Logger = logger;
+            CommandLineStyle = cmdLineStyle;
+            Log = new CommandLineLogger();
+            MasterText = MasterTextCollection.GetDefault(cmdLineStyle);
+            ElementTerminator = _elementTerminator ?? new ElementTerminator(MasterText, Log);
+            KeyPrefixer = _keyPrefixer ?? new KeyPrefixer(MasterText, Log);
+            Allocator = allocator ?? new Allocator(ElementTerminator, KeyPrefixer, Log);
         }
 
-        protected CommandLineLogger Logger { get; }
-        protected MasterTextCollection MasterText { get; }
-        protected List<IOption> Options { get; } = new();
+        public OptionCollection(
+            MasterTextCollection mt,
+            IAllocator? allocator = null,
+            IElementTerminator? _elementTerminator = null,
+            IKeyPrefixer? _keyPrefixer = null
+        )
+        {
+            CommandLineStyle = CommandLineStyle.UserDefined;
+            Log = new CommandLineLogger();
+            MasterText = mt;
+            ElementTerminator = _elementTerminator ?? new ElementTerminator(MasterText, Log);
+            KeyPrefixer = _keyPrefixer ?? new KeyPrefixer(MasterText, Log);
+            Allocator = allocator ?? new Allocator(ElementTerminator, KeyPrefixer, Log);
+        }
 
-        public int Count => Options.Count;
+        public CommandLineStyle CommandLineStyle { get; }
+        public CommandLineLogger Log { get; }
+        public IElementTerminator ElementTerminator { get; }
+        public IKeyPrefixer KeyPrefixer { get; }
+        public IAllocator Allocator { get; }
+        public MasterTextCollection MasterText { get; }
+        public ReadOnlyCollection<IOption> Options => _options.AsReadOnly();
+        public int Count => _options.Count;
 
         public void SetTypeContextKeyPrefix<TTarget>(string prefix)
             where TTarget : class, new()
@@ -69,13 +94,13 @@ namespace J4JSoftware.CommandLine
             return type.Name;
         }
 
-        public bool TargetsMultipleTypes => Options.Cast<ITypeBoundOption>().Distinct(_comparer).Count() > 1;
+        public bool TargetsMultipleTypes => _options.Cast<ITypeBoundOption>().Distinct(_comparer).Count() > 1;
 
         public IOption Add(string contextPath)
         {
             var retVal = new Option(this, contextPath, MasterText);
 
-            Options.Add(retVal);
+            _options.Add(retVal);
 
             return retVal;
         }
@@ -103,7 +128,7 @@ namespace J4JSoftware.CommandLine
 
                         if( !ValidateProperty( propInfo, out var curStyle ) )
                         {
-                            Logger.Log( $"Property '{propInfo.Name}' is invalid");
+                            Log.LogError( $"Property '{propInfo.Name}' is invalid");
                             return false;
                         }
 
@@ -123,7 +148,7 @@ namespace J4JSoftware.CommandLine
 
                             if (!ValidateProperty(propInfo2, out var curStyle2))
                             {
-                                Logger.Log($"Property '{propInfo2.Name}' is invalid");
+                                Log.LogError($"Property '{propInfo2.Name}' is invalid");
                                 return false;
                             }
 
@@ -156,7 +181,7 @@ namespace J4JSoftware.CommandLine
                 result.AddCommandLineKey( key );
             }
 
-            Options.Add(result);
+            _options.Add(result);
 
             return true;
         }
@@ -167,7 +192,7 @@ namespace J4JSoftware.CommandLine
 
         public bool UsesContextPath( string contextPath )
         {
-            return Options.Any( x =>
+            return _options.Any( x =>
                 x.ContextPath?.Equals( contextPath, MasterText.TextComparison ) ?? false );
         }
 
@@ -175,7 +200,7 @@ namespace J4JSoftware.CommandLine
         {
             get
             {
-                return Options.FirstOrDefault( opt =>
+                return _options.FirstOrDefault( opt =>
                     opt.IsInitialized
                     && opt.Keys.Any( k => string.Equals( k, key, MasterText.TextComparison ) )
                 );
@@ -227,7 +252,7 @@ namespace J4JSoftware.CommandLine
 
             if (genType.GenericTypeArguments.Length != 1)
             {
-                Logger.Log($"Generic type '{genType.Name}' does not have just one generic Type argument");
+                Log.LogError($"Generic type '{genType.Name}' does not have just one generic Type argument");
                 return false;
             }
 
@@ -236,7 +261,7 @@ namespace J4JSoftware.CommandLine
 
             if (!typeof(List<>).MakeGenericType(genType.GenericTypeArguments[0]).IsAssignableFrom(genType))
             {
-                Logger.Log($"Generic type '{genType}' is not a List<> type");
+                Log.LogError($"Generic type '{genType}' is not a List<> type");
                 return false;
             }
 
@@ -258,7 +283,7 @@ namespace J4JSoftware.CommandLine
                 || toCheck.GetConstructors().Any( c => c.GetParameters().Length == 0 ) )
                 return true;
 
-            Logger.Log($"Unsupported type '{toCheck}'");
+            Log.LogError($"Unsupported type '{toCheck}'");
 
             return false;
         }
@@ -267,19 +292,19 @@ namespace J4JSoftware.CommandLine
         {
             if (methodInfo == null)
             {
-                Logger.Log($"Property '{propName}' does not have a get or set method");
+                Log.LogError($"Property '{propName}' does not have a get or set method");
                 return false;
             }
 
             if (!methodInfo.IsPublic )
             {
-                Logger.Log($"Property '{propName}::{methodInfo.Name}' is not bindable");
+                Log.LogError($"Property '{propName}::{methodInfo.Name}' is not bindable");
                 return false;
             }
 
             if (methodInfo.GetParameters().Length > allowedParams)
             {
-                Logger.Log($"Property '{propName}::{methodInfo.Name}' is indexed");
+                Log.LogError($"Property '{propName}::{methodInfo.Name}' is indexed");
                 return false;
             }
 
@@ -316,7 +341,7 @@ namespace J4JSoftware.CommandLine
         
         public IEnumerator<IOption> GetEnumerator()
         {
-            foreach( var option in Options ) yield return option;
+            foreach( var option in _options ) yield return option;
         }
 
         IEnumerator IEnumerable.GetEnumerator()

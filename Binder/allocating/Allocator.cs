@@ -1,9 +1,4 @@
-﻿using System;
-using System.Linq;
-using System.Runtime.CompilerServices;
-using System.Runtime.InteropServices.ComTypes;
-using System.Text;
-using Microsoft.VisualBasic;
+﻿using System.Text;
 
 #pragma warning disable 8618
 
@@ -70,7 +65,7 @@ namespace J4JSoftware.CommandLine
                     else
                     {
                         retVal.UnknownKeys.Add( element );
-                        _logger.Log($"Unknown key '{element}'");
+                        _logger.LogInformation($"Unknown key '{element}'");
                     }
                 }
                 else

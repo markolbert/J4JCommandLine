@@ -1,30 +1,29 @@
-﻿using System;
-using System.Collections;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace J4JSoftware.CommandLine
 {
-    public class CommandLineLogger : IEnumerable<string>
+    public class CommandLineLogger
     {
-        private readonly List<string> _messages = new List<string>();
-
-        public bool HasMessages => _messages.Count > 0;
-
-        public void Log( string mesg ) => _messages.Add( mesg );
-        public IEnumerator<string> GetEnumerator()
+        public class LogEntry
         {
-            foreach( var mesg in _messages )
-            {
-                yield return mesg;
-            }
+            public bool IsError { get; set; }
+            public string Message { get; set; }
         }
+        
+        private readonly List<LogEntry> _messages = new List<LogEntry>();
 
-        IEnumerator IEnumerable.GetEnumerator()
+        public bool HasMessages( bool errorsOnly = true ) => _messages.Any( m => m.IsError == errorsOnly );
+
+        public void LogError( string mesg ) => _messages.Add( new LogEntry { IsError = true, Message = mesg } );
+        public void LogInformation( string mesg) => _messages.Add(new LogEntry { Message = mesg });
+
+        public IEnumerator<string> GetMessages( bool errorsOnly = true )
         {
-            return GetEnumerator();
+            foreach( var entry in _messages.Where(m=>m.IsError == errorsOnly  ) )
+            {
+                yield return $"[{(entry.IsError ? "Error" : "Information")}]:{entry.Message}" ;
+            }
         }
     }
 }
