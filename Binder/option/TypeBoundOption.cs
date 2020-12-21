@@ -23,9 +23,7 @@ namespace J4JSoftware.CommandLine
                 if( base.ContextPath == null )
                     return null;
 
-                return Container.TargetsMultipleTypes
-                    ? $"{Container.GetContextPathPrefix<TTarget>()}:{base.ContextPath}"
-                    : base.ContextPath;
+                return $"{Container.GetTypePrefix<TTarget>()}{base.ContextPath}";
             }
         }
     }

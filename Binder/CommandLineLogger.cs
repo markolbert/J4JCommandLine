@@ -18,7 +18,7 @@ namespace J4JSoftware.CommandLine
         public void LogError( string mesg ) => _messages.Add( new LogEntry { IsError = true, Message = mesg } );
         public void LogInformation( string mesg) => _messages.Add(new LogEntry { Message = mesg });
 
-        public IEnumerator<string> GetMessages( bool errorsOnly = true )
+        public IEnumerable<string> GetMessages( bool errorsOnly = true )
         {
             foreach( var entry in _messages.Where(m=>m.IsError == errorsOnly  ) )
             {

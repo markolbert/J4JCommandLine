@@ -22,9 +22,8 @@ namespace J4JSoftware.Binder.Tests
         protected void Bind<TTarget, TProp>( Expression<Func<TTarget, TProp>> propSelector )
             where TTarget : class, new()
         {
-            Options.Bind( propSelector, out var option  )
-                .Should()
-                .BeTrue();
+            var option = Options.Bind( propSelector );
+            option.Should().NotBeNull();
 
             var optConfig = TestConfig!.OptionConfigurations
                 .FirstOrDefault( x =>

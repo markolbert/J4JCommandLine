@@ -72,7 +72,7 @@ namespace J4JSoftware.CommandLine
         public ReadOnlyCollection<IOption> Options => _options.AsReadOnly();
         public int Count => _options.Count;
 
-        public void SetTypeContextKeyPrefix<TTarget>(string prefix)
+        public void SetTypePrefix<TTarget>(string prefix)
             where TTarget : class, new()
         {
             var type = typeof(TTarget);
@@ -83,15 +83,15 @@ namespace J4JSoftware.CommandLine
             _typePrefixes.Add(type, prefix);
         }
 
-        public string GetContextPathPrefix<TTarget>()
+        public string GetTypePrefix<TTarget>()
             where TTarget : class, new()
         {
             var type = typeof(TTarget);
 
-            if (_typePrefixes.ContainsKey(type))
-                return _typePrefixes[type];
+            if( _typePrefixes.ContainsKey( type ) )
+                return $"{_typePrefixes[ type ]}:";
 
-            return type.Name;
+            return TargetsMultipleTypes ? $"{type.Name}:" : string.Empty;
         }
 
         public bool TargetsMultipleTypes => _options.Cast<ITypeBoundOption>().Distinct(_comparer).Count() > 1;
@@ -105,14 +105,11 @@ namespace J4JSoftware.CommandLine
             return retVal;
         }
 
-        public bool Bind<TTarget, TProp>(
+        public Option? Bind<TTarget, TProp>(
             Expression<Func<TTarget, TProp>> propertySelector,
-            out Option? result,
             params string[] cmdLineKeys )
             where TTarget : class, new()
         {
-            result = null;
-
             // walk the expression tree to extract the PropertyInfo objects defining
             // the path to the property of interest
             var propElements = new List<PropertyInfo>();
@@ -129,7 +126,7 @@ namespace J4JSoftware.CommandLine
                         if( !ValidateProperty( propInfo, out var curStyle ) )
                         {
                             Log.LogError( $"Property '{propInfo.Name}' is invalid");
-                            return false;
+                            return null;
                         }
 
                         firstStyle ??= curStyle;
@@ -149,7 +146,7 @@ namespace J4JSoftware.CommandLine
                             if (!ValidateProperty(propInfo2, out var curStyle2))
                             {
                                 Log.LogError($"Property '{propInfo2.Name}' is invalid");
-                                return false;
+                                return null;
                             }
 
                             firstStyle ??= curStyle2;
@@ -172,18 +169,18 @@ namespace J4JSoftware.CommandLine
 
             propElements.Reverse();
 
-            result = new TypeBoundOption<TTarget>(this, GetContextPath(propElements), MasterText);
+            var retVal = new TypeBoundOption<TTarget>(this, GetContextPath(propElements), MasterText);
 
-            result.SetStyle(firstStyle!.Value);
+            retVal.SetStyle(firstStyle!.Value);
 
             foreach( var key in ValidateCommandLineKeys( cmdLineKeys ) )
             {
-                result.AddCommandLineKey( key );
+                retVal.AddCommandLineKey( key );
             }
 
-            _options.Add(result);
+            _options.Add(retVal);
 
-            return true;
+            return retVal;
         }
 
         // determines whether or not a key is being used by an existing option, honoring whatever
