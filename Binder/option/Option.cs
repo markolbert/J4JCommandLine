@@ -11,7 +11,7 @@ namespace J4JSoftware.CommandLine
         private static List<string> _switchFalse = new List<string> { "false" };
 
         private readonly List<string> _cmdLineKeys = new List<string>();
-        private readonly List<string> _allocatedValues = new List<string>();
+        private readonly List<string> _values = new List<string>();
         private readonly MasterTextCollection _masterText;
 
         internal Option( 
@@ -46,7 +46,7 @@ namespace J4JSoftware.CommandLine
                 _ => throw new InvalidEnumArgumentException( $"Unsupported OptionStyle '{Style}'" )
             };
 
-        public int NumValuesAllocated => _allocatedValues.Count;
+        public int NumValuesAllocated => _values.Count;
 
         public bool ValuesSatisfied
         {
@@ -55,7 +55,7 @@ namespace J4JSoftware.CommandLine
                 if (string.IsNullOrEmpty(CommandLineKeyProvided))
                     return false;
 
-                var numValuesAlloc = _allocatedValues.Count;
+                var numValuesAlloc = _values.Count;
 
                 return Style switch
                 {
@@ -68,12 +68,13 @@ namespace J4JSoftware.CommandLine
             }
         }
 
-        public ReadOnlyCollection<string> CommandLineValues => _allocatedValues.AsReadOnly();
+        public ReadOnlyCollection<string> Values => _values.AsReadOnly();
+        public void ClearValues() => _values.Clear();
         public OptionStyle Style { get; private set; } = OptionStyle.Undefined;
         public bool Required { get; private set; }
         public string? Description { get; private set; }
 
-        public void AddAllocatedValue( string value ) => _allocatedValues.Add( value );
+        public void AddAllocatedValue( string value ) => _values.Add( value );
 
         public Option AddCommandLineKey(string cmdLineKey)
         {

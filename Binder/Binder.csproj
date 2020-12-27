@@ -14,6 +14,10 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Compile Remove="allocating\AllocationContext.cs" />
+    <Compile Remove="allocating\AllocationElement.AllocationContext2.cs" />
+    <Compile Remove="allocating\AllocationElement.cs" />
+    <Compile Remove="allocating\NewAllocator.cs" />
     <Compile Remove="options\IContextKey.cs" />
     <Compile Remove="options\OptionConfiguration.cs" />
     <Compile Remove="options\OptionRequiredAttribute.cs" />

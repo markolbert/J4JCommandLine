@@ -14,7 +14,8 @@ namespace J4JSoftware.CommandLine
         int MaxValues { get; }
         int NumValuesAllocated { get; }
         bool ValuesSatisfied { get; }
-        ReadOnlyCollection<string> CommandLineValues { get; }
+        ReadOnlyCollection<string> Values { get; }
+        void ClearValues();
         void AddAllocatedValue( string value );
         OptionStyle Style { get; }
         bool Required { get; }

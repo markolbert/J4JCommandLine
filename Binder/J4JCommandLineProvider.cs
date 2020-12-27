@@ -30,7 +30,7 @@ namespace J4JSoftware.CommandLine
 
                     case OptionStyle.SingleValued:
                         if( option.NumValuesAllocated > 0)
-                            Set(option.ContextPath, option.CommandLineValues[0]);
+                            Set(option.ContextPath, option.Values[0]);
 
                         break;
 
@@ -40,14 +40,14 @@ namespace J4JSoftware.CommandLine
                         // collections), but they contain multiple string values from
                         // allocating the command line
                         if (option.NumValuesAllocated > 0)
-                                Set( option.ContextPath, string.Join( ", ", option.CommandLineValues ) );
+                                Set( option.ContextPath, string.Join( ", ", option.Values ) );
 
                         break;
 
                     case OptionStyle.Collection:
                         for( var idx = 0; idx < option.NumValuesAllocated; idx++ )
                         {
-                            Set( $"{option.ContextPath}:{idx}", option.CommandLineValues[ idx ] );
+                            Set( $"{option.ContextPath}:{idx}", option.Values[ idx ] );
                         }
 
                         break;

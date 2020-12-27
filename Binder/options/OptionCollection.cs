@@ -42,7 +42,7 @@ namespace J4JSoftware.CommandLine
         {
             CommandLineStyle = cmdLineStyle;
             Log = new CommandLineLogger();
-            MasterText = MasterTextCollection.GetDefault(cmdLineStyle);
+            MasterText = MasterTextCollection.GetDefault(cmdLineStyle, Log);
             ElementTerminator = _elementTerminator ?? new ElementTerminator(MasterText, Log);
             KeyPrefixer = _keyPrefixer ?? new KeyPrefixer(MasterText, Log);
             Allocator = allocator ?? new Allocator(ElementTerminator, KeyPrefixer, MasterText, Log);
@@ -71,6 +71,7 @@ namespace J4JSoftware.CommandLine
         public MasterTextCollection MasterText { get; }
         public ReadOnlyCollection<IOption> Options => _options.AsReadOnly();
         public int Count => _options.Count;
+        public void ClearValues() => _options.ForEach( x => x.ClearValues() );
 
         public void SetTypePrefix<TTarget>(string prefix)
             where TTarget : class, new()

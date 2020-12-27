@@ -1,0 +1,200 @@
+[
+  {
+    "CommandLine": "/x",
+    "Data": [
+      {
+        "Type": "KeyPrefix",
+        "Text": "/"
+      },
+      {
+        "Type": "Text",
+        "Text": "x"
+      }
+    ]
+  },
+  {
+    "CommandLine": "/x abcd",
+    "Data": [
+      {
+        "Type": "KeyPrefix",
+        "Text": "/"
+      },
+      {
+        "Type": "Text",
+        "Text": "x"
+      },
+      {
+        "Type": "Separator",
+        "Text": " "
+      },
+      {
+        "Type": "Text",
+        "Text": "abcd"
+      }
+    ]
+  },
+  {
+    "CommandLine": "/x \"ab cd\"",
+    "Data": [
+      {
+        "Type": "KeyPrefix",
+        "Text": "/"
+      },
+      {
+        "Type": "Text",
+        "Text": "x"
+      },
+      {
+        "Type": "Separator",
+        "Text": " "
+      },
+      {
+        "Type": "Text",
+        "Text": "ab cd"
+      }
+    ]
+  },
+  {
+    "CommandLine": "/x \"'Now is the time for all good men'\"",
+    "Data": [
+      {
+        "Type": "KeyPrefix",
+        "Text": "/"
+      },
+      {
+        "Type": "Text",
+        "Text": "x"
+      },
+      {
+        "Type": "Separator",
+        "Text": " "
+      },
+      {
+        "Type": "Text",
+        "Text": "'Now is the time for all good men'"
+      }
+    ]
+  },
+  {
+    "CommandLine": "/x \"ab cd /y def",
+    "Data": [
+      {
+        "Type": "KeyPrefix",
+        "Text": "/"
+      },
+      {
+        "Type": "Text",
+        "Text": "x"
+      },
+      {
+        "Type": "Separator",
+        "Text": " "
+      },
+      {
+        "Type": "Text",
+        "Text": "ab cd /y def"
+      }
+    ]
+  },
+
+  {
+    "CommandLine": "/ x",
+    "Data": [
+      {
+        "Type": "KeyPrefix",
+        "Text": "/"
+      },
+      {
+        "Type": "Separator",
+        "Text": " "
+      },
+      {
+        "Type": "Text",
+        "Text": "x"
+      }
+    ]
+  },
+  {
+    "CommandLine": "abcd",
+    "Data": [
+      {
+        "Type": "Text",
+        "Text": "abcd"
+      }
+    ]
+  },
+  {
+    "CommandLine": "     abcd",
+    "Data": [
+      {
+        "Type": "Separator",
+        "Text": " "
+      },
+      {
+        "Type": "Text",
+        "Text": "abcd"
+      }
+    ]
+  },
+  {
+    "CommandLine": "/x /y abc /z abc def",
+    "Data": [
+      {
+        "Type": "KeyPrefix",
+        "Text": "/"
+      },
+      {
+        "Type": "Text",
+        "Text": "x"
+      },
+      {
+        "Type": "Separator",
+        "Text": " "
+      },
+      {
+        "Type": "KeyPrefix",
+        "Text": "/"
+      },
+      {
+        "Type": "Text",
+        "Text": "y"
+      },
+      {
+        "Type": "Separator",
+        "Text": " "
+      },
+      {
+        "Type": "Text",
+        "Text": "abc"
+      },
+      {
+        "Type": "Separator",
+        "Text": " "
+      },
+      {
+        "Type": "KeyPrefix",
+        "Text": "/"
+      },
+      {
+        "Type": "Text",
+        "Text": "z"
+      },
+      {
+        "Type": "Separator",
+        "Text": " "
+      },
+      {
+        "Type": "Text",
+        "Text": "abc"
+      },
+      {
+        "Type": "Separator",
+        "Text": " "
+      },
+      {
+        "Type": "Text",
+        "Text": "def"
+      }
+    ]
+  }
+]

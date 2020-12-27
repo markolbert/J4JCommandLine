@@ -21,8 +21,8 @@ namespace J4JSoftware.Binder.Tests
             allocResult.UnknownKeys.Should().BeEmpty();
             allocResult.UnkeyedParameters.Should().BeEmpty();
 
-            option!.CommandLineValues.Count.Should().Be( 1 );
-            option.CommandLineValues[ 0 ].Should().Be( result );
+            option!.Values.Count.Should().Be( 1 );
+            option.Values[ 0 ].Should().Be( result );
         }
     }
 }

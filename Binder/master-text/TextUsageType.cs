@@ -7,6 +7,8 @@
         Prefix,
         Quote,
         ValueEncloser,
-        OptionKey
+        OptionKey,
+        Separator,
+        Undefined
     }
 }

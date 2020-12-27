@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
 
 namespace J4JSoftware.CommandLine
@@ -8,9 +9,12 @@ namespace J4JSoftware.CommandLine
     // option key) used in the framework and ensures they are all used uniquely.
     public class MasterTextCollection
     {
-        public static MasterTextCollection GetDefault( CommandLineStyle cmdLineStyle, StringComparison? comparison = null )
+        public static MasterTextCollection GetDefault( 
+            CommandLineStyle cmdLineStyle, 
+            CommandLineLogger logger, 
+            StringComparison? comparison = null )
         {
-            var retVal = new MasterTextCollection( comparison ?? StringComparison.OrdinalIgnoreCase );
+            var retVal = new MasterTextCollection( comparison ?? StringComparison.OrdinalIgnoreCase, logger );
 
             switch( cmdLineStyle )
             {
@@ -18,30 +22,35 @@ namespace J4JSoftware.CommandLine
                     retVal.AddRange(TextUsageType.Prefix, "-", "--");
                     retVal.AddRange(TextUsageType.Quote, "\"", "'");
                     retVal.Add(TextUsageType.ValueEncloser, "=");
+                    retVal.AddRange(TextUsageType.Separator, " ", "\t");
 
-                    break;
+                    return retVal;
 
                 case CommandLineStyle.Universal:
                     retVal.AddRange(TextUsageType.Prefix, "-", "--", "/");
                     retVal.AddRange(TextUsageType.Quote, "\"", "'");
                     retVal.Add(TextUsageType.ValueEncloser, "=");
+                    retVal.AddRange(TextUsageType.Separator, " ", "\t");
 
-                    break;
+                    return retVal;
 
                 case CommandLineStyle.Windows:
                     retVal.AddRange(TextUsageType.Prefix, "/", "-", "--");
                     retVal.Add(TextUsageType.Quote, "\"");
                     retVal.Add(TextUsageType.ValueEncloser, "=");
+                    retVal.AddRange(TextUsageType.Separator, " ", "\t");
 
-                    break;
+                    return retVal;
+                
+                default:
+                    throw new InvalidEnumArgumentException( $"Unsupported CommandLineStyle '{cmdLineStyle}'" );
             }
-
-            return retVal;
         }
-        
-        private readonly List<TextUsage> _items = new List<TextUsage>();
 
-        public MasterTextCollection( StringComparison comparison )
+        private readonly List<TextUsage> _items = new List<TextUsage>();
+        private readonly CommandLineLogger _logger;
+
+        public MasterTextCollection( StringComparison comparison, CommandLineLogger logger )
         {
             TextComparison = comparison;
 
@@ -55,6 +64,8 @@ namespace J4JSoftware.CommandLine
                 StringComparison.OrdinalIgnoreCase => StringComparer.OrdinalIgnoreCase,
                 _ => StringComparer.CurrentCultureIgnoreCase
             };
+
+            _logger = logger;
         }
 
         public StringComparison TextComparison { get; }
@@ -68,11 +79,27 @@ namespace J4JSoftware.CommandLine
         public bool Contains( string text, TextUsageType usage ) =>
             _items.Any( x => x.Usage == usage && string.Equals( x.Text, text, TextComparison ) );
 
+        public TextUsageType GetTextUsageType( string toCheck )
+        {
+            var item = _items.FirstOrDefault( x => x.Text.Equals( toCheck, TextComparison ) );
+
+            return item?.Usage ?? TextUsageType.Undefined;
+        }
+
         // adds an item to the collection
         public bool Add( TextUsageType usage, string item )
         {
             if( Contains( item ) )
+            {
+                _logger.LogInformation($"Duplicate {usage} '{item}'");
                 return false;
+            }
+
+            if( usage == TextUsageType.Undefined )
+            {
+                _logger.LogInformation( $"Cannot add {usage} items ({item})" );
+                return false;
+            }
 
             _items.Add( new TextUsage( item, usage ) );
 
@@ -88,11 +115,15 @@ namespace J4JSoftware.CommandLine
         {
             var retVal = true;
 
-            foreach( var item in items )
+            if (usage == TextUsageType.Undefined)
             {
-                if( Contains( item ) )
-                    retVal = false;
-                else _items.Add( new TextUsage( item, usage ) );
+                _logger.LogInformation( $"Cannot add {usage} items ({string.Join( ",", items )})" );
+                return false;
+            }
+
+            foreach ( var item in items )
+            {
+                retVal &= Add( usage, item );
             }
 
             return retVal;
