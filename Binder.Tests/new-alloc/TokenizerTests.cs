@@ -17,8 +17,9 @@ namespace J4JSoftware.Binder.Tests
         {
             var cmdLogger = new CommandLineLogger();
             var tokenColl = TokenCollection.GetDefault( CommandLineStyle.Windows, cmdLogger );
+            var tokenizer = new Tokenizer( tokenColl, cmdLogger );
 
-            var tokens = tokenColl.Tokenize( config.CommandLine );
+            var tokens = tokenizer.Tokenize( config.CommandLine );
 
             tokens.Count.Should().Be( config.Data.Count + 1 );
 
