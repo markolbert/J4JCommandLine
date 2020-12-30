@@ -1,12 +1,12 @@
 ﻿using System;
 
-namespace J4JSoftware.CommandLine
+namespace J4JSoftware.Configuration.CommandLine
 {
     public class TypeBoundOption<TTarget> : Option, ITypeBoundOption
         where TTarget : class, new()
     {
         internal TypeBoundOption(
-            OptionCollection container,
+            IOptionCollection container,
             string typeRelativeContextPath,
             MasterTextCollection masterText
         )

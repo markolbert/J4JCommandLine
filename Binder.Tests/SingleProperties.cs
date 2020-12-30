@@ -12,7 +12,7 @@ namespace J4JSoftware.Binder.Tests
             
             Options.CreateOptionsFromContextKeys( config.OptionConfigurations);
 
-            ValidateAllocations();
+            ValidateTokenizing();
         }
 
         [ Theory ]

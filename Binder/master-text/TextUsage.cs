@@ -1,4 +1,4 @@
-﻿namespace J4JSoftware.CommandLine
+﻿namespace J4JSoftware.Configuration.CommandLine
 {
     // a class defining how a particular piece of text is uniquely used within
     // the framework
@@ -11,6 +11,6 @@
         }
 
         public string Text { get; }
-        public TextUsageType Usage { get; } 
+        public TextUsageType Usage { get; }
     }
 }

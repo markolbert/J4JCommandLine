@@ -1,7 +1,7 @@
 ﻿using System.ComponentModel;
 using Microsoft.Extensions.Configuration;
 
-namespace J4JSoftware.CommandLine
+namespace J4JSoftware.Configuration.CommandLine
 {
     public class J4JCommandLineProvider : ConfigurationProvider
     {
@@ -14,10 +14,10 @@ namespace J4JSoftware.CommandLine
 
         public override void Load()
         {
-            Source.Options.Allocator.AllocateCommandLine( Source.CommandLine, Source.Options );
-            
+            if( !Source.Parse() )
+                return;
+
             foreach( var option in Source.Options )
-            {
                 switch( option.Style )
                 {
                     case OptionStyle.Switch:
@@ -25,12 +25,12 @@ namespace J4JSoftware.CommandLine
                             string.IsNullOrEmpty( option.CommandLineKeyProvided )
                                 ? "false"
                                 : "true" );
-                        
+
                         break;
 
                     case OptionStyle.SingleValued:
-                        if( option.NumValuesAllocated > 0)
-                            Set(option.ContextPath, option.Values[0]);
+                        if( option.NumValuesAllocated > 0 )
+                            Set( option.ContextPath, option.Values[ 0 ] );
 
                         break;
 
@@ -39,23 +39,20 @@ namespace J4JSoftware.CommandLine
                         // single valued from a target point of view (i.e., they're not
                         // collections), but they contain multiple string values from
                         // allocating the command line
-                        if (option.NumValuesAllocated > 0)
-                                Set( option.ContextPath, string.Join( ", ", option.Values ) );
+                        if( option.NumValuesAllocated > 0 )
+                            Set( option.ContextPath, string.Join( ", ", option.Values ) );
 
                         break;
 
                     case OptionStyle.Collection:
                         for( var idx = 0; idx < option.NumValuesAllocated; idx++ )
-                        {
                             Set( $"{option.ContextPath}:{idx}", option.Values[ idx ] );
-                        }
 
                         break;
 
                     default:
                         throw new InvalidEnumArgumentException( $"Unsupported OptionStyle '{option.Style}'" );
                 }
-            }
         }
     }
 }

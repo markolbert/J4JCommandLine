@@ -2,7 +2,7 @@
 using System.Linq;
 using System.Linq.Expressions;
 using FluentAssertions;
-using J4JSoftware.CommandLine;
+using J4JSoftware.Configuration.CommandLine;
 using Microsoft.Extensions.Configuration;
 using Xunit;
 
@@ -11,12 +11,19 @@ namespace J4JSoftware.Binder.Tests
     public class BaseTest
     {
         protected TestConfig? TestConfig { get; private set; }
-        protected OptionCollection Options { get; } = new();
+        protected IOptionCollection Options { get; private set; }
+        protected CommandLineLogger Logger => Options.Log;
+
+        protected void Initialize(CommandLineStyle style)
+        {
+            Options = new OptionCollectionNG(style);
+            Options.Log.HasMessages().Should().BeFalse();
+        }
 
         protected void Initialize( TestConfig testConfig )
         {
+            Initialize( testConfig.Style );
             TestConfig = testConfig;
-            Options.Log.HasMessages().Should().BeFalse();
         }
 
         protected void Bind<TTarget, TProp>( Expression<Func<TTarget, TProp>> propSelector )
@@ -40,12 +47,13 @@ namespace J4JSoftware.Binder.Tests
             optConfig.Option = option;
         }
 
-        protected void ValidateAllocations()
+        protected void ValidateTokenizing()
         {
-            var result = Options.Allocator.AllocateCommandLine(TestConfig!.CommandLine!, Options!);
+            var parser = new Parser(Options, Logger);
+            parser.Parse( TestConfig!.CommandLine ).Should().Be( Options.UnknownKeys.Count == 0 );
 
-            result.UnknownKeys.Count.Should().Be( TestConfig.UnknownKeys );
-            result.UnkeyedParameters.Count.Should().Be( TestConfig.UnkeyedParameters );
+            Options.UnknownKeys.Count.Should().Be( TestConfig.UnknownKeys );
+            Options.UnkeyedValues.Count.Should().Be( TestConfig.UnkeyedValues );
 
             foreach( var optConfig in TestConfig.OptionConfigurations )
             {
@@ -64,7 +72,7 @@ namespace J4JSoftware.Binder.Tests
 
             TParsed? parsed = null;
 
-            if( TestConfig!.OptionConfigurations.Any( x => x.ParsingWillFail ) )
+            if( TestConfig!.OptionConfigurations.Any( x => x.ConversionWillFail ) )
             {
                 var exception = Assert.Throws<InvalidOperationException>( () => config.Get<TParsed>() );
                 return;
@@ -73,7 +81,7 @@ namespace J4JSoftware.Binder.Tests
             parsed = config.Get<TParsed>();
 
             if( TestConfig.OptionConfigurations.TrueForAll( x => !x.ValuesSatisfied )
-                && TestConfig.OptionConfigurations.All( x => x.Style != OptionStyle.Switch ) )
+                /*&& TestConfig.OptionConfigurations.All( x => x.Style != OptionStyle.Switch )*/ )
             {
                 parsed.Should().BeNull();
                 return;

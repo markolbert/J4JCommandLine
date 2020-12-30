@@ -1,0 +1,347 @@
+[
+  {
+    "CommandLine": "-x",
+    "Style": "Linux",
+    "UnkeyedValues": 0,
+    "UnknownKeys": 0,
+    "OptionConfigurations": [
+      {
+        "ContextPath": "ASwitch",
+        "CommandLineKey": "x",
+        "Style": "Switch",
+        "ValuesSatisfied": true,
+        "CorrectText": "true"
+      }
+    ]
+  },
+  {
+    "CommandLine": "-z",
+    "Style": "Linux",
+    "UnkeyedValues": 0,
+    "UnknownKeys": 1,
+    "OptionConfigurations": [
+      {
+        "ContextPath": "ASwitch",
+        "CommandLineKey": "x",
+        "Style": "Switch",
+        "CorrectText": "false"
+      }
+    ]
+  },
+  {
+    "CommandLine": "-x excess",
+    "Style": "Linux",
+    "UnkeyedValues": 1,
+    "UnknownKeys": 0,
+    "OptionConfigurations": [
+      {
+        "ContextPath": "ASwitch",
+        "CommandLineKey": "x",
+        "Style": "Switch",
+        "ValuesSatisfied": true,
+        "CorrectText": "true"
+      }
+    ]
+  },
+  {
+    "CommandLine": "-z excess",
+    "Style": "Linux",
+    "UnkeyedValues": 0,
+    "UnknownKeys": 1,
+    "OptionConfigurations": [
+      {
+        "ContextPath": "ASwitch",
+        "CommandLineKey": "x",
+        "Style": "Switch",
+        "CorrectText": "false"
+      }
+    ]
+  },
+  {
+    "CommandLine": "-x",
+    "Style": "Linux",
+    "UnkeyedValues": 0,
+    "UnknownKeys": 0,
+    "OptionConfigurations": [
+      {
+        "ContextPath": "ASingleValue",
+        "CommandLineKey": "x",
+        "Style": "SingleValued"
+      }
+    ]
+  },
+  {
+    "CommandLine": "-z",
+    "Style": "Linux",
+    "UnkeyedValues": 0,
+    "UnknownKeys": 1,
+    "OptionConfigurations": [
+      {
+        "ContextPath": "ASingleValue",
+        "CommandLineKey": "x",
+        "Style": "SingleValued"
+      }
+    ]
+  },
+  {
+    "CommandLine": "-x expected",
+    "Style": "Linux",
+    "UnkeyedValues": 0,
+    "UnknownKeys": 0,
+    "OptionConfigurations": [
+      {
+        "ContextPath": "ASingleValue",
+        "CommandLineKey": "x",
+        "Style": "SingleValued",
+        "ValuesSatisfied": true,
+        "CorrectText": "expected"
+      }
+    ]
+  },
+  {
+    "CommandLine": "-z expected",
+    "Style": "Linux",
+    "UnkeyedValues": 0,
+    "UnknownKeys": 1,
+    "OptionConfigurations": [
+      {
+        "ContextPath": "ASingleValue",
+        "CommandLineKey": "x",
+        "Style": "SingleValued"
+      }
+    ]
+  },
+  {
+    "CommandLine": "-x expected excess",
+    "Style": "Linux",
+    "UnkeyedValues": 1,
+    "UnknownKeys": 0,
+    "OptionConfigurations": [
+      {
+        "ContextPath": "ASingleValue",
+        "CommandLineKey": "x",
+        "Style": "SingleValued",
+        "ValuesSatisfied": true,
+        "CorrectText": "expected"
+      }
+    ]
+  },
+  {
+    "CommandLine": "-z expected excess",
+    "Style": "Linux",
+    "UnkeyedValues": 0,
+    "UnknownKeys": 1,
+    "OptionConfigurations": [
+      {
+        "ContextPath": "ASingleValue",
+        "CommandLineKey": "x",
+        "Style": "SingleValued"
+      }
+    ]
+  },
+  {
+    "CommandLine": "-x EnumValue1",
+    "Style": "Linux",
+    "UnkeyedValues": 0,
+    "UnknownKeys": 0,
+    "OptionConfigurations": [
+      {
+        "ContextPath": "AnEnumValue",
+        "CommandLineKey": "x",
+        "Style": "SingleValued",
+        "ValuesSatisfied": true,
+        "CorrectText": "EnumValue1"
+      }
+    ]
+  },
+  {
+    "CommandLine": "-x EnumValue2",
+    "Style": "Linux",
+    "UnkeyedValues": 0,
+    "UnknownKeys": 0,
+    "OptionConfigurations": [
+      {
+        "ContextPath": "AnEnumValue",
+        "CommandLineKey": "x",
+        "Style": "SingleValued",
+        "ValuesSatisfied": true,
+        "CorrectText": "EnumValue2"
+      }
+    ]
+  },
+  {
+    "CommandLine": "-x EnumValue3",
+    "Style": "Linux",
+    "UnkeyedValues": 0,
+    "UnknownKeys": 0,
+    "OptionConfigurations": [
+      {
+        "ContextPath": "AnEnumValue",
+        "CommandLineKey": "x",
+        "Style": "SingleValued",
+        "ValuesSatisfied": true,
+        "ConversionWillFail":  true 
+      }
+    ]
+  },
+  {
+    "CommandLine": "-x enumvalue1",
+    "Style": "Linux",
+    "UnkeyedValues": 0,
+    "UnknownKeys": 0,
+    "OptionConfigurations": [
+      {
+        "ContextPath": "AnEnumValue",
+        "CommandLineKey": "x",
+        "Style": "SingleValued",
+        "ValuesSatisfied": true,
+        "CorrectText": "EnumValue1"
+      }
+    ]
+  },
+  {
+    "CommandLine": "-x EnumValue1",
+    "Style": "Linux",
+    "UnkeyedValues": 0,
+    "UnknownKeys": 0,
+    "OptionConfigurations": [
+      {
+        "ContextPath": "AFlagEnumValue",
+        "CommandLineKey": "x",
+        "Style": "ConcatenatedSingleValue",
+        "ValuesSatisfied": true,
+        "CorrectText": "EnumValue1"
+      }
+    ]
+  },
+  {
+    "CommandLine": "-x EnumValue2",
+    "Style": "Linux",
+    "UnkeyedValues": 0,
+    "UnknownKeys": 0,
+    "OptionConfigurations": [
+      {
+        "ContextPath": "AFlagEnumValue",
+        "CommandLineKey": "x",
+        "Style": "ConcatenatedSingleValue",
+        "ValuesSatisfied": true,
+        "CorrectText": "EnumValue2"
+      }
+    ]
+  },
+  {
+    "CommandLine": "-x EnumValue1 EnumValue2",
+    "Style": "Linux",
+    "UnkeyedValues": 0,
+    "UnknownKeys": 0,
+    "OptionConfigurations": [
+      {
+        "ContextPath": "AFlagEnumValue",
+        "CommandLineKey": "x",
+        "Style": "ConcatenatedSingleValue",
+        "ValuesSatisfied": true,
+        "CorrectText": "EnumValue1, EnumValue2"
+      }
+    ]
+  },
+  {
+    "CommandLine": "-x",
+    "Style": "Linux",
+    "UnkeyedValues": 0,
+    "UnknownKeys": 0,
+    "OptionConfigurations": [
+      {
+        "ContextPath": "ACollection",
+        "CommandLineKey": "x",
+        "Style": "Collection"
+      }
+    ]
+  },
+  {
+    "CommandLine": "-z",
+    "Style": "Linux",
+    "UnkeyedValues": 0,
+    "UnknownKeys": 1,
+    "OptionConfigurations": [
+      {
+        "ContextPath": "ACollection",
+        "CommandLineKey": "x",
+        "Style": "Collection"
+      }
+    ]
+  },
+  {
+    "CommandLine": "-x item1",
+    "Style": "Linux",
+    "UnkeyedValues": 0,
+    "UnknownKeys": 0,
+    "OptionConfigurations": [
+      {
+        "ContextPath": "ACollection",
+        "CommandLineKey": "x",
+        "Style": "Collection",
+        "ValuesSatisfied": true,
+        "CorrectTextArray": [
+          "item1"
+        ]
+      }
+    ]
+  },
+  {
+    "CommandLine": "-z item1",
+    "Style": "Linux",
+    "UnkeyedValues": 0,
+    "UnknownKeys": 1,
+    "OptionConfigurations": [
+      {
+        "ContextPath": "ACollection",
+        "CommandLineKey": "x",
+        "Style": "Collection"
+      }
+    ]
+  },
+  {
+    "CommandLine": "-z item1 -q item2",
+    "Style": "Linux",
+    "UnkeyedValues": 0,
+    "UnknownKeys": 2,
+    "OptionConfigurations": [
+      {
+        "ContextPath": "ACollection",
+        "CommandLineKey": "x",
+        "Style": "Collection"
+      }
+    ]
+  },
+  {
+    "CommandLine": "-x item1 item2",
+    "Style": "Linux",
+    "UnkeyedValues": 0,
+    "UnknownKeys": 0,
+    "OptionConfigurations": [
+      {
+        "ContextPath": "ACollection",
+        "CommandLineKey": "x",
+        "Style": "Collection",
+        "ValuesSatisfied": true,
+        "CorrectTextArray": [
+          "item1",
+          "item2"
+        ]
+      }
+    ]
+  },
+  {
+    "CommandLine": "-z item1 item2",
+    "Style": "Linux",
+    "UnkeyedValues": 0,
+    "UnknownKeys": 1,
+    "OptionConfigurations": [
+      {
+        "ContextPath": "ACollection",
+        "CommandLineKey": "x",
+        "Style": "Collection"
+      }
+    ]
+  }
+]

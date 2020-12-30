@@ -1,0 +1,18 @@
+[
+  {
+    "CommandLine": "/x",
+    "Style": "Windows",
+    "TargetType": "BasicTarget",
+    "UnkeyedParameters": 0,
+    "UnknownKeys": 0,
+    "OptionConfigurations": [
+      {
+        "ContextPath": "ASwitch",
+        "CommandLineKey": "x",
+        "Style": "Switch",
+        "ValuesSatisfied": true,
+        "CorrectText": "true"
+      }
+    ]
+  }
+]

@@ -47,13 +47,16 @@
 	  <None Update="appConfig.json">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </None>
-	  <None Update="embeddedProperties.json">
+	  <None Update="test-files\embeddedProperties.json">
 	    <CopyToOutputDirectory>Always</CopyToOutputDirectory>
 	  </None>
-	  <None Update="singleProperties.json">
+	  <None Update="test-files\singleProperties.json">
 	    <CopyToOutputDirectory>Always</CopyToOutputDirectory>
 	  </None>
-	  <None Update="tokenizer.json">
+	  <None Update="test-files\parser.json">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </None>
+	  <None Update="test-files\tokenizer.json">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </None>
 	</ItemGroup>

@@ -1,12 +1,12 @@
 ﻿using System.Collections.Generic;
-using J4JSoftware.CommandLine;
+using J4JSoftware.Configuration.CommandLine;
 
 namespace J4JSoftware.Binder.Tests
 {
     public static class TestExtensions
     {
         public static void CreateOptionsFromContextKeys( 
-            this OptionCollection options,
+            this IOptionCollection options,
             IEnumerable<OptionConfig> optConfigs )
         {
             foreach( var optConfig in optConfigs )
@@ -15,7 +15,7 @@ namespace J4JSoftware.Binder.Tests
             }
         }
 
-        public static OptionCollection CreateOptionFromContextKey( this OptionCollection options, OptionConfig optConfig )
+        public static IOptionCollection CreateOptionFromContextKey( this IOptionCollection options, OptionConfig optConfig )
         {
             var option = options.Add( optConfig.ContextPath )
                 .AddCommandLineKey( optConfig.CommandLineKey )

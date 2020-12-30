@@ -1,4 +1,4 @@
-﻿namespace J4JSoftware.CommandLine
+﻿namespace J4JSoftware.Configuration.CommandLine
 {
     public enum CommandLineStyle
     {

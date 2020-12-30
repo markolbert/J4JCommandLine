@@ -2,29 +2,10 @@
 
   <PropertyGroup>
     <TargetFramework>net5.0</TargetFramework>
-    <AssemblyName>J4JSoftware.CommandLine.Binder</AssemblyName>
-    <RootNamespace>J4JSoftware.CommandLine</RootNamespace>
+    <AssemblyName>J4JSoftware.Configuration.CommandLine</AssemblyName>
+    <RootNamespace>J4JSoftware.Configuration.CommandLine</RootNamespace>
     <Nullable>enable</Nullable>
   </PropertyGroup>
-
-  <ItemGroup>
-    <Compile Remove="type-initializer\**" />
-    <EmbeddedResource Remove="type-initializer\**" />
-    <None Remove="type-initializer\**" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Compile Remove="allocating\AllocationContext.cs" />
-    <Compile Remove="allocating\AllocationElement.AllocationContext2.cs" />
-    <Compile Remove="allocating\AllocationElement.cs" />
-    <Compile Remove="allocating\NewAllocator.cs" />
-    <Compile Remove="options\IContextKey.cs" />
-    <Compile Remove="options\OptionConfiguration.cs" />
-    <Compile Remove="options\OptionRequiredAttribute.cs" />
-    <Compile Remove="options\Options.cs" />
-    <Compile Remove="options\SimpleContextKey.cs" />
-    <Compile Remove="options\TypeBoundOptions.cs" />
-  </ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="Microsoft.Extensions.Configuration" Version="5.0.0" />

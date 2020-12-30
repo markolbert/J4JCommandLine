@@ -2,12 +2,13 @@
 using System.Linq;
 using System.Text;
 
-namespace J4JSoftware.CommandLine
+namespace J4JSoftware.Configuration.CommandLine
 {
     public static class OptionExtensions
     {
-        public static string ToTextPath( this List<string> contextKeys ) =>
-            contextKeys.Aggregate(
+        public static string ToTextPath( this List<string> contextKeys )
+        {
+            return contextKeys.Aggregate(
                 new StringBuilder(),
                 ( sb, t ) =>
                 {
@@ -19,6 +20,7 @@ namespace J4JSoftware.CommandLine
                     return sb;
                 },
                 sb => sb.ToString() );
+        }
 
         // creates a list of all combinations of the specified key and the allowed key prefixes
         // (e.g., "-x, --x, /x" for 'x')
@@ -30,7 +32,7 @@ namespace J4JSoftware.CommandLine
                 return retVal;
 
             retVal.AddRange(
-                masterText[TextUsageType.Prefix].Aggregate(
+                masterText[ TextUsageType.Prefix ].Aggregate(
                     new List<string>(),
                     ( innerList, delim ) =>
                     {
@@ -46,20 +48,20 @@ namespace J4JSoftware.CommandLine
 
         // creates a list of all combinations of an Option's keys and the allowed key prefixes
         // (e.g., "-x, --x, /x" for 'x')
-        public static List<string> ConjugateKeys(this Option option, MasterTextCollection masterText)
+        public static List<string> ConjugateKeys( this Option option, MasterTextCollection masterText )
         {
             var retVal = new List<string>();
 
             return option.Keys.Aggregate(
                 retVal,
-                (list, key) =>
+                ( list, key ) =>
                 {
                     list.AddRange(
-                        masterText[TextUsageType.Prefix].Aggregate(
+                        masterText[ TextUsageType.Prefix ].Aggregate(
                             new List<string>(),
-                            (innerList, delim) =>
+                            ( innerList, delim ) =>
                             {
-                                innerList.Add($"{delim}{key}");
+                                innerList.Add( $"{delim}{key}" );
 
                                 return innerList;
                             }
@@ -67,7 +69,7 @@ namespace J4JSoftware.CommandLine
                     );
 
                     return list;
-                });
+                } );
         }
     }
 }

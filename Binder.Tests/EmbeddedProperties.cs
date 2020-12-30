@@ -17,7 +17,7 @@ namespace J4JSoftware.Binder.Tests
             Bind<EmbeddedTarget, TestFlagEnum>(x => x.Target1.AFlagEnumValue);
             Bind<EmbeddedTarget, List<string>>(x => x.Target1.ACollection);
 
-            ValidateAllocations();
+            ValidateTokenizing();
         }
 
         [Theory]

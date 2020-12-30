@@ -1,0 +1,205 @@
+[
+  {
+    "CommandLine": "/x",
+    "Style": "Windows",
+    "Data": [
+      {
+        "Type": "KeyPrefix",
+        "Text": "/"
+      },
+      {
+        "Type": "Text",
+        "Text": "x"
+      }
+    ]
+  },
+  {
+    "CommandLine": "/x abcd",
+    "Style": "Windows",
+    "Data": [
+      {
+        "Type": "KeyPrefix",
+        "Text": "/"
+      },
+      {
+        "Type": "Text",
+        "Text": "x"
+      },
+      {
+        "Type": "Separator",
+        "Text": " "
+      },
+      {
+        "Type": "Text",
+        "Text": "abcd"
+      }
+    ]
+  },
+  {
+    "CommandLine": "/x \"ab cd\"",
+    "Style": "Windows",
+    "Data": [
+      {
+        "Type": "KeyPrefix",
+        "Text": "/"
+      },
+      {
+        "Type": "Text",
+        "Text": "x"
+      },
+      {
+        "Type": "Separator",
+        "Text": " "
+      },
+      {
+        "Type": "Text",
+        "Text": "ab cd"
+      }
+    ]
+  },
+  {
+    "CommandLine": "/x \"'Now is the time for all good men'\"",
+    "Style": "Windows",
+    "Data": [
+      {
+        "Type": "KeyPrefix",
+        "Text": "/"
+      },
+      {
+        "Type": "Text",
+        "Text": "x"
+      },
+      {
+        "Type": "Separator",
+        "Text": " "
+      },
+      {
+        "Type": "Text",
+        "Text": "'Now is the time for all good men'"
+      }
+    ]
+  },
+  {
+    "CommandLine": "/x \"ab cd /y def",
+    "Style": "Windows",
+    "Data": [
+      {
+        "Type": "KeyPrefix",
+        "Text": "/"
+      },
+      {
+        "Type": "Text",
+        "Text": "x"
+      },
+      {
+        "Type": "Separator",
+        "Text": " "
+      }
+    ]
+  },
+
+  {
+    "CommandLine": "/ x",
+    "Style": "Windows",
+    "Data": [
+      {
+        "Type": "KeyPrefix",
+        "Text": "/"
+      },
+      {
+        "Type": "Separator",
+        "Text": " "
+      },
+      {
+        "Type": "Text",
+        "Text": "x"
+      }
+    ]
+  },
+  {
+    "CommandLine": "abcd",
+    "Style": "Windows",
+    "Data": [
+      {
+        "Type": "Text",
+        "Text": "abcd"
+      }
+    ]
+  },
+  {
+    "CommandLine": "     abcd",
+    "Style": "Windows",
+    "Data": [
+      {
+        "Type": "Separator",
+        "Text": " "
+      },
+      {
+        "Type": "Text",
+        "Text": "abcd"
+      }
+    ]
+  },
+  {
+    "CommandLine": "/x /y abc /z abc def",
+    "Style": "Windows",
+    "Data": [
+      {
+        "Type": "KeyPrefix",
+        "Text": "/"
+      },
+      {
+        "Type": "Text",
+        "Text": "x"
+      },
+      {
+        "Type": "Separator",
+        "Text": " "
+      },
+      {
+        "Type": "KeyPrefix",
+        "Text": "/"
+      },
+      {
+        "Type": "Text",
+        "Text": "y"
+      },
+      {
+        "Type": "Separator",
+        "Text": " "
+      },
+      {
+        "Type": "Text",
+        "Text": "abc"
+      },
+      {
+        "Type": "Separator",
+        "Text": " "
+      },
+      {
+        "Type": "KeyPrefix",
+        "Text": "/"
+      },
+      {
+        "Type": "Text",
+        "Text": "z"
+      },
+      {
+        "Type": "Separator",
+        "Text": " "
+      },
+      {
+        "Type": "Text",
+        "Text": "abc"
+      },
+      {
+        "Type": "Separator",
+        "Text": " "
+      },
+      {
+        "Type": "Text",
+        "Text": "def"
+      }
+    ]
+  }
+]

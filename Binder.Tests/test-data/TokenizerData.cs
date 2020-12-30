@@ -1,4 +1,4 @@
-﻿using J4JSoftware.CommandLine;
+﻿using J4JSoftware.Configuration.CommandLine;
 #pragma warning disable 8618
 
 namespace J4JSoftware.Binder.Tests
