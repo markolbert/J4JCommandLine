@@ -15,13 +15,11 @@ namespace J4JSoftware.Binder.Tests
         [MemberData(nameof(TestDataSource.GetTokenizerData), MemberType = typeof(TestDataSource))]
         public void Tokenizer( TokenizerConfig config )
         {
-            var cmdLogger = new CommandLineLogger();
-
             var tokenizer = new Tokenizer(
-                AvailableTokens.GetDefault(CommandLineStyle.Windows, cmdLogger), 
-                cmdLogger,
-                new ConsolidateQuotedText(StringComparison.OrdinalIgnoreCase, cmdLogger),
-                new MergeSequentialSeparators(cmdLogger) );
+                AvailableTokens.GetDefault(CommandLineStyle.Windows, LoggerFactory), 
+                LoggerFactory,
+                new ConsolidateQuotedText(StringComparison.OrdinalIgnoreCase, LoggerFactory()),
+                new MergeSequentialSeparators(LoggerFactory()) );
 
             var tokens = tokenizer.Tokenize( config.CommandLine );
 
@@ -43,8 +41,7 @@ namespace J4JSoftware.Binder.Tests
         {
             Initialize(config);
 
-            var cmdLogger = new CommandLineLogger();
-            var parser = new Parser( Options, cmdLogger );
+            var parser = new Parser( Options, LoggerFactory );
 
             parser.Options.CreateOptionsFromContextKeys( config.OptionConfigurations );
 

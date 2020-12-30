@@ -6,6 +6,7 @@ using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
 using System.Text;
+using J4JSoftware.Logging;
 
 namespace J4JSoftware.Configuration.CommandLine
 {
@@ -15,23 +16,32 @@ namespace J4JSoftware.Configuration.CommandLine
         private readonly List<IOption> _options = new();
 
         private readonly Dictionary<Type, string> _typePrefixes = new();
+        private readonly IJ4JLogger? _logger;
 
-        public OptionCollectionNG( CommandLineStyle cmdLineStyle = CommandLineStyle.Windows )
+        public OptionCollectionNG( 
+            CommandLineStyle cmdLineStyle = CommandLineStyle.Windows, 
+            Func<IJ4JLogger>? loggerFactory = null 
+            )
         {
             CommandLineStyle = cmdLineStyle;
-            Log = new CommandLineLogger();
-            MasterText = MasterTextCollection.GetDefault( cmdLineStyle, Log );
+
+            var cache = new J4JLoggerCache();
+            loggerFactory ??= () => new J4JCachedLogger( cache );
+
+            _logger = loggerFactory();
+
+            MasterText = MasterTextCollection.GetDefault( cmdLineStyle, loggerFactory );
         }
 
         public OptionCollectionNG( MasterTextCollection mt )
         {
             CommandLineStyle = CommandLineStyle.UserDefined;
-            Log = new CommandLineLogger();
             MasterText = mt;
+
+            _logger = mt.LoggerFactory?.Invoke();
         }
 
         public CommandLineStyle CommandLineStyle { get; }
-        public CommandLineLogger Log { get; }
         public MasterTextCollection MasterText { get; }
         public ReadOnlyCollection<IOption> Options => _options.AsReadOnly();
         public int Count => _options.Count;
@@ -97,7 +107,7 @@ namespace J4JSoftware.Configuration.CommandLine
 
                         if( !ValidateProperty( propInfo, out var curStyle ) )
                         {
-                            Log.LogError( $"Property '{propInfo.Name}' is invalid" );
+                            _logger?.Error<string>( "Property '{0}' is invalid", propInfo.Name );
                             return null;
                         }
 
@@ -117,7 +127,7 @@ namespace J4JSoftware.Configuration.CommandLine
 
                             if( !ValidateProperty( propInfo2, out var curStyle2 ) )
                             {
-                                Log.LogError( $"Property '{propInfo2.Name}' is invalid" );
+                                _logger?.Error<string>( "Property '{0}' is invalid", propInfo2.Name );
                                 return null;
                             }
 
@@ -231,7 +241,9 @@ namespace J4JSoftware.Configuration.CommandLine
 
             if( genType.GenericTypeArguments.Length != 1 )
             {
-                Log.LogError( $"Generic type '{genType.Name}' does not have just one generic Type argument" );
+                _logger?.Error<string>( "Generic type '{0}' does not have just one generic Type argument",
+                    genType.Name );
+
                 return false;
             }
 
@@ -240,7 +252,7 @@ namespace J4JSoftware.Configuration.CommandLine
 
             if( !typeof(List<>).MakeGenericType( genType.GenericTypeArguments[ 0 ] ).IsAssignableFrom( genType ) )
             {
-                Log.LogError( $"Generic type '{genType}' is not a List<> type" );
+                _logger?.Error( "Generic type '{0}' is not a List<> type", genType );
                 return false;
             }
 
@@ -262,7 +274,7 @@ namespace J4JSoftware.Configuration.CommandLine
                 || toCheck.GetConstructors().Any( c => c.GetParameters().Length == 0 ) )
                 return true;
 
-            Log.LogError( $"Unsupported type '{toCheck}'" );
+            _logger?.Error( "Unsupported type '{0}'", toCheck );
 
             return false;
         }
@@ -271,19 +283,19 @@ namespace J4JSoftware.Configuration.CommandLine
         {
             if( methodInfo == null )
             {
-                Log.LogError( $"Property '{propName}' does not have a get or set method" );
+                _logger?.Error<string>( "Property '{0}' does not have a get or set method", propName );
                 return false;
             }
 
             if( !methodInfo.IsPublic )
             {
-                Log.LogError( $"Property '{propName}::{methodInfo.Name}' is not bindable" );
+                _logger?.Error<string, string>( "Property '{0}::{1}' is not bindable", propName, methodInfo.Name );
                 return false;
             }
 
             if( methodInfo.GetParameters().Length > allowedParams )
             {
-                Log.LogError( $"Property '{propName}::{methodInfo.Name}' is indexed" );
+                _logger?.Error<string>( "Property '{0}::{1}' is indexed", propName, methodInfo.Name );
                 return false;
             }
 

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using J4JSoftware.Logging;
 
 namespace J4JSoftware.Configuration.CommandLine
 {
@@ -11,9 +12,13 @@ namespace J4JSoftware.Configuration.CommandLine
         private readonly Dictionary<TokenType, Dictionary<TokenType, ParsingAction?>> _table =
             new();
 
-        public ParsingTable( IOptionCollection options, CommandLineLogger logger )
+        private readonly IJ4JLogger? _logger;
+
+        public ParsingTable( IOptionCollection options, Func<IJ4JLogger>? loggerFactory = null )
         {
-            Entries = new TokenEntry.TokenEntries( options, logger );
+            _logger = loggerFactory?.Invoke();
+
+            Entries = new TokenEntry.TokenEntries( options, loggerFactory?.Invoke() );
 
             foreach( var row in Enum.GetValues( typeof(TokenType) )
                 .Cast<TokenType>() )

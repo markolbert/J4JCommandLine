@@ -39,6 +39,6 @@ namespace J4JSoftware.Binder.Tests
                 .As<IJ4JLoggerConfiguration>();
         }
 
-        public IJ4JLogger Logger => Host!.Services.GetRequiredService<IJ4JLogger>();
+        public Func<IJ4JLogger> LoggerFactory => () => Host!.Services.GetRequiredService<IJ4JLogger>();
     }
 }

@@ -1,4 +1,7 @@
-﻿using Microsoft.Extensions.Configuration;
+﻿using System;
+using J4JSoftware.Logging;
+using Microsoft.Extensions.Configuration;
+using Serilog.Core;
 
 namespace J4JSoftware.Configuration.CommandLine
 {
@@ -9,29 +12,28 @@ namespace J4JSoftware.Configuration.CommandLine
 
         public J4JCommandLineSource(
             IOptionCollection options,
-            string cmdLine
+            string cmdLine,
+            Func<IJ4JLogger>? loggerFactory = null
         )
         {
             Options = options;
             _cmdLine = cmdLine;
-            Logger = new CommandLineLogger();
 
-            var tokenizer = new Tokenizer( Logger, options.CommandLineStyle, options.MasterText.TextComparison );
-            var parsingTable = new ParsingTable( options, Logger );
+            var tokenizer = new Tokenizer( options.CommandLineStyle, options.MasterText.TextComparison, loggerFactory );
+            var parsingTable = new ParsingTable( options, loggerFactory);
 
-            _parser = new Parser( options, tokenizer, parsingTable, Logger );
+            _parser = new Parser( options, tokenizer, parsingTable, loggerFactory?.Invoke() );
         }
 
         public J4JCommandLineSource(
             IOptionCollection options,
             string[] args,
-            CommandLineLogger logger
+            Func<IJ4JLogger>? loggerFactory
         )
-            : this( options, string.Join( " ", args ) )
+            : this( options, string.Join( " ", args ), loggerFactory )
         {
         }
 
-        public CommandLineLogger Logger { get; }
         public IOptionCollection Options { get; }
 
         public IConfigurationProvider Build( IConfigurationBuilder builder )

@@ -1,15 +1,16 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using J4JSoftware.Logging;
 
 namespace J4JSoftware.Configuration.CommandLine
 {
     public partial class AvailableTokens
     {
         private readonly Dictionary<TokenType, List<string>> _available = new();
-        private readonly CommandLineLogger _logger;
+        private readonly IJ4JLogger? _logger;
 
-        public AvailableTokens( StringComparison textComp, CommandLineLogger logger )
+        public AvailableTokens( StringComparison textComp, IJ4JLogger? logger )
         {
             TextComparison = textComp;
             _logger = logger;
@@ -33,14 +34,14 @@ namespace J4JSoftware.Configuration.CommandLine
         {
             if( type == TokenType.Text || type == TokenType.StartOfInput )
             {
-                _logger.LogError( $"Cannot include {type} tokens" );
+                _logger?.Error( "Cannot include {0} tokens", type );
                 return false;
             }
 
             if( _available.SelectMany( kvp => kvp.Value )
                 .Any( t => t.Equals( text, TextComparison ) ) )
             {
-                _logger.LogError( $"Duplicate token text '{text}' ({type})" );
+                _logger?.Error( "Duplicate token text '{0}' ({1})", text, type);
                 return false;
             }
 
@@ -60,7 +61,7 @@ namespace J4JSoftware.Configuration.CommandLine
 
             if( idx < 0 )
             {
-                _logger.LogError( $"Couldn't find '{text}' among tokens to delete" );
+                _logger?.Error<string>( "Couldn't find '{0}' among tokens to delete", text );
                 return false;
             }
 

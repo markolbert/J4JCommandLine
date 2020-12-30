@@ -2,19 +2,20 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using J4JSoftware.Logging;
+
 #pragma warning disable 8618
 
 namespace J4JSoftware.Configuration.CommandLine
 {
     public class ConsolidateQuotedText : ICleanupTokens
     {
-        private readonly CommandLineLogger _logger;
-
         private readonly StringComparison _textComparison;
+        private readonly IJ4JLogger? _logger;
 
         public ConsolidateQuotedText(
             StringComparison textComparison,
-            CommandLineLogger logger )
+            IJ4JLogger? logger )
         {
             _textComparison = textComparison;
             _logger = logger;
@@ -33,8 +34,8 @@ namespace J4JSoftware.Configuration.CommandLine
                 // "quoted" tokens
                 if( curPair.End == null )
                 {
-                    _logger.LogError(
-                        $"Unclosed quoter encountered, command line truncated at token #{curPair.Start.Index}" );
+                    _logger?.Error( "Unclosed quoter encountered, command line truncated at token #{0}", 
+                        curPair.Start.Index );
 
                     tokens.RemoveFrom( curPair.Start.Index );
 

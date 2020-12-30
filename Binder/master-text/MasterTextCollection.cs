@@ -2,19 +2,21 @@
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
+using J4JSoftware.Logging;
 
 namespace J4JSoftware.Configuration.CommandLine
 {
     // a class which keeps track of every text element (e.g., prefix, value encloser, quote character,
     // option key) used in the framework and ensures they are all used uniquely.
-    public class MasterTextCollection
+    public partial class MasterTextCollection
     {
         private readonly List<TextUsage> _items = new();
-        private readonly CommandLineLogger _logger;
+        private readonly IJ4JLogger? _logger;
 
-        public MasterTextCollection( StringComparison comparison, CommandLineLogger logger )
+        public MasterTextCollection( StringComparison comparison, Func<IJ4JLogger>? loggerFactory = null )
         {
             TextComparison = comparison;
+            LoggerFactory = loggerFactory;
 
             TextComparer = comparison switch
             {
@@ -27,55 +29,19 @@ namespace J4JSoftware.Configuration.CommandLine
                 _ => StringComparer.CurrentCultureIgnoreCase
             };
 
-            _logger = logger;
+            _logger = loggerFactory?.Invoke();
         }
 
         public StringComparison TextComparison { get; }
         public IEqualityComparer<string> TextComparer { get; }
+
+        internal Func<IJ4JLogger>? LoggerFactory { get; }
 
         // gets a list of all the items for the specified type of usage
         public List<string> this[ TextUsageType usage ] =>
             _items.Where( x => x.Usage == usage )
                 .Select( x => x.Text )
                 .ToList();
-
-        public static MasterTextCollection GetDefault(
-            CommandLineStyle cmdLineStyle,
-            CommandLineLogger logger,
-            StringComparison? comparison = null )
-        {
-            var retVal = new MasterTextCollection( comparison ?? StringComparison.OrdinalIgnoreCase, logger );
-
-            switch( cmdLineStyle )
-            {
-                case CommandLineStyle.Linux:
-                    retVal.AddRange( TextUsageType.Prefix, "-", "--" );
-                    retVal.AddRange( TextUsageType.Quote, "\"", "'" );
-                    retVal.Add( TextUsageType.ValueEncloser, "=" );
-                    retVal.AddRange( TextUsageType.Separator, " ", "\t" );
-
-                    return retVal;
-
-                case CommandLineStyle.Universal:
-                    retVal.AddRange( TextUsageType.Prefix, "-", "--", "/" );
-                    retVal.AddRange( TextUsageType.Quote, "\"", "'" );
-                    retVal.Add( TextUsageType.ValueEncloser, "=" );
-                    retVal.AddRange( TextUsageType.Separator, " ", "\t" );
-
-                    return retVal;
-
-                case CommandLineStyle.Windows:
-                    retVal.AddRange( TextUsageType.Prefix, "/", "-", "--" );
-                    retVal.Add( TextUsageType.Quote, "\"" );
-                    retVal.Add( TextUsageType.ValueEncloser, "=" );
-                    retVal.AddRange( TextUsageType.Separator, " ", "\t" );
-
-                    return retVal;
-
-                default:
-                    throw new InvalidEnumArgumentException( $"Unsupported CommandLineStyle '{cmdLineStyle}'" );
-            }
-        }
 
         // indicates whether the supplied text exists in the collection
         public bool Contains( string text )
@@ -101,13 +67,13 @@ namespace J4JSoftware.Configuration.CommandLine
         {
             if( Contains( item ) )
             {
-                _logger.LogInformation( $"Duplicate {usage} '{item}'" );
+                _logger?.Information<TextUsageType, string>( "Duplicate {0} '{1}'", usage, item );
                 return false;
             }
 
             if( usage == TextUsageType.Undefined )
             {
-                _logger.LogInformation( $"Cannot add {usage} items ({item})" );
+                _logger?.Information<TextUsageType, string>( "Cannot add {0} items ({1})", usage, item );
                 return false;
             }
 
@@ -129,7 +95,10 @@ namespace J4JSoftware.Configuration.CommandLine
 
             if( usage == TextUsageType.Undefined )
             {
-                _logger.LogInformation( $"Cannot add {usage} items ({string.Join( ",", items )})" );
+                _logger?.Information<TextUsageType, string>( "Cannot add {0} items ({1})", 
+                    usage,
+                    string.Join( ",", items ) );
+
                 return false;
             }
 

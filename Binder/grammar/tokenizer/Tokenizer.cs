@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using J4JSoftware.Logging;
 
 namespace J4JSoftware.Configuration.CommandLine
 {
@@ -7,48 +8,47 @@ namespace J4JSoftware.Configuration.CommandLine
     {
         private readonly ICleanupTokens[] _cleanupProcessors;
         private readonly AvailableTokens _collection;
-        private readonly CommandLineLogger _logger;
+        private readonly IJ4JLogger? _logger;
 
         public Tokenizer(
             AvailableTokens collection,
-            CommandLineLogger logger,
+            Func<IJ4JLogger>? loggerFactory,
             params ICleanupTokens[] cleanupProcessors
         )
         {
             _collection = collection;
+            _logger = loggerFactory?.Invoke();
 
             if( cleanupProcessors.Length > 0 )
                 _cleanupProcessors = cleanupProcessors;
             else
                 _cleanupProcessors = new ICleanupTokens[]
                 {
-                    new ConsolidateQuotedText( collection.TextComparison, logger ),
-                    new MergeSequentialSeparators( logger )
+                    new ConsolidateQuotedText( collection.TextComparison, loggerFactory?.Invoke() ),
+                    new MergeSequentialSeparators( loggerFactory?.Invoke() )
                 };
-
-            _logger = logger;
         }
 
         public Tokenizer(
-            CommandLineLogger logger,
             CommandLineStyle style = CommandLineStyle.Windows,
             StringComparison? textComparison = null,
+            Func<IJ4JLogger>? loggerFactory = null,
             params ICleanupTokens[] cleanupProcessors
         )
         {
+            _logger = loggerFactory?.Invoke();
+
             textComparison ??= StringComparison.OrdinalIgnoreCase;
-            _collection = AvailableTokens.GetDefault( style, logger, textComparison );
+            _collection = AvailableTokens.GetDefault( style, loggerFactory, textComparison );
 
             if( cleanupProcessors.Length > 0 )
                 _cleanupProcessors = cleanupProcessors;
             else
                 _cleanupProcessors = new ICleanupTokens[]
                 {
-                    new ConsolidateQuotedText( textComparison.Value, logger ),
-                    new MergeSequentialSeparators( logger )
+                    new ConsolidateQuotedText( textComparison.Value, loggerFactory?.Invoke() ),
+                    new MergeSequentialSeparators( loggerFactory?.Invoke() )
                 };
-
-            _logger = logger;
         }
 
         public List<Token> Tokenize( string cmdLine )

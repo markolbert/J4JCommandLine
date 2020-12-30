@@ -1,27 +1,30 @@
-﻿namespace J4JSoftware.Configuration.CommandLine
+﻿using System;
+using J4JSoftware.Logging;
+
+namespace J4JSoftware.Configuration.CommandLine
 {
     public class Parser
     {
-        private readonly CommandLineLogger _logger;
+        private readonly IJ4JLogger? _logger;
         private readonly ITokenizer _tokenizer;
 
         public Parser(
-            CommandLineLogger logger,
-            CommandLineStyle style = CommandLineStyle.Windows
+            CommandLineStyle style = CommandLineStyle.Windows,
+            Func<IJ4JLogger>? loggerFactory = null
         )
-            : this( new OptionCollectionNG( style ), logger )
+            : this( new OptionCollectionNG( style ), loggerFactory )
         {
         }
 
         public Parser(
             IOptionCollection options,
-            CommandLineLogger logger
+            Func<IJ4JLogger>? loggerFactory = null
         )
             : this(
                 options,
-                new Tokenizer( logger, options.CommandLineStyle, options.MasterText.TextComparison ),
-                new ParsingTable( options, logger ),
-                logger )
+                new Tokenizer( options.CommandLineStyle, options.MasterText.TextComparison, loggerFactory ),
+                new ParsingTable( options, loggerFactory ),
+                loggerFactory?.Invoke() )
         {
         }
 
@@ -29,7 +32,7 @@
             IOptionCollection options,
             ITokenizer tokenizer,
             IParsingTable parsingTable,
-            CommandLineLogger logger
+            IJ4JLogger? logger = null
         )
         {
             Options = options;
@@ -45,7 +48,7 @@
         {
             if( !ParsingTable.IsValid )
             {
-                _logger.LogError( "ParsingTable is invalid" );
+                _logger?.Error( "ParsingTable is invalid" );
                 return false;
             }
 

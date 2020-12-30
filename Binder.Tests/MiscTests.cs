@@ -15,9 +15,8 @@ namespace J4JSoftware.Binder.Tests
 
             var option = Options.Bind<MiscTarget, string?>( x => x.AStringValue, "x" );
             option.Should().NotBeNull();
-            Options.Log.HasMessages().Should().BeFalse();
 
-            var parser = new Parser(Options, Logger);
+            var parser = new Parser(Options, LoggerFactory);
             parser.Parse( cmdLine ).Should().BeTrue();
 
             Options.UnknownKeys.Should().BeEmpty();

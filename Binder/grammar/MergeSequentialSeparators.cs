@@ -1,12 +1,13 @@
 ﻿using System.Collections.Generic;
+using J4JSoftware.Logging;
 
 namespace J4JSoftware.Configuration.CommandLine
 {
     public class MergeSequentialSeparators : ICleanupTokens
     {
-        private readonly CommandLineLogger _logger;
+        private readonly IJ4JLogger? _logger;
 
-        public MergeSequentialSeparators( CommandLineLogger logger )
+        public MergeSequentialSeparators( IJ4JLogger? logger )
         {
             _logger = logger;
         }

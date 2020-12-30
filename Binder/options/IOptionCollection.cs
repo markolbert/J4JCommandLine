@@ -8,7 +8,6 @@ namespace J4JSoftware.Configuration.CommandLine
     public interface IOptionCollection : IEnumerable<IOption>
     {
         CommandLineStyle CommandLineStyle { get; }
-        CommandLineLogger Log { get; }
         MasterTextCollection MasterText { get; }
         ReadOnlyCollection<IOption> Options { get; }
         int Count { get; }

@@ -1,4 +1,5 @@
 ﻿using System.Linq;
+using J4JSoftware.Logging;
 
 namespace J4JSoftware.Configuration.CommandLine
 {
@@ -6,11 +7,11 @@ namespace J4JSoftware.Configuration.CommandLine
     {
         public class TokenEntries
         {
-            private readonly CommandLineLogger _logger;
+            private readonly IJ4JLogger? _logger;
 
             public TokenEntries(
                 IOptionCollection options,
-                CommandLineLogger logger
+                IJ4JLogger? logger
             )
             {
                 Options = options;
@@ -29,8 +30,8 @@ namespace J4JSoftware.Configuration.CommandLine
 
             public bool TerminateWithPrejuidice( Token prevToken, Token curToken, params string[] args )
             {
-                _logger.LogError(
-                    $"{curToken.Type} ('{curToken.Text}') follows {prevToken} ('{prevToken.Text}'), which is not allowed" );
+                _logger?.Error( "{0} ('{1}') follows {2} ('{3}'), which is not allowed",
+                    new object[] { curToken.Type, curToken.Text, prevToken.Type, prevToken.Text } );
 
                 Current = null;
 
@@ -41,13 +42,13 @@ namespace J4JSoftware.Configuration.CommandLine
             {
                 if( Current == null )
                 {
-                    _logger.LogError( "Attempted to commit undefined TokenEntry" );
+                    _logger?.Error( "Attempted to commit undefined TokenEntry" );
                     return false;
                 }
 
                 if( Current.Option == null )
                 {
-                    _logger.LogError( $"Found entry with unexpected key '{Current.Key}'" );
+                    _logger?.Error<string>( "Found entry with unexpected key '{0}'", Current.Key ?? string.Empty );
                     Options.UnknownKeys.Add( Current );
 
                     // create a new TokenEntry
@@ -77,8 +78,11 @@ namespace J4JSoftware.Configuration.CommandLine
             {
                 if( args.Length != 1 )
                 {
-                    _logger.LogError(
-                        $"Invalid number of text arguments ({args.Length}) process {curToken.Type} ('{curToken.Text}')" );
+                    _logger?.Error<int, TokenType, string>(
+                        "Invalid number of text arguments ({0}) process {1} ('{2}')",
+                        args.Length,
+                        curToken.Type,
+                        curToken.Text );
 
                     Current = null;
 

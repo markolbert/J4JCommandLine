@@ -3,6 +3,7 @@ using System.Linq;
 using System.Linq.Expressions;
 using FluentAssertions;
 using J4JSoftware.Configuration.CommandLine;
+using J4JSoftware.Logging;
 using Microsoft.Extensions.Configuration;
 using Xunit;
 
@@ -10,14 +11,20 @@ namespace J4JSoftware.Binder.Tests
 {
     public class BaseTest
     {
+        protected BaseTest()
+        {
+            LoggerFactory = CompositionRoot.Default.LoggerFactory;
+            Logger = LoggerFactory();
+        }
+
+        protected Func<IJ4JLogger> LoggerFactory { get; }
         protected TestConfig? TestConfig { get; private set; }
         protected IOptionCollection Options { get; private set; }
-        protected CommandLineLogger Logger => Options.Log;
+        protected IJ4JLogger Logger { get; }
 
-        protected void Initialize(CommandLineStyle style)
+        protected void Initialize( CommandLineStyle style )
         {
-            Options = new OptionCollectionNG(style);
-            Options.Log.HasMessages().Should().BeFalse();
+            Options = new OptionCollectionNG(style, LoggerFactory);
         }
 
         protected void Initialize( TestConfig testConfig )
@@ -49,7 +56,7 @@ namespace J4JSoftware.Binder.Tests
 
         protected void ValidateTokenizing()
         {
-            var parser = new Parser(Options, Logger);
+            var parser = new Parser(Options, LoggerFactory);
             parser.Parse( TestConfig!.CommandLine ).Should().Be( Options.UnknownKeys.Count == 0 );
 
             Options.UnknownKeys.Count.Should().Be( TestConfig.UnknownKeys );
@@ -67,8 +74,6 @@ namespace J4JSoftware.Binder.Tests
             var config = new ConfigurationBuilder()
                 .AddJ4JCommandLine( TestConfig!.CommandLine, Options )
                 .Build();
-
-            Options.Log.HasMessages().Should().BeFalse();
 
             TParsed? parsed = null;
 
