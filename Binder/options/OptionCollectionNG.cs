@@ -13,15 +13,15 @@ namespace J4JSoftware.Configuration.CommandLine
     public class OptionCollectionNG : IOptionCollection
     {
         private readonly TypeBoundOptionComparer _comparer = new();
+        private readonly IJ4JLogger? _logger;
         private readonly List<IOption> _options = new();
 
         private readonly Dictionary<Type, string> _typePrefixes = new();
-        private readonly IJ4JLogger? _logger;
 
-        public OptionCollectionNG( 
-            CommandLineStyle cmdLineStyle = CommandLineStyle.Windows, 
-            Func<IJ4JLogger>? loggerFactory = null 
-            )
+        public OptionCollectionNG(
+            CommandLineStyle cmdLineStyle = CommandLineStyle.Windows,
+            Func<IJ4JLogger>? loggerFactory = null
+        )
         {
             CommandLineStyle = cmdLineStyle;
 
@@ -141,7 +141,7 @@ namespace J4JSoftware.Configuration.CommandLine
 
                         break;
 
-                    case ParameterExpression paramExpr:
+                    case ParameterExpression:
                         // this is the root/anchor of the expression tree.
                         // we're done
                         curExpr = null;
@@ -309,14 +309,14 @@ namespace J4JSoftware.Configuration.CommandLine
                     yield return key;
         }
 
-        private string GetContextPath( List<PropertyInfo> propElements )
+        private static string GetContextPath( List<PropertyInfo> propElements )
         {
             return propElements.Aggregate(
                 new StringBuilder(),
                 ( sb, pi ) =>
                 {
                     if( sb.Length > 0 )
-                        sb.Append( ":" );
+                        sb.Append(':');
 
                     sb.Append( pi.Name );
 
@@ -326,7 +326,7 @@ namespace J4JSoftware.Configuration.CommandLine
             );
         }
 
-        private bool HasAttribute<TAttr>( Type toCheck )
+        private static bool HasAttribute<TAttr>( Type toCheck )
             where TAttr : Attribute
         {
             return toCheck.GetCustomAttribute<TAttr>() != null;
@@ -337,11 +337,10 @@ namespace J4JSoftware.Configuration.CommandLine
             public bool Equals( ITypeBoundOption? x, ITypeBoundOption? y )
             {
                 if( ReferenceEquals( x, y ) ) return true;
-                if( ReferenceEquals( x, null ) ) return false;
-                if( ReferenceEquals( y, null ) ) return false;
-                if( x.GetType() != y.GetType() ) return false;
+                if( x is null) return false;
+                if( y is null) return false;
 
-                return x.TargetType.Equals( y.TargetType );
+                return x.GetType() == y.GetType() && x.TargetType == y.TargetType;
             }
 
             public int GetHashCode( ITypeBoundOption obj )

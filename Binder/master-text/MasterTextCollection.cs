@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel;
 using System.Linq;
 using J4JSoftware.Logging;
 
@@ -95,7 +94,7 @@ namespace J4JSoftware.Configuration.CommandLine
 
             if( usage == TextUsageType.Undefined )
             {
-                _logger?.Information<TextUsageType, string>( "Cannot add {0} items ({1})", 
+                _logger?.Information<TextUsageType, string>( "Cannot add {0} items ({1})",
                     usage,
                     string.Join( ",", items ) );
 

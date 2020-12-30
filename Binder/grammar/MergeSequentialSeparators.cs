@@ -5,13 +5,6 @@ namespace J4JSoftware.Configuration.CommandLine
 {
     public class MergeSequentialSeparators : ICleanupTokens
     {
-        private readonly IJ4JLogger? _logger;
-
-        public MergeSequentialSeparators( IJ4JLogger? logger )
-        {
-            _logger = logger;
-        }
-
         public void Process( List<Token> tokens )
         {
             var toRemove = new List<int>();

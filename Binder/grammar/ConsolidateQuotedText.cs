@@ -10,8 +10,8 @@ namespace J4JSoftware.Configuration.CommandLine
 {
     public class ConsolidateQuotedText : ICleanupTokens
     {
-        private readonly StringComparison _textComparison;
         private readonly IJ4JLogger? _logger;
+        private readonly StringComparison _textComparison;
 
         public ConsolidateQuotedText(
             StringComparison textComparison,
@@ -24,7 +24,7 @@ namespace J4JSoftware.Configuration.CommandLine
         public void Process( List<Token> tokens )
         {
             var startIdx = 0;
-            QuoterPair? curPair = null;
+            QuoterPair? curPair;
 
             // loop through all QuoterPairs (i.e., pairs of quoter tokens defining
             // a quoted sequence
@@ -34,7 +34,7 @@ namespace J4JSoftware.Configuration.CommandLine
                 // "quoted" tokens
                 if( curPair.End == null )
                 {
-                    _logger?.Error( "Unclosed quoter encountered, command line truncated at token #{0}", 
+                    _logger?.Error( "Unclosed quoter encountered, command line truncated at token #{0}",
                         curPair.Start.Index );
 
                     tokens.RemoveFrom( curPair.Start.Index );

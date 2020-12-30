@@ -19,7 +19,7 @@ namespace J4JSoftware.Binder.Tests
                 AvailableTokens.GetDefault(CommandLineStyle.Windows, LoggerFactory), 
                 LoggerFactory,
                 new ConsolidateQuotedText(StringComparison.OrdinalIgnoreCase, LoggerFactory()),
-                new MergeSequentialSeparators(LoggerFactory()) );
+                new MergeSequentialSeparators() );
 
             var tokens = tokenizer.Tokenize( config.CommandLine );
 

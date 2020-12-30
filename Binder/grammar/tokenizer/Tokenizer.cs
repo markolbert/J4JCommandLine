@@ -25,7 +25,7 @@ namespace J4JSoftware.Configuration.CommandLine
                 _cleanupProcessors = new ICleanupTokens[]
                 {
                     new ConsolidateQuotedText( collection.TextComparison, loggerFactory?.Invoke() ),
-                    new MergeSequentialSeparators( loggerFactory?.Invoke() )
+                    new MergeSequentialSeparators()
                 };
         }
 
@@ -47,7 +47,7 @@ namespace J4JSoftware.Configuration.CommandLine
                 _cleanupProcessors = new ICleanupTokens[]
                 {
                     new ConsolidateQuotedText( textComparison.Value, loggerFactory?.Invoke() ),
-                    new MergeSequentialSeparators( loggerFactory?.Invoke() )
+                    new MergeSequentialSeparators()
                 };
         }
 
@@ -108,7 +108,7 @@ namespace J4JSoftware.Configuration.CommandLine
 
                 retVal.Add( firstMatch.token );
 
-                cmdLine = cmdLine.Substring( firstMatch.startChar + firstMatch.token.Length );
+                cmdLine = cmdLine[(firstMatch.startChar + firstMatch.token.Length)..];
             }
 
             foreach( var cleanupProc in _cleanupProcessors ) cleanupProc.Process( retVal );

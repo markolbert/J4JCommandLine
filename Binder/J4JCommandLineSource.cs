@@ -1,7 +1,6 @@
 ﻿using System;
 using J4JSoftware.Logging;
 using Microsoft.Extensions.Configuration;
-using Serilog.Core;
 
 namespace J4JSoftware.Configuration.CommandLine
 {
@@ -20,7 +19,7 @@ namespace J4JSoftware.Configuration.CommandLine
             _cmdLine = cmdLine;
 
             var tokenizer = new Tokenizer( options.CommandLineStyle, options.MasterText.TextComparison, loggerFactory );
-            var parsingTable = new ParsingTable( options, loggerFactory);
+            var parsingTable = new ParsingTable( options, loggerFactory );
 
             _parser = new Parser( options, tokenizer, parsingTable, loggerFactory?.Invoke() );
         }

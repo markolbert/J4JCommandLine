@@ -12,12 +12,8 @@ namespace J4JSoftware.Configuration.CommandLine
         private readonly Dictionary<TokenType, Dictionary<TokenType, ParsingAction?>> _table =
             new();
 
-        private readonly IJ4JLogger? _logger;
-
         public ParsingTable( IOptionCollection options, Func<IJ4JLogger>? loggerFactory = null )
         {
-            _logger = loggerFactory?.Invoke();
-
             Entries = new TokenEntry.TokenEntries( options, loggerFactory?.Invoke() );
 
             foreach( var row in Enum.GetValues( typeof(TokenType) )

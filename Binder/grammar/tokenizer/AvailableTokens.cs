@@ -41,7 +41,7 @@ namespace J4JSoftware.Configuration.CommandLine
             if( _available.SelectMany( kvp => kvp.Value )
                 .Any( t => t.Equals( text, TextComparison ) ) )
             {
-                _logger?.Error( "Duplicate token text '{0}' ({1})", text, type);
+                _logger?.Error( "Duplicate token text '{0}' ({1})", text, type );
                 return false;
             }
 
