@@ -1,6 +1,5 @@
-﻿using System;
-using FluentAssertions;
-using J4JSoftware.CommandLine;
+﻿using FluentAssertions;
+using J4JSoftware.CommandLine.Deprecated;
 using Xunit;
 
 namespace J4JCommandLine.Tests

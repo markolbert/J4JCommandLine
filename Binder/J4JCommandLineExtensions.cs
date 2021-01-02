@@ -13,5 +13,11 @@ namespace J4JSoftware.Configuration.CommandLine
 
             return builder;
         }
+
+        public static IConfigurationBuilder AddJ4JCommandLine(
+            this IConfigurationBuilder builder,
+            string[] args,
+            IOptionCollection options )
+            => builder.AddJ4JCommandLine( string.Join( " ", args ), options );
     }
 }

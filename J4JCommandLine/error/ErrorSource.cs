@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace J4JSoftware.CommandLine
+﻿namespace J4JSoftware.CommandLine.Deprecated
 {
     public class ErrorSource
     {

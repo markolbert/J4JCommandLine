@@ -8,32 +8,21 @@ a library after I've (re)written it. I was intrigued by some
 of the design issues I learned about from Jon and wanted to
 get a better feel for how to implement them.
 
-But there was a bigger reason. I view C# as a type-centered
-language. While it has many other characteristics at its core
-everything seems to revolve around types. Because of that I
-tend to think of "parsing a command line" as "converting a
-bunch of text into an instance of a configuration type". I 
-wanted a library that was centered around types.
+I also found most of the available open-source libraries somewhat confusing.
+That's almost certainly in part the result of not having written them myself.
+But it seemed like there might be use for the different approach I've come
+up with here.
 
-That's an ad hoc restriction. There are plenty of other targets
-one could imagine turning command line text into (e.g., in C#,
-fields or method variables). But it's a pretty powerful
-and flexible restriction, I think, because once you have 
-command line information in a type you can go anywhere you
-want (e.g., assign information to method variables, call
-methods defined in the configuration object using the
-command line values, etc.).
+While I initially wrote this library to be mostly independent of the Net5
+`IConfiguration` system I quickly came to realize that wasn't a good design
+choice. `IConfiguration` is too pervasive, rightfully so, and too useful to
+ignore. But adapting what I wanted to do to the way it works required a 
+radical redesign of `J4JCommandLine`'s plumbing.
 
-I also wanted the library to work with dependency injection.
-Initially that was a very pervasive design consideration but ultimately
-it ended up being fairly trivial. There's an add-on library which
-provides [Autofac](https://autofac.org) support (I love Autofac -- 
-it's worth checking out).
-
-Finally, I wanted the library to be relatively easily extensible and
-customizable. Consequently, most of its core revolves around key
-interfaces. The guts of the code implement those interfaces and glue
-them together into a functioning whole. But you should be able to 
-customize the bits and just drop them into the overall framework (that's
-dependency injection for you :)).
-
+I also originally wanted the library to work with dependency injection. But after
+using it for a bit with Net5's `IHostBuilder` system I realized there was what to
+me looked like a fundamental incompatibility. The `IHostBuilder` system's goal is
+to establish the infrastucture for your program, *including the dependency injection
+subsystem*. Having a command line processor which uses dependency injection to work
+while you're setting up dependency injection is a chicken-and-egg problem. So the
+redesigned `J4JCommandLine` library doesn't use dependency injection.

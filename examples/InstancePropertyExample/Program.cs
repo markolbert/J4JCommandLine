@@ -1,66 +1,40 @@
 ﻿using System;
-using Autofac;
-using Autofac.Extensions.DependencyInjection;
-using Microsoft.Extensions.DependencyInjection;
-#pragma warning disable 8618
+using J4JSoftware.Configuration.CommandLine;
+using Microsoft.Extensions.Configuration;
 
 namespace J4JSoftware.CommandLine.Examples
 {
     class Program
     {
-        static IServiceProvider _svcProvider { get; set; }
-
         static void Main(string[] args)
         {
-            InitializeServiceProvider();
+            var options = new OptionCollection(CommandLineStyle.Linux);
 
-            var builder = _svcProvider.GetRequiredService<BindingTargetBuilder>();
+            var intValue = options.Bind<Configuration, int>(x => x.IntValue, "i");
+            var textValue = options.Bind<Configuration, string>(x => x.TextValue, "t");
 
-            builder.Prefixes("-", "--", "/")
-                .Quotes('\'', '"')
-                .HelpKeys("h", "?")
-                .Description("a test program for exercising J4JCommandLine")
-                .ProgramName($"{nameof(Program)}.exe");
+            var config = new ConfigurationBuilder()
+                .AddJ4JCommandLine(args, options)
+                .Build();
 
-            var binder = builder.Build<Configuration>( null );
-            if( binder == null )
-                throw new NullReferenceException(nameof(Program));
+            var parsed = config.Get<Configuration>();
 
-            binder!.Bind(x => x.IntValue, "i")
-                .SetDescription("an integer value")
-                .SetDefaultValue(1)
-                .SetValidator(OptionInRange<int>.GreaterThan(0));
-
-            binder.Bind(x => x.TextValue, "t")
-                .SetDescription("a text value")
-                .SetDefaultValue("some text value");
-
-            binder.BindUnkeyed(x => x.Unkeyed);
-
-            if (!binder.Parse(args))
+            if (parsed == null)
             {
-                Environment.ExitCode = 1;
+                Console.WriteLine("Parsing failed");
+
+                Environment.ExitCode = -1;
                 return;
             }
 
-            Console.WriteLine($"IntValue is {binder.Value.IntValue}");
-            Console.WriteLine($"TextValue is {binder.Value.TextValue}");
+            Console.WriteLine("Parsing succeeded");
 
-            Console.WriteLine(binder.Value.Unkeyed.Count == 0
+            Console.WriteLine($"IntValue is {parsed.IntValue}");
+            Console.WriteLine($"TextValue is {parsed.TextValue}");
+
+            Console.WriteLine(options.UnkeyedValues.Count == 0
                 ? "No unkeyed parameters"
-                : $"Unkeyed parameters: {string.Join(", ", binder.Value.Unkeyed)}");
-        }
-
-        private static void InitializeServiceProvider()
-        {
-            var builder = new ContainerBuilder();
-
-            builder.RegisterType<FancyConsole>()
-                .AsImplementedInterfaces();
-
-            builder.AddJ4JCommandLine();
-
-            _svcProvider = new AutofacServiceProvider(builder.Build());
+                : $"Unkeyed parameters: {string.Join(", ", options.UnkeyedValues)}");
         }
     }
 }

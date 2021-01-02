@@ -2,7 +2,7 @@
 using System.Linq;
 using System.Text;
 
-namespace J4JSoftware.CommandLine
+namespace J4JSoftware.CommandLine.Deprecated
 {
     // class for capturing logger, keyed by the command line key associated with an
     // error (i.e., the 'x' in '-x').

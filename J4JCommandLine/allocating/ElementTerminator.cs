@@ -1,11 +1,9 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using System.Linq;
-using System.Text;
+
 #pragma warning disable 8618
 
-namespace J4JSoftware.CommandLine
+namespace J4JSoftware.CommandLine.Deprecated
 {
     public class ElementTerminator : IElementTerminator
     {

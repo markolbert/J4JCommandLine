@@ -6,139 +6,58 @@ separate configuration class to hold the configuration information. The
 properties.
 
 Here's an example of such a class/app (the source code is in 
-examples/InstancePropertyExample). It's using [Autofac](https://autofac.org) as
-the dependency injection system and the extension library *AutofacCommandLine*
-that's available in the repository. It uses a simple configuration
+examples/InstancePropertyExample). It uses a simple configuration
 object:
 ```
 public class Configuration
 {
     public int IntValue { get; set; }
     public string TextValue { get; set; }
-    public List<string> Unkeyed { get; set; }
 }
 ```
 
-Two of the public properties, **IntValue** and **TextValue** are bound
-to command line options in code I'll show below. The third property, **Unkeyed**,
-will be bound to any "unkeyed" options -- plain old command line parameters --
-found on the command line. Otherwise there's nothing
-special about them. They're just regular properties with public get
-and set accessors.
+The two public properties, **IntValue** and **TextValue**, are bound
+to command line options like this:
 
 Here's the app's code:
+```csharp
+var options = new OptionCollection(CommandLineStyle.Linux);
+
+var intValue = options.Bind<Configuration, int>(x => x.IntValue, "i");
+var textValue = options.Bind<Configuration, string>(x => x.TextValue, "t");
 ```
-using System;
-using Autofac;
-using Autofac.Extensions.DependencyInjection;
-using J4JSoftware.CommandLine;
-using Microsoft.Extensions.DependencyInjection;
-
-namespace InstancePropertyExample
+Often you won't even need to retain the return value from the `Bind<>()` call. It's
+generally only useful if you want to set certain properties for the `Option` object:
+```csharp
+public interface IOption
 {
-    class Program
-    {
-        static IServiceProvider _svcProvider { get; set; }
+    // ...other details omitted
 
-        static void Main(string[] args)
-        {
-            // detail follows below, omitted here for brevity...
-        }
+    Option AddCommandLineKey( string cmdLineKey );
+    Option AddCommandLineKeys( IEnumerable<string> cmdLineKeys );
+    Option SetStyle( OptionStyle style );
+    Option IsRequired();
+    Option IsOptional();
+    Option SetDescription( string description );
 
-        private static void InitializeServiceProvider()
-        {
-            var builder = new ContainerBuilder();
-
-            builder.RegisterType<FancyConsole>()
-                .AsImplementedInterfaces();
-
-            builder.AddJ4JCommandLine();
-
-            _svcProvider = new AutofacServiceProvider(builder.Build());
-        }
-    }
+    // ...other details omitted
 }
 ```
+Command line keys can be added in the `Bind<>()` call and the binding process 
+determines the `OptionStyle` for the option. But you can specifically define an 
+option as being required or optional (the default is optional). `SetDescription()`
+lets you describe the option, but it's not currently utilized (it's there to 
+support future development).
 
-The **InitializeServiceProvider()** method is where the dependency injection
-resolver is configured. For details on what **AddJ4JCommandLine()** does
-see [this article](di.md). Note that I explicitly register **FancyConsole**. 
-It's the implementation I'm using of **IConsoleOutput**. 
-**BindingTargetBuilder** requires access to an implementation of 
-**IConsoleOutput** to work. This registration lets an instance of 
-**BindingTargetBuilder** be retrieved from the dependency injection resolver 
-used in the **Main()** method.
-
-The setup, binding and parsing code is very simple. First you create an
-instance of **BindingTargetBuilder** and configure it (done here through
-the **IServiceProvider** interface, powered by the **Autofac** dependency
-injection system):
-
+Once you've defined your option collection you can add it to your `IConfiguration`
+pipeline by calling `AddJ4JCommandLine()` on an instance of `ConfigurationBuilder`:
+```csharp
+var config = new ConfigurationBuilder()
+    .AddJ4JCommandLine(args, options)
+    .Build();
 ```
-static void Main(string[] args)
-{
-    InitializeServiceProvider();
-
-    var builder = _svcProvider.GetRequiredService<BindingTargetBuilder>();
-
-    builder.Prefixes( "-", "--", "/" )
-        .Quotes( '\'', '"' )
-        .HelpKeys( "h", "?" )
-        .Description( "a test program for exercising J4JCommandLine" )
-        .ProgramName( $"{nameof(Program)}.exe" );
-
-    // to be continued
-```
-Then create an instance of **BindingTarget<Configuration>** by calling the builder's
-**Build()** method, checking to make sure it's not null:
-
-```
-    // see above for details...
-
-    var binder = builder.Build<Configuration>( null );
-    if( binder == null )
-        throw new NullReferenceException(nameof(Program));
-
-    // to be continued
-```
-Next you bind the options to `Configuration`'s public properties:
-```
-    // see above for details...
-
-    binder!.Bind(x => x.IntValue, "i")
-        .SetDescription("an integer value")
-        .SetDefaultValue(1)
-        .SetValidator(OptionInRange<int>.GreaterThan(0));
-
-    binder.Bind(x => x.TextValue, "t")
-        .SetDescription("a text value")
-        .SetDefaultValue("some text value");
-
-    binder.BindUnkeyed(x => x.Unkeyed);
-
-    // to be continued
-```
-You don't have to set descriptions, default values or validators but that's how
-you'd do it if you want to.
-
-Finally, you parse the command line arguments supplied to **Main()**. Note that if
-the parsing succeeds the updated **Configuration** object is available in
-**binder.Value**. In a real example you'd want to assign it's value to some
-field or property you can access wherever you need it:
-```
-    // see above for details...
-
-    if( !binder.Parse(args) )
-    {
-        Environment.ExitCode = 1;
-        return;
-    }
-
-    Console.WriteLine($"IntValue is {binder.Value.IntValue}");
-    Console.WriteLine($"TextValue is {binder.Value.TextValue}");
-
-    Console.WriteLine(binder.Value.Unkeyed.Count == 0
-        ? "No unkeyed parameters"
-        : $"Unkeyed parameters: {string.Join(", ", binder.Value.Unkeyed)}");
-}
+At that point you just use the `IConfiguration` framework to get your configuration
+objects:
+```csharp
+var parsed = config.Get<Configuration>();
 ```

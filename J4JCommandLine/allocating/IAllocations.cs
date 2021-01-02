@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 
-namespace J4JSoftware.CommandLine
+namespace J4JSoftware.CommandLine.Deprecated
 {
     public interface IAllocations : ICollection<IAllocation>
     {

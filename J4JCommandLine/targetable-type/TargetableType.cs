@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Reflection;
 
-namespace J4JSoftware.CommandLine
+namespace J4JSoftware.CommandLine.Deprecated
 {
     // abstract base class of the various ITargetableType classes
     public abstract class TargetableType : ITargetableType

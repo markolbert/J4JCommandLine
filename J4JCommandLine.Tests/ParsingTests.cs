@@ -1,9 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text.RegularExpressions;
 using FluentAssertions;
-using J4JSoftware.CommandLine;
+using J4JSoftware.CommandLine.Deprecated;
 using Microsoft.Extensions.DependencyInjection;
 using Xunit;
 

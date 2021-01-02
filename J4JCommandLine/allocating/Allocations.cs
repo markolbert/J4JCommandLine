@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.ObjectModel;
 
-namespace J4JSoftware.CommandLine
+namespace J4JSoftware.CommandLine.Deprecated
 {
     public class Allocations : KeyedCollection<string, IAllocation>, IAllocations
     {

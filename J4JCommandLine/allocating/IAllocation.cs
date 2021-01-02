@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 
-namespace J4JSoftware.CommandLine
+namespace J4JSoftware.CommandLine.Deprecated
 {
     // defines the interface for an individual parsing result
     // (e.g., "-x param1 param2")

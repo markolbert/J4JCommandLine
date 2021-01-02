@@ -38,10 +38,9 @@ namespace J4JSoftware.Configuration.CommandLine
                     retVal.AddRange( TextUsageType.Separator, " ", "\t" );
 
                     return retVal;
-
-                default:
-                    throw new InvalidEnumArgumentException( $"Unsupported CommandLineStyle '{cmdLineStyle}'" );
             }
+
+            return retVal;
         }
     }
 }

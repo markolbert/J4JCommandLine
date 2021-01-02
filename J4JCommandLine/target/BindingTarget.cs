@@ -6,7 +6,7 @@ using System.Reflection;
 using System.Text;
 #pragma warning disable 8618
 
-namespace J4JSoftware.CommandLine
+namespace J4JSoftware.CommandLine.Deprecated
 {
     // defines target for binding operations, tying command line arguments to
     // specific properties of TValue

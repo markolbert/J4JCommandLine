@@ -2,7 +2,7 @@
 using System.Reflection;
 using Autofac;
 
-namespace J4JSoftware.CommandLine
+namespace J4JSoftware.CommandLine.Deprecated
 {
     public static class AutofacCommandLineExtensions
     {

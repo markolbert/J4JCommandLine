@@ -1,7 +1,7 @@
 ﻿using System.Linq;
 #pragma warning disable 8618
 
-namespace J4JSoftware.CommandLine
+namespace J4JSoftware.CommandLine.Deprecated
 {
     public partial class BindingTargetBuilder
     {

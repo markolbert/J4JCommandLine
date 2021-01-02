@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using Alba.CsConsoleFormat;
 #pragma warning disable 8618
 
-namespace J4JSoftware.CommandLine
+namespace J4JSoftware.CommandLine.Deprecated
 {
     public class FancyConsole : IConsoleOutput
     {

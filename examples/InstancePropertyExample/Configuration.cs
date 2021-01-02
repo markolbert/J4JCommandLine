@@ -1,5 +1,4 @@
-﻿using System.Collections.Generic;
-#pragma warning disable 8618
+﻿#pragma warning disable 8618
 
 namespace J4JSoftware.CommandLine.Examples
 {
@@ -7,6 +6,5 @@ namespace J4JSoftware.CommandLine.Examples
     {
         public int IntValue { get; set; }
         public string TextValue { get; set; }
-        public List<string> Unkeyed { get; set; }
     }
 }

@@ -1,5 +1,4 @@
 ﻿using System.Collections.Generic;
-using J4JSoftware.Logging;
 
 namespace J4JSoftware.Configuration.CommandLine
 {

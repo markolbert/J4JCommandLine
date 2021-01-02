@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 
-namespace J4JSoftware.CommandLine
+namespace J4JSoftware.CommandLine.Deprecated
 {
     // represents an Array of some Type. Can only be created via the ITargetedPropertyFactory interface
     public class TargetableArray : TargetableType

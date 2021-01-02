@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace J4JSoftware.CommandLine
+namespace J4JSoftware.CommandLine.Deprecated
 {
     // determines whether an object is not contained in a pre-defined list of objects. This is done
     // by using the object's IEquatable<T> interface, so only Types supporting that interface

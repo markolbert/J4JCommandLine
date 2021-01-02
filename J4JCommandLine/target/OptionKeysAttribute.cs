@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace J4JSoftware.CommandLine
+namespace J4JSoftware.CommandLine.Deprecated
 {
     [ AttributeUsage( AttributeTargets.Property, AllowMultiple = false, Inherited = false ) ]
     public class OptionKeysAttribute : Attribute

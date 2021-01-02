@@ -1,8 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
+﻿using System.Collections.Generic;
 using FluentAssertions;
-using J4JSoftware.CommandLine;
+using J4JSoftware.CommandLine.Deprecated;
 using Microsoft.Extensions.DependencyInjection;
 using Xunit;
 #pragma warning disable 8618

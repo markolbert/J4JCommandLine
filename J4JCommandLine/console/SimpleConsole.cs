@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 #pragma warning disable 8618
 
-namespace J4JSoftware.CommandLine
+namespace J4JSoftware.CommandLine.Deprecated
 {
     public class SimpleConsole : IConsoleOutput
     {
@@ -169,7 +169,7 @@ namespace J4JSoftware.CommandLine
                             // up (this is arbitrary but it's simple)
                             line.Append(part.Substring(0, available));
 
-                            part = part.Substring(available);
+                            part = part[available..];
                         }
                     }
                 }

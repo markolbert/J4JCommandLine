@@ -3,7 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace J4JSoftware.CommandLine
+namespace J4JSoftware.CommandLine.Deprecated
 {
     // represents a generic List<> of some Type. Can only be created via the ITargetedPropertyFactory interface
     public class TargetableList : TargetableType

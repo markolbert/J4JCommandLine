@@ -3,7 +3,7 @@ using System.ComponentModel;
 using System.Linq;
 using System.Reflection;
 
-namespace J4JSoftware.CommandLine
+namespace J4JSoftware.CommandLine.Deprecated
 {
     public class OptionConfiguration
     {

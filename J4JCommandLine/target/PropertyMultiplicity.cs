@@ -1,4 +1,4 @@
-﻿namespace J4JSoftware.CommandLine
+﻿namespace J4JSoftware.CommandLine.Deprecated
 {
     // the kinds of property multiplicity for properties that can be the targets of command line options
     public enum PropertyMultiplicity

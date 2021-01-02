@@ -10,9 +10,9 @@ namespace J4JSoftware.Binder.Tests
 {
     public class CompositionRoot : J4JCompositionRoot
     {
-        private static readonly CompositionRoot _root = new CompositionRoot();
+        public static CompositionRoot Default { get; } = new();
 
-        public static CompositionRoot Default => _root;
+        public Func<IJ4JLogger> LoggerFactory => () => Host!.Services.GetRequiredService<IJ4JLogger>();
 
         protected override void ConfigureHostBuilder( IHostBuilder hostBuilder )
         {
@@ -26,19 +26,11 @@ namespace J4JSoftware.Binder.Tests
 
         private void ConfigureDependencyInjection( HostBuilderContext context, ContainerBuilder builder )
         {
-            builder.RegisterJ4JLogging();
+            var factory = new ChannelFactory( context.Configuration );
 
-            builder.Register( c =>
-                {
-                    var retVal = context.Configuration
-                        .GetSection("Logger"  )
-                        .Get<J4JLoggerConfiguration<LogChannelsConfig>>();
+            factory.AddChannel<DebugConfig>( "Channels:Debug" );
 
-                    return retVal;
-                } )
-                .As<IJ4JLoggerConfiguration>();
+            builder.RegisterJ4JLogging<J4JLoggerConfiguration>( factory );
         }
-
-        public Func<IJ4JLogger> LoggerFactory => () => Host!.Services.GetRequiredService<IJ4JLogger>();
     }
 }

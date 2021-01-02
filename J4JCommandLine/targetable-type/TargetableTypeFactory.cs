@@ -3,7 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace J4JSoftware.CommandLine
+namespace J4JSoftware.CommandLine.Deprecated
 {
     // implements ITargetableTypeFactory to create supported ITargetableType objects.
     // if you expand the framework's repertoire beyond simple values, arrays and generic

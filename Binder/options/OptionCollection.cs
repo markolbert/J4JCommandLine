@@ -10,7 +10,7 @@ using J4JSoftware.Logging;
 
 namespace J4JSoftware.Configuration.CommandLine
 {
-    public class OptionCollectionNG : IOptionCollection
+    public class OptionCollection : IOptionCollection
     {
         private readonly TypeBoundOptionComparer _comparer = new();
         private readonly IJ4JLogger? _logger;
@@ -18,29 +18,28 @@ namespace J4JSoftware.Configuration.CommandLine
 
         private readonly Dictionary<Type, string> _typePrefixes = new();
 
-        public OptionCollectionNG(
+        public OptionCollection(
             CommandLineStyle cmdLineStyle = CommandLineStyle.Windows,
             Func<IJ4JLogger>? loggerFactory = null
         )
         {
             CommandLineStyle = cmdLineStyle;
+            MasterText = MasterTextCollection.GetDefault(cmdLineStyle, loggerFactory);
+            LoggerFactory = loggerFactory;
 
-            var cache = new J4JLoggerCache();
-            loggerFactory ??= () => new J4JCachedLogger( cache );
-
-            _logger = loggerFactory();
-
-            MasterText = MasterTextCollection.GetDefault( cmdLineStyle, loggerFactory );
+            _logger = loggerFactory?.Invoke();
         }
 
-        public OptionCollectionNG( MasterTextCollection mt )
+        public OptionCollection( MasterTextCollection mt )
         {
             CommandLineStyle = CommandLineStyle.UserDefined;
             MasterText = mt;
+            LoggerFactory = mt.LoggerFactory;
 
             _logger = mt.LoggerFactory?.Invoke();
         }
 
+        public Func<IJ4JLogger>? LoggerFactory { get; }
         public CommandLineStyle CommandLineStyle { get; }
         public MasterTextCollection MasterText { get; }
         public ReadOnlyCollection<IOption> Options => _options.AsReadOnly();

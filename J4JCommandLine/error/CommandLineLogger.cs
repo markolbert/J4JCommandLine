@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 #pragma warning disable 8618
 
-namespace J4JSoftware.CommandLine
+namespace J4JSoftware.CommandLine.Deprecated
 {
     public class CommandLineLogger
     {

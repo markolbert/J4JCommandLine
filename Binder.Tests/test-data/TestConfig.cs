@@ -1,5 +1,4 @@
 ﻿using System.Collections.Generic;
-using System.Linq;
 using J4JSoftware.Configuration.CommandLine;
 
 #pragma warning disable 8618

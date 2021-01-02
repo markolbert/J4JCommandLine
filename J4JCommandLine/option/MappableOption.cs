@@ -1,9 +1,8 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Runtime.InteropServices;
 
-namespace J4JSoftware.CommandLine
+namespace J4JSoftware.CommandLine.Deprecated
 {
     public class MappableOption : Option
     {
@@ -28,20 +27,13 @@ namespace J4JSoftware.CommandLine
             IAllocation allocation,
             ITargetableType targetType )
         {
-            switch( targetType.Multiplicity )
+            return targetType.Multiplicity switch
             {
-                case PropertyMultiplicity.Array:
-                    return ConvertToArray( allocation );
-
-                case PropertyMultiplicity.List:
-                    return ConvertToList( allocation );
-
-                case PropertyMultiplicity.SimpleValue:
-                    return ConvertToSimpleValue( allocation );
-
-                default:
-                    return null;
-            }
+                PropertyMultiplicity.Array => ConvertToArray( allocation ),
+                PropertyMultiplicity.List => ConvertToList( allocation ),
+                PropertyMultiplicity.SimpleValue => ConvertToSimpleValue( allocation ),
+                _ => null
+            };
         }
 
         // attempts to convert a text value using the defined ITextConverter property

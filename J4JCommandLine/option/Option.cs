@@ -1,8 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
 
-namespace J4JSoftware.CommandLine
+namespace J4JSoftware.CommandLine.Deprecated
 {
     // the abstract base class of Option and NullOption.
     public abstract class Option
@@ -137,7 +138,7 @@ namespace J4JSoftware.CommandLine
                     break;
 
                 default:
-                    throw new NotSupportedException( $"Unsupported {nameof(OptionStyle)} '{OptionStyle}'" );
+                    throw new InvalidEnumArgumentException( $"Unsupported {nameof(OptionStyle)} '{OptionStyle}'" );
             }
 
             return true;

@@ -180,7 +180,7 @@
         "CommandLineKey": "x",
         "Style": "SingleValued",
         "ValuesSatisfied": true,
-        "ConversionWillFail":  true 
+        "ConversionWillFail": true
       }
     ]
   },

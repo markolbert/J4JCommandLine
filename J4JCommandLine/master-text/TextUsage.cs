@@ -1,4 +1,4 @@
-﻿namespace J4JSoftware.CommandLine
+﻿namespace J4JSoftware.CommandLine.Deprecated
 {
     // a class defining how a particular piece of text is uniquely used within
     // the framework

@@ -1,11 +1,4 @@
-﻿using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using FluentAssertions;
-using J4JSoftware.CommandLine;
-using Microsoft.Extensions.DependencyInjection;
-using Xunit;
-using Xunit.Abstractions;
+﻿using J4JSoftware.CommandLine.Deprecated;
 
 namespace J4JCommandLine.Tests
 {

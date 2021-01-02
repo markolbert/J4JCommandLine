@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 
-namespace J4JSoftware.CommandLine
+namespace J4JSoftware.CommandLine.Deprecated
 {
     // represents an 'simple' Type, meaning one which isn't either an array or a List<>.
     // Can only be created via the ITargetedPropertyFactory interface

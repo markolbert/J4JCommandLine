@@ -1,4 +1,4 @@
-﻿namespace J4JSoftware.CommandLine
+﻿namespace J4JSoftware.CommandLine.Deprecated
 {
     // describes a "SupportedType" which is not targetable, for any of several
     // reasons

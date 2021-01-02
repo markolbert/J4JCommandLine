@@ -1,11 +1,8 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using System.Linq;
-using System.Net.Sockets;
 
-namespace J4JSoftware.CommandLine
+namespace J4JSoftware.CommandLine.Deprecated
 {
     // a class which keeps track of every text element (e.g., prefix, value encloser, quote character,
     // option key) used in the framework and ensures they are all used uniquely.

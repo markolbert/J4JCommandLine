@@ -1,6 +1,4 @@
-﻿using System.Collections.Generic;
-
-namespace J4JSoftware.CommandLine
+﻿namespace J4JSoftware.CommandLine.Deprecated
 {
     // defines an IOption which always returns null when used as the target of a parsing
     // operation. Used to capture error information about an invalid parsing.

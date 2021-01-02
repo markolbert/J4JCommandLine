@@ -1,72 +1,47 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using Autofac;
-using Autofac.Extensions.DependencyInjection;
-using Microsoft.Extensions.DependencyInjection;
+using J4JSoftware.Configuration.CommandLine;
+using Microsoft.Extensions.Configuration;
+
 #pragma warning disable 8618
 
 namespace J4JSoftware.CommandLine.Examples
 {
+    // NOTE: this example is currently identical to StaticPropertyExample. It's
+    // here to support future development.
     class Program
     {
-        static void Main(string[] args)
+        static void Main( string[] args )
         {
-            InitializeServiceProvider();
+            var options = new OptionCollection(CommandLineStyle.Linux);
 
-            var builder = ServiceProvider.GetRequiredService<BindingTargetBuilder>();
+            var intValue = options.Bind<Program, int>(x => Program.IntValue, "i");
+            var textValue = options.Bind<Program, string>(x => Program.TextValue, "t");
 
-            builder.Prefixes("-", "--", "/")
-                .Quotes('\'', '"')
-                .HelpKeys("h", "?")
-                .Description("a test program for exercising J4JCommandLine")
-                .ProgramName($"{nameof(Program)}.exe");
+            var config = new ConfigurationBuilder()
+                .AddJ4JCommandLine(args, options)
+                .Build();
 
-            var binder = builder.AutoBind<Program>();
-            if (binder == null)
-                throw new NullReferenceException(nameof(Program));
+            var parsed = config.Get<Program>();
 
-            binder.SetValidator("i", OptionInRange<int>.GreaterThan( 0 ) );
-
-            if (!binder.Parse(args))
+            if( parsed == null )
             {
-                Environment.ExitCode = 1;
+                Console.WriteLine( "Parsing failed" );
+
+                Environment.ExitCode = -1;
                 return;
             }
 
-            Console.WriteLine($"IntValue is {IntValue}");
-            Console.WriteLine($"TextValue is {TextValue}");
+            Console.WriteLine( "Parsing succeeded" );
 
-            Console.WriteLine(Unkeyed.Count == 0
+            Console.WriteLine( $"IntValue is {IntValue}");
+            Console.WriteLine( $"TextValue is {TextValue}");
+
+            Console.WriteLine( options.UnkeyedValues.Count == 0
                 ? "No unkeyed parameters"
-                : $"Unkeyed parameters: {string.Join(", ", Unkeyed)}");
+                : $"Unkeyed parameters: {string.Join( ", ", options.UnkeyedValues )}" );
         }
 
-        public static IServiceProvider ServiceProvider { get; set; }
-
-        [OptionKeys("i")]
-        [DefaultValue(5)]
-        [Description("some integer value")]
         public static int IntValue { get; set; }
-
-        [OptionKeys("t")]
-        [DefaultValue("abc")]
-        [Description("some text value")]
         public static string TextValue { get; set; }
-
-        [OptionKeys()]
-        public static List<string> Unkeyed { get; set; }
-
-        private static void InitializeServiceProvider()
-        {
-            var builder = new ContainerBuilder();
-
-            builder.RegisterType<FancyConsole>()
-                .AsImplementedInterfaces();
-
-            builder.AddJ4JCommandLine();
-
-            ServiceProvider = new AutofacServiceProvider(builder.Build());
-        }
     }
 }

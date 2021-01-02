@@ -1,60 +1,76 @@
 # J4JCommandLine
-A Net Core 3.1 library for parsing command line arguments 
-in a flexible fashion.
+A Net5 library which adds parsing command line arguments to the IConfiguration
+system.
 
 [![Nuget](https://img.shields.io/nuget/v/J4JSoftware.CommandLine?style=flat-square)](https://www.nuget.org/packages/J4JSoftware.CommandLine/)
 
 ### TL;DR
 
-```
-// create an instance of BindingTargetBuilder (here done via 
-// dependency injection). Note that there are several objects
-// you need to create if you want to create an instance of
-// BindingTargetBuilder without dependency injection.
-var builder = ServiceProvider.GetRequiredService<BindingTargetBuilder>();
+```csharp
+using System;
+using J4JSoftware.Configuration.CommandLine;
+using Microsoft.Extensions.Configuration;
+#pragma warning disable 8618
 
-// configure the builder (these are the minimum calls you need to make)
-builder.Prefixes( "-", "--", "/" )
-    .Quotes( '\'', '"' )
-    .HelpKeys( "h", "?" );
-
-var binder = builder.AutoBind<Program>();
-if (binder == null)
-    throw new NullReferenceException(nameof(Program));
-
-binder.SetValidator("i", OptionInRange<int>.GreaterThan( 0 ) );
-
-if (!binder.Parse(args))
+namespace J4JSoftware.CommandLine.Examples
 {
-    Environment.ExitCode = 1;
-    return;
+    public class Program
+    {
+        static void Main(string[] args)
+        {
+            var options = new OptionCollection(CommandLineStyle.Linux);
+
+            var intValue = options.Bind<Program, int>(x => Program.IntValue, "i");
+            var textValue = options.Bind<Program, string>(x => Program.TextValue, "t");
+
+            var config = new ConfigurationBuilder()
+                .AddJ4JCommandLine(args, options)
+                .Build();
+
+            var parsed = config.Get<Program>();
+
+            if (parsed == null)
+            {
+                Console.WriteLine("Parsing failed");
+
+                Environment.ExitCode = -1;
+                return;
+            }
+
+            Console.WriteLine("Parsing succeeded");
+
+            Console.WriteLine($"IntValue is {IntValue}");
+            Console.WriteLine($"TextValue is {TextValue}");
+
+            Console.WriteLine(options.UnkeyedValues.Count == 0
+                ? "No unkeyed parameters"
+                : $"Unkeyed parameters: {string.Join(", ", options.UnkeyedValues)}");
+        }
+
+        public static int IntValue { get; set; }
+        public static string TextValue { get; set; }
+    }
 }
-
-Console.WriteLine($"IntValue is {IntValue}");
-Console.WriteLine($"TextValue is {TextValue}");
-
-Console.WriteLine(Unkeyed.Count == 0
-    ? "No unkeyed parameters"
-    : $"Unkeyed parameters: {string.Join(", ", Unkeyed)}");
 ```
+### v0.9 Breaking Changes
+The original version of this library did not integrate easily with the Net5
+IConfiguration system. In addition, its error-checking/validation capabilities
+required a lot of complex, behind-the-scenes code. That was, in part, due to its
+duplicating some of the functionality of the IConfiguration system, as well as
+doing validations which arguably ought to be done in application code.
+
+Going forward I don't plan on any further development for the original version. It's
+available as version 0.5.0.1.
 
 ### Table of Contents
 
 - [Goal and Concept](docs/goal-concept.md)
-- [Terminology](docs/terminology.md)
-- Usage
-  - [Autobinding](docs/usage-auto.md)
-  - [Explicit binding](docs/usage-explicit.md)
-- [How Command Lines Are Allocated](docs/allocation.md)
+- [Command Line Styles](docs/cmdlinestyle.md)
+- [Binding](docs/binding.md)
 - Examples
   - [Binding to static properties](docs/example-static.md)
   - [Binding to a configuration object](docs/example-instance.md)
-- [Architectural Notes](docs/diagrams.md)
-- [Autofac Dependency Injection Support](docs/di.md)
-- Extending the framework
-  - [Adding Text Converters](docs/text-converters.md)
-  - [Adding Validators](docs/validators.md)
-- [Notes on the allocator](docs/allocator.md)
+- [Logging and Errors](docs/logging.md)
 
 #### Inspiration and Dedication
 

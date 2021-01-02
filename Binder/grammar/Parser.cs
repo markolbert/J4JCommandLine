@@ -12,7 +12,7 @@ namespace J4JSoftware.Configuration.CommandLine
             CommandLineStyle style = CommandLineStyle.Windows,
             Func<IJ4JLogger>? loggerFactory = null
         )
-            : this( new OptionCollectionNG( style ), loggerFactory )
+            : this( new OptionCollection( style ), loggerFactory )
         {
         }
 
@@ -24,7 +24,7 @@ namespace J4JSoftware.Configuration.CommandLine
                 options,
                 new Tokenizer( options.CommandLineStyle, options.MasterText.TextComparison, loggerFactory ),
                 new ParsingTable( options, loggerFactory ),
-                loggerFactory?.Invoke() )
+                (loggerFactory == null ? options.LoggerFactory : loggerFactory)?.Invoke() )
         {
         }
 

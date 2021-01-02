@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace J4JSoftware.CommandLine
+namespace J4JSoftware.CommandLine.Deprecated
 {
     // determines whether two instances are not equal by using the Type's IEquatable<T> interface.
     // Consequently, only Types supporting that interface can be validated by this class.

@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace J4JSoftware.CommandLine
+namespace J4JSoftware.CommandLine.Deprecated
 {
     // The non-generic interface defining how a text value gets converted to a 
     // particular type (SupportedType) of object

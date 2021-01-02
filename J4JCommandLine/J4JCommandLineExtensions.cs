@@ -1,9 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq.Expressions;
 using System.Reflection;
 
-namespace J4JSoftware.CommandLine
+namespace J4JSoftware.CommandLine.Deprecated
 {
     // various extension methods used by the framework
     public static class J4JCommandLineExtensions
@@ -97,7 +98,7 @@ namespace J4JSoftware.CommandLine
                 StringComparison.InvariantCultureIgnoreCase => StringComparer.InvariantCultureIgnoreCase,
                 StringComparison.CurrentCultureIgnoreCase => StringComparer.CurrentCultureIgnoreCase,
                 StringComparison.OrdinalIgnoreCase => StringComparer.OrdinalIgnoreCase,
-                _ => throw new NotImplementedException()
+                _ => throw new InvalidEnumArgumentException( $"Unsupported StringComparison '{textComp}'" )
             };
         }
 

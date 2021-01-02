@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.ComponentModel;
-using J4JSoftware.CommandLine;
+using J4JSoftware.CommandLine.Deprecated;
 #pragma warning disable 8618
 
 namespace J4JCommandLine.Tests

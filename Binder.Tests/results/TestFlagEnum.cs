@@ -2,10 +2,10 @@
 
 namespace J4JSoftware.Binder.Tests
 {
-    [Flags]
+    [ Flags ]
     public enum TestFlagEnum
     {
         EnumValue1 = 1 << 0,
-        EnumValue2 = 1 << 1,
+        EnumValue2 = 1 << 1
     }
 }

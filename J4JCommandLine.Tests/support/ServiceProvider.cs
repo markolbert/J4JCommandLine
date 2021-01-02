@@ -1,7 +1,7 @@
 ﻿using System;
 using Autofac;
 using Autofac.Extensions.DependencyInjection;
-using J4JSoftware.CommandLine;
+using J4JSoftware.CommandLine.Deprecated;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace J4JCommandLine.Tests

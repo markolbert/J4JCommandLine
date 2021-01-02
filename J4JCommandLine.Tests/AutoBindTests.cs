@@ -1,7 +1,6 @@
-﻿using System;
-using System.Linq;
+﻿using System.Linq;
 using FluentAssertions;
-using J4JSoftware.CommandLine;
+using J4JSoftware.CommandLine.Deprecated;
 using Microsoft.Extensions.DependencyInjection;
 using Xunit;
 
@@ -11,7 +10,7 @@ namespace J4JCommandLine.Tests
     {
         [Theory]
         [InlineData("-i 32 -t junk", true, 32, "junk", new string[] { })]
-        public void working(
+        public void Working(
             string cmdLine,
             bool result,
             int intValue,
@@ -23,7 +22,7 @@ namespace J4JCommandLine.Tests
             builder.Prefixes("-")
                 .Quotes('\'', '"')
                 .HelpKeys("h")
-                .ProgramName($"{nameof(AutoBindTests.working)}")
+                .ProgramName($"{nameof(AutoBindTests.Working)}")
                 .Description("a test program for exercising J4JCommandLine")
                 .IgnoreUnprocessedUnkeyedParameters( false );
 
@@ -41,7 +40,7 @@ namespace J4JCommandLine.Tests
         [Theory]
         [InlineData("-i 32 -t junk")]
 #pragma warning disable xUnit1026 // Theory methods should use all of their parameters
-        public void broken( string cmdLine )
+        public void Broken( string cmdLine )
 #pragma warning restore xUnit1026 // Theory methods should use all of their parameters
         {
             var builder = ServiceProvider.Instance.GetRequiredService<BindingTargetBuilder>();
@@ -49,7 +48,7 @@ namespace J4JCommandLine.Tests
             builder.Prefixes("-")
                 .Quotes('\'', '"')
                 .HelpKeys("h")
-                .ProgramName($"{nameof(AutoBindTests.working)}")
+                .ProgramName($"{nameof(AutoBindTests.Working)}")
                 .Description("a test program for exercising J4JCommandLine")
                 .IgnoreUnprocessedUnkeyedParameters(false);
 

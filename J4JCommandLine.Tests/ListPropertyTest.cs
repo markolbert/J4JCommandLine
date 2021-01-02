@@ -1,5 +1,5 @@
 ﻿using FluentAssertions;
-using J4JSoftware.CommandLine;
+using J4JSoftware.CommandLine.Deprecated;
 using Xunit;
 
 namespace J4JCommandLine.Tests
@@ -11,7 +11,7 @@ namespace J4JCommandLine.Tests
         [InlineData("-x 32 33", true, true, new int[] { 32 }, new int[] { 33 })]
         [InlineData("-z 32 33", false, true, new int[] { }, new int[] { 33 })]
         [InlineData("-x 32 -x 33", true, true, new int[] { 32, 33 }, new int[] { })]
-        public void root_properties(
+        public void Root_properties(
             string cmdLine,
             bool required,
             bool result,
@@ -35,7 +35,7 @@ namespace J4JCommandLine.Tests
         [InlineData("-x 32 33", true, true, new int[] { 32 }, new int[] { 33 })]
         [InlineData("-z 32 33", false, true, new int[] { }, new int[] { 33 })]
         [InlineData("-x 32 -x 33", true, true, new int[] { 32, 33 }, new int[] { })]
-        public void parameterless_properties(
+        public void Parameterless_properties(
             string cmdLine,
             bool required,
             bool result,
@@ -59,7 +59,7 @@ namespace J4JCommandLine.Tests
         [InlineData("-x 32 33", true, true, new int[] { 32 }, new int[] { 33 })]
         [InlineData("-z 32 33", false, true, new int[] { }, new int[] { 33 })]
         [InlineData("-x 32 -x 33", true, true, new int[] { 32, 33 }, new int[] { })]
-        public void parametered_properties(
+        public void Parametered_properties(
             string cmdLine,
             bool required,
             bool result,

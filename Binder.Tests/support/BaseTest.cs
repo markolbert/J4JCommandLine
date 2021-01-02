@@ -7,6 +7,8 @@ using J4JSoftware.Logging;
 using Microsoft.Extensions.Configuration;
 using Xunit;
 
+#pragma warning disable 8618
+
 namespace J4JSoftware.Binder.Tests
 {
     public class BaseTest
@@ -24,7 +26,7 @@ namespace J4JSoftware.Binder.Tests
 
         protected void Initialize( CommandLineStyle style )
         {
-            Options = new OptionCollectionNG(style, LoggerFactory);
+            Options = new OptionCollection( style, LoggerFactory );
         }
 
         protected void Initialize( TestConfig testConfig )
@@ -44,11 +46,11 @@ namespace J4JSoftware.Binder.Tests
                     option!.ContextPath!.Equals( x.ContextPath, StringComparison.OrdinalIgnoreCase ) );
 
             optConfig.Should().NotBeNull();
-            
-            option!.AddCommandLineKey(optConfig!.CommandLineKey)
-                .SetStyle(optConfig.Style);
 
-            if (optConfig.Required) option.IsRequired();
+            option!.AddCommandLineKey( optConfig!.CommandLineKey )
+                .SetStyle( optConfig.Style );
+
+            if( optConfig.Required ) option.IsRequired();
             else option.IsOptional();
 
             optConfig.Option = option;
@@ -56,16 +58,14 @@ namespace J4JSoftware.Binder.Tests
 
         protected void ValidateTokenizing()
         {
-            var parser = new Parser(Options, LoggerFactory);
+            var parser = new Parser( Options, LoggerFactory );
             parser.Parse( TestConfig!.CommandLine ).Should().Be( Options.UnknownKeys.Count == 0 );
 
             Options.UnknownKeys.Count.Should().Be( TestConfig.UnknownKeys );
             Options.UnkeyedValues.Count.Should().Be( TestConfig.UnkeyedValues );
 
             foreach( var optConfig in TestConfig.OptionConfigurations )
-            {
                 optConfig.Option!.ValuesSatisfied.Should().Be( optConfig.ValuesSatisfied );
-            }
         }
 
         protected void ValidateConfiguration<TParsed>()
@@ -82,7 +82,7 @@ namespace J4JSoftware.Binder.Tests
                 var exception = Assert.Throws<InvalidOperationException>( () => config.Get<TParsed>() );
                 return;
             }
-            
+
             parsed = config.Get<TParsed>();
 
             if( TestConfig.OptionConfigurations.TrueForAll( x => !x.ValuesSatisfied )
@@ -92,9 +92,9 @@ namespace J4JSoftware.Binder.Tests
                 return;
             }
 
-            foreach( var optConfig in TestConfig.OptionConfigurations)
+            foreach( var optConfig in TestConfig.OptionConfigurations )
             {
-                GetPropertyValue<TParsed>( parsed, optConfig.ContextPath, out var result, out var resultType )
+                GetPropertyValue( parsed, optConfig.ContextPath, out var result, out var resultType )
                     .Should()
                     .BeTrue();
 
@@ -102,12 +102,14 @@ namespace J4JSoftware.Binder.Tests
                 {
                     if( optConfig.CorrectTextArray.Count == 0 )
                         result.Should().BeNull();
-                    else result.Should().BeEquivalentTo(optConfig.CorrectTextArray);
+                    else result.Should().BeEquivalentTo( optConfig.CorrectTextArray );
                 }
                 else
                 {
                     if( optConfig.CorrectText == null )
+                    {
                         result.Should().BeNull();
+                    }
                     else
                     {
                         var correctValue = resultType!.IsEnum
@@ -120,9 +122,9 @@ namespace J4JSoftware.Binder.Tests
             }
         }
 
-        private bool GetPropertyValue<TParsed>( 
-            TParsed parsed, 
-            string contextKey, 
+        private bool GetPropertyValue<TParsed>(
+            TParsed parsed,
+            string contextKey,
             out object? result,
             out Type? resultType )
             where TParsed : class, new()
@@ -132,13 +134,13 @@ namespace J4JSoftware.Binder.Tests
 
             Type curType = typeof(TParsed);
             object? curValue = parsed;
-            
+
             var keys = contextKey.Split( ":", StringSplitOptions.RemoveEmptyEntries );
 
-            for(var idx = 0; idx < keys.Length; idx++ )
+            for( var idx = 0; idx < keys.Length; idx++ )
             {
-                var curPropInfo = curType.GetProperty( keys[idx] );
-                
+                var curPropInfo = curType.GetProperty( keys[ idx ] );
+
                 if( curPropInfo == null )
                     return false;
 

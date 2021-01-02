@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace J4JSoftware.CommandLine
+namespace J4JSoftware.CommandLine.Deprecated
 {
     // an abstract base class implementing IOptionValidator. Types derived from
     // this class can validate particular types

@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace J4JSoftware.CommandLine
+namespace J4JSoftware.CommandLine.Deprecated
 {
     // information about a Type used to determine if it is targetable by the framework,
     // converting values from text to the SupportedType, and getting a default value for the

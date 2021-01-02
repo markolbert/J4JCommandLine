@@ -7,7 +7,7 @@
     <Version>0.1.0.0</Version>
     <Authors>Mark A. Olbert</Authors>
     <Company>Jump for Joy Software</Company>
-    <Product>XUnit Tests for J4JSoftware Command Line Processor</Product>
+    <Product>XUnit Tests for deprecated J4JSoftware Command Line Processor</Product>
     <Copyright>© Mark A. Olbert all rights reserved</Copyright>
   </PropertyGroup>
 

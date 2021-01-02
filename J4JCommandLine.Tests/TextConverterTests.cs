@@ -1,8 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
-using Alba.CsConsoleFormat;
 using FluentAssertions;
-using J4JSoftware.CommandLine;
+using J4JSoftware.CommandLine.Deprecated;
 using Xunit;
 #pragma warning disable 8618
 
@@ -27,7 +26,7 @@ namespace J4JCommandLine.Tests
         [InlineData("-x", true, true, new string[] { })]
         [InlineData("-z", true, false, new string[] { })]
         [InlineData("-x abc", true, true, new string[] { "abc" })]
-        public void boolean(
+        public void Boolean(
             string cmdLine,
             bool parseResult,
             bool optValue,
@@ -51,7 +50,7 @@ namespace J4JCommandLine.Tests
         [InlineData("-x 32", true, 32, new string[] { })]
         [InlineData("-x abc", false, 0, new string[] { })]
         [InlineData("-x 32 abc", true, 32, new string[] { "abc" })]
-        public void integer(
+        public void Integer(
             string cmdLine,
             bool parseResult,
             int optValue,

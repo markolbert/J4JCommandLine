@@ -1,8 +1,6 @@
 ﻿using System;
-using System.Collections;
-using System.Collections.Generic;
 
-namespace J4JSoftware.CommandLine
+namespace J4JSoftware.CommandLine.Deprecated
 {
     public interface IElementKey
     {

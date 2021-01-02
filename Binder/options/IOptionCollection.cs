@@ -2,11 +2,13 @@
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq.Expressions;
+using J4JSoftware.Logging;
 
 namespace J4JSoftware.Configuration.CommandLine
 {
     public interface IOptionCollection : IEnumerable<IOption>
     {
+        Func<IJ4JLogger>? LoggerFactory { get; }
         CommandLineStyle CommandLineStyle { get; }
         MasterTextCollection MasterText { get; }
         ReadOnlyCollection<IOption> Options { get; }

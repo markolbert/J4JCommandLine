@@ -9,8 +9,8 @@ namespace J4JSoftware.Binder.Tests
         public void Allocations( TestConfig config )
         {
             Initialize( config );
-            
-            Options.CreateOptionsFromContextKeys( config.OptionConfigurations);
+
+            Options.CreateOptionsFromContextKeys( config.OptionConfigurations );
 
             ValidateTokenizing();
         }
@@ -21,7 +21,7 @@ namespace J4JSoftware.Binder.Tests
         {
             Initialize( config );
 
-            Options.CreateOptionsFromContextKeys(config.OptionConfigurations);
+            Options.CreateOptionsFromContextKeys( config.OptionConfigurations );
 
             ValidateConfiguration<BasicTarget>();
         }

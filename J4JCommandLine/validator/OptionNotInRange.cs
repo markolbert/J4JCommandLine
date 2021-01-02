@@ -2,7 +2,7 @@
 using System.Text;
 #pragma warning disable 8618
 
-namespace J4JSoftware.CommandLine
+namespace J4JSoftware.CommandLine.Deprecated
 {
     // determines whether a Type which supports the IComparable<T> interface 
     // meets certain exclusion criteria (e.g., not >, not >=). Only Types supporting IComparable<T>

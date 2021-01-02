@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace J4JSoftware.CommandLine
+namespace J4JSoftware.CommandLine.Deprecated
 {
     public partial class OptionNotInRange<T> : OptionValidator<T>
         where T : IComparable<T>

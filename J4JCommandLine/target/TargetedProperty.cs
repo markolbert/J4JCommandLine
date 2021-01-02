@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 
-namespace J4JSoftware.CommandLine
+namespace J4JSoftware.CommandLine.Deprecated
 {
     // describes a user-selected property intended to be a target of a command line option
     // the targeted property may or may not actually be targetable unless it meets
