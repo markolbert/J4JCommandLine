@@ -11,25 +11,23 @@ namespace J4JSoftware.Configuration.CommandLine
 
         public J4JCommandLineSource(
             IOptionCollection options,
-            string cmdLine,
-            Func<IJ4JLogger>? loggerFactory = null
+            string cmdLine
         )
         {
             Options = options;
             _cmdLine = cmdLine;
 
-            var tokenizer = new Tokenizer( options.CommandLineStyle, options.MasterText.TextComparison, loggerFactory );
-            var parsingTable = new ParsingTable( options, loggerFactory );
+            var tokenizer = new Tokenizer( options.CommandLineStyle, options.MasterText.TextComparison, options.LoggerFactory );
+            var parsingTable = new ParsingTable( options, options.LoggerFactory );
 
-            _parser = new Parser( options, tokenizer, parsingTable, loggerFactory?.Invoke() );
+            _parser = new Parser( options, tokenizer, parsingTable, options.LoggerFactory?.Invoke() );
         }
 
         public J4JCommandLineSource(
             IOptionCollection options,
-            string[] args,
-            Func<IJ4JLogger>? loggerFactory
+            string[] args
         )
-            : this( options, string.Join( " ", args ), loggerFactory )
+            : this( options, string.Join( " ", args ) )
         {
         }
 

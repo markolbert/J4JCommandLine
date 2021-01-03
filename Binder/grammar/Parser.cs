@@ -12,19 +12,16 @@ namespace J4JSoftware.Configuration.CommandLine
             CommandLineStyle style = CommandLineStyle.Windows,
             Func<IJ4JLogger>? loggerFactory = null
         )
-            : this( new OptionCollection( style ), loggerFactory )
+            : this( new OptionCollection( style, loggerFactory ) )
         {
         }
 
-        public Parser(
-            IOptionCollection options,
-            Func<IJ4JLogger>? loggerFactory = null
-        )
+        public Parser( IOptionCollection options )
             : this(
                 options,
-                new Tokenizer( options.CommandLineStyle, options.MasterText.TextComparison, loggerFactory ),
-                new ParsingTable( options, loggerFactory ),
-                (loggerFactory == null ? options.LoggerFactory : loggerFactory)?.Invoke() )
+                new Tokenizer( options.CommandLineStyle, options.MasterText.TextComparison, options.LoggerFactory ),
+                new ParsingTable( options, options.LoggerFactory ),
+                options.LoggerFactory?.Invoke() )
         {
         }
 
@@ -56,9 +53,7 @@ namespace J4JSoftware.Configuration.CommandLine
 
             var allOkay = true;
 
-            var tokens = _tokenizer.Tokenize( cmdLine );
-            foreach( var token in tokens )
-                //foreach( var token in _tokenizer.Tokenize( cmdLine ) )
+            foreach( var token in _tokenizer.Tokenize(cmdLine))
             {
                 allOkay &= ParsingTable[ prevToken.Type, token.Type ]!( prevToken, token, token.Text );
 

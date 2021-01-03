@@ -30,8 +30,8 @@ namespace J4JSoftware.Configuration.CommandLine
 
             public bool TerminateWithPrejuidice( Token prevToken, Token curToken, params string[] args )
             {
-                _logger?.Error( "{0} ('{1}') follows {2} ('{3}'), which is not allowed",
-                    new object[] { curToken.Type, curToken.Text, prevToken.Type, prevToken.Text } );
+                _logger?.Error( "{0} ('{1}') => {2} ('{3}'): {4}",
+                    new object[] { curToken.Type, curToken.Text, prevToken.Type, prevToken.Text, "invalid token sequence" } );
 
                 Current = null;
 
@@ -42,13 +42,26 @@ namespace J4JSoftware.Configuration.CommandLine
             {
                 if( Current == null )
                 {
-                    _logger?.Error( "Attempted to commit undefined TokenEntry" );
+                    // if we're not yet building an entry but we received a KeyPrefix token we must be
+                    // about to start building one
+                    if( curToken.Type == TokenType.KeyPrefix )
+                        return Create( prevToken, curToken );
+
+                    _logger?.Error("{0} ('{1}') => {2} ('{3}'): {4}",
+                        new object[] { curToken.Type, curToken.Text, prevToken.Type, prevToken.Text, "undefined TokenEntry" });
+
                     return false;
                 }
 
                 if( Current.Option == null )
                 {
-                    _logger?.Error<string>( "Found entry with unexpected key '{0}'", Current.Key ?? string.Empty );
+                    _logger?.Error( "{0} ('{1}') => {2} ('{3}'): {4}",
+                        new object[]
+                        {
+                            curToken.Type, curToken.Text, prevToken.Type, prevToken.Text,
+                            $"unexpected key '{Current.Key}'"
+                        } );
+
                     Options.UnknownKeys.Add( Current );
 
                     // create a new TokenEntry
@@ -78,11 +91,12 @@ namespace J4JSoftware.Configuration.CommandLine
             {
                 if( args.Length != 1 )
                 {
-                    _logger?.Error<int, TokenType, string>(
-                        "Invalid number of text arguments ({0}) process {1} ('{2}')",
-                        args.Length,
-                        curToken.Type,
-                        curToken.Text );
+                    _logger?.Error("{0} ('{1}') => {2} ('{3}'): {4}",
+                        new object[]
+                        {
+                            curToken.Type, curToken.Text, prevToken.Type, prevToken.Text,
+                            $"invalid number of text arguments '{args.Length}'"
+                        });
 
                     Current = null;
 
