@@ -71,6 +71,7 @@ available as version 0.5.0.1.
   - [Binding to static properties](docs/example-static.md)
   - [Binding to a configuration object](docs/example-instance.md)
 - [Logging and Errors](docs/logging.md)
+- [Notes on the Tokenizer and Parser](docs/parser.md)
 
 #### Inspiration and Dedication
 

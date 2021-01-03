@@ -20,6 +20,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "docs", "docs", "{473DDAC4-C
 		docs\goal-concept.md = docs\goal-concept.md
 		LICENSE.md = LICENSE.md
 		docs\logging.md = docs\logging.md
+		docs\parser.md = docs\parser.md
 		README.md = README.md
 	EndProjectSection
 EndProject
