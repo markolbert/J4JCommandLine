@@ -6,6 +6,17 @@ namespace J4JSoftware.Configuration.CommandLine
     {
         public static IConfigurationBuilder AddJ4JCommandLine(
             this IConfigurationBuilder builder,
+            IOptionCollection options)
+        {
+            var rawCmdLine = new RawCommandLine();
+
+            builder.Add(new J4JCommandLineSource(options, rawCmdLine.GetRawCommandLine()));
+
+            return builder;
+        }
+
+        public static IConfigurationBuilder AddJ4JCommandLine(
+            this IConfigurationBuilder builder,
             string cmdLine,
             IOptionCollection options )
         {

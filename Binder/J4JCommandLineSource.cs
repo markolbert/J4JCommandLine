@@ -1,6 +1,4 @@
-﻿using System;
-using J4JSoftware.Logging;
-using Microsoft.Extensions.Configuration;
+﻿using Microsoft.Extensions.Configuration;
 
 namespace J4JSoftware.Configuration.CommandLine
 {
