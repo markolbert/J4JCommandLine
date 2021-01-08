@@ -37,7 +37,7 @@ namespace J4JSoftware.Binder.Tests
         {
             Initialize( config );
 
-            var parser = new Parser( Options, LoggerFactory );
+            var parser = new Parser( Options );
 
             parser.Options.CreateOptionsFromContextKeys( config.OptionConfigurations );
 

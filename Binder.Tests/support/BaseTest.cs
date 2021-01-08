@@ -58,7 +58,7 @@ namespace J4JSoftware.Binder.Tests
 
         protected void ValidateTokenizing()
         {
-            var parser = new Parser( Options, LoggerFactory );
+            var parser = new Parser( Options );
             parser.Parse( TestConfig!.CommandLine ).Should().Be( Options.UnknownKeys.Count == 0 );
 
             Options.UnknownKeys.Count.Should().Be( TestConfig.UnknownKeys );

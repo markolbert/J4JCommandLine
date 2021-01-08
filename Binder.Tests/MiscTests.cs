@@ -16,7 +16,7 @@ namespace J4JSoftware.Binder.Tests
             var option = Options.Bind<MiscTarget, string?>( x => x.AStringValue, "x" );
             option.Should().NotBeNull();
 
-            var parser = new Parser( Options, LoggerFactory );
+            var parser = new Parser( Options );
             parser.Parse( cmdLine ).Should().BeTrue();
 
             Options.UnknownKeys.Should().BeEmpty();
@@ -24,7 +24,10 @@ namespace J4JSoftware.Binder.Tests
 
             option!.Values.Count.Should().Be( result.Length );
 
-            for( var idx = 0; idx < result.Length; idx++ ) option.Values[ idx ].Should().Be( result[ idx ] );
+            for( var idx = 0; idx < result.Length; idx++ )
+            {
+                option.Values[ idx ].Should().Be( result[ idx ] );
+            }
         }
     }
 }

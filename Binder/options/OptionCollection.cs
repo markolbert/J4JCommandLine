@@ -104,13 +104,12 @@ namespace J4JSoftware.Configuration.CommandLine
                     case MemberExpression memExpr:
                         var propInfo = (PropertyInfo) memExpr.Member;
 
-                        if( !ValidateProperty( propInfo, out var curStyle ) )
-                        {
-                            _logger?.Error<string>( "Property '{0}' is invalid", propInfo.Name );
+                        // the first PropertyInfo, which is the outermost 'leaf', must
+                        // have a public parameterless constructor and a property setter
+                        if( !ValidatePropertyInfo( propInfo, firstStyle == null ) )
                             return null;
-                        }
 
-                        firstStyle ??= curStyle;
+                        firstStyle ??= propInfo.GetOptionStyle();
 
                         propElements.Add( propInfo );
 
@@ -124,13 +123,12 @@ namespace J4JSoftware.Configuration.CommandLine
                         {
                             var propInfo2 = (PropertyInfo) unaryMemExpr.Member;
 
-                            if( !ValidateProperty( propInfo2, out var curStyle2 ) )
-                            {
-                                _logger?.Error<string>( "Property '{0}' is invalid", propInfo2.Name );
+                            // the first PropertyInfo, which is the outermost 'leaf', must
+                            // have a public parameterless constructor and a property setter
+                            if (!ValidatePropertyInfo(propInfo2, firstStyle == null))
                                 return null;
-                            }
 
-                            firstStyle ??= curStyle2;
+                            firstStyle ??= propInfo2.GetOptionStyle();
 
                             propElements.Add( propInfo2 );
                         }
@@ -159,6 +157,33 @@ namespace J4JSoftware.Configuration.CommandLine
             _options.Add( retVal );
 
             return retVal;
+        }
+
+        private bool ValidatePropertyInfo( PropertyInfo propInfo, bool isOuterMostLeaf = false )
+        {
+            var piContext = new ValidationContext(propInfo);
+
+            var piEntry = ((ValidationEntry<PropertyInfo>)piContext.Current)
+                .HasSupportedGetter();
+            
+            var typeEntry = piEntry.CreateChild(piEntry.Value.PropertyType)
+                .IsSupportedType();
+
+            if( isOuterMostLeaf )
+            {
+                piEntry.HasSupportedSetter();
+                typeEntry.HasRequiredConstructor();
+            }
+
+            if( piContext.IsValid ) 
+                return true;
+
+            foreach (var error in piContext.Errors)
+            {
+                _logger?.Error(error.Error);
+            }
+
+            return false;
         }
 
         // determines whether or not a key is being used by an existing option, honoring whatever
@@ -195,111 +220,111 @@ namespace J4JSoftware.Configuration.CommandLine
             return GetEnumerator();
         }
 
-        private bool ValidateProperty( PropertyInfo propInfo, out OptionStyle? style )
-        {
-            style = null;
+        //private bool ValidateProperty( PropertyInfo propInfo, out OptionStyle? style )
+        //{
+        //    style = null;
 
-            if( !ValidateAccessMethod( propInfo.GetMethod, propInfo.Name, 0 ) )
-                return false;
+        //    if( !ValidateAccessMethod( propInfo.GetMethod, propInfo.Name, 0 ) )
+        //        return false;
 
-            if( !ValidateAccessMethod( propInfo.SetMethod, propInfo.Name, 1 ) )
-                return false;
+        //    if( !ValidateAccessMethod( propInfo.SetMethod, propInfo.Name, 1 ) )
+        //        return false;
 
-            if( propInfo.PropertyType.IsEnum )
-            {
-                style = HasAttribute<FlagsAttribute>( propInfo.PropertyType )
-                    ? OptionStyle.ConcatenatedSingleValue
-                    : OptionStyle.SingleValued;
+        //    if( propInfo.PropertyType.IsEnum )
+        //    {
+        //        style = HasAttribute<FlagsAttribute>( propInfo.PropertyType )
+        //            ? OptionStyle.ConcatenatedSingleValue
+        //            : OptionStyle.SingleValued;
 
-                return true;
-            }
+        //        return true;
+        //    }
 
-            if( propInfo.PropertyType.IsGenericType )
-            {
-                if( ValidateGenericType( propInfo.PropertyType, out var innerStyle ) )
-                    style = innerStyle;
+        //    if( propInfo.PropertyType.IsGenericType )
+        //    {
+        //        if( ValidateGenericType( propInfo.PropertyType, out var innerStyle ) )
+        //            style = innerStyle;
 
-                return style != null;
-            }
+        //        return style != null;
+        //    }
 
-            if( !ValidateType( propInfo.PropertyType ) )
-                return false;
+        //    if( !ValidateType( propInfo.PropertyType ) )
+        //        return false;
 
-            style = propInfo.PropertyType.IsArray
-                ? OptionStyle.Collection
-                : typeof(bool).IsAssignableFrom( propInfo.PropertyType )
-                    ? OptionStyle.Switch
-                    : OptionStyle.SingleValued;
+        //    style = propInfo.PropertyType.IsArray
+        //        ? OptionStyle.Collection
+        //        : typeof(bool).IsAssignableFrom( propInfo.PropertyType )
+        //            ? OptionStyle.Switch
+        //            : OptionStyle.SingleValued;
 
-            return true;
-        }
+        //    return true;
+        //}
 
-        private bool ValidateGenericType( Type genType, out OptionStyle? style )
-        {
-            style = null;
+        //private bool ValidateGenericType( Type genType, out OptionStyle? style )
+        //{
+        //    style = null;
 
-            if( genType.GenericTypeArguments.Length != 1 )
-            {
-                _logger?.Error<string>( "Generic type '{0}' does not have just one generic Type argument",
-                    genType.Name );
+        //    if( genType.GenericTypeArguments.Length != 1 )
+        //    {
+        //        _logger?.Error<string>( "Generic type '{0}' does not have just one generic Type argument",
+        //            genType.Name );
 
-                return false;
-            }
+        //        return false;
+        //    }
 
-            if( !ValidateType( genType.GenericTypeArguments[ 0 ] ) )
-                return false;
+        //    if( !ValidateType( genType.GenericTypeArguments[ 0 ] ) )
+        //        return false;
 
-            if( !typeof(List<>).MakeGenericType( genType.GenericTypeArguments[ 0 ] ).IsAssignableFrom( genType ) )
-            {
-                _logger?.Error( "Generic type '{0}' is not a List<> type", genType );
-                return false;
-            }
+        //    if( !typeof(List<>).MakeGenericType( genType.GenericTypeArguments[ 0 ] ).IsAssignableFrom( genType ) )
+        //    {
+        //        _logger?.Error( "Generic type '{0}' is not a List<> type", genType );
+        //        return false;
+        //    }
 
-            style = OptionStyle.Collection;
+        //    style = OptionStyle.Collection;
 
-            return true;
-        }
+        //    return true;
+        //}
 
-        private bool ValidateType( Type toCheck )
-        {
-            if( toCheck.IsGenericType )
-                return false;
+        //private bool ValidateType( Type toCheck )
+        //{
+        //    if( toCheck.IsGenericType )
+        //        return false;
 
-            if( toCheck.IsArray )
-                return ValidateType( toCheck.GetElementType()! );
+        //    if( toCheck.IsArray )
+        //        return ValidateType( toCheck.GetElementType()! );
 
-            if( toCheck.IsValueType
-                || typeof(string).IsAssignableFrom( toCheck )
-                || toCheck.GetConstructors().Any( c => c.GetParameters().Length == 0 ) )
-                return true;
+        //    if( toCheck.IsValueType
+        //        || typeof(string).IsAssignableFrom( toCheck )
+        //        || toCheck.GetConstructors().Any( c => c.GetParameters().Length == 0 ) )
+        //        return true;
 
-            _logger?.Error( "Unsupported type '{0}'", toCheck );
+        //    _logger?.Error( "Unsupported type '{0}'", toCheck );
 
-            return false;
-        }
+        //    return false;
+        //}
 
-        private bool ValidateAccessMethod( MethodInfo? methodInfo, string propName, int allowedParams )
-        {
-            if( methodInfo == null )
-            {
-                _logger?.Error<string>( "Property '{0}' does not have a get or set method", propName );
-                return false;
-            }
+        //private bool ValidateAccessMethod( MethodInfo? methodInfo, string propName, int allowedParams )
+        //{
+        //    if( methodInfo == null )
+        //    {
+        //        _logger?.Error<string>( "Property '{0}' does not have a get or set method", propName );
+        //        return false;
+        //    }
 
-            if( !methodInfo.IsPublic )
-            {
-                _logger?.Error<string, string>( "Property '{0}::{1}' is not bindable", propName, methodInfo.Name );
-                return false;
-            }
+        //    if( !methodInfo.IsPublic )
+        //    {
+        //        _logger?.Error<string, string>( "Property '{0}::{1}' is not bindable", propName, methodInfo.Name );
+        //        return false;
+        //    }
 
-            if( methodInfo.GetParameters().Length > allowedParams )
-            {
-                _logger?.Error<string>( "Property '{0}::{1}' is indexed", propName, methodInfo.Name );
-                return false;
-            }
+        //    if( methodInfo.GetParameters().Length > allowedParams )
+        //    {
+        //        _logger?.Error<string>( "Property '{0}::{1}' is indexed", propName, methodInfo.Name );
+        //        return false;
+        //    }
 
-            return true;
-        }
+        //    return true;
+        //}
 
         private IEnumerable<string> ValidateCommandLineKeys( string[] cmdLineKeys )
         {
@@ -325,11 +350,11 @@ namespace J4JSoftware.Configuration.CommandLine
             );
         }
 
-        private static bool HasAttribute<TAttr>( Type toCheck )
-            where TAttr : Attribute
-        {
-            return toCheck.GetCustomAttribute<TAttr>() != null;
-        }
+        //private static bool HasAttribute<TAttr>( Type toCheck )
+        //    where TAttr : Attribute
+        //{
+        //    return toCheck.GetCustomAttribute<TAttr>() != null;
+        //}
 
         private class TypeBoundOptionComparer : IEqualityComparer<ITypeBoundOption>
         {

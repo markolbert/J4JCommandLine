@@ -8,28 +8,44 @@ using Microsoft.Extensions.Hosting;
 
 namespace J4JSoftware.Binder.Tests
 {
-    public class CompositionRoot : J4JCompositionRoot
+    public class CompositionRoot : J4JCompositionRoot<J4JLoggerConfiguration>
     {
-        public static CompositionRoot Default { get; } = new();
+        static CompositionRoot()
+        {
+            Default = new CompositionRoot
+            {
+                UseConsoleLifetime = true,
+                CachedLoggerScope = CachedLoggerScope.SingleInstance,
+                LoggingSectionKey = string.Empty
+            };
+
+            Default.ChannelInformation
+                .AddChannel<DebugConfig>("Channels:Debug");
+
+            Default.Initialize();
+        }
+
+        public static CompositionRoot Default { get; }
 
         public Func<IJ4JLogger> LoggerFactory => () => Host!.Services.GetRequiredService<IJ4JLogger>();
 
-        protected override void ConfigureHostBuilder( IHostBuilder hostBuilder )
+        protected override void SetupConfigurationEnvironment( IConfigurationBuilder builder )
         {
-            hostBuilder.ConfigureAppConfiguration( ( hc, b ) =>
-                b.SetBasePath( Environment.CurrentDirectory )
-                    .AddJsonFile( "appConfig.json" )
-            );
+            base.SetupConfigurationEnvironment( builder );
 
-            hostBuilder.ConfigureContainer<ContainerBuilder>( ConfigureDependencyInjection );
+            builder.SetBasePath( Environment.CurrentDirectory )
+                .AddJsonFile( "appConfig.json" );
         }
 
-        private void ConfigureDependencyInjection( HostBuilderContext context, ContainerBuilder builder )
+        protected override void SetupDependencyInjection( HostBuilderContext hbc, ContainerBuilder builder )
         {
-            var factory = new ChannelFactory( context.Configuration );
+            base.SetupDependencyInjection( hbc, builder );
 
-            factory.AddChannel<DebugConfig>( "Channels:Debug" );
+            var channelInfo = new ChannelInformation()
+                .AddChannel<DebugConfig>( "Channels:Debug" );
 
+            var factory = new ChannelFactory( hbc.Configuration, channelInfo );
+            
             builder.RegisterJ4JLogging<J4JLoggerConfiguration>( factory );
         }
     }
