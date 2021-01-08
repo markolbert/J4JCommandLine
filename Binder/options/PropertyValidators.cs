@@ -42,11 +42,11 @@ namespace J4JSoftware.Configuration.CommandLine
             return entry;
         }
 
-        public static ValidationEntry<Type> IsSupportedType( this ValidationEntry<Type> entry )
+        public static ValidationEntry<Type> IsSupportedType( this ValidationEntry<Type> entry, bool isOuterMostLeaf = false )
         {
             if( entry.Value.IsGenericType )
                 entry.IsSupportedGenericType();
-            else entry.IsSupportedNonGenericType();
+            else entry.IsSupportedNonGenericType( isOuterMostLeaf );
 
             return entry;
         }
@@ -63,7 +63,7 @@ namespace J4JSoftware.Configuration.CommandLine
                 var typeParamEntry =
                     entry.CreateChild<Type>( entry.Value.GetGenericArguments()[ 0 ], "from generic type check" );
 
-                typeParamEntry.IsSupportedNonGenericType();
+                typeParamEntry.IsSupportedNonGenericType( true );
 
                 if (!typeof(List<>).MakeGenericType(entry.Value.GenericTypeArguments[0]).IsAssignableFrom(entry.Value))
                     entry.AddError("Generic type is not a List<> type");
@@ -72,7 +72,7 @@ namespace J4JSoftware.Configuration.CommandLine
             return entry;
         }
 
-        public static ValidationEntry<Type> IsSupportedNonGenericType( this ValidationEntry<Type> entry )
+        public static ValidationEntry<Type> IsSupportedNonGenericType( this ValidationEntry<Type> entry, bool isOuterMostLeaf = false )
         {
             if( entry.Value.IsGenericType )
                 entry.AddError( "Type must be non-generic" );
@@ -87,8 +87,10 @@ namespace J4JSoftware.Configuration.CommandLine
                 }
                 else
                 {
-                    if( entry.Value.IsValueType
-                        || typeof(string).IsAssignableFrom( entry.Value )
+                    if( entry.Value.IsValueType || typeof(string).IsAssignableFrom( entry.Value ) )
+                        return entry;
+
+                    if( !isOuterMostLeaf
                         || entry.Value.GetConstructors().Any( c => !c.GetParameters().Any() ) )
                         return entry;
 

@@ -165,9 +165,9 @@ namespace J4JSoftware.Configuration.CommandLine
 
             var piEntry = ((ValidationEntry<PropertyInfo>)piContext.Current)
                 .HasSupportedGetter();
-            
-            var typeEntry = piEntry.CreateChild(piEntry.Value.PropertyType)
-                .IsSupportedType();
+
+            var typeEntry = piEntry.CreateChild( piEntry.Value.PropertyType )
+                .IsSupportedType( isOuterMostLeaf );
 
             if( isOuterMostLeaf )
             {
