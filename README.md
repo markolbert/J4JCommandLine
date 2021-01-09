@@ -52,7 +52,7 @@ namespace J4JSoftware.CommandLine.Examples
     }
 }
 ```
-### v0.9 Breaking Changes
+### v1.0 Breaking Changes
 The original version of this library did not integrate easily with the Net5
 IConfiguration system. In addition, its error-checking/validation capabilities
 required a lot of complex, behind-the-scenes code. That was, in part, due to its
