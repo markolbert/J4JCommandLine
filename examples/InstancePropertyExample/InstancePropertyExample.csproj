@@ -19,7 +19,7 @@
 	</ItemGroup>
 
 	<ItemGroup>
-		<ProjectReference Include="..\..\Binder\Binder.csproj" />
+		<ProjectReference Include="..\..\J4JCommandLine\J4JCommandLine.csproj" />
 	</ItemGroup>
 
 </Project>
