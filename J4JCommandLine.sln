@@ -3,13 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 16
 VisualStudioVersion = 16.0.30011.22
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "J4JCommandLine", "J4JCommandLine\J4JCommandLine.csproj", "{6BAF4933-2008-47EC-A2D0-110AF694B8AE}"
-EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "externals", "externals", "{49668F40-3271-4A21-A860-8C6496E00124}"
-EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "J4JCommandLine.Tests", "J4JCommandLine.Tests\J4JCommandLine.Tests.csproj", "{719FF724-C0F9-45C2-842D-901688480603}"
-EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AutofacCommandLine", "AutofacCommandLine\AutofacCommandLine.csproj", "{15200685-21A4-4BEC-8A55-751AF6963FB2}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "docs", "docs", "{473DDAC4-C8B9-4FBC-97C9-51AB11F038EF}"
 	ProjectSection(SolutionItems) = preProject
@@ -30,72 +24,69 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "InstancePropertyExample", "
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AutoBindExample", "examples\AutoBindExample\AutoBindExample.csproj", "{C5400387-BD0A-4E24-80B7-C532A8D1A216}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FancyConsole", "FancyConsole\FancyConsole.csproj", "{972D7E96-1318-488A-A3B4-6EBF3C228DD5}"
-EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Binder", "Binder\Binder.csproj", "{A2FE588F-0375-45B3-AA3E-02EDB2446F85}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "J4JCommandLine", "J4JCommandLine\J4JCommandLine.csproj", "{A2FE588F-0375-45B3-AA3E-02EDB2446F85}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "J4JLogging", "..\J4JLogging\J4JLogging\J4JLogging.csproj", "{01DBD6AD-3B44-45A9-9F28-6FA7886C123B}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Binder.Tests", "Binder.Tests\Binder.Tests.csproj", "{59EAF16A-A5F5-45E2-A75A-76B4AD6A8B17}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Test.J4JCommandLine", "Test.J4JCommandLine\Test.J4JCommandLine.csproj", "{59EAF16A-A5F5-45E2-A75A-76B4AD6A8B17}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DependencyInjection", "..\ProgrammingUtilities\DependencyInjection\DependencyInjection.csproj", "{3D714B5C-7FE3-430E-95B4-E2DAB360DBEA}"
-EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AutoFacJ4JLogging", "..\J4JLogging\AutoFacJ4JLogging\AutoFacJ4JLogging.csproj", "{AD3C06E9-478D-426C-B393-7947275A47FA}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "StaticPropertyExample", "examples\StaticPropertyExample\StaticPropertyExample.csproj", "{7985FAD5-17DC-40AD-90A9-40A7CC903743}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
+		NugetRelease|Any CPU = NugetRelease|Any CPU
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{6BAF4933-2008-47EC-A2D0-110AF694B8AE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{6BAF4933-2008-47EC-A2D0-110AF694B8AE}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{6BAF4933-2008-47EC-A2D0-110AF694B8AE}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{6BAF4933-2008-47EC-A2D0-110AF694B8AE}.Release|Any CPU.Build.0 = Release|Any CPU
-		{719FF724-C0F9-45C2-842D-901688480603}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{719FF724-C0F9-45C2-842D-901688480603}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{719FF724-C0F9-45C2-842D-901688480603}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{719FF724-C0F9-45C2-842D-901688480603}.Release|Any CPU.Build.0 = Release|Any CPU
-		{15200685-21A4-4BEC-8A55-751AF6963FB2}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{15200685-21A4-4BEC-8A55-751AF6963FB2}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{15200685-21A4-4BEC-8A55-751AF6963FB2}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{15200685-21A4-4BEC-8A55-751AF6963FB2}.Release|Any CPU.Build.0 = Release|Any CPU
 		{6DA4542E-A31A-422C-815F-ABEFB4F00295}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{6DA4542E-A31A-422C-815F-ABEFB4F00295}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6DA4542E-A31A-422C-815F-ABEFB4F00295}.NugetRelease|Any CPU.ActiveCfg = NugetRelease|Any CPU
+		{6DA4542E-A31A-422C-815F-ABEFB4F00295}.NugetRelease|Any CPU.Build.0 = NugetRelease|Any CPU
 		{6DA4542E-A31A-422C-815F-ABEFB4F00295}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{6DA4542E-A31A-422C-815F-ABEFB4F00295}.Release|Any CPU.Build.0 = Release|Any CPU
 		{C5400387-BD0A-4E24-80B7-C532A8D1A216}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{C5400387-BD0A-4E24-80B7-C532A8D1A216}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C5400387-BD0A-4E24-80B7-C532A8D1A216}.NugetRelease|Any CPU.ActiveCfg = NugetRelease|Any CPU
+		{C5400387-BD0A-4E24-80B7-C532A8D1A216}.NugetRelease|Any CPU.Build.0 = NugetRelease|Any CPU
 		{C5400387-BD0A-4E24-80B7-C532A8D1A216}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{C5400387-BD0A-4E24-80B7-C532A8D1A216}.Release|Any CPU.Build.0 = Release|Any CPU
-		{972D7E96-1318-488A-A3B4-6EBF3C228DD5}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{972D7E96-1318-488A-A3B4-6EBF3C228DD5}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{972D7E96-1318-488A-A3B4-6EBF3C228DD5}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{972D7E96-1318-488A-A3B4-6EBF3C228DD5}.Release|Any CPU.Build.0 = Release|Any CPU
 		{A2FE588F-0375-45B3-AA3E-02EDB2446F85}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{A2FE588F-0375-45B3-AA3E-02EDB2446F85}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A2FE588F-0375-45B3-AA3E-02EDB2446F85}.NugetRelease|Any CPU.ActiveCfg = NugetRelease|Any CPU
+		{A2FE588F-0375-45B3-AA3E-02EDB2446F85}.NugetRelease|Any CPU.Build.0 = NugetRelease|Any CPU
 		{A2FE588F-0375-45B3-AA3E-02EDB2446F85}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{A2FE588F-0375-45B3-AA3E-02EDB2446F85}.Release|Any CPU.Build.0 = Release|Any CPU
 		{01DBD6AD-3B44-45A9-9F28-6FA7886C123B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{01DBD6AD-3B44-45A9-9F28-6FA7886C123B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{01DBD6AD-3B44-45A9-9F28-6FA7886C123B}.NugetRelease|Any CPU.ActiveCfg = NuGetRelease|Any CPU
+		{01DBD6AD-3B44-45A9-9F28-6FA7886C123B}.NugetRelease|Any CPU.Build.0 = NuGetRelease|Any CPU
 		{01DBD6AD-3B44-45A9-9F28-6FA7886C123B}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{01DBD6AD-3B44-45A9-9F28-6FA7886C123B}.Release|Any CPU.Build.0 = Release|Any CPU
 		{59EAF16A-A5F5-45E2-A75A-76B4AD6A8B17}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{59EAF16A-A5F5-45E2-A75A-76B4AD6A8B17}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{59EAF16A-A5F5-45E2-A75A-76B4AD6A8B17}.NugetRelease|Any CPU.ActiveCfg = NugetRelease|Any CPU
+		{59EAF16A-A5F5-45E2-A75A-76B4AD6A8B17}.NugetRelease|Any CPU.Build.0 = NugetRelease|Any CPU
 		{59EAF16A-A5F5-45E2-A75A-76B4AD6A8B17}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{59EAF16A-A5F5-45E2-A75A-76B4AD6A8B17}.Release|Any CPU.Build.0 = Release|Any CPU
 		{3D714B5C-7FE3-430E-95B4-E2DAB360DBEA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{3D714B5C-7FE3-430E-95B4-E2DAB360DBEA}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3D714B5C-7FE3-430E-95B4-E2DAB360DBEA}.NugetRelease|Any CPU.ActiveCfg = NuGetRelease|Any CPU
+		{3D714B5C-7FE3-430E-95B4-E2DAB360DBEA}.NugetRelease|Any CPU.Build.0 = NuGetRelease|Any CPU
 		{3D714B5C-7FE3-430E-95B4-E2DAB360DBEA}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{3D714B5C-7FE3-430E-95B4-E2DAB360DBEA}.Release|Any CPU.Build.0 = Release|Any CPU
 		{AD3C06E9-478D-426C-B393-7947275A47FA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{AD3C06E9-478D-426C-B393-7947275A47FA}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{AD3C06E9-478D-426C-B393-7947275A47FA}.NugetRelease|Any CPU.ActiveCfg = NuGetRelease|Any CPU
+		{AD3C06E9-478D-426C-B393-7947275A47FA}.NugetRelease|Any CPU.Build.0 = NuGetRelease|Any CPU
 		{AD3C06E9-478D-426C-B393-7947275A47FA}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{AD3C06E9-478D-426C-B393-7947275A47FA}.Release|Any CPU.Build.0 = Release|Any CPU
 		{7985FAD5-17DC-40AD-90A9-40A7CC903743}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{7985FAD5-17DC-40AD-90A9-40A7CC903743}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7985FAD5-17DC-40AD-90A9-40A7CC903743}.NugetRelease|Any CPU.ActiveCfg = NugetRelease|Any CPU
+		{7985FAD5-17DC-40AD-90A9-40A7CC903743}.NugetRelease|Any CPU.Build.0 = NugetRelease|Any CPU
 		{7985FAD5-17DC-40AD-90A9-40A7CC903743}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{7985FAD5-17DC-40AD-90A9-40A7CC903743}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection

@@ -1,36 +1,48 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
 	<PropertyGroup>
 		<TargetFramework>net5.0</TargetFramework>
 		<Nullable>enable</Nullable>
-		<AssemblyName>J4JSoftware.CommandLine</AssemblyName>
-		<RootNamespace>J4JSoftware.CommandLine.Deprecated</RootNamespace>
+		<AssemblyName>J4JSoftware.Configuration.CommandLine</AssemblyName>
+		<RootNamespace>J4JSoftware.Configuration.CommandLine</RootNamespace>
 		<Authors>Mark A. Olbert</Authors>
 		<Company>Jump for Joy Software</Company>
 		<Product>J4JSoftware Command Line Processor</Product>
-		<Description>object-focused command line processing</Description>
+		<Description>command line processing for the Net5 IConfiguration system</Description>
 		<Copyright>© Mark A. Olbert all rights reserved</Copyright>
-		<PackageDescription>(Deprecated) adds the J4JSoftware Command Line Processor</PackageDescription>
+		<PackageDescription>initial release of reworked library</PackageDescription>
 		<RepositoryUrl>https://github.com/markolbert/J4JCommandLine</RepositoryUrl>
 		<PackageLicenseExpression>MIT</PackageLicenseExpression>
-		<PackageProjectUrl>https://github.com/markolbert/J4JCommandLine</PackageProjectUrl>
 		<RepositoryType>git</RepositoryType>
 		<PackageIcon>Diego nuspec.png</PackageIcon>
-		<Version>0.5.0.1</Version>
-		<AssemblyVersion>0.5.0.1</AssemblyVersion>
-		<PackageReleaseNotes>deprecated package due to fundamental redesign</PackageReleaseNotes>
+		<Version>1.0.0.0</Version>
+		<AssemblyVersion>1.0.0.0</AssemblyVersion>
+		<PackageReleaseNotes>complete rework to work with the IConfiguration system; breaking changes</PackageReleaseNotes>
+		<Configurations>Debug;Release;NugetRelease</Configurations>
 	</PropertyGroup>
 
 	<ItemGroup>
 		<PackageReference Include="Microsoft.Extensions.Configuration" Version="5.0.0" />
-		<PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="5.0.1" />
 	</ItemGroup>
 
+	<Choose>
+		<When Condition=" '$(Configuration)' == 'NuGetRelease' ">
+			<ItemGroup>
+				<PackageReference Include="J4JSoftware.Logging" Version="3.0.0" />
+			</ItemGroup>
+		</When>
+		<Otherwise>
+			<ItemGroup>
+				<ProjectReference Include="..\..\J4JLogging\J4JLogging\J4JLogging.csproj" />
+			</ItemGroup>
+		</Otherwise>
+	</Choose>
+
 	<ItemGroup>
-	  <None Include="E:\Pix\JumpForJoy\Diego nuspec.png">
-	    <Pack>True</Pack>
-	    <PackagePath></PackagePath>
-	  </None>
+		<None Include="E:\Pix\JumpForJoy\Diego nuspec.png" Link="Diego nuspec.png">
+			<PackagePath></PackagePath>
+			<Pack>True</Pack>
+		</None>
 	</ItemGroup>
 
 </Project>

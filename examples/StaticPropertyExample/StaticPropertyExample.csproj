@@ -11,6 +11,7 @@
 	  <Product>J4JSoftware Command Line Processor</Product>
 	  <Description>static binding example for J4JCommandLine</Description>
 	  <Copyright>© Mark A. Olbert all rights reserved</Copyright>
+	  <Configurations>Debug;Release;NugetRelease</Configurations>
   </PropertyGroup>
 
   <ItemGroup>
@@ -19,7 +20,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\AutofacCommandLine\AutofacCommandLine.csproj" />
     <ProjectReference Include="..\..\Binder\Binder.csproj" />
   </ItemGroup>
 

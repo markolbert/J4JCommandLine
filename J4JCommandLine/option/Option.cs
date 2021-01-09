@@ -1,147 +1,134 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.ComponentModel;
-using System.Linq;
 
-namespace J4JSoftware.CommandLine.Deprecated
+namespace J4JSoftware.Configuration.CommandLine
 {
-    // the abstract base class of Option and NullOption.
-    public abstract class Option
+    public class Option : IOption
     {
-        private object? _defaultValue;
+        private static List<string> _switchTrue = new() { "true" };
+        private static List<string> _switchFalse = new() { "false" };
 
-        protected Option(
-            OptionType optionType,
-            ITargetableType targetableType,
-            OptionCollection options,
-            CommandLineLogger logger
+        private readonly List<string> _cmdLineKeys = new();
+        private readonly MasterTextCollection _masterText;
+        private readonly List<string> _values = new();
+
+        internal Option(
+            IOptionCollection container,
+            string contextPath,
+            MasterTextCollection masterText
         )
         {
-            OptionType = optionType;
-            TargetableType = targetableType;
-            Options = options;
-            Logger = logger;
+            Container = container;
+            ContextPath = contextPath;
+            _masterText = masterText;
+
+            if( Container.UsesContextPath( ContextPath! ) )
+                throw new ArgumentException( $"Duplicate context key path '{ContextPath}'" );
         }
 
+        public bool IsInitialized => !string.IsNullOrEmpty( ContextPath ) && _cmdLineKeys.Count > 0;
+
         // the collection of Options used by the parsing activity
-        public OptionCollection Options { get; }
-        protected CommandLineLogger Logger { get; }
+        public IOptionCollection Container { get; }
+        public virtual string? ContextPath { get; }
+        public ReadOnlyCollection<string> Keys => _cmdLineKeys.AsReadOnly();
+        public string? CommandLineKeyProvided { get; set; }
 
-        // Information about the targetability of the type of the TargetProperty to
-        // which the option is bound. Options can be bound to un-targetable properties.
-        public ITargetableType TargetableType { get; }
+        public int MaxValues =>
+            Style switch
+            {
+                OptionStyle.Collection => int.MaxValue,
+                OptionStyle.SingleValued => 1,
+                OptionStyle.ConcatenatedSingleValue => int.MaxValue,
+                OptionStyle.Switch => 0,
+                _ => throw new InvalidEnumArgumentException( $"Unsupported OptionStyle '{Style}'" )
+            };
 
-        // an optional description of the Option, used in displaying help or error information
-        public string Description { get; internal set; } = string.Empty;
-        
-        // the first key defined for an option, sorted alphabetically (Options can define multiple keys
-        // but they must be unique within the scope of all Options)
-        public List<string> Keys { get; } = new List<string>();
+        public int NumValuesAllocated => _values.Count;
 
-        // the first key defined for an option, sorted alphabetically (Options can define multiple keys
-        // but they must be unique within the scope of all Options)
-        public string FirstKey => Keys.Count == 0 ? string.Empty : Keys.OrderBy( k => k ).First();
-
-        // the type of the Option, currently either Mappable or Null
-        public OptionType OptionType { get; }
-
-        // flag indicating whether or not the option must be specified on the command line
-        public bool IsRequired { get; internal set; }
-
-        // flag indicating whether or not an option requires a parameter and whether or not
-        // multiple parameters are allowed. Switches do not have parameters. Collections
-        // require multiple parameters to be allowed.
-        public OptionStyle OptionStyle { get; internal set; }
-
-        // the validator for the Option
-        public IOptionValidator? Validator { get; internal set; }
-        
-        // the optional default value assigned to the Option
-        public object? DefaultValue
+        public bool ValuesSatisfied
         {
             get
             {
-                if( _defaultValue == null && TargetableType.IsCreatable )
-                    _defaultValue = TargetableType.GetDefaultValue();
+                if( string.IsNullOrEmpty( CommandLineKeyProvided ) )
+                    return false;
 
-                return _defaultValue;
+                var numValuesAlloc = _values.Count;
+
+                return Style switch
+                {
+                    OptionStyle.Switch => numValuesAlloc == 0,
+                    OptionStyle.SingleValued => numValuesAlloc == 1,
+                    OptionStyle.Collection => numValuesAlloc > 0,
+                    OptionStyle.ConcatenatedSingleValue => numValuesAlloc > 0,
+                    _ => throw new InvalidEnumArgumentException( $"Unsupported OptionStyle '{Style}'" )
+                };
             }
-
-            internal set => _defaultValue = value;
         }
 
+        public ReadOnlyCollection<string> Values => _values.AsReadOnly();
 
-        // the method called to validate the specified value within the expectations
-        // defined for the Option
-        public bool Validate( object value )
+        public void ClearValues()
         {
-            if( Validator == null )
-                return true;
-
-            if( value.GetType() == Validator.SupportedType )
-                return Validator?.Validate( this, value, Logger ) ?? true;
-
-            Logger.LogError(
-                ProcessingPhase.Parsing,
-                $"Object to be validated is a {value.GetType()} but should be a {Validator.SupportedType}, rejecting",
-                option : this );
-
-            return false;
+            _values.Clear();
         }
 
-        // the method called to convert the parsing results for a particular command
-        // line key to a option value. Return values other than MappingResult.Success
-        // indicate one or more problems were encountered in the conversion and validation
-        // process
-        public abstract object? Convert( IAllocation allocation, ITargetableType targetType );
+        public OptionStyle Style { get; private set; } = OptionStyle.Undefined;
+        public bool Required { get; private set; }
+        public string? Description { get; private set; }
 
-        // validates whether or not a valid number of parameters are included in the specified
-        // IAllocation
-        protected bool ValidParameterCount( IAllocation allocation )
+        public void AddValue( string value )
         {
-            // The UnkeyedOption allows for any number of parameters
-            if( OptionType == OptionType.Unkeyed )
-                return true;
+            _values.Add( value );
+        }
 
-            switch( OptionStyle )
+        public void AddValues( IEnumerable<string> values )
+        {
+            _values.AddRange( values );
+        }
+
+        public Option AddCommandLineKey( string cmdLineKey )
+        {
+            if( !Container.UsesCommandLineKey( cmdLineKey ) )
             {
-                case OptionStyle.Switch:
-                    if (allocation.NumParameters > 0)
-                        allocation.MoveExcessParameters(0);
-
-                    break;
-
-                case OptionStyle.SingleValued:
-                    switch( allocation.NumParameters )
-                    {
-                        case 0:
-                            Logger.LogError( 
-                                ProcessingPhase.Parsing, 
-                                $"Expected one parameter, got none",
-                                option : this );
-
-                            return false;
-
-                        case 1:
-                            // no op; desired situation
-                            break;
-
-                        default:
-                            allocation.MoveExcessParameters(1);
-                            break;
-                    }
-
-                    break;
-
-                case OptionStyle.Collection:
-                    // any number of a parameters is okay
-                    break;
-
-                default:
-                    throw new InvalidEnumArgumentException( $"Unsupported {nameof(OptionStyle)} '{OptionStyle}'" );
+                _cmdLineKeys.Add( cmdLineKey );
+                _masterText.Add( TextUsageType.OptionKey, cmdLineKey );
             }
 
-            return true;
+            return this;
+        }
+
+        public Option AddCommandLineKeys( IEnumerable<string> cmdLineKeys )
+        {
+            foreach( var cmdLineKey in cmdLineKeys ) AddCommandLineKey( cmdLineKey );
+
+            return this;
+        }
+
+        public Option SetStyle( OptionStyle style )
+        {
+            Style = style;
+            return this;
+        }
+
+        public Option IsRequired()
+        {
+            Required = true;
+            return this;
+        }
+
+        public Option IsOptional()
+        {
+            Required = false;
+            return this;
+        }
+
+        public Option SetDescription( string description )
+        {
+            Description = description;
+            return this;
         }
     }
 }

@@ -10,6 +10,8 @@
     <RootNamespace>J4JSoftware.Binder.Tests</RootNamespace>
 
     <Nullable>enable</Nullable>
+
+    <Configurations>Debug;Release;NugetRelease</Configurations>
   </PropertyGroup>
 
   <ItemGroup>
@@ -40,7 +42,7 @@
 	  <ProjectReference Include="..\..\J4JLogging\AutoFacJ4JLogging\AutoFacJ4JLogging.csproj" />
 	  <ProjectReference Include="..\..\J4JLogging\J4JLogging\J4JLogging.csproj" />
 	  <ProjectReference Include="..\..\ProgrammingUtilities\DependencyInjection\DependencyInjection.csproj" />
-	  <ProjectReference Include="..\Binder\Binder.csproj" />
+	  <ProjectReference Include="..\J4JCommandLine\J4JCommandLine.csproj" />
 	</ItemGroup>
 
 	<ItemGroup>

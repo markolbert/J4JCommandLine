@@ -1,4 +1,4 @@
-﻿namespace J4JSoftware.CommandLine.Deprecated
+﻿namespace J4JSoftware.Configuration.CommandLine
 {
     // the various ways in which a piece of text can be used within
     // the framework
@@ -7,7 +7,8 @@
         Prefix,
         Quote,
         ValueEncloser,
-        HelpOptionKey,
-        OptionKey
+        OptionKey,
+        Separator,
+        Undefined
     }
 }
