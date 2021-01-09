@@ -2,7 +2,7 @@
 A Net5 library which adds parsing command line arguments to the IConfiguration
 system.
 
-[![Nuget](https://img.shields.io/nuget/v/J4JSoftware.CommandLine?style=flat-square)](https://www.nuget.org/packages/J4JSoftware.CommandLine/)
+[![Nuget](https://img.shields.io/nuget/v/J4JSoftware.Configuration.CommandLine?style=flat-square)](https://www.nuget.org/packages/J4JSoftware.Configuration.CommandLine/)
 
 ### TL;DR
 
