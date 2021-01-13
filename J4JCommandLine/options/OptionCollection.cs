@@ -13,6 +13,7 @@ namespace J4JSoftware.Configuration.CommandLine
     public class OptionCollection : IOptionCollection
     {
         private readonly TypeBoundOptionComparer _comparer = new();
+        private readonly IPropertyValidator? _propValidator;
         private readonly IJ4JLogger? _logger;
         private readonly List<IOption> _options = new();
 
@@ -20,11 +21,16 @@ namespace J4JSoftware.Configuration.CommandLine
 
         public OptionCollection(
             CommandLineStyle cmdLineStyle = CommandLineStyle.Windows,
+            IPropertyValidator? propValidator = null,
             Func<IJ4JLogger>? loggerFactory = null
         )
         {
             CommandLineStyle = cmdLineStyle;
             MasterText = MasterTextCollection.GetDefault(cmdLineStyle, loggerFactory);
+
+            _propValidator = propValidator ??
+                             new DefaultPropertyValidator( loggerFactory?.Invoke() );
+
             LoggerFactory = loggerFactory;
 
             _logger = loggerFactory?.Invoke();
@@ -93,7 +99,7 @@ namespace J4JSoftware.Configuration.CommandLine
         {
             // walk the expression tree to extract the PropertyInfo objects defining
             // the path to the property of interest
-            var propElements = new List<PropertyInfo>();
+            var propElements = new Stack<PropertyInfo>();
 
             var curExpr = propertySelector.Body;
             OptionStyle? firstStyle = null;
@@ -104,14 +110,15 @@ namespace J4JSoftware.Configuration.CommandLine
                     case MemberExpression memExpr:
                         var propInfo = (PropertyInfo) memExpr.Member;
 
+                        propElements.Push(propInfo);
+
                         // the first PropertyInfo, which is the outermost 'leaf', must
                         // have a public parameterless constructor and a property setter
-                        if( !ValidatePropertyInfo( propInfo, firstStyle == null ) )
+                        if ( !_propValidator!.IsPropertyBindable(propElements))
+                        //if( !ValidatePropertyInfo( propInfo, firstStyle == null ) )
                             return null;
 
-                        firstStyle ??= propInfo.GetOptionStyle();
-
-                        propElements.Add( propInfo );
+                        firstStyle ??= GetOptionStyle( propInfo );
 
                         // walk up expression tree
                         curExpr = memExpr.Expression;
@@ -123,14 +130,15 @@ namespace J4JSoftware.Configuration.CommandLine
                         {
                             var propInfo2 = (PropertyInfo) unaryMemExpr.Member;
 
+                            propElements.Push(propInfo2);
+
                             // the first PropertyInfo, which is the outermost 'leaf', must
                             // have a public parameterless constructor and a property setter
-                            if (!ValidatePropertyInfo(propInfo2, firstStyle == null))
+                            if (!_propValidator!.IsPropertyBindable(propElements))
+                            //if (!ValidatePropertyInfo(propInfo2, firstStyle == null))
                                 return null;
 
-                            firstStyle ??= propInfo2.GetOptionStyle();
-
-                            propElements.Add( propInfo2 );
+                            firstStyle ??= GetOptionStyle(propInfo2);
                         }
 
                         // we're done; UnaryExpressions aren't part of an expression tree
@@ -146,9 +154,7 @@ namespace J4JSoftware.Configuration.CommandLine
                         break;
                 }
 
-            propElements.Reverse();
-
-            var retVal = new TypeBoundOption<TTarget>( this, GetContextPath( propElements ), MasterText );
+            var retVal = new TypeBoundOption<TTarget>( this, GetContextPath( propElements.ToList() ), MasterText );
 
             retVal.SetStyle( firstStyle!.Value );
 
@@ -157,33 +163,6 @@ namespace J4JSoftware.Configuration.CommandLine
             _options.Add( retVal );
 
             return retVal;
-        }
-
-        private bool ValidatePropertyInfo( PropertyInfo propInfo, bool isOuterMostLeaf = false )
-        {
-            var piContext = new ValidationContext(propInfo);
-
-            var piEntry = ((ValidationEntry<PropertyInfo>)piContext.Current)
-                .HasSupportedGetter();
-
-            var typeEntry = piEntry.CreateChild( piEntry.Value.PropertyType )
-                .IsSupportedType( isOuterMostLeaf );
-
-            if( isOuterMostLeaf )
-            {
-                piEntry.HasSupportedSetter();
-                typeEntry.HasRequiredConstructor();
-            }
-
-            if( piContext.IsValid ) 
-                return true;
-
-            foreach (var error in piContext.Errors)
-            {
-                _logger?.Error(error.Error);
-            }
-
-            return false;
         }
 
         // determines whether or not a key is being used by an existing option, honoring whatever
@@ -220,112 +199,6 @@ namespace J4JSoftware.Configuration.CommandLine
             return GetEnumerator();
         }
 
-        //private bool ValidateProperty( PropertyInfo propInfo, out OptionStyle? style )
-        //{
-        //    style = null;
-
-        //    if( !ValidateAccessMethod( propInfo.GetMethod, propInfo.Name, 0 ) )
-        //        return false;
-
-        //    if( !ValidateAccessMethod( propInfo.SetMethod, propInfo.Name, 1 ) )
-        //        return false;
-
-        //    if( propInfo.PropertyType.IsEnum )
-        //    {
-        //        style = HasAttribute<FlagsAttribute>( propInfo.PropertyType )
-        //            ? OptionStyle.ConcatenatedSingleValue
-        //            : OptionStyle.SingleValued;
-
-        //        return true;
-        //    }
-
-        //    if( propInfo.PropertyType.IsGenericType )
-        //    {
-        //        if( ValidateGenericType( propInfo.PropertyType, out var innerStyle ) )
-        //            style = innerStyle;
-
-        //        return style != null;
-        //    }
-
-        //    if( !ValidateType( propInfo.PropertyType ) )
-        //        return false;
-
-        //    style = propInfo.PropertyType.IsArray
-        //        ? OptionStyle.Collection
-        //        : typeof(bool).IsAssignableFrom( propInfo.PropertyType )
-        //            ? OptionStyle.Switch
-        //            : OptionStyle.SingleValued;
-
-        //    return true;
-        //}
-
-        //private bool ValidateGenericType( Type genType, out OptionStyle? style )
-        //{
-        //    style = null;
-
-        //    if( genType.GenericTypeArguments.Length != 1 )
-        //    {
-        //        _logger?.Error<string>( "Generic type '{0}' does not have just one generic Type argument",
-        //            genType.Name );
-
-        //        return false;
-        //    }
-
-        //    if( !ValidateType( genType.GenericTypeArguments[ 0 ] ) )
-        //        return false;
-
-        //    if( !typeof(List<>).MakeGenericType( genType.GenericTypeArguments[ 0 ] ).IsAssignableFrom( genType ) )
-        //    {
-        //        _logger?.Error( "Generic type '{0}' is not a List<> type", genType );
-        //        return false;
-        //    }
-
-        //    style = OptionStyle.Collection;
-
-        //    return true;
-        //}
-
-        //private bool ValidateType( Type toCheck )
-        //{
-        //    if( toCheck.IsGenericType )
-        //        return false;
-
-        //    if( toCheck.IsArray )
-        //        return ValidateType( toCheck.GetElementType()! );
-
-        //    if( toCheck.IsValueType
-        //        || typeof(string).IsAssignableFrom( toCheck )
-        //        || toCheck.GetConstructors().Any( c => c.GetParameters().Length == 0 ) )
-        //        return true;
-
-        //    _logger?.Error( "Unsupported type '{0}'", toCheck );
-
-        //    return false;
-        //}
-
-        //private bool ValidateAccessMethod( MethodInfo? methodInfo, string propName, int allowedParams )
-        //{
-        //    if( methodInfo == null )
-        //    {
-        //        _logger?.Error<string>( "Property '{0}' does not have a get or set method", propName );
-        //        return false;
-        //    }
-
-        //    if( !methodInfo.IsPublic )
-        //    {
-        //        _logger?.Error<string, string>( "Property '{0}::{1}' is not bindable", propName, methodInfo.Name );
-        //        return false;
-        //    }
-
-        //    if( methodInfo.GetParameters().Length > allowedParams )
-        //    {
-        //        _logger?.Error<string>( "Property '{0}::{1}' is indexed", propName, methodInfo.Name );
-        //        return false;
-        //    }
-
-        //    return true;
-        //}
-
         private IEnumerable<string> ValidateCommandLineKeys( string[] cmdLineKeys )
         {
             foreach( var key in cmdLineKeys )
@@ -349,13 +222,7 @@ namespace J4JSoftware.Configuration.CommandLine
                 sb => sb.ToString()
             );
         }
-
-        //private static bool HasAttribute<TAttr>( Type toCheck )
-        //    where TAttr : Attribute
-        //{
-        //    return toCheck.GetCustomAttribute<TAttr>() != null;
-        //}
-
+        
         private class TypeBoundOptionComparer : IEqualityComparer<ITypeBoundOption>
         {
             public bool Equals( ITypeBoundOption? x, ITypeBoundOption? y )
@@ -371,6 +238,25 @@ namespace J4JSoftware.Configuration.CommandLine
             {
                 return obj.TargetType.GetHashCode();
             }
+        }
+
+        private OptionStyle GetOptionStyle( PropertyInfo propInfo )
+        {
+            if( propInfo.PropertyType.IsEnum )
+                return propInfo.PropertyType.GetCustomAttribute<FlagsAttribute>() != null
+                    ? OptionStyle.ConcatenatedSingleValue
+                    : OptionStyle.SingleValued;
+
+            // we assume any generic type is a collection-style option because
+            // the only generic types we support are List<>s
+            if( propInfo.PropertyType.IsGenericType )
+                return OptionStyle.Collection;
+
+            return propInfo.PropertyType.IsArray
+                ? OptionStyle.Collection
+                : typeof(bool).IsAssignableFrom( propInfo.PropertyType )
+                    ? OptionStyle.Switch
+                    : OptionStyle.SingleValued;
         }
     }
 }

@@ -12,7 +12,7 @@ namespace J4JSoftware.Configuration.CommandLine
             CommandLineStyle style = CommandLineStyle.Windows,
             Func<IJ4JLogger>? loggerFactory = null
         )
-            : this( new OptionCollection( style, loggerFactory ) )
+            : this( new OptionCollection( style, null, loggerFactory ) )
         {
         }
 
