@@ -9,10 +9,12 @@ namespace J4JSoftware.Configuration.CommandLine
         private readonly ITokenizer _tokenizer;
 
         public Parser(
+            IPropertyValidator? propertyValidator,
+            IConverters converters,
             CommandLineStyle style = CommandLineStyle.Windows,
             Func<IJ4JLogger>? loggerFactory = null
         )
-            : this( new OptionCollection( style, null, loggerFactory ) )
+            : this( new OptionCollection( style, loggerFactory: loggerFactory ) )
         {
         }
 

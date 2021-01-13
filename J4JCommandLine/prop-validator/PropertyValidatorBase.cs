@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using System.Text;
@@ -8,8 +9,13 @@ namespace J4JSoftware.Configuration.CommandLine
 {
     public class PropertyValidatorBase : IPropertyValidator
     {
-        protected PropertyValidatorBase( IJ4JLogger? logger )
+        private readonly IConverters _converters;
+
+        protected PropertyValidatorBase( 
+            IConverters converters,
+            IJ4JLogger? logger )
         {
+            _converters = converters;
             Logger = logger;
         }
 
@@ -17,6 +23,8 @@ namespace J4JSoftware.Configuration.CommandLine
         protected bool IsBindable { get; private set; }
         protected string? PropertyPath { get; private set; }
         protected bool IsOuterMostLeaf { get; private set; }
+
+        protected bool CanConvert(Type toCheck) => _converters.CanConvert(toCheck);
 
         public virtual bool IsPropertyBindable( Stack<PropertyInfo> propertyStack )
         {

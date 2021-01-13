@@ -26,7 +26,7 @@ namespace J4JSoftware.Binder.Tests
 
         protected void Initialize( CommandLineStyle style )
         {
-            Options = new OptionCollection( style, null, LoggerFactory );
+            Options = new OptionCollection( style, loggerFactory : LoggerFactory );
         }
 
         protected void Initialize( TestConfig testConfig )

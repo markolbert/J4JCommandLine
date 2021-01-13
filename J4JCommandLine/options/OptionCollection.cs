@@ -13,7 +13,7 @@ namespace J4JSoftware.Configuration.CommandLine
     public class OptionCollection : IOptionCollection
     {
         private readonly TypeBoundOptionComparer _comparer = new();
-        private readonly IPropertyValidator? _propValidator;
+        private readonly IPropertyValidator _propValidator;
         private readonly IJ4JLogger? _logger;
         private readonly List<IOption> _options = new();
 
@@ -21,23 +21,35 @@ namespace J4JSoftware.Configuration.CommandLine
 
         public OptionCollection(
             CommandLineStyle cmdLineStyle = CommandLineStyle.Windows,
+            IConverters? converters = null,
             IPropertyValidator? propValidator = null,
             Func<IJ4JLogger>? loggerFactory = null
         )
         {
-            CommandLineStyle = cmdLineStyle;
-            MasterText = MasterTextCollection.GetDefault(cmdLineStyle, loggerFactory);
+            converters ??= new Converters( Enumerable.Empty<IConverter>(), loggerFactory?.Invoke() );
 
             _propValidator = propValidator ??
-                             new DefaultPropertyValidator( loggerFactory?.Invoke() );
+                             new DefaultPropertyValidator( converters, loggerFactory?.Invoke() );
+
+            CommandLineStyle = cmdLineStyle;
+            MasterText = MasterTextCollection.GetDefault(cmdLineStyle, loggerFactory);
 
             LoggerFactory = loggerFactory;
 
             _logger = loggerFactory?.Invoke();
         }
 
-        public OptionCollection( MasterTextCollection mt )
+        public OptionCollection(
+            MasterTextCollection mt,
+            IConverters? converters = null,
+            IPropertyValidator? propValidator = null
+        )
         {
+            converters ??= new Converters(Enumerable.Empty<IConverter>(), mt.LoggerFactory?.Invoke());
+
+            _propValidator = propValidator ??
+                             new DefaultPropertyValidator( converters, mt.LoggerFactory?.Invoke() );
+
             CommandLineStyle = CommandLineStyle.UserDefined;
             MasterText = mt;
             LoggerFactory = mt.LoggerFactory;
@@ -114,7 +126,7 @@ namespace J4JSoftware.Configuration.CommandLine
 
                         // the first PropertyInfo, which is the outermost 'leaf', must
                         // have a public parameterless constructor and a property setter
-                        if ( !_propValidator!.IsPropertyBindable(propElements))
+                        if ( !_propValidator.IsPropertyBindable(propElements))
                         //if( !ValidatePropertyInfo( propInfo, firstStyle == null ) )
                             return null;
 
@@ -134,7 +146,7 @@ namespace J4JSoftware.Configuration.CommandLine
 
                             // the first PropertyInfo, which is the outermost 'leaf', must
                             // have a public parameterless constructor and a property setter
-                            if (!_propValidator!.IsPropertyBindable(propElements))
+                            if (!_propValidator.IsPropertyBindable(propElements))
                             //if (!ValidatePropertyInfo(propInfo2, firstStyle == null))
                                 return null;
 

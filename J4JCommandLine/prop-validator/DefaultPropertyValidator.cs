@@ -10,8 +10,11 @@ namespace J4JSoftware.Configuration.CommandLine
 {
     public class DefaultPropertyValidator : PropertyValidatorBase
     {
-        public DefaultPropertyValidator( IJ4JLogger? logger ) 
-            : base( logger )
+        public DefaultPropertyValidator( 
+            IConverters converters,
+            IJ4JLogger? logger 
+            ) 
+            : base( converters, logger )
         {
         }
 
@@ -61,11 +64,14 @@ namespace J4JSoftware.Configuration.CommandLine
             }
         }
 
-        private void CheckType(Type toCheck)
+        private void CheckType( Type toCheck )
         {
-            if (toCheck.IsGenericType)
-                CheckGenericType(toCheck);
-            else CheckNonGenericType(toCheck);
+            if( toCheck.IsGenericType )
+                CheckGenericType( toCheck );
+            else CheckNonGenericType( toCheck );
+
+            if( IsOuterMostLeaf && !CanConvert( toCheck ) )
+                LogError( "No converter for text values exists for the property type" );
         }
 
         private void CheckGenericType(Type toCheck)
