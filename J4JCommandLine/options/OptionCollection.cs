@@ -5,6 +5,7 @@ using System.Collections.ObjectModel;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
+using System.Security.Principal;
 using System.Text;
 using J4JSoftware.Logging;
 
@@ -93,21 +94,74 @@ namespace J4JSoftware.Configuration.CommandLine
             return TargetsMultipleTypes ? $"{type.Name}:" : string.Empty;
         }
 
-        public bool TargetsMultipleTypes => _options.Cast<ITypeBoundOption>().Distinct( _comparer ).Count() > 1;
+        public bool TargetsMultipleTypes => _options.Cast<ITypeBoundOption>().Distinct(_comparer).Count() > 1;
 
-        public IOption Add( string contextPath )
+        public Option<TProp>? Add<TProp>( string contextPath )
         {
-            var retVal = new Option( this, contextPath, MasterText );
+            var propType = typeof(TProp);
+
+            if( !_propValidator.IsPropertyBindable( propType ) )
+            {
+                _logger?.Error("Cannot bind to type '{0}'", propType);
+                return null;
+            }
+
+            if( this.Any( x => x.ContextPath!.Equals( contextPath, MasterText.TextComparison ) ) )
+            {
+                _logger?.Error<string>( "An option with the same ContextPath ('{0}') is already in the collection",
+                    contextPath );
+                return null;
+            }
+
+            var retVal = new Option<TProp>( this, contextPath, MasterText );
 
             _options.Add( retVal );
 
             return retVal;
         }
 
-        public Option? Bind<TTarget, TProp>(
-            Expression<Func<TTarget, TProp>> propertySelector,
+        public IOption? Add( Type propType, string contextPath)
+        {
+            if (!_propValidator.IsPropertyBindable(propType))
+            {
+                _logger?.Error("Cannot bind to type '{0}'", propType);
+                return null;
+            }
+
+            if (this.Any(x => x.ContextPath!.Equals(contextPath, MasterText.TextComparison)))
+            {
+                _logger?.Error<string>("An option with the same ContextPath ('{0}') is already in the collection",
+                    contextPath);
+                return null;
+            }
+
+            var genType = typeof(Option<>).MakeGenericType( propType );
+            var ctor = genType.GetConstructors( BindingFlags.Instance | BindingFlags.NonPublic )
+                .FirstOrDefault();
+
+            if( ctor == null )
+            {
+                _logger?.Error("Couldn't find constructor for {0}", genType);
+                return null;
+            }
+
+            var retVal = ctor.Invoke( new object?[] { this, contextPath, MasterText } ) as IOption;
+
+            if( retVal == null )
+            {
+                _logger?.Error( "Failed to create instance of {0}", genType );
+                return null;
+            }
+
+            _options.Add(retVal);
+
+            return retVal;
+        }
+
+        public Option<TProp>? Bind<TContainer, TProp>(
+            Expression<Func<TContainer, TProp>> propertySelector,
             params string[] cmdLineKeys )
-            where TTarget : class, new()
+            where TContainer : class, new()
         {
             // walk the expression tree to extract the PropertyInfo objects defining
             // the path to the property of interest
@@ -166,7 +220,19 @@ namespace J4JSoftware.Configuration.CommandLine
                         break;
                 }
 
-            var retVal = new TypeBoundOption<TTarget>( this, GetContextPath( propElements.ToList() ), MasterText );
+            var contextPath = GetContextPath( propElements.ToList() );
+
+            if (this.Any(x => x.ContextPath!.Equals(contextPath, MasterText.TextComparison)))
+            {
+                _logger?.Error<string>("An option with the same ContextPath ('{0}') is already in the collection",
+                    contextPath);
+                return null;
+            }
+
+            var retVal = new TypeBoundOption<TContainer, TProp>(
+                this,
+                contextPath,
+                MasterText );
 
             retVal.SetStyle( firstStyle!.Value );
 
@@ -243,12 +309,42 @@ namespace J4JSoftware.Configuration.CommandLine
                 if( x is null) return false;
                 if( y is null) return false;
 
-                return x.GetType() == y.GetType() && x.TargetType == y.TargetType;
+                // this is messy because constructed generic types are not deemed to
+                // be equal even if they are built from the same types. We are also
+                // assuming the ITypeBoundOption instances are instances of
+                // TypeBoundOption when they could, in reality, be instances of
+                // something else entirely.
+                if( !GetTypeBoundTypeParameters( x, out var xContainerType ) )
+                    return false;
+
+                if (!GetTypeBoundTypeParameters(y, out var yContainerType))
+                    return false;
+
+                return xContainerType!.IsAssignableFrom( yContainerType! );
+            }
+
+            private bool GetTypeBoundTypeParameters( ITypeBoundOption tbOption, out Type? containerType )
+            {
+                containerType = null;
+
+                var tbType = tbOption.GetType();
+
+                // we assume we were given an instance of a generic type with two type parameters
+                if (!tbType.IsGenericType || tbType.GetGenericArguments().Length != 2)
+                    return false;
+
+                // we further assume we are derived from TypeBoundOption<,>
+                if( !typeof(TypeBoundOption<,>).IsAssignableFrom( tbType.GetGenericTypeDefinition() ) )
+                    return false;
+
+                containerType = tbType.GetGenericArguments()[ 0 ];
+
+                return true;
             }
 
             public int GetHashCode( ITypeBoundOption obj )
             {
-                return obj.TargetType.GetHashCode();
+                return obj.ContainerType.GetHashCode();
             }
         }
 

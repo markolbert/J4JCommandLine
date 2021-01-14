@@ -1,5 +1,7 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
 using System.Reflection;
 
@@ -27,58 +29,82 @@ namespace J4JSoftware.Configuration.CommandLine
 
         public bool CanConvert( Type toCheck )
         {
+            var collInfo = BindableTypeInfo.Create( toCheck );
+
             // we support simple types, Lists of simple types and Arrays of simple types
-            if( toCheck.IsArray )
-            {
-                var elementType = toCheck.GetElementType()!;
-                return _supportedTypes.ContainsKey( elementType ) || elementType.IsEnum;
-            }
-
-            if( toCheck.IsGenericType )
-            {
-
-                if( toCheck.GenericTypeArguments.Length != 1 )
-                    return false;
-
-                var genType = toCheck.GetGenericArguments()[ 0 ];
-
-                if( !typeof(List<>).MakeGenericType( genType ).IsAssignableFrom( toCheck ) )
-                    return false;
-
-                return !genType.IsGenericType && !genType.IsArray;
-            }
-
-            // now check for supported simple types
-            return _supportedTypes.ContainsKey( toCheck ) || toCheck.IsEnum;
+            return _supportedTypes.ContainsKey( collInfo.TargetType ) || collInfo.TargetType.IsEnum;
         }
 
-        public IEnumerable<T?> Convert<T>( IEnumerable<string> values )
+        private object? ConvertSingleString( Type targetType, string? text )
         {
-            foreach( var converted in Convert( typeof(T), values ) )
-            {
-                yield return converted == null ? default(T) : (T) converted;
-            }
-        }
+            // this check should never get triggered, but...
+            if( !CanConvert( targetType ) )
+                return null;
 
-        public IEnumerable<object?> Convert( Type targetType, IEnumerable<string> values )
-        {
-            if (!CanConvert(targetType))
-                yield break;
+            if( string.IsNullOrEmpty( text ) )
+                return null;
 
             if( targetType.IsEnum )
-            {
-                foreach( var text in values )
-                {
-                    yield return Enum.TryParse( targetType, text, true, out var convEnum ) ? convEnum : default;
-                }
-            }
-            else
-            {
-                foreach( var text in values )
-                {
-                    yield return _supportedTypes[ targetType ].Invoke( null, new object[] { text } );
-                }
-            }
+                return Enum.TryParse( targetType, text, true, out var convEnum ) ? convEnum : null;
+
+            return _supportedTypes[ targetType ].Invoke( null, new object[] { text } );
         }
+
+        public T? Convert<T>( IEnumerable<string> values )
+        {
+            var targetType = typeof(T);
+
+            var retVal = Convert( targetType, values );
+
+            if( retVal == null )
+                return default(T);
+
+            return (T) retVal;
+        }
+
+        public object? Convert( Type targetType, IEnumerable<string> values )
+        {
+            if( !CanConvert( targetType ) )
+                return null;
+
+            var listValues = values.ToList();
+
+            var bindableInfo = BindableTypeInfo.Create( targetType );
+
+            return bindableInfo.BindableType switch
+            {
+                BindableType.Array => ConvertToArray( targetType, listValues ),
+                BindableType.List => ConvertToList( targetType, listValues ),
+                BindableType.Simple => ConvertSingleString( targetType, listValues.FirstOrDefault() ),
+                BindableType.Unsupported => null,
+                _ => throw new InvalidEnumArgumentException(
+                    $"Unsupported {typeof(BindableType)} '{bindableInfo.BindableType}'" )
+            };
+        }
+
+        private object ConvertToArray(Type elementType, List<string> values)
+        {
+            var retVal = Array.CreateInstance(elementType, values.Count);
+
+            for (var idx = 0; idx < values.Count; idx++)
+            {
+                retVal.SetValue(ConvertSingleString(elementType, values[idx]), idx);
+            }
+
+            return retVal;
+        }
+
+        private object ConvertToList(Type elementType, List<string> values)
+        {
+            var retVal = (IList)Activator.CreateInstance(typeof(List<>).MakeGenericType(elementType))!;
+
+            foreach (var value in values)
+            {
+                retVal!.Add(ConvertSingleString(elementType, value));
+            }
+
+            return retVal;
+        }
+
     }
 }

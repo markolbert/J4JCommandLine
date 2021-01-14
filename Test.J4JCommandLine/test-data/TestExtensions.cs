@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using FluentAssertions;
 using J4JSoftware.Configuration.CommandLine;
 
 namespace J4JSoftware.Binder.Tests
@@ -12,11 +13,13 @@ namespace J4JSoftware.Binder.Tests
             foreach( var optConfig in optConfigs ) options.CreateOptionFromContextKey( optConfig );
         }
 
-        public static IOptionCollection CreateOptionFromContextKey( this IOptionCollection options,
+        private static IOptionCollection CreateOptionFromContextKey( this IOptionCollection options,
             OptionConfig optConfig )
         {
-            var option = options.Add( optConfig.ContextPath )
-                .AddCommandLineKey( optConfig.CommandLineKey )
+            var option = options.Add( optConfig.GetPropertyType(), optConfig.ContextPath );
+            option.Should().NotBeNull();
+
+            option!.AddCommandLineKey( optConfig.CommandLineKey )
                 .SetStyle( optConfig.Style );
 
             if( optConfig.Required ) option.IsRequired();

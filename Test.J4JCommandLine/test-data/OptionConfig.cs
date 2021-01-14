@@ -1,10 +1,21 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using J4JSoftware.Configuration.CommandLine;
 
 #pragma warning disable 8618
 
 namespace J4JSoftware.Binder.Tests
 {
+    public enum PropertyTypes
+    {
+        Boolean,
+        String,
+        Int,
+        TestEnum,
+        TestFlagEnum,
+        ListOfStrings
+    }
+
     public class OptionConfig
     {
         public string CommandLineKey { get; set; }
@@ -15,6 +26,18 @@ namespace J4JSoftware.Binder.Tests
         public bool ValuesSatisfied { get; set; }
         public string? CorrectText { get; set; }
         public List<string> CorrectTextArray { get; set; }
-        public Option? Option { get; set; }
+        public PropertyTypes PropertyType { get; set; }
+
+        public Type GetPropertyType() => PropertyType switch
+        {
+            PropertyTypes.Boolean => typeof(bool),
+            PropertyTypes.Int => typeof(int),
+            PropertyTypes.ListOfStrings => typeof(List<string>),
+            PropertyTypes.TestEnum => typeof(TestEnum),
+            PropertyTypes.TestFlagEnum => typeof(TestFlagEnum),
+            _ => typeof(string)
+        };
+
+        public IOption? Option { get; set; }
     }
 }

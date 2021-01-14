@@ -27,27 +27,21 @@ namespace J4JSoftware.Configuration.CommandLine
             _converters.FirstOrDefault( c => c.CanConvert( toCheck ) )
             ?? ( _defaultConv.CanConvert( toCheck ) ? _defaultConv : null );
 
-        public IEnumerable<object?> Convert( Type targetType, IEnumerable<string> values )
+        public object? Convert( Type targetType, IEnumerable<string> values )
         {
             var converter = GetConverter( targetType );
 
-            if( converter == null )
-                yield break;
-
-            foreach( var converted in converter.Convert( targetType, values ) )
-            {
-                yield return converted;
-            }
+            return converter?.Convert( targetType, values );
         }
 
-        public IEnumerable<T?> Convert<T>( IEnumerable<string> values )
+        public T? Convert<T>( IEnumerable<string> values )
         {
-            foreach( var converted in Convert( typeof(T), values ) )
-            {
-                if( converted == null )
-                    yield return default(T);
-                else yield return (T) converted;
-            }
+            var retVal = Convert( typeof(T), values );
+
+            if( retVal == null )
+                return default(T);
+
+            return (T) retVal;
         }
     }
 }

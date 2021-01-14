@@ -8,29 +8,44 @@ namespace J4JSoftware.Configuration.CommandLine
     {
         bool IsInitialized { get; }
         IOptionCollection Container { get; }
+        
         string? ContextPath { get; }
+
         ReadOnlyCollection<string> Keys { get; }
+        IOption AddCommandLineKey(string cmdLineKey);
+        IOption AddCommandLineKeys(IEnumerable<string> cmdLineKeys);
         string? CommandLineKeyProvided { get; set; }
+
+        OptionStyle Style { get; }
+        IOption SetStyle(OptionStyle style);
+
+        ReadOnlyCollection<string> Values { get; }
+        void ClearValues();
         int MaxValues { get; }
         int NumValuesAllocated { get; }
         bool ValuesSatisfied { get; }
-        ReadOnlyCollection<string> Values { get; }
-        OptionStyle Style { get; }
-        bool Required { get; }
-        string? Description { get; }
-        void ClearValues();
+
         void AddValue( string value );
         void AddValues( IEnumerable<string> values );
-        Option AddCommandLineKey( string cmdLineKey );
-        Option AddCommandLineKeys( IEnumerable<string> cmdLineKeys );
-        Option SetStyle( OptionStyle style );
-        Option IsRequired();
-        Option IsOptional();
-        Option SetDescription( string description );
+        
+        bool Required { get; }
+        IOption IsRequired();
+        IOption IsOptional();
+
+        string? Description { get; }
+        IOption SetDescription( string description );
+
+        string? GetDefaultValue();
+    }
+
+    public interface IOption<T> : IOption
+    {
+        T? DefaultValue { get; }
+        void SetDefault( T? value );
     }
 
     public interface ITypeBoundOption : IOption
     {
-        Type TargetType { get; }
+        Type ContainerType { get; }
     }
 }

@@ -2,8 +2,8 @@
 
 namespace J4JSoftware.Configuration.CommandLine
 {
-    public class TypeBoundOption<TTarget> : Option, ITypeBoundOption
-        where TTarget : class, new()
+    public class TypeBoundOption<TContainer, TProp> : Option<TProp>, ITypeBoundOption
+        where TContainer : class, new()
     {
         internal TypeBoundOption(
             IOptionCollection container,
@@ -14,7 +14,7 @@ namespace J4JSoftware.Configuration.CommandLine
         {
         }
 
-        public Type TargetType => typeof(TTarget);
+        public Type ContainerType => typeof(TContainer);
 
         public override string? ContextPath
         {
@@ -23,7 +23,7 @@ namespace J4JSoftware.Configuration.CommandLine
                 if( base.ContextPath == null )
                     return null;
 
-                return $"{Container.GetTypePrefix<TTarget>()}{base.ContextPath}";
+                return $"{Container.GetTypePrefix<TContainer>()}{base.ContextPath}";
             }
         }
     }

@@ -5,10 +5,10 @@ using System.ComponentModel;
 
 namespace J4JSoftware.Configuration.CommandLine
 {
-    public class Option : IOption
+    public class Option<T> : IOption<T>
     {
-        private static List<string> _switchTrue = new() { "true" };
-        private static List<string> _switchFalse = new() { "false" };
+        //private static List<string> _switchTrue = new() { "true" };
+        //private static List<string> _switchFalse = new() { "false" };
 
         private readonly List<string> _cmdLineKeys = new();
         private readonly MasterTextCollection _masterText;
@@ -24,8 +24,8 @@ namespace J4JSoftware.Configuration.CommandLine
             ContextPath = contextPath;
             _masterText = masterText;
 
-            if( Container.UsesContextPath( ContextPath! ) )
-                throw new ArgumentException( $"Duplicate context key path '{ContextPath}'" );
+            //if( Container.UsesContextPath( ContextPath! ) )
+            //    throw new ArgumentException( $"Duplicate context key path '{ContextPath}'" );
         }
 
         public bool IsInitialized => !string.IsNullOrEmpty( ContextPath ) && _cmdLineKeys.Count > 0;
@@ -35,6 +35,9 @@ namespace J4JSoftware.Configuration.CommandLine
         public virtual string? ContextPath { get; }
         public ReadOnlyCollection<string> Keys => _cmdLineKeys.AsReadOnly();
         public string? CommandLineKeyProvided { get; set; }
+
+        public T? DefaultValue { get; private set; }
+        public void SetDefault( T? value ) => DefaultValue = value;
 
         public int MaxValues =>
             Style switch
@@ -89,7 +92,7 @@ namespace J4JSoftware.Configuration.CommandLine
             _values.AddRange( values );
         }
 
-        public Option AddCommandLineKey( string cmdLineKey )
+        public IOption AddCommandLineKey( string cmdLineKey )
         {
             if( !Container.UsesCommandLineKey( cmdLineKey ) )
             {
@@ -100,35 +103,37 @@ namespace J4JSoftware.Configuration.CommandLine
             return this;
         }
 
-        public Option AddCommandLineKeys( IEnumerable<string> cmdLineKeys )
+        public IOption AddCommandLineKeys( IEnumerable<string> cmdLineKeys )
         {
             foreach( var cmdLineKey in cmdLineKeys ) AddCommandLineKey( cmdLineKey );
 
             return this;
         }
 
-        public Option SetStyle( OptionStyle style )
+        public IOption SetStyle( OptionStyle style )
         {
             Style = style;
             return this;
         }
 
-        public Option IsRequired()
+        public IOption IsRequired()
         {
             Required = true;
             return this;
         }
 
-        public Option IsOptional()
+        public IOption IsOptional()
         {
             Required = false;
             return this;
         }
 
-        public Option SetDescription( string description )
+        public IOption SetDescription( string description )
         {
             Description = description;
             return this;
         }
+
+        string? IOption.GetDefaultValue() => DefaultValue?.ToString();
     }
 }

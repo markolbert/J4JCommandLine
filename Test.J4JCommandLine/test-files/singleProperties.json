@@ -7,6 +7,7 @@
     "OptionConfigurations": [
       {
         "ContextPath": "ASwitch",
+        "PropertyType": "boolean", 
         "CommandLineKey": "x",
         "Style": "Switch",
         "ValuesSatisfied": true,
@@ -22,7 +23,8 @@
     "OptionConfigurations": [
       {
         "ContextPath": "ASwitch",
-        "CommandLineKey": "x",
+        "PropertyType": "boolean",
+                "CommandLineKey": "x",
         "Style": "Switch",
         "CorrectText": "false"
       }
@@ -36,7 +38,8 @@
     "OptionConfigurations": [
       {
         "ContextPath": "ASwitch",
-        "CommandLineKey": "x",
+        "PropertyType": "boolean",
+                "CommandLineKey": "x",
         "Style": "Switch",
         "ValuesSatisfied": true,
         "CorrectText": "true"
@@ -51,7 +54,8 @@
     "OptionConfigurations": [
       {
         "ContextPath": "ASwitch",
-        "CommandLineKey": "x",
+        "PropertyType": "boolean",
+                "CommandLineKey": "x",
         "Style": "Switch",
         "CorrectText": "false"
       }
@@ -65,7 +69,8 @@
     "OptionConfigurations": [
       {
         "ContextPath": "ASingleValue",
-        "CommandLineKey": "x",
+        "PropertyType": "string",
+                "CommandLineKey": "x",
         "Style": "SingleValued"
       }
     ]
@@ -78,7 +83,8 @@
     "OptionConfigurations": [
       {
         "ContextPath": "ASingleValue",
-        "CommandLineKey": "x",
+        "PropertyType": "string",
+                "CommandLineKey": "x",
         "Style": "SingleValued"
       }
     ]
@@ -91,7 +97,8 @@
     "OptionConfigurations": [
       {
         "ContextPath": "ASingleValue",
-        "CommandLineKey": "x",
+        "PropertyType": "string",
+                "CommandLineKey": "x",
         "Style": "SingleValued",
         "ValuesSatisfied": true,
         "CorrectText": "expected"
@@ -106,7 +113,8 @@
     "OptionConfigurations": [
       {
         "ContextPath": "ASingleValue",
-        "CommandLineKey": "x",
+        "PropertyType": "string",
+                "CommandLineKey": "x",
         "Style": "SingleValued"
       }
     ]
@@ -119,7 +127,8 @@
     "OptionConfigurations": [
       {
         "ContextPath": "ASingleValue",
-        "CommandLineKey": "x",
+        "PropertyType": "string",
+                "CommandLineKey": "x",
         "Style": "SingleValued",
         "ValuesSatisfied": true,
         "CorrectText": "expected"
@@ -134,7 +143,8 @@
     "OptionConfigurations": [
       {
         "ContextPath": "ASingleValue",
-        "CommandLineKey": "x",
+        "PropertyType": "string",
+                "CommandLineKey": "x",
         "Style": "SingleValued"
       }
     ]
@@ -147,7 +157,8 @@
     "OptionConfigurations": [
       {
         "ContextPath": "AnEnumValue",
-        "CommandLineKey": "x",
+        "PropertyType": "TestEnum",
+                "CommandLineKey": "x",
         "Style": "SingleValued",
         "ValuesSatisfied": true,
         "CorrectText": "EnumValue1"
@@ -162,7 +173,8 @@
     "OptionConfigurations": [
       {
         "ContextPath": "AnEnumValue",
-        "CommandLineKey": "x",
+        "PropertyType": "TestEnum",
+                "CommandLineKey": "x",
         "Style": "SingleValued",
         "ValuesSatisfied": true,
         "CorrectText": "EnumValue2"
@@ -177,7 +189,8 @@
     "OptionConfigurations": [
       {
         "ContextPath": "AnEnumValue",
-        "CommandLineKey": "x",
+        "PropertyType": "TestEnum",
+                "CommandLineKey": "x",
         "Style": "SingleValued",
         "ValuesSatisfied": true,
         "ConversionWillFail": true
@@ -192,7 +205,8 @@
     "OptionConfigurations": [
       {
         "ContextPath": "AnEnumValue",
-        "CommandLineKey": "x",
+        "PropertyType": "TestEnum",
+                "CommandLineKey": "x",
         "Style": "SingleValued",
         "ValuesSatisfied": true,
         "CorrectText": "EnumValue1"
@@ -207,7 +221,8 @@
     "OptionConfigurations": [
       {
         "ContextPath": "AFlagEnumValue",
-        "CommandLineKey": "x",
+        "PropertyType": "TestFlagEnum",
+                "CommandLineKey": "x",
         "Style": "ConcatenatedSingleValue",
         "ValuesSatisfied": true,
         "CorrectText": "EnumValue1"
@@ -222,7 +237,8 @@
     "OptionConfigurations": [
       {
         "ContextPath": "AFlagEnumValue",
-        "CommandLineKey": "x",
+        "PropertyType": "TestFlagEnum",
+                "CommandLineKey": "x",
         "Style": "ConcatenatedSingleValue",
         "ValuesSatisfied": true,
         "CorrectText": "EnumValue2"
@@ -237,7 +253,8 @@
     "OptionConfigurations": [
       {
         "ContextPath": "AFlagEnumValue",
-        "CommandLineKey": "x",
+        "PropertyType": "TestFlagEnum",
+                "CommandLineKey": "x",
         "Style": "ConcatenatedSingleValue",
         "ValuesSatisfied": true,
         "CorrectText": "EnumValue1, EnumValue2"
@@ -252,7 +269,8 @@
     "OptionConfigurations": [
       {
         "ContextPath": "ACollection",
-        "CommandLineKey": "x",
+        "PropertyType": "ListOfStrings",
+                "CommandLineKey": "x",
         "Style": "Collection"
       }
     ]
@@ -265,7 +283,8 @@
     "OptionConfigurations": [
       {
         "ContextPath": "ACollection",
-        "CommandLineKey": "x",
+        "PropertyType": "ListOfStrings",
+                "CommandLineKey": "x",
         "Style": "Collection"
       }
     ]
@@ -278,7 +297,8 @@
     "OptionConfigurations": [
       {
         "ContextPath": "ACollection",
-        "CommandLineKey": "x",
+        "PropertyType": "ListOfStrings",
+                "CommandLineKey": "x",
         "Style": "Collection",
         "ValuesSatisfied": true,
         "CorrectTextArray": [
@@ -295,7 +315,8 @@
     "OptionConfigurations": [
       {
         "ContextPath": "ACollection",
-        "CommandLineKey": "x",
+        "PropertyType": "ListOfStrings",
+                "CommandLineKey": "x",
         "Style": "Collection"
       }
     ]
@@ -308,7 +329,8 @@
     "OptionConfigurations": [
       {
         "ContextPath": "ACollection",
-        "CommandLineKey": "x",
+        "PropertyType": "ListOfStrings",
+                "CommandLineKey": "x",
         "Style": "Collection"
       }
     ]
@@ -321,7 +343,8 @@
     "OptionConfigurations": [
       {
         "ContextPath": "ACollection",
-        "CommandLineKey": "x",
+        "PropertyType": "ListOfStrings",
+                "CommandLineKey": "x",
         "Style": "Collection",
         "ValuesSatisfied": true,
         "CorrectTextArray": [
@@ -339,7 +362,8 @@
     "OptionConfigurations": [
       {
         "ContextPath": "ACollection",
-        "CommandLineKey": "x",
+        "PropertyType": "ListOfStrings",
+                "CommandLineKey": "x",
         "Style": "Collection"
       }
     ]

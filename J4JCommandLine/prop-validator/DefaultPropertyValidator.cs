@@ -36,6 +36,16 @@ namespace J4JSoftware.Configuration.CommandLine
             return IsBindable;
         }
 
+        public override bool IsPropertyBindable( Type propType )
+        {
+            base.IsPropertyBindable( propType );
+
+            CheckType( propType );
+            CheckConstructor( propType );
+
+            return IsBindable;
+        }
+
         private void CheckGetter(PropertyInfo propInfo )
         {
             if( propInfo.GetMethod == null )

@@ -8,6 +8,7 @@
     "OptionConfigurations": [
       {
         "ContextPath": "ASwitch",
+        "PropertyType": "boolean",
         "CommandLineKey": "x",
         "Style": "Switch",
         "ValuesSatisfied": true,

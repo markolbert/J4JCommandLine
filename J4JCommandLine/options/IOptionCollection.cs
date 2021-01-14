@@ -26,9 +26,10 @@ namespace J4JSoftware.Configuration.CommandLine
         string GetTypePrefix<TTarget>()
             where TTarget : class, new();
 
-        IOption Add( string contextPath );
+        Option<TProp>? Add<TProp>( string contextPath );
+        IOption? Add( Type propType, string contextPath );
 
-        Option? Bind<TTarget, TProp>(
+        Option<TProp>? Bind<TTarget, TProp>(
             Expression<Func<TTarget, TProp>> propertySelector,
             params string[] cmdLineKeys )
             where TTarget : class, new();

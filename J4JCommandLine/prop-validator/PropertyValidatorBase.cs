@@ -46,7 +46,20 @@ namespace J4JSoftware.Configuration.CommandLine
 
             IsOuterMostLeaf = propertyStack.Count == 1;
 
-            return true;
+            CheckBasicBindability( propertyStack.Peek().PropertyType );
+
+            return IsBindable;
+        }
+
+        public virtual bool IsPropertyBindable( Type propType )
+        {
+            IsBindable = true;
+            PropertyPath = propType.Name;
+            IsOuterMostLeaf = true;
+
+            CheckBasicBindability( propType );
+
+            return IsBindable;
         }
 
         protected void LogError(string error, string? hint = null)
@@ -60,6 +73,14 @@ namespace J4JSoftware.Configuration.CommandLine
                 PropertyPath!,
                 hint == null ? string.Empty : $" ({hint})",
                 error);
+        }
+
+        private void CheckBasicBindability( Type toCheck )
+        {
+            var bindableInfo = BindableTypeInfo.Create(toCheck);
+
+            if( bindableInfo.BindableType == BindableType.Unsupported )
+                LogError( $"{toCheck} is neither a simple type, nor an array/list of simple types" );
         }
     }
 }
