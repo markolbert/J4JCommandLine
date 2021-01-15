@@ -1,5 +1,6 @@
 ﻿using System;
 using J4JSoftware.Configuration.CommandLine;
+using J4JSoftware.Configuration.J4JCommandLine;
 using Microsoft.Extensions.Configuration;
 
 #pragma warning disable 8618
@@ -14,8 +15,19 @@ namespace J4JSoftware.CommandLine.Examples
         {
             var options = new OptionCollection(CommandLineStyle.Linux);
 
-            var intValue = options.Bind<Program, int>(x => Program.IntValue, "i");
-            var textValue = options.Bind<Program, string>(x => Program.TextValue, "t");
+            var intValue = options.Bind<Program, int>( x => Program.IntValue, "i" )!
+                .SetDefaultValue( 75 )
+                .SetDescription( "An integer value" );
+
+            var textValue = options.Bind<Program, string>( x => Program.TextValue, "t" )!
+                .SetDefaultValue( "a cool default" )
+                .SetDescription( "A string value" );
+
+            options.DisplayHelp();
+
+            Console.WriteLine("\n===============\n");
+
+            options.DisplayHelp( new DisplayColorHelp( null ) );
 
             var config = new ConfigurationBuilder()
                 .AddJ4JCommandLine(args, options)

@@ -36,5 +36,7 @@ namespace J4JSoftware.Configuration.CommandLine
 
         bool UsesCommandLineKey( string key );
         bool UsesContextPath( string contextPath );
+
+        void DisplayHelp( IDisplayHelp? displayHelp, string? reqdKey = null );
     }
 }

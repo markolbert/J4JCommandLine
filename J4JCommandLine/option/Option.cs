@@ -2,14 +2,13 @@
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
+using System.Linq;
+using System.Security.Cryptography;
 
 namespace J4JSoftware.Configuration.CommandLine
 {
     public class Option<T> : IOption<T>
     {
-        //private static List<string> _switchTrue = new() { "true" };
-        //private static List<string> _switchFalse = new() { "false" };
-
         private readonly List<string> _cmdLineKeys = new();
         private readonly MasterTextCollection _masterText;
         private readonly List<string> _values = new();
@@ -23,21 +22,55 @@ namespace J4JSoftware.Configuration.CommandLine
             Container = container;
             ContextPath = contextPath;
             _masterText = masterText;
-
-            //if( Container.UsesContextPath( ContextPath! ) )
-            //    throw new ArgumentException( $"Duplicate context key path '{ContextPath}'" );
         }
 
         public bool IsInitialized => !string.IsNullOrEmpty( ContextPath ) && _cmdLineKeys.Count > 0;
-
-        // the collection of Options used by the parsing activity
         public IOptionCollection Container { get; }
+
         public virtual string? ContextPath { get; }
+        
         public ReadOnlyCollection<string> Keys => _cmdLineKeys.AsReadOnly();
+
+        public IOption AddCommandLineKey(string cmdLineKey)
+        {
+            if (!Container.UsesCommandLineKey(cmdLineKey))
+            {
+                _cmdLineKeys.Add(cmdLineKey);
+                _masterText.Add(TextUsageType.OptionKey, cmdLineKey);
+            }
+
+            return this;
+        }
+
+        public IOption AddCommandLineKeys(IEnumerable<string> cmdLineKeys)
+        {
+            foreach (var cmdLineKey in cmdLineKeys) AddCommandLineKey(cmdLineKey);
+
+            return this;
+        }
+
         public string? CommandLineKeyProvided { get; set; }
 
-        public T? DefaultValue { get; private set; }
-        public void SetDefault( T? value ) => DefaultValue = value;
+        public OptionStyle Style { get; private set; } = OptionStyle.Undefined;
+        public IOption SetStyle(OptionStyle style)
+        {
+            Style = style;
+            return this;
+        }
+
+        public ReadOnlyCollection<string> Values => _values.AsReadOnly();
+        
+        public void ClearValues() => _values.Clear();
+
+        public void AddValue(string value)
+        {
+            _values.Add(value);
+        }
+
+        public void AddValues(IEnumerable<string> values)
+        {
+            _values.AddRange(values);
+        }
 
         public int MaxValues =>
             Style switch
@@ -46,7 +79,7 @@ namespace J4JSoftware.Configuration.CommandLine
                 OptionStyle.SingleValued => 1,
                 OptionStyle.ConcatenatedSingleValue => int.MaxValue,
                 OptionStyle.Switch => 0,
-                _ => throw new InvalidEnumArgumentException( $"Unsupported OptionStyle '{Style}'" )
+                _ => throw new InvalidEnumArgumentException($"Unsupported OptionStyle '{Style}'")
             };
 
         public int NumValuesAllocated => _values.Count;
@@ -55,7 +88,7 @@ namespace J4JSoftware.Configuration.CommandLine
         {
             get
             {
-                if( string.IsNullOrEmpty( CommandLineKeyProvided ) )
+                if (string.IsNullOrEmpty(CommandLineKeyProvided))
                     return false;
 
                 var numValuesAlloc = _values.Count;
@@ -66,55 +99,12 @@ namespace J4JSoftware.Configuration.CommandLine
                     OptionStyle.SingleValued => numValuesAlloc == 1,
                     OptionStyle.Collection => numValuesAlloc > 0,
                     OptionStyle.ConcatenatedSingleValue => numValuesAlloc > 0,
-                    _ => throw new InvalidEnumArgumentException( $"Unsupported OptionStyle '{Style}'" )
+                    _ => throw new InvalidEnumArgumentException($"Unsupported OptionStyle '{Style}'")
                 };
             }
         }
 
-        public ReadOnlyCollection<string> Values => _values.AsReadOnly();
-
-        public void ClearValues()
-        {
-            _values.Clear();
-        }
-
-        public OptionStyle Style { get; private set; } = OptionStyle.Undefined;
         public bool Required { get; private set; }
-        public string? Description { get; private set; }
-
-        public void AddValue( string value )
-        {
-            _values.Add( value );
-        }
-
-        public void AddValues( IEnumerable<string> values )
-        {
-            _values.AddRange( values );
-        }
-
-        public IOption AddCommandLineKey( string cmdLineKey )
-        {
-            if( !Container.UsesCommandLineKey( cmdLineKey ) )
-            {
-                _cmdLineKeys.Add( cmdLineKey );
-                _masterText.Add( TextUsageType.OptionKey, cmdLineKey );
-            }
-
-            return this;
-        }
-
-        public IOption AddCommandLineKeys( IEnumerable<string> cmdLineKeys )
-        {
-            foreach( var cmdLineKey in cmdLineKeys ) AddCommandLineKey( cmdLineKey );
-
-            return this;
-        }
-
-        public IOption SetStyle( OptionStyle style )
-        {
-            Style = style;
-            return this;
-        }
 
         public IOption IsRequired()
         {
@@ -128,9 +118,19 @@ namespace J4JSoftware.Configuration.CommandLine
             return this;
         }
 
-        public IOption SetDescription( string description )
+        public string? Description { get; private set; }
+
+        public IOption SetDescription(string description)
         {
             Description = description;
+            return this;
+        }
+
+        public T? DefaultValue { get; private set; }
+
+        public IOption<T> SetDefaultValue( T? value )
+        {
+            DefaultValue = value;
             return this;
         }
 

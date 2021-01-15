@@ -20,13 +20,12 @@ namespace J4JSoftware.Configuration.CommandLine
         IOption SetStyle(OptionStyle style);
 
         ReadOnlyCollection<string> Values { get; }
+        void AddValue(string value);
+        void AddValues(IEnumerable<string> values);
         void ClearValues();
         int MaxValues { get; }
         int NumValuesAllocated { get; }
         bool ValuesSatisfied { get; }
-
-        void AddValue( string value );
-        void AddValues( IEnumerable<string> values );
         
         bool Required { get; }
         IOption IsRequired();
@@ -41,7 +40,7 @@ namespace J4JSoftware.Configuration.CommandLine
     public interface IOption<T> : IOption
     {
         T? DefaultValue { get; }
-        void SetDefault( T? value );
+        IOption<T> SetDefaultValue( T? value );
     }
 
     public interface ITypeBoundOption : IOption

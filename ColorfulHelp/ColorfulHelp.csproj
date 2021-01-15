@@ -1,0 +1,32 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+	<PropertyGroup>
+		<TargetFramework>net5.0</TargetFramework>
+		<AssemblyName>J4JSoftware.Configuration.J4JCommandLine.ColorfulHelp</AssemblyName>
+		<RootNamespace>J4JSoftware.Configuration.J4JCommandLine</RootNamespace>
+		<Nullable>enable</Nullable>
+		<Authors>Mark A. Olbert</Authors>
+		<Company>Jump for Joy Software</Company>
+		<Product>Colorful Help for J4JSoftware Command Line Processor</Product>
+		<Description>colorful help formatter</Description>
+		<Copyright>© Mark A. Olbert all rights reserved</Copyright>
+		<PackageDescription>initial release</PackageDescription>
+		<RepositoryUrl>https://github.com/markolbert/J4JCommandLine</RepositoryUrl>
+		<PackageLicenseExpression>MIT</PackageLicenseExpression>
+		<RepositoryType>git</RepositoryType>
+		<PackageIcon>Diego nuspec.png</PackageIcon>
+		<Version>1.0.0.0</Version>
+		<AssemblyVersion>1.0.0.0</AssemblyVersion>
+		<PackageReleaseNotes>initial release</PackageReleaseNotes>
+		<Configurations>Debug;Release;NugetRelease</Configurations>
+	</PropertyGroup>
+
+	<ItemGroup>
+	  <PackageReference Include="Alba.CsConsoleFormat-NoXaml" Version="1.0.0" />
+	</ItemGroup>
+
+	<ItemGroup>
+	  <ProjectReference Include="..\J4JCommandLine\J4JCommandLine.csproj" />
+	</ItemGroup>
+
+</Project>
