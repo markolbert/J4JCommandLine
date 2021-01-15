@@ -11,38 +11,23 @@ using J4JSoftware.Logging;
 
 namespace J4JSoftware.Configuration.J4JCommandLine
 {
-    [ Flags ]
-    public enum Borders
-    {
-        Left = 1 << 0,
-        Top = 1 << 1,
-        Right = 1 << 2,
-        Bottom = 1 << 3,
-
-        None = 0,
-        NoBottom = Left | Top | Right,
-        NoTop = Left | Bottom | Right,
-        NoLeft = Top | Bottom | Right,
-
-        All = Left | Top | Right | Bottom
-    }
-
     public class DisplayColorHelp : DisplayHelpBase
     {
-        public DisplayColorHelp( IJ4JLogger? logger ) 
+        public DisplayColorHelp( IJ4JLogger? logger = null ) 
             : base( logger )
         {
         }
 
         public Thickness CellPadding { get; set; } = new Thickness( 2, 0 );
+        public ConsoleColor GridColor { get; set; } = ConsoleColor.Gray;
         public ConsoleColor HeadingColor { get; set; } = ConsoleColor.Green;
-        public ConsoleColor EmphasisColor { get; set; } = ConsoleColor.Yellow;
-        public ConsoleColor KeysColor { get; set; } = ConsoleColor.Cyan;
+        public ConsoleColor TitleColor { get; set; } = ConsoleColor.Yellow;
+        public ConsoleColor EmphasisColor { get; set; } = ConsoleColor.Cyan;
         public ConsoleColor TextColor { get; set; } = ConsoleColor.White;
 
         public override void ProcessOptions( IOptionCollection options )
         {
-            var grid = new Grid { Color = ConsoleColor.Gray };
+            var grid = new Grid { Color = GridColor };
 
             grid.Columns.Add( GridLength.Auto, GridLength.Auto, GridLength.Auto );
 
@@ -54,8 +39,8 @@ namespace J4JSoftware.Configuration.J4JCommandLine
             {
                 var retVal = new List<object>();
 
-                retVal.Add( NewCell( string.Join( ", ", GetKeys( x ) ), KeysColor, border: Borders.NoBottom  ) );
-                retVal.Add( NewCell( x.Required ? "Y" : "N", KeysColor ) );
+                retVal.Add( NewCell( string.Join( ", ", GetKeys( x ) ), EmphasisColor, border: Borders.NoBottom  ) );
+                retVal.Add( NewCell( x.Required ? "Y" : "N", EmphasisColor ) );
                 retVal.Add( NewCell( x.Description, TextColor ) );
 
                 var styleDefCell = NewCell( colSpan: 2,
@@ -69,7 +54,7 @@ namespace J4JSoftware.Configuration.J4JCommandLine
                 if( !string.IsNullOrEmpty( defValue ) )
                     styleDefCell.Children.Add( "\n",
                         new Span( "default: " ) { Color = HeadingColor },
-                        new Span( defValue ) { Color = KeysColor } );
+                        new Span( defValue ) { Color = EmphasisColor } );
 
                 retVal.Add( NewCell( border: Borders.Bottom | Borders.Left) );
                 retVal.Add( styleDefCell );
@@ -79,7 +64,7 @@ namespace J4JSoftware.Configuration.J4JCommandLine
 
             var doc = new Document();
 
-            doc.Children.Add( new Span( "Command line help" ) { Color = EmphasisColor }, "\n" );
+            doc.Children.Add( new Span( "Command line help" ) { Color = TitleColor }, "\n" );
             doc.Children.Add( grid );
 
             ConsoleRenderer.RenderDocument( doc );

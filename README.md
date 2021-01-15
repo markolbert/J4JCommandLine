@@ -62,6 +62,44 @@ doing validations which arguably ought to be done in application code.
 Going forward I don't plan on any further development for the original version. It's
 available as version 0.5.0.1.
 
+### v1.1 Changes
+You can now display help on the console:
+```csharp
+var options = new OptionCollection(CommandLineStyle.Linux);
+
+var intValue = options.Bind<Program, int>( x => Program.IntValue, "i" )!
+    .SetDefaultValue( 75 )
+    .SetDescription( "An integer value" );
+
+var textValue = options.Bind<Program, string>( x => Program.TextValue, "t" )!
+    .SetDefaultValue( "a cool default" )
+    .SetDescription( "A string value" );
+
+options.DisplayHelp();
+
+options.DisplayHelp( new DisplayColorHelp() );
+```
+Calling `DisplayHelp()` without a display formatter gives you a very
+simple display:
+![simple help](docs/assets/simple-help.png)
+
+Calling `DisplayHelp()` with the `DisplayColorHelp()` formatter gives you
+this:
+![colorful help](docs/assets/fancy-help.png)
+
+`DisplayColorHelp` is defined in an add-on assembly, *ColorfulHelp*. It's 
+based on [CsConsoleFormat](https://github.com/Athari/CsConsoleFormat), a
+cool library that makes it easy to colorize and structure console
+output.
+
+Default values can now be specified and will be used if nothing is
+entered at the command line for an option.
+
+I extracted the property validation logic (i.e., the code which
+determines whether a property can be bound to an option). This doesn't
+have any user-side impact. It's part of a longer-term effort to proposing
+a modification to the overall Net5 `IConfiguation` system I'm working on.
+
 ### Table of Contents
 
 - [Goal and Concept](docs/goal-concept.md)
@@ -71,6 +109,7 @@ available as version 0.5.0.1.
   - [Binding to static properties](docs/example-static.md)
   - [Binding to a configuration object](docs/example-instance.md)
 - [Logging and Errors](docs/logging.md)
+- [Outputting Help](docs/help.md)
 - [Notes on the Tokenizer and Parser](docs/parser.md)
 
 #### Inspiration and Dedication

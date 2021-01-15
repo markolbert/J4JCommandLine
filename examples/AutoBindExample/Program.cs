@@ -25,7 +25,7 @@ namespace J4JSoftware.CommandLine.Examples
 
             options.DisplayHelp();
             Console.WriteLine("\n===============\n");
-            options.DisplayHelp( new DisplayColorHelp( null ) );
+            options.DisplayHelp( new DisplayColorHelp() );
 
             var config = new ConfigurationBuilder()
                 .AddJ4JCommandLine(args, options)
