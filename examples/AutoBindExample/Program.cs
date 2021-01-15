@@ -24,9 +24,7 @@ namespace J4JSoftware.CommandLine.Examples
                 .SetDescription( "A string value" );
 
             options.DisplayHelp();
-
             Console.WriteLine("\n===============\n");
-
             options.DisplayHelp( new DisplayColorHelp( null ) );
 
             var config = new ConfigurationBuilder()

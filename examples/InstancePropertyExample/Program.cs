@@ -1,5 +1,6 @@
 ﻿using System;
 using J4JSoftware.Configuration.CommandLine;
+using J4JSoftware.Configuration.J4JCommandLine;
 using Microsoft.Extensions.Configuration;
 
 namespace J4JSoftware.CommandLine.Examples
@@ -10,8 +11,17 @@ namespace J4JSoftware.CommandLine.Examples
         {
             var options = new OptionCollection(CommandLineStyle.Linux);
 
-            var intValue = options.Bind<Configuration, int>(x => x.IntValue, "i");
-            var textValue = options.Bind<Configuration, string>(x => x.TextValue, "t");
+            var intValue = options.Bind<Configuration, int>(x => x.IntValue, "i")!
+                .SetDefaultValue( 75 )
+                .SetDescription( "An integer value" );
+
+            var textValue = options.Bind<Configuration, string>(x => x.TextValue, "t")!
+                .SetDefaultValue( "a cool default" )
+                .SetDescription( "A string value" );
+
+            options.DisplayHelp();
+            Console.WriteLine("\n===============\n");
+            options.DisplayHelp( new DisplayColorHelp( null ) );
 
             var config = new ConfigurationBuilder()
                 .AddJ4JCommandLine(args, options)

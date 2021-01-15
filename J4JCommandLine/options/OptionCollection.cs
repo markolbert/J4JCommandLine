@@ -267,18 +267,20 @@ namespace J4JSoftware.Configuration.CommandLine
             }
         }
 
-        public void DisplayHelp( IDisplayHelp? displayHelp = null, string? reqdKey = null )
+        public void DisplayHelp( IDisplayHelp? displayHelp = null )
         {
             displayHelp ??= new DefaultDisplayHelp( LoggerFactory?.Invoke() );
 
-            // don't do anything if we only display when a particular option key
-            // (e.g., 'h') was supplied on the command line
-            if( !string.IsNullOrEmpty( reqdKey )
-                && _options.Any( x =>
-                    x.CommandLineKeyProvided?.Equals( reqdKey, MasterText.TextComparison ) ?? false ) )
-                return;
-
             displayHelp.ProcessOptions( this );
+        }
+
+        public bool KeysSpecified( params string[] keys )
+        {
+            if( keys.Length == 0 )
+                return false;
+
+            return keys.Any( k => _options.Any( x =>
+                x.CommandLineKeyProvided?.Equals( k, MasterText.TextComparison ) ?? false ) );
         }
 
         public IEnumerator<IOption> GetEnumerator()

@@ -19,6 +19,7 @@
 	</ItemGroup>
 
 	<ItemGroup>
+		<ProjectReference Include="..\..\ColorfulHelp\ColorfulHelp.csproj" />
 		<ProjectReference Include="..\..\J4JCommandLine\J4JCommandLine.csproj" />
 	</ItemGroup>
 
