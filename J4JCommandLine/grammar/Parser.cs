@@ -55,7 +55,7 @@ namespace J4JSoftware.Configuration.CommandLine
 
             var allOkay = true;
 
-            foreach( var token in _tokenizer.Tokenize(cmdLine))
+            foreach( var token in _tokenizer.Tokenize( cmdLine ) )
             {
                 allOkay &= ParsingTable[ prevToken.Type, token.Type ]!( prevToken, token, token.Text );
 
