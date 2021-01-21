@@ -12,17 +12,24 @@ namespace J4JSoftware.Binder.Tests
     {
         static CompositionRoot()
         {
-            Default = new CompositionRoot
-            {
-                UseConsoleLifetime = true,
-                CachedLoggerScope = CachedLoggerScope.SingleInstance,
-                LoggingSectionKey = string.Empty
-            };
-
-            Default.ChannelInformation
-                .AddChannel<DebugConfig>("Channels:Debug");
+            Default = new CompositionRoot();
 
             Default.Initialize();
+        }
+
+        private CompositionRoot() 
+            : base( "J4JSoftware", "BinderTests" )
+        {
+            UseConsoleLifetime = true;
+
+            var loggerConfig = new J4JLoggerConfiguration()
+            {
+                SourceRootPath = "C:/Programming/J4JCommandLine"
+            };
+
+            loggerConfig.Channels.Add(new DebugConfig()  );
+
+            StaticConfiguredLogging( loggerConfig );
         }
 
         public static CompositionRoot Default { get; }
@@ -35,18 +42,6 @@ namespace J4JSoftware.Binder.Tests
 
             builder.SetBasePath( Environment.CurrentDirectory )
                 .AddJsonFile( "appConfig.json" );
-        }
-
-        protected override void SetupDependencyInjection( HostBuilderContext hbc, ContainerBuilder builder )
-        {
-            base.SetupDependencyInjection( hbc, builder );
-
-            var channelInfo = new ChannelInformation()
-                .AddChannel<DebugConfig>( "Channels:Debug" );
-
-            var factory = new ChannelFactory( hbc.Configuration, channelInfo );
-            
-            builder.RegisterJ4JLogging<J4JLoggerConfiguration>( factory );
         }
     }
 }

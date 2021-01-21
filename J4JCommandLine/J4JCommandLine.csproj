@@ -15,18 +15,11 @@
 		<PackageLicenseExpression>MIT</PackageLicenseExpression>
 		<RepositoryType>git</RepositoryType>
 		<PackageIcon>Diego nuspec.png</PackageIcon>
-		<Version>1.0.0.0</Version>
-		<AssemblyVersion>1.0.0.0</AssemblyVersion>
-		<PackageReleaseNotes>complete rework to work with the IConfiguration system; breaking changes</PackageReleaseNotes>
+		<Version>1.1.0.0</Version>
+		<AssemblyVersion>1.1.0.0</AssemblyVersion>
+		<PackageReleaseNotes>added help display capability; reworked property validation and convertability system</PackageReleaseNotes>
 		<Configurations>Debug;Release;NugetRelease</Configurations>
 	</PropertyGroup>
-
-	<ItemGroup>
-	  <Compile Remove="options\IValidationEntry.cs" />
-	  <Compile Remove="options\ValidationContext.cs" />
-	  <Compile Remove="options\ValidationEntry.cs" />
-	  <Compile Remove="options\ValidationError.cs" />
-	</ItemGroup>
 
 	<ItemGroup>
 		<PackageReference Include="Microsoft.Extensions.Configuration" Version="5.0.0" />
