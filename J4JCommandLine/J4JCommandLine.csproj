@@ -12,7 +12,7 @@
 		<Copyright>© Mark A. Olbert all rights reserved</Copyright>
 		<PackageDescription>initial release of reworked library</PackageDescription>
 		<RepositoryUrl>https://github.com/markolbert/J4JCommandLine</RepositoryUrl>
-		<PackageLicenseExpression>MIT</PackageLicenseExpression>
+		<PackageLicenseExpression>GPL-3.0-or-later</PackageLicenseExpression>
 		<GeneratePackageOnBuild>true</GeneratePackageOnBuild>
 		<RepositoryType>git</RepositoryType>
 		<PackageIcon>Diego nuspec.png</PackageIcon>

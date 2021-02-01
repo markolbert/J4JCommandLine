@@ -4,6 +4,9 @@ system.
 
 [![Nuget](https://img.shields.io/nuget/v/J4JSoftware.Configuration.CommandLine?style=flat-square)](https://www.nuget.org/packages/J4JSoftware.Configuration.CommandLine/)
 
+The libraries are licensed under the GNU GPL-v3 or later. For more details see
+the [license file](LICENSE.md).
+
 ### TL;DR
 
 ```csharp
