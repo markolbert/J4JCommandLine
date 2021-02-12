@@ -1,11 +1,29 @@
-﻿using System;
+﻿#region license
+
+// Copyright 2021 Mark A. Olbert
+// 
+// This library or program 'J4JCommandLine' is free software: you can redistribute it
+// and/or modify it under the terms of the GNU General Public License as
+// published by the Free Software Foundation, either version 3 of the License,
+// or (at your option) any later version.
+// 
+// This library or program is distributed in the hope that it will be useful, but
+// WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+// General Public License for more details.
+// 
+// You should have received a copy of the GNU General Public License along with
+// this library or program.  If not, see <https://www.gnu.org/licenses/>.
+
+#endregion
+
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
-using System.Security.Principal;
 using System.Text;
 using J4JSoftware.Logging;
 
@@ -14,9 +32,9 @@ namespace J4JSoftware.Configuration.CommandLine
     public partial class OptionCollection : IOptionCollection
     {
         private readonly TypeBoundOptionComparer _comparer = new();
-        private readonly IPropertyValidator _propValidator;
         private readonly IJ4JLogger? _logger;
         private readonly List<IOption> _options = new();
+        private readonly IPropertyValidator _propValidator;
 
         private readonly Dictionary<Type, string> _typePrefixes = new();
 
@@ -33,7 +51,7 @@ namespace J4JSoftware.Configuration.CommandLine
                              new DefaultPropertyValidator( converters, loggerFactory?.Invoke() );
 
             CommandLineStyle = cmdLineStyle;
-            MasterText = MasterTextCollection.GetDefault(cmdLineStyle, loggerFactory);
+            MasterText = MasterTextCollection.GetDefault( cmdLineStyle, loggerFactory );
 
             LoggerFactory = loggerFactory;
 
@@ -46,7 +64,7 @@ namespace J4JSoftware.Configuration.CommandLine
             IPropertyValidator? propValidator = null
         )
         {
-            converters ??= new Converters(Enumerable.Empty<IConverter>(), mt.LoggerFactory?.Invoke());
+            converters ??= new Converters( Enumerable.Empty<IConverter>(), mt.LoggerFactory?.Invoke() );
 
             _propValidator = propValidator ??
                              new DefaultPropertyValidator( converters, mt.LoggerFactory?.Invoke() );
@@ -94,7 +112,7 @@ namespace J4JSoftware.Configuration.CommandLine
             return TargetsMultipleTypes ? $"{type.Name}:" : string.Empty;
         }
 
-        public bool TargetsMultipleTypes => _options.Cast<ITypeBoundOption>().Distinct(_comparer).Count() > 1;
+        public bool TargetsMultipleTypes => _options.Cast<ITypeBoundOption>().Distinct( _comparer ).Count() > 1;
 
         public Option<TProp>? Add<TProp>( string contextPath )
         {
@@ -102,7 +120,7 @@ namespace J4JSoftware.Configuration.CommandLine
 
             if( !_propValidator.IsPropertyBindable( propType ) )
             {
-                _logger?.Error("Cannot bind to type '{0}'", propType);
+                _logger?.Error( "Cannot bind to type '{0}'", propType );
                 return null;
             }
 
@@ -120,18 +138,18 @@ namespace J4JSoftware.Configuration.CommandLine
             return retVal;
         }
 
-        public IOption? Add( Type propType, string contextPath)
+        public IOption? Add( Type propType, string contextPath )
         {
-            if (!_propValidator.IsPropertyBindable(propType))
+            if( !_propValidator.IsPropertyBindable( propType ) )
             {
-                _logger?.Error("Cannot bind to type '{0}'", propType);
+                _logger?.Error( "Cannot bind to type '{0}'", propType );
                 return null;
             }
 
-            if (this.Any(x => x.ContextPath!.Equals(contextPath, MasterText.TextComparison)))
+            if( this.Any( x => x.ContextPath!.Equals( contextPath, MasterText.TextComparison ) ) )
             {
-                _logger?.Error<string>("An option with the same ContextPath ('{0}') is already in the collection",
-                    contextPath);
+                _logger?.Error<string>( "An option with the same ContextPath ('{0}') is already in the collection",
+                    contextPath );
                 return null;
             }
 
@@ -141,7 +159,7 @@ namespace J4JSoftware.Configuration.CommandLine
 
             if( ctor == null )
             {
-                _logger?.Error("Couldn't find constructor for {0}", genType);
+                _logger?.Error( "Couldn't find constructor for {0}", genType );
                 return null;
             }
 
@@ -153,7 +171,7 @@ namespace J4JSoftware.Configuration.CommandLine
                 return null;
             }
 
-            _options.Add(retVal);
+            _options.Add( retVal );
 
             return retVal;
         }
@@ -176,12 +194,12 @@ namespace J4JSoftware.Configuration.CommandLine
                     case MemberExpression memExpr:
                         var propInfo = (PropertyInfo) memExpr.Member;
 
-                        propElements.Push(propInfo);
+                        propElements.Push( propInfo );
 
                         // the first PropertyInfo, which is the outermost 'leaf', must
                         // have a public parameterless constructor and a property setter
-                        if ( !_propValidator.IsPropertyBindable(propElements))
-                        //if( !ValidatePropertyInfo( propInfo, firstStyle == null ) )
+                        if( !_propValidator.IsPropertyBindable( propElements ) )
+                            //if( !ValidatePropertyInfo( propInfo, firstStyle == null ) )
                             return null;
 
                         firstStyle ??= GetOptionStyle( propInfo );
@@ -196,15 +214,15 @@ namespace J4JSoftware.Configuration.CommandLine
                         {
                             var propInfo2 = (PropertyInfo) unaryMemExpr.Member;
 
-                            propElements.Push(propInfo2);
+                            propElements.Push( propInfo2 );
 
                             // the first PropertyInfo, which is the outermost 'leaf', must
                             // have a public parameterless constructor and a property setter
-                            if (!_propValidator.IsPropertyBindable(propElements))
-                            //if (!ValidatePropertyInfo(propInfo2, firstStyle == null))
+                            if( !_propValidator.IsPropertyBindable( propElements ) )
+                                //if (!ValidatePropertyInfo(propInfo2, firstStyle == null))
                                 return null;
 
-                            firstStyle ??= GetOptionStyle(propInfo2);
+                            firstStyle ??= GetOptionStyle( propInfo2 );
                         }
 
                         // we're done; UnaryExpressions aren't part of an expression tree
@@ -222,10 +240,10 @@ namespace J4JSoftware.Configuration.CommandLine
 
             var contextPath = GetContextPath( propElements.ToList() );
 
-            if (this.Any(x => x.ContextPath!.Equals(contextPath, MasterText.TextComparison)))
+            if( this.Any( x => x.ContextPath!.Equals( contextPath, MasterText.TextComparison ) ) )
             {
-                _logger?.Error<string>("An option with the same ContextPath ('{0}') is already in the collection",
-                    contextPath);
+                _logger?.Error<string>( "An option with the same ContextPath ('{0}') is already in the collection",
+                    contextPath );
                 return null;
             }
 
@@ -307,7 +325,7 @@ namespace J4JSoftware.Configuration.CommandLine
                 ( sb, pi ) =>
                 {
                     if( sb.Length > 0 )
-                        sb.Append(':');
+                        sb.Append( ':' );
 
                     sb.Append( pi.Name );
 

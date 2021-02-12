@@ -1,19 +1,36 @@
-﻿using System;
+﻿#region license
+
+// Copyright 2021 Mark A. Olbert
+// 
+// This library or program 'J4JCommandLine' is free software: you can redistribute it
+// and/or modify it under the terms of the GNU General Public License as
+// published by the Free Software Foundation, either version 3 of the License,
+// or (at your option) any later version.
+// 
+// This library or program is distributed in the hope that it will be useful, but
+// WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+// General Public License for more details.
+// 
+// You should have received a copy of the GNU General Public License along with
+// this library or program.  If not, see <https://www.gnu.org/licenses/>.
+
+#endregion
+
+using System;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using System.Linq;
 using System.Reflection;
 using J4JSoftware.Logging;
-using Serilog;
 
 namespace J4JSoftware.Configuration.CommandLine
 {
     public class DefaultPropertyValidator : PropertyValidatorBase
     {
-        public DefaultPropertyValidator( 
+        public DefaultPropertyValidator(
             IConverters converters,
-            IJ4JLogger? logger 
-            ) 
+            IJ4JLogger? logger
+        )
             : base( converters, logger )
         {
         }
@@ -27,11 +44,11 @@ namespace J4JSoftware.Configuration.CommandLine
             CheckGetter( topProp );
             CheckType( topProp.PropertyType );
 
-            if( !IsOuterMostLeaf ) 
+            if( !IsOuterMostLeaf )
                 return IsBindable;
-            
-            CheckSetter(topProp);
-            CheckConstructor(topProp.PropertyType);
+
+            CheckSetter( topProp );
+            CheckConstructor( topProp.PropertyType );
 
             return IsBindable;
         }
@@ -46,10 +63,12 @@ namespace J4JSoftware.Configuration.CommandLine
             return IsBindable;
         }
 
-        private void CheckGetter(PropertyInfo propInfo )
+        private void CheckGetter( PropertyInfo propInfo )
         {
             if( propInfo.GetMethod == null )
+            {
                 LogError( "Property does not have a get method" );
+            }
             else
             {
                 if( !propInfo.GetMethod.IsPublic )
@@ -60,17 +79,19 @@ namespace J4JSoftware.Configuration.CommandLine
             }
         }
 
-        private void CheckSetter(PropertyInfo propInfo)
+        private void CheckSetter( PropertyInfo propInfo )
         {
-            if (propInfo.SetMethod == null)
-                LogError("Property does not have a get method");
+            if( propInfo.SetMethod == null )
+            {
+                LogError( "Property does not have a get method" );
+            }
             else
             {
-                if (!propInfo.SetMethod.IsPublic)
-                    LogError("Property's getter is not public");
+                if( !propInfo.SetMethod.IsPublic )
+                    LogError( "Property's getter is not public" );
 
-                if (propInfo.SetMethod.GetParameters().Length > 1)
-                    LogError("Property's setter is indexed");
+                if( propInfo.SetMethod.GetParameters().Length > 1 )
+                    LogError( "Property's setter is indexed" );
             }
         }
 
@@ -84,42 +105,48 @@ namespace J4JSoftware.Configuration.CommandLine
                 LogError( "No converter for text values exists for the property type" );
         }
 
-        private void CheckGenericType(Type toCheck)
+        private void CheckGenericType( Type toCheck )
         {
-            if (!toCheck.IsGenericType)
+            if( !toCheck.IsGenericType )
                 return;
 
             if( toCheck.GenericTypeArguments.Length != 1 )
+            {
                 LogError( "Generic type has more than one generic Type argument" );
+            }
             else
             {
                 var genType = toCheck.GetGenericArguments()[ 0 ];
                 CheckNonGenericType( genType, "from generic type check" );
 
-                if (!typeof(List<>).MakeGenericType(genType).IsAssignableFrom(toCheck))
-                    LogError("Generic type is not a List<> type");
+                if( !typeof(List<>).MakeGenericType( genType ).IsAssignableFrom( toCheck ) )
+                    LogError( "Generic type is not a List<> type" );
             }
         }
 
-        private void CheckNonGenericType(Type toCheck, string? hint = null )
+        private void CheckNonGenericType( Type toCheck, string? hint = null )
         {
-            if (toCheck.IsGenericType)
-                LogError("Type must be non-generic", hint);
+            if( toCheck.IsGenericType )
+            {
+                LogError( "Type must be non-generic", hint );
+            }
             else
             {
-                if (toCheck.IsArray)
+                if( toCheck.IsArray )
+                {
                     CheckNonGenericType( toCheck.GetElementType()!, "from array type check" );
+                }
                 else
                 {
-                    if (toCheck.IsValueType || typeof(string).IsAssignableFrom(toCheck))
+                    if( toCheck.IsValueType || typeof(string).IsAssignableFrom( toCheck ) )
                         return;
 
-                    if (!IsOuterMostLeaf
-                        || toCheck.GetConstructors().Any(c => !c.GetParameters().Any()))
+                    if( !IsOuterMostLeaf
+                        || toCheck.GetConstructors().Any( c => !c.GetParameters().Any() ) )
                         return;
 
                     LogError(
-                        "Type is neither a ValueType nor a string type and does not have a public parameterless constructor");
+                        "Type is neither a ValueType nor a string type and does not have a public parameterless constructor" );
                 }
             }
         }
@@ -128,11 +155,11 @@ namespace J4JSoftware.Configuration.CommandLine
         {
             // strings are reference types but act like value types from a construction point of view
             // value types don't have and don't need constructors
-            if (toCheck.IsValueType || typeof(string).IsAssignableFrom(toCheck))
+            if( toCheck.IsValueType || typeof(string).IsAssignableFrom( toCheck ) )
                 return;
 
-            if (toCheck.GetConstructors().All(c => c.GetParameters().Length != 0))
-                LogError("Type does not have any public parameterless constructors");
+            if( toCheck.GetConstructors().All( c => c.GetParameters().Length != 0 ) )
+                LogError( "Type does not have any public parameterless constructors" );
         }
     }
 }

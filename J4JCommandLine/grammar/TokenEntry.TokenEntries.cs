@@ -1,4 +1,23 @@
-﻿using System.Linq;
+﻿#region license
+
+// Copyright 2021 Mark A. Olbert
+// 
+// This library or program 'J4JCommandLine' is free software: you can redistribute it
+// and/or modify it under the terms of the GNU General Public License as
+// published by the Free Software Foundation, either version 3 of the License,
+// or (at your option) any later version.
+// 
+// This library or program is distributed in the hope that it will be useful, but
+// WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+// General Public License for more details.
+// 
+// You should have received a copy of the GNU General Public License along with
+// this library or program.  If not, see <https://www.gnu.org/licenses/>.
+
+#endregion
+
+using System.Linq;
 using J4JSoftware.Logging;
 
 namespace J4JSoftware.Configuration.CommandLine
@@ -31,7 +50,8 @@ namespace J4JSoftware.Configuration.CommandLine
             public bool TerminateWithPrejuidice( Token prevToken, Token curToken, params string[] args )
             {
                 _logger?.Error( "{0} ('{1}') => {2} ('{3}'): {4}",
-                    new object[] { curToken.Type, curToken.Text, prevToken.Type, prevToken.Text, "invalid token sequence" } );
+                    new object[]
+                        { curToken.Type, curToken.Text, prevToken.Type, prevToken.Text, "invalid token sequence" } );
 
                 Current = null;
 
@@ -47,8 +67,9 @@ namespace J4JSoftware.Configuration.CommandLine
                     if( curToken.Type == TokenType.KeyPrefix )
                         return Create( prevToken, curToken );
 
-                    _logger?.Error("{0} ('{1}') => {2} ('{3}'): {4}",
-                        new object[] { curToken.Type, curToken.Text, prevToken.Type, prevToken.Text, "undefined TokenEntry" });
+                    _logger?.Error( "{0} ('{1}') => {2} ('{3}'): {4}",
+                        new object[]
+                            { curToken.Type, curToken.Text, prevToken.Type, prevToken.Text, "undefined TokenEntry" } );
 
                     return false;
                 }
@@ -91,12 +112,12 @@ namespace J4JSoftware.Configuration.CommandLine
             {
                 if( args.Length != 1 )
                 {
-                    _logger?.Error("{0} ('{1}') => {2} ('{3}'): {4}",
+                    _logger?.Error( "{0} ('{1}') => {2} ('{3}'): {4}",
                         new object[]
                         {
                             curToken.Type, curToken.Text, prevToken.Type, prevToken.Text,
                             $"invalid number of text arguments '{args.Length}'"
-                        });
+                        } );
 
                     Current = null;
 
