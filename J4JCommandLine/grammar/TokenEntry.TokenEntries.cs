@@ -62,16 +62,23 @@ namespace J4JSoftware.Configuration.CommandLine
             {
                 if( Current == null )
                 {
-                    // if we're not yet building an entry but we received a KeyPrefix token we must be
-                    // about to start building one
-                    if( curToken.Type == TokenType.KeyPrefix )
-                        return Create( prevToken, curToken );
+                    switch( curToken.Type )
+                    {
+                        // if we're not yet building an entry but we received a KeyPrefix token we must be
+                        // about to start building one
+                        case TokenType.Separator when prevToken.Type == TokenType.Separator:
+                            return true;
 
-                    _logger?.Error( "{0} ('{1}') => {2} ('{3}'): {4}",
-                        new object[]
-                            { curToken.Type, curToken.Text, prevToken.Type, prevToken.Text, "undefined TokenEntry" } );
+                        case TokenType.KeyPrefix:
+                            return Create( prevToken, curToken );
 
-                    return false;
+                        default:
+                            _logger?.Error( "{0} ('{1}') => {2} ('{3}'): {4}",
+                                new object[]
+                                    { curToken.Type, curToken.Text, prevToken.Type, prevToken.Text, "undefined TokenEntry" } );
+
+                            return false;
+                    }
                 }
 
                 if( Current.Option == null )

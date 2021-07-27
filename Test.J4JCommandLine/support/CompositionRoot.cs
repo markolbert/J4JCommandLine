@@ -25,7 +25,7 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace J4JSoftware.Binder.Tests
 {
-    public class CompositionRoot : J4JCompositionRoot<J4JLoggerConfiguration>
+    public class CompositionRoot : J4JCompositionRoot
     {
         static CompositionRoot()
         {
@@ -38,15 +38,13 @@ namespace J4JSoftware.Binder.Tests
             : base( "J4JSoftware", "BinderTests" )
         {
             UseConsoleLifetime = true;
+        }
 
-            var loggerConfig = new J4JLoggerConfiguration
-            {
-                SourceRootPath = "C:/Programming/J4JCommandLine"
-            };
+        protected override void ConfigureLoggerDefaults( J4JLogger logger )
+        {
+            var channel = logger.AddDebug();
 
-            loggerConfig.Channels.Add( new DebugConfig() );
-
-            StaticConfiguredLogging( loggerConfig );
+            channel.Parameters.SetSourceRootPath( "C:/Programming/J4JCommandLine" );
         }
 
         public static CompositionRoot Default { get; }
