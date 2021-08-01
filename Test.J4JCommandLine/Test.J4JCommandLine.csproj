@@ -14,14 +14,6 @@
     <Configurations>Debug;Release;NugetRelease</Configurations>
   </PropertyGroup>
 
-  <ItemGroup>
-    <Compile Remove="test-data\CollectionTests.cs" />
-    <Compile Remove="test-data\OptionContextConfig.cs" />
-    <Compile Remove="test-data\OptionTypeBoundConfig.cs" />
-    <Compile Remove="test-data\SingleValueTests.cs" />
-    <Compile Remove="test-data\SwitchTests.cs" />
-  </ItemGroup>
-
 	<ItemGroup>
 		<PackageReference Include="Autofac" Version="6.2.0" />
 		<PackageReference Include="Autofac.Extensions.DependencyInjection" Version="7.1.0" />
@@ -39,7 +31,6 @@
 	</ItemGroup>
 
 	<ItemGroup>
-	  <ProjectReference Include="..\..\J4JLogging\AutoFacJ4JLogging\AutoFacJ4JLogging.csproj" />
 	  <ProjectReference Include="..\..\J4JLogging\J4JLogging\J4JLogging.csproj" />
 	  <ProjectReference Include="..\..\ProgrammingUtilities\DependencyInjection\DependencyInjection.csproj" />
 	  <ProjectReference Include="..\J4JCommandLine\J4JCommandLine.csproj" />

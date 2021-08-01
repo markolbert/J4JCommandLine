@@ -40,12 +40,7 @@ namespace J4JSoftware.Binder.Tests
             UseConsoleLifetime = true;
         }
 
-        protected override void ConfigureLoggerDefaults( J4JLogger logger )
-        {
-            var channel = logger.AddDebug();
-
-            channel.Parameters.SetSourceRootPath( "C:/Programming/J4JCommandLine" );
-        }
+        protected override void ConfigureLogger( J4JLogger logger ) => logger.AddDebug();
 
         public static CompositionRoot Default { get; }
 
