@@ -25,26 +25,32 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace J4JSoftware.Binder.Tests
 {
-    public class CompositionRoot : J4JCompositionRoot
+    public class CompositionRoot : ConsoleRoot
     {
-        static CompositionRoot()
-        {
-            Default = new CompositionRoot();
+        private static CompositionRoot? _compRoot;
 
-            Default.Initialize();
+        public static CompositionRoot Default
+        {
+            get
+            {
+                if( _compRoot != null )
+                    return _compRoot;
+
+                _compRoot = new CompositionRoot();
+                _compRoot.Build();
+
+                return _compRoot;
+            }
         }
 
         private CompositionRoot()
-            : base( "J4JSoftware", "BinderTests" )
+            : base( "J4JSoftware", "BinderTests",true )
         {
-            UseConsoleLifetime = true;
         }
 
         protected override void ConfigureLogger( J4JLogger logger ) => logger.AddDebug();
 
-        public static CompositionRoot Default { get; }
-
-        public Func<IJ4JLogger> LoggerFactory => () => Host!.Services.GetRequiredService<IJ4JLogger>();
+        public IJ4JLogger Logger => Host!.Services.GetRequiredService<IJ4JLogger>();
 
         protected override void SetupConfigurationEnvironment( IConfigurationBuilder builder )
         {
