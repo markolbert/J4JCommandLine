@@ -17,7 +17,9 @@
 
 #endregion
 
+using System;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using J4JSoftware.Logging;
 
 namespace J4JSoftware.Configuration.CommandLine
@@ -29,15 +31,18 @@ namespace J4JSoftware.Configuration.CommandLine
             private readonly IJ4JLogger? _logger;
 
             public TokenEntries(
+                StringComparison textComparison,
                 IOptionCollection options,
                 IJ4JLogger? logger
             )
             {
+                TextComparison = textComparison;
                 Options = options;
                 _logger = logger;
             }
 
             public IOptionCollection Options { get; }
+            public StringComparison TextComparison { get; }
             public TokenEntry? Current { get; private set; }
 
             public bool Create( Token prevToken, Token curToken, params string[] args )

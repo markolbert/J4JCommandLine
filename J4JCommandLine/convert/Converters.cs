@@ -26,46 +26,57 @@ namespace J4JSoftware.Configuration.CommandLine
 {
     public class Converters : IConverters
     {
-        private readonly List<IConverter> _converters;
-        private readonly DefaultConverter _defaultConv = new();
+        private readonly List<ITextToValue> _converters;
         private readonly IJ4JLogger? _logger;
 
         public Converters(
-            IEnumerable<IConverter> converters,
+            IEnumerable<ITextToValue> converters,
             IJ4JLogger? logger
         )
         {
             _converters = converters.ToList();
+            _converters.AddRange( BuiltInTextToValue.SystemConverters );
+
             _logger = logger;
+            _logger?.SetLoggedType( GetType() );
         }
 
-        public bool CanConvert( Type toCheck )
+        public bool CanConvert( Type toCheck ) => _converters.Any( c => c.TargetType == toCheck );
+
+        public bool Convert( Type targetType, IEnumerable<string> values, out object? result )
         {
-            return _converters.Any( c => c.CanConvert( toCheck ) )
-                   || _defaultConv.CanConvert( toCheck );
+            var valueList = values.ToList();
+
+            foreach( var converter in _converters
+                .Where( c => c.TargetType == targetType )
+                .OrderByDescending( x => x.Priority ) )
+            {
+                if( converter.Convert( valueList, out result ) )
+                    return true;
+            }
+
+            result = null;
+
+            return false;
         }
 
-        public object? Convert( Type targetType, IEnumerable<string> values )
+        public bool Convert<T>( IEnumerable<string> values, out T? result )
         {
-            var converter = GetConverter( targetType );
+            result = default;
 
-            return converter?.Convert( targetType, values );
-        }
+            if( !Convert( typeof(T), values, out var innerResult ) )
+                return false;
 
-        public T? Convert<T>( IEnumerable<string> values )
-        {
-            var retVal = Convert( typeof(T), values );
+            try
+            {
+                result = (T?) innerResult;
+            }
+            catch
+            {
+                return false;
+            }
 
-            if( retVal == null )
-                return default;
-
-            return (T) retVal;
-        }
-
-        public IConverter? GetConverter( Type toCheck )
-        {
-            return _converters.FirstOrDefault( c => c.CanConvert( toCheck ) )
-                   ?? ( _defaultConv.CanConvert( toCheck ) ? _defaultConv : null );
+            return true;
         }
     }
 }

@@ -31,9 +31,17 @@ namespace J4JSoftware.Configuration.CommandLine
         private readonly Dictionary<TokenType, Dictionary<TokenType, ParsingAction?>> _table =
             new();
 
-        public ParsingTable( IOptionCollection options, Func<IJ4JLogger>? loggerFactory = null )
+        internal ParsingTable( 
+            StringComparison textComparison,
+            IOptionCollection options, 
+            IJ4JLoggerFactory? loggerFactory = null 
+            )
         {
-            Entries = new TokenEntry.TokenEntries( options, loggerFactory?.Invoke() );
+            Options = options;
+            
+            Entries = new TokenEntry.TokenEntries( textComparison, 
+                Options,
+                loggerFactory?.CreateLogger<TokenEntry.TokenEntries>() );
 
             foreach( var row in Enum.GetValues( typeof(TokenType) )
                 .Cast<TokenType>() )
@@ -81,6 +89,8 @@ namespace J4JSoftware.Configuration.CommandLine
             this[ TokenType.Text, TokenType.Separator ] = Entries.ConsumeToken;
             this[ TokenType.Text, TokenType.Text ] = Entries.ProcessText;
         }
+
+        public IOptionCollection Options { get; }
 
         public bool IsValid => !_table
             .Any( row =>

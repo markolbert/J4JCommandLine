@@ -27,9 +27,8 @@ namespace J4JSoftware.Configuration.CommandLine
 {
     public interface IOptionCollection : IEnumerable<IOption>
     {
-        Func<IJ4JLogger>? LoggerFactory { get; }
-        CommandLineStyle CommandLineStyle { get; }
-        MasterTextCollection MasterText { get; }
+        void FinishConfiguration();
+
         ReadOnlyCollection<IOption> Options { get; }
         int Count { get; }
         bool TargetsMultipleTypes { get; }

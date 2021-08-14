@@ -12,7 +12,13 @@
     <Nullable>enable</Nullable>
 
     <Configurations>Debug;Release;NugetRelease</Configurations>
+
   </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Remove="support\BindingExtensions.cs" />
+    <Compile Remove="test-data\TestExtensions.cs" />
+  </ItemGroup>
 
 	<ItemGroup>
 		<PackageReference Include="Autofac" Version="6.2.0" />
@@ -20,6 +26,7 @@
 		<PackageReference Include="FluentAssertions" Version="5.10.3" />
 		<PackageReference Include="Microsoft.NET.Test.Sdk" Version="16.10.0" />
 		<PackageReference Include="xunit" Version="2.4.1" />
+		<PackageReference Include="xunit.frameworks.autofac" Version="0.4.0" />
 		<PackageReference Include="xunit.runner.visualstudio" Version="2.4.3">
 			<PrivateAssets>all</PrivateAssets>
 			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
@@ -33,6 +40,7 @@
 	<ItemGroup>
 	  <ProjectReference Include="..\..\J4JLogging\J4JLogging\J4JLogging.csproj" />
 	  <ProjectReference Include="..\..\ProgrammingUtilities\DependencyInjection\DependencyInjection.csproj" />
+	  <ProjectReference Include="..\AutofacCommandLine\AutofacCommandLine.csproj" />
 	  <ProjectReference Include="..\J4JCommandLine\J4JCommandLine.csproj" />
 	</ItemGroup>
 

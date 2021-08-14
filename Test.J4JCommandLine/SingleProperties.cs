@@ -17,32 +17,43 @@
 
 #endregion
 
+using FluentAssertions;
+using J4JSoftware.Configuration.CommandLine;
 using Xunit;
 
 namespace J4JSoftware.Binder.Tests
 {
-    public class SingleProperties : BaseTest
+    public class SingleProperties : Validator
     {
         [ Theory ]
         [ MemberData( nameof(TestDataSource.GetSinglePropertyData), MemberType = typeof(TestDataSource) ) ]
-        public void Allocations( TestConfig config )
+        public void Allocations( TestConfig testConfig )
         {
-            Initialize( config );
+            var parser = CompositionRoot.Default.GetParser( CommandLineStyle.Linux );
+            parser.Should().NotBeNull();
 
-            Options.CreateOptionsFromContextKeys( config.OptionConfigurations );
+            CreateOptionsFromContextKeys( parser!.Options, testConfig.OptionConfigurations );
+            parser.Options.FinishConfiguration();
 
-            ValidateTokenizing();
+            ValidateTokenizing( parser, testConfig );
         }
 
         [ Theory ]
         [ MemberData( nameof(TestDataSource.GetSinglePropertyData), MemberType = typeof(TestDataSource) ) ]
-        public void Parsing( TestConfig config )
+        public void Parsing( TestConfig testConfig )
         {
-            Initialize( config );
+            var configParser = CompositionRoot.Default
+                .GetConfigurationAndParser( CommandLineStyle.Linux, testConfig.CommandLine );
 
-            Options.CreateOptionsFromContextKeys( config.OptionConfigurations );
+            configParser.parser.Should().NotBeNull();
 
-            ValidateConfiguration<BasicTarget>();
+            CreateOptionsFromContextKeys(configParser.parser!.Options, testConfig.OptionConfigurations);
+            configParser.parser.Options.FinishConfiguration();
+            configParser.parser.Options.Count.Should().BeGreaterThan(0);
+
+            configParser.parser.Parse( testConfig.CommandLine ).Should().BeTrue();
+
+            ValidateConfiguration<BasicTarget>( configParser.configRoot, testConfig );
         }
     }
 }

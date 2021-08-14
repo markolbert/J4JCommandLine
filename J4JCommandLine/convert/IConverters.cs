@@ -25,7 +25,7 @@ namespace J4JSoftware.Configuration.CommandLine
     public interface IConverters
     {
         bool CanConvert( Type toCheck );
-        object? Convert( Type targetType, IEnumerable<string> values );
-        T? Convert<T>( IEnumerable<string> values );
+        bool Convert( Type targetType, IEnumerable<string> values, out object? result );
+        bool Convert<T>( IEnumerable<string> values, out T? result );
     }
 }

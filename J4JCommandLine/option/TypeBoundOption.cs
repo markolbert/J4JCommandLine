@@ -27,7 +27,7 @@ namespace J4JSoftware.Configuration.CommandLine
         internal TypeBoundOption(
             IOptionCollection container,
             string typeRelativeContextPath,
-            MasterTextCollection masterText
+            IMasterTextCollection masterText
         )
             : base( container, typeRelativeContextPath, masterText )
         {

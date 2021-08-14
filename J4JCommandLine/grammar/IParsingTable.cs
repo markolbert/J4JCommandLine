@@ -21,7 +21,9 @@ namespace J4JSoftware.Configuration.CommandLine
 {
     public interface IParsingTable
     {
+        IOptionCollection Options { get; }
         bool IsValid { get; }
+
         TokenEntry.TokenEntries Entries { get; }
         ParsingTable.ParsingAction? this[ TokenType row, TokenType col ] { get; set; }
     }

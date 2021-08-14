@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using J4JSoftware.Configuration.CommandLine;
 using J4JSoftware.Configuration.J4JCommandLine;
 using Microsoft.Extensions.Configuration;
@@ -13,22 +14,23 @@ namespace J4JSoftware.CommandLine.Examples
     {
         static void Main( string[] args )
         {
-            var options = new OptionCollection(CommandLineStyle.Linux);
+            var parser = CompositionRoot.Default.Parser;
+            var displayHelp = CompositionRoot.Default.DisplayHelp;
 
-            var intValue = options.Bind<Program, int>( x => Program.IntValue, "i" )!
+            var intValue = parser.Options.Bind<Program, int>( x => Program.IntValue, "i" )!
                 .SetDefaultValue( 75 )
                 .SetDescription( "An integer value" );
 
-            var textValue = options.Bind<Program, string>( x => Program.TextValue, "t" )!
+            var textValue = parser.Options.Bind<Program, string>( x => Program.TextValue, "t" )!
                 .SetDefaultValue( "a cool default" )
                 .SetDescription( "A string value" );
 
-            options.DisplayHelp();
+            parser.Options.DisplayHelp( displayHelp );
             Console.WriteLine("\n===============\n");
-            options.DisplayHelp( new DisplayColorHelp() );
+            parser.Options.DisplayHelp( new DisplayColorHelp() );
 
             var config = new ConfigurationBuilder()
-                .AddJ4JCommandLine(args, options)
+                .AddJ4JCommandLine(CommandLineStyle.Windows, CompositionRoot.Default.Host!.Services, out _ )
                 .Build();
 
             var parsed = config.Get<Program>();
@@ -46,6 +48,11 @@ namespace J4JSoftware.CommandLine.Examples
             Console.WriteLine( $"IntValue is {IntValue}");
             Console.WriteLine( $"TextValue is {TextValue}");
 
+            var provider = config.Providers
+                .FirstOrDefault( x => x is J4JCommandLineProvider ) as J4JCommandLineProvider;
+
+            var options = provider!.Source.Parser!.Options;
+    
             Console.WriteLine( options.UnkeyedValues.Count == 0
                 ? "No unkeyed parameters"
                 : $"Unkeyed parameters: {string.Join( ", ", options.UnkeyedValues )}" );

@@ -22,7 +22,7 @@ using J4JSoftware.Logging;
 
 namespace J4JSoftware.Configuration.CommandLine
 {
-    public class DefaultDisplayHelp : DisplayHelpBase
+    public class DefaultDisplayHelp : DisplayHelp
     {
         public DefaultDisplayHelp( IJ4JLogger? logger )
             : base( logger )

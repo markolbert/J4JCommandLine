@@ -25,47 +25,29 @@ namespace J4JSoftware.Configuration.CommandLine
 {
     public class Tokenizer : ITokenizer
     {
+        private readonly StringComparison _textComparison;
         private readonly ICleanupTokens[] _cleanupProcessors;
-        private readonly AvailableTokens _collection;
+        private readonly IAvailableTokens _tokens;
         private readonly IJ4JLogger? _logger;
 
-        public Tokenizer(
-            AvailableTokens collection,
-            Func<IJ4JLogger>? loggerFactory,
+        internal Tokenizer(
+            StringComparison textComparison,
+            IAvailableTokens tokens,
+            IJ4JLoggerFactory? loggerFactory,
             params ICleanupTokens[] cleanupProcessors
         )
         {
-            _collection = collection;
-            _logger = loggerFactory?.Invoke();
+            _textComparison = textComparison;
+            _tokens = tokens;
+
+            _logger = loggerFactory?.CreateLogger( GetType() );
 
             if( cleanupProcessors.Length > 0 )
                 _cleanupProcessors = cleanupProcessors;
             else
                 _cleanupProcessors = new ICleanupTokens[]
                 {
-                    new ConsolidateQuotedText( collection.TextComparison, loggerFactory?.Invoke() ),
-                    new MergeSequentialSeparators()
-                };
-        }
-
-        public Tokenizer(
-            CommandLineStyle style = CommandLineStyle.Windows,
-            StringComparison? textComparison = null,
-            Func<IJ4JLogger>? loggerFactory = null,
-            params ICleanupTokens[] cleanupProcessors
-        )
-        {
-            _logger = loggerFactory?.Invoke();
-
-            textComparison ??= StringComparison.OrdinalIgnoreCase;
-            _collection = AvailableTokens.GetDefault( style, loggerFactory, textComparison );
-
-            if( cleanupProcessors.Length > 0 )
-                _cleanupProcessors = cleanupProcessors;
-            else
-                _cleanupProcessors = new ICleanupTokens[]
-                {
-                    new ConsolidateQuotedText( textComparison.Value, loggerFactory?.Invoke() ),
+                    new ConsolidateQuotedText( _textComparison, loggerFactory?.CreateLogger<ConsolidateQuotedText>() ),
                     new MergeSequentialSeparators()
                 };
         }
@@ -80,9 +62,9 @@ namespace J4JSoftware.Configuration.CommandLine
             {
                 firstMatch = ( null, 0 );
 
-                foreach( var (text, tokenType) in _collection.Available )
+                foreach( var (text, tokenType) in _tokens.Available )
                 {
-                    var tokenStart = cmdLine.IndexOf( text, _collection.TextComparison );
+                    var tokenStart = cmdLine.IndexOf( text, _textComparison );
 
                     // If there was no match, go to next token
                     if( tokenStart < 0 )

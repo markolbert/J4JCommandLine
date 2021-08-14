@@ -26,13 +26,13 @@ namespace J4JSoftware.Configuration.CommandLine
     public class Option<T> : IOption<T>
     {
         private readonly List<string> _cmdLineKeys = new();
-        private readonly MasterTextCollection _masterText;
+        private readonly IMasterTextCollection _masterText;
         private readonly List<string> _values = new();
 
         internal Option(
             IOptionCollection container,
             string contextPath,
-            MasterTextCollection masterText
+            IMasterTextCollection masterText
         )
         {
             Container = container;

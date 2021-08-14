@@ -26,7 +26,7 @@ using J4JSoftware.Logging;
 
 namespace J4JSoftware.Configuration.J4JCommandLine
 {
-    public class DisplayColorHelp : DisplayHelpBase
+    public class DisplayColorHelp : DisplayHelp
     {
         public DisplayColorHelp( IJ4JLogger? logger = null )
             : base( logger )

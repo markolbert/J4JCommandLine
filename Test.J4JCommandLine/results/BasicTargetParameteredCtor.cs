@@ -31,8 +31,8 @@ namespace J4JSoftware.Binder.Tests
         }
 
         public bool ASwitch { get; set; }
-        public string ASingleValue { get; set; }
-        public List<string> ACollection { get; set; }
+        public string ASingleValue { get; set; } = string.Empty;
+        public List<string> ACollection { get; set; } = new();
         public TestEnum AnEnumValue { get; set; }
         public TestFlagEnum AFlagEnumValue { get; set; }
     }

@@ -18,40 +18,49 @@
 #endregion
 
 using System.Collections.Generic;
+using FluentAssertions;
+using J4JSoftware.Configuration.CommandLine;
 using Xunit;
 
 namespace J4JSoftware.Binder.Tests
 {
-    public class EmbeddedProperties : BaseTest
+    public class EmbeddedProperties : Validator
     {
         [ Theory ]
         [ MemberData( nameof(TestDataSource.GetEmbeddedPropertyData), MemberType = typeof(TestDataSource) ) ]
-        public void Allocations( TestConfig config )
+        public void Allocations( TestConfig testConfig )
         {
-            Initialize( config );
+            var parser = CompositionRoot.Default.GetParser(CommandLineStyle.Windows);
+            parser.Should().NotBeNull();
 
-            Bind<EmbeddedTarget, bool>( x => x.Target1.ASwitch );
-            Bind<EmbeddedTarget, string>( x => x.Target1.ASingleValue );
-            Bind<EmbeddedTarget, TestEnum>( x => x.Target1.AnEnumValue );
-            Bind<EmbeddedTarget, TestFlagEnum>( x => x.Target1.AFlagEnumValue );
-            Bind<EmbeddedTarget, List<string>>( x => x.Target1.ACollection );
+            Bind<EmbeddedTarget, bool>( parser!, x => x.Target1.ASwitch, testConfig );
+            Bind<EmbeddedTarget, string>(parser!, x => x.Target1.ASingleValue, testConfig );
+            Bind<EmbeddedTarget, TestEnum>(parser!, x => x.Target1.AnEnumValue, testConfig);
+            Bind<EmbeddedTarget, TestFlagEnum>(parser!, x => x.Target1.AFlagEnumValue, testConfig);
+            Bind<EmbeddedTarget, List<string>>(parser!, x => x.Target1.ACollection, testConfig);
 
-            ValidateTokenizing();
+            ValidateTokenizing( parser!, testConfig );
         }
 
         [ Theory ]
         [ MemberData( nameof(TestDataSource.GetEmbeddedPropertyData), MemberType = typeof(TestDataSource) ) ]
-        public void Parsing( TestConfig config )
+        public void Parsing( TestConfig testConfig )
         {
-            Initialize( config );
+            var configParser = CompositionRoot.Default
+                .GetConfigurationAndParser( CommandLineStyle.Windows, testConfig.CommandLine );
 
-            Bind<EmbeddedTarget, bool>( x => x.Target1.ASwitch );
-            Bind<EmbeddedTarget, string>( x => x.Target1.ASingleValue );
-            Bind<EmbeddedTarget, TestEnum>( x => x.Target1.AnEnumValue );
-            Bind<EmbeddedTarget, TestFlagEnum>( x => x.Target1.AFlagEnumValue );
-            Bind<EmbeddedTarget, List<string>>( x => x.Target1.ACollection );
+            configParser.parser.Should().NotBeNull();
 
-            ValidateConfiguration<EmbeddedTarget>();
+            Bind<EmbeddedTarget, bool>( configParser.parser!, x => x.Target1.ASwitch, testConfig );
+            Bind<EmbeddedTarget, string>( configParser.parser!, x => x.Target1.ASingleValue, testConfig );
+            Bind<EmbeddedTarget, TestEnum>( configParser.parser!, x => x.Target1.AnEnumValue, testConfig );
+            Bind<EmbeddedTarget, TestFlagEnum>( configParser.parser!, x => x.Target1.AFlagEnumValue, testConfig );
+            Bind<EmbeddedTarget, List<string>>( configParser.parser!, x => x.Target1.ACollection, testConfig );
+
+            configParser.parser!.Options.FinishConfiguration();
+            configParser.parser.Options.Count.Should().BeGreaterThan(0);
+
+            ValidateConfiguration<EmbeddedTarget>( configParser.configRoot, testConfig );
         }
     }
 }

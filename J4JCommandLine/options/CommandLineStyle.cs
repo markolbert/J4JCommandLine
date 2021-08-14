@@ -23,7 +23,6 @@ namespace J4JSoftware.Configuration.CommandLine
     {
         Linux,
         Universal,
-        Windows,
-        UserDefined
+        Windows
     }
 }

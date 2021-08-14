@@ -24,6 +24,7 @@ using System.Collections.ObjectModel;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
+using System.Runtime.CompilerServices;
 using System.Text;
 using J4JSoftware.Logging;
 
@@ -31,54 +32,38 @@ namespace J4JSoftware.Configuration.CommandLine
 {
     public partial class OptionCollection : IOptionCollection
     {
+        private readonly StringComparison _textComparison;
+        private readonly IMasterTextCollection _mtCollection;
+        private readonly IBindabilityValidator _propValidator;
+        private readonly IDisplayHelp _displayHelp;
+
         private readonly TypeBoundOptionComparer _comparer = new();
+        
         private readonly IJ4JLogger? _logger;
         private readonly List<IOption> _options = new();
-        private readonly IPropertyValidator _propValidator;
 
         private readonly Dictionary<Type, string> _typePrefixes = new();
+        private readonly ChangeObserver _changeObserver = ChangeObserver.Instance;
 
-        public OptionCollection(
-            CommandLineStyle cmdLineStyle = CommandLineStyle.Windows,
-            IConverters? converters = null,
-            IPropertyValidator? propValidator = null,
-            Func<IJ4JLogger>? loggerFactory = null
+        internal OptionCollection(
+            StringComparison textComparison,
+            IMasterTextCollection mtCollection,
+            IBindabilityValidator propValidator,
+            IDisplayHelp displayHelp,
+            IJ4JLogger? logger
         )
         {
-            converters ??= new Converters( Enumerable.Empty<IConverter>(), loggerFactory?.Invoke() );
+            _textComparison = textComparison;
+            _mtCollection = mtCollection;
+            _propValidator = propValidator;
+            _displayHelp = displayHelp;
 
-            _propValidator = propValidator ??
-                             new DefaultPropertyValidator( converters, loggerFactory?.Invoke() );
-
-            CommandLineStyle = cmdLineStyle;
-            MasterText = MasterTextCollection.GetDefault( cmdLineStyle, loggerFactory );
-
-            LoggerFactory = loggerFactory;
-
-            _logger = loggerFactory?.Invoke();
+            _logger = logger;
+            _logger?.SetLoggedType( GetType() );
         }
 
-        public OptionCollection(
-            MasterTextCollection mt,
-            IConverters? converters = null,
-            IPropertyValidator? propValidator = null
-        )
-        {
-            converters ??= new Converters( Enumerable.Empty<IConverter>(), mt.LoggerFactory?.Invoke() );
+        public void FinishConfiguration() => _changeObserver.OnChanged();
 
-            _propValidator = propValidator ??
-                             new DefaultPropertyValidator( converters, mt.LoggerFactory?.Invoke() );
-
-            CommandLineStyle = CommandLineStyle.UserDefined;
-            MasterText = mt;
-            LoggerFactory = mt.LoggerFactory;
-
-            _logger = mt.LoggerFactory?.Invoke();
-        }
-
-        public Func<IJ4JLogger>? LoggerFactory { get; }
-        public CommandLineStyle CommandLineStyle { get; }
-        public MasterTextCollection MasterText { get; }
         public ReadOnlyCollection<IOption> Options => _options.AsReadOnly();
         public int Count => _options.Count;
 
@@ -124,14 +109,14 @@ namespace J4JSoftware.Configuration.CommandLine
                 return null;
             }
 
-            if( this.Any( x => x.ContextPath!.Equals( contextPath, MasterText.TextComparison ) ) )
+            if( this.Any( x => x.ContextPath!.Equals( contextPath, _textComparison ) ) )
             {
                 _logger?.Error<string>( "An option with the same ContextPath ('{0}') is already in the collection",
                     contextPath );
                 return null;
             }
 
-            var retVal = new Option<TProp>( this, contextPath, MasterText );
+            var retVal = new Option<TProp>( this, contextPath, _mtCollection );
 
             _options.Add( retVal );
 
@@ -146,7 +131,7 @@ namespace J4JSoftware.Configuration.CommandLine
                 return null;
             }
 
-            if( this.Any( x => x.ContextPath!.Equals( contextPath, MasterText.TextComparison ) ) )
+            if( this.Any( x => x.ContextPath!.Equals( contextPath, _textComparison ) ) )
             {
                 _logger?.Error<string>( "An option with the same ContextPath ('{0}') is already in the collection",
                     contextPath );
@@ -163,7 +148,7 @@ namespace J4JSoftware.Configuration.CommandLine
                 return null;
             }
 
-            var retVal = ctor.Invoke( new object?[] { this, contextPath, MasterText } ) as IOption;
+            var retVal = ctor.Invoke( new object?[] { this, contextPath, _mtCollection } ) as IOption;
 
             if( retVal == null )
             {
@@ -240,7 +225,7 @@ namespace J4JSoftware.Configuration.CommandLine
 
             var contextPath = GetContextPath( propElements.ToList() );
 
-            if( this.Any( x => x.ContextPath!.Equals( contextPath, MasterText.TextComparison ) ) )
+            if( this.Any( x => x.ContextPath!.Equals( contextPath, _textComparison) ) )
             {
                 _logger?.Error<string>( "An option with the same ContextPath ('{0}') is already in the collection",
                     contextPath );
@@ -250,7 +235,7 @@ namespace J4JSoftware.Configuration.CommandLine
             var retVal = new TypeBoundOption<TContainer, TProp>(
                 this,
                 contextPath,
-                MasterText );
+                _mtCollection );
 
             retVal.SetStyle( firstStyle!.Value );
 
@@ -265,13 +250,13 @@ namespace J4JSoftware.Configuration.CommandLine
         // case sensitivity is in use
         public bool UsesCommandLineKey( string key )
         {
-            return MasterText.Contains( key, TextUsageType.OptionKey );
+            return _mtCollection.Contains( key, TextUsageType.OptionKey );
         }
 
         public bool UsesContextPath( string contextPath )
         {
             return _options.Any( x =>
-                x.ContextPath?.Equals( contextPath, MasterText.TextComparison ) ?? false );
+                x.ContextPath?.Equals( contextPath, _textComparison) ?? false );
         }
 
         public IOption? this[ string key ]
@@ -280,15 +265,14 @@ namespace J4JSoftware.Configuration.CommandLine
             {
                 return _options.FirstOrDefault( opt =>
                     opt.IsInitialized
-                    && opt.Keys.Any( k => string.Equals( k, key, MasterText.TextComparison ) )
+                    && opt.Keys.Any( k => string.Equals( k, key, _textComparison) )
                 );
             }
         }
 
         public void DisplayHelp( IDisplayHelp? displayHelp = null )
         {
-            displayHelp ??= new DefaultDisplayHelp( LoggerFactory?.Invoke() );
-
+            displayHelp ??= _displayHelp;
             displayHelp.ProcessOptions( this );
         }
 
@@ -298,7 +282,7 @@ namespace J4JSoftware.Configuration.CommandLine
                 return false;
 
             return keys.Any( k => _options.Any( x =>
-                x.CommandLineKeyProvided?.Equals( k, MasterText.TextComparison ) ?? false ) );
+                x.CommandLineKeyProvided?.Equals( k, _textComparison) ?? false ) );
         }
 
         public IEnumerator<IOption> GetEnumerator()

@@ -34,6 +34,6 @@ namespace J4JSoftware.Configuration.CommandLine
         public List<string> Values { get; } = new();
 
         public IOption? Option => Entries.Options.FirstOrDefault( x =>
-            x.Keys.Any( k => k.Equals( Key, Entries.Options.MasterText.TextComparison ) ) );
+            x.Keys.Any( k => k.Equals( Key, Entries.TextComparison ) ) );
     }
 }
