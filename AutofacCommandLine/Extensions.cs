@@ -24,6 +24,7 @@ using System.Linq;
 using System.Reflection;
 using Autofac;
 using Autofac.Features.ResolveAnything;
+using J4JSoftware.DependencyInjection;
 using J4JSoftware.Logging;
 
 namespace J4JSoftware.Configuration.CommandLine

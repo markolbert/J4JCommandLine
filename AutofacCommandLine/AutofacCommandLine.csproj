@@ -22,7 +22,14 @@
 	</PropertyGroup>
 
 	<ItemGroup>
+	  <Compile Remove="ConstructorTester.cs" />
+	  <Compile Remove="ConstructorTesterBase.cs" />
+	  <Compile Remove="ConstructorTesterPermuted.cs" />
+	  <Compile Remove="ITypeTester.cs" />
+	  <Compile Remove="Permute.cs" />
+	  <Compile Remove="PredefinedTypeTests.cs" />
 	  <Compile Remove="RequiredParameter.cs" />
+	  <Compile Remove="TypeTester.cs" />
 	</ItemGroup>
 
 	<ItemGroup>
@@ -37,6 +44,7 @@
 	</ItemGroup>
 
 	<ItemGroup>
+	  <ProjectReference Include="..\..\ProgrammingUtilities\DependencyInjection\DependencyInjection.csproj" />
 	  <ProjectReference Include="..\J4JCommandLine\J4JCommandLine.csproj" />
 	</ItemGroup>
 
