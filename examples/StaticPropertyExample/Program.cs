@@ -27,7 +27,7 @@ namespace J4JSoftware.CommandLine.Examples
             parser.Options.DisplayHelp( new DisplayColorHelp( null ) );
 
             var config = new ConfigurationBuilder()
-                .AddJ4JCommandLine(CommandLineStyle.Windows, CompositionRoot.Default.Host!.Services, out _)
+                .AddJ4JCommandLine( CommandLineStyle.Windows, CompositionRoot.Default.Host!.Services )
                 .Build();
 
             var parsed = config.Get<Program>();
