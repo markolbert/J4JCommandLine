@@ -23,14 +23,18 @@ using Xunit;
 
 namespace J4JSoftware.Binder.Tests
 {
-    public class MiscTests
+    //[UseAutofacTestFramework]
+    public class MiscTests : TestBase
     {
         [ Theory ]
         [ InlineData( CommandLineStyle.Linux, "-x abc", "abc" ) ]
         [ InlineData( CommandLineStyle.Linux, "-x \"abc\"", "abc" ) ]
         public void StringHandling( CommandLineStyle style, string cmdLine, params string[] result )
         {
-            var parser = CompositionRoot.Default.GetParser( style );
+            ParserFactory.Create(style, out var parser)
+                .Should()
+                .BeTrue();
+
             parser.Should().NotBeNull();
 
             var option = parser!.Options.Bind<MiscTarget, string?>( x => x.AStringValue, "x" );

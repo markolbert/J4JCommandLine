@@ -1,68 +1,113 @@
-﻿#region license
-
-// Copyright 2021 Mark A. Olbert
-// 
-// This library or program 'Test.J4JCommandLine' is free software: you can redistribute it
-// and/or modify it under the terms of the GNU General Public License as
-// published by the Free Software Foundation, either version 3 of the License,
-// or (at your option) any later version.
-// 
-// This library or program is distributed in the hope that it will be useful, but
-// WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-// General Public License for more details.
-// 
-// You should have received a copy of the GNU General Public License along with
-// this library or program.  If not, see <https://www.gnu.org/licenses/>.
-
-#endregion
-
-using System;
+﻿using System;
+using System.Collections.Generic;
 using FluentAssertions;
 using J4JSoftware.Configuration.CommandLine;
-using J4JSoftware.Logging;
 using Xunit;
-using Xunit.Frameworks.Autofac;
 
 namespace J4JSoftware.Binder.Tests
 {
-    [UseAutofacTestFramework]
-    public class TokenizerTests : Validator
+    public class TokenizerTests : TestBase
     {
-        private IParser _parser;
+        private IParser? _parser;
 
-        public TokenizerTests(
-            IParserFactory parserFactory,
-            IJ4JLoggerFactory loggerFactory
-        )
+        [Theory]
+        [MemberData(nameof(TestDataSource.GetTokenizerData), MemberType = typeof(TestDataSource))]
+        public void Simple(TokenizerConfig config)
         {
-            var consolidatedLogger = loggerFactory.CreateLogger<ConsolidateQuotedText>();
+            var consolidatedLogger = LoggerFactory.CreateLogger<ConsolidateQuotedText>();
 
-            parserFactory.Create( CommandLineStyle.Linux, out var temp, StringComparison.OrdinalIgnoreCase,
-                    new ConsolidateQuotedText( StringComparison.OrdinalIgnoreCase, consolidatedLogger ),
-                    new MergeSequentialSeparators() )
+            Initialize(config.Style,
+                StringComparison.OrdinalIgnoreCase,
+                new ConsolidateQuotedText(StringComparison.OrdinalIgnoreCase, consolidatedLogger),
+                new MergeSequentialSeparators());
+
+            var tokens = _parser!.Tokenizer.Tokenize(config.CommandLine);
+            tokens.Count.Should().Be(config.Data.Count);
+
+            for (var idx = 0; idx < tokens.Count; idx++)
+            {
+                var token = tokens[idx];
+                token.Should().NotBeNull();
+
+                token!.Type.Should().Be(config.Data[idx].Type);
+                token!.Text.Should().Be(config.Data[idx].Text);
+            }
+        }
+
+        [Theory]
+        [MemberData(nameof(TestDataSource.GetSinglePropertyData), MemberType = typeof(TestDataSource))]
+        public void SingleProperties(TestConfig testConfig)
+        {
+            Initialize(testConfig.Style);
+
+            CreateOptionsFromContextKeys(_parser!.Options, testConfig.OptionConfigurations);
+            _parser.Options.FinishConfiguration();
+
+            ValidateTokenizing(testConfig);
+        }
+
+        [Theory]
+        [MemberData(nameof(TestDataSource.GetEmbeddedPropertyData), MemberType = typeof(TestDataSource))]
+        public void Embedded(TestConfig testConfig)
+        {
+            Initialize(testConfig.Style);
+
+            Bind<EmbeddedTarget, bool>(_parser!, x => x.Target1.ASwitch, testConfig);
+            Bind<EmbeddedTarget, string>(_parser!, x => x.Target1.ASingleValue, testConfig);
+            Bind<EmbeddedTarget, TestEnum>(_parser!, x => x.Target1.AnEnumValue, testConfig);
+            Bind<EmbeddedTarget, TestFlagEnum>(_parser!, x => x.Target1.AFlagEnumValue, testConfig);
+            Bind<EmbeddedTarget, List<string>>(_parser!, x => x.Target1.ACollection, testConfig);
+
+            ValidateTokenizing(testConfig);
+        }
+
+        [Theory]
+        [MemberData(nameof(TestDataSource.GetEmbeddedPropertyData), MemberType = typeof(TestDataSource))]
+        public void EmbeddedNoSetters(TestConfig testConfig)
+        {
+            Initialize(testConfig.Style);
+
+            Bind<EmbeddedTargetNoSetter, bool>(_parser!, x => x.Target1.ASwitch, testConfig);
+            Bind<EmbeddedTargetNoSetter, string>(_parser!, x => x.Target1.ASingleValue, testConfig);
+            Bind<EmbeddedTargetNoSetter, TestEnum>(_parser!, x => x.Target1.AnEnumValue, testConfig);
+            Bind<EmbeddedTargetNoSetter, TestFlagEnum>(_parser!, x => x.Target1.AFlagEnumValue, testConfig);
+            Bind<EmbeddedTargetNoSetter, List<string>>(_parser!, x => x.Target1.ACollection, testConfig);
+
+            ValidateTokenizing(testConfig);
+        }
+
+        private void Initialize( CommandLineStyle style, 
+            StringComparison? textComparison = null,
+            params ICleanupTokens[] cleanupTokens )
+        {
+
+            ParserFactory.Create(style, 
+                    out _parser, 
+                    textComparison, 
+                    cleanupTokens)
                 .Should()
                 .BeTrue();
 
-            temp.Should().NotBeNull();
-            _parser = temp!;
+            _parser.Should().NotBeNull();
         }
 
-        [ Theory ]
-        [ MemberData( nameof(TestDataSource.GetTokenizerData), MemberType = typeof(TestDataSource) ) ]
-        public void Tokenizer( TokenizerConfig config )
+        private void ValidateTokenizing(TestConfig testConfig)
         {
-            var tokens = _parser.Tokenizer.Tokenize( config.CommandLine );
+            _parser.Should().NotBeNull();
 
-            tokens.Count.Should().Be( config.Data.Count );
+            _parser!.Parse(testConfig.CommandLine)
+                .Should()
+                .BeTrue();
 
-            for( var idx = 0; idx < tokens.Count; idx++ )
+            _parser.Options.UnknownKeys.Count.Should().Be(testConfig.UnknownKeys);
+            _parser.Options.UnkeyedValues.Count.Should().Be(testConfig.UnkeyedValues);
+
+            foreach (var optConfig in testConfig.OptionConfigurations)
             {
-                var token = tokens[ idx ];
-                token.Should().NotBeNull();
-
-                token!.Type.Should().Be( config.Data[ idx ].Type );
-                token!.Text.Should().Be( config.Data[ idx ].Text );
+                optConfig.Option!
+                    .ValuesSatisfied
+                    .Should()
+                    .Be(optConfig.ValuesSatisfied);
             }
         }
     }
