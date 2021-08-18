@@ -23,7 +23,7 @@ using System.Reflection;
 
 namespace J4JSoftware.Configuration.CommandLine
 {
-    public interface IBindabilityValidator : ICustomized
+    public interface IBindabilityValidator : ICustomizedWithStyle
     {
         bool IsPropertyBindable( Stack<PropertyInfo> propertyStack );
         bool IsPropertyBindable( Type propType );

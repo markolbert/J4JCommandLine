@@ -21,9 +21,8 @@ using System.Collections.Generic;
 
 namespace J4JSoftware.Configuration.CommandLine
 {
-    public interface IAvailableTokens : ICustomized
+    public interface IAvailableTokens : ICustomizedWithStyle
     {
-        CommandLineStyle Style { get; }
         void Initialize();
 
         IEnumerable<(string text, TokenType type)> Available { get; }

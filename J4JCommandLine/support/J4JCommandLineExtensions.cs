@@ -20,7 +20,6 @@
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
-using System.Linq;
 using J4JSoftware.Logging;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -63,7 +62,7 @@ namespace J4JSoftware.Configuration.CommandLine
                 : new BindableTypeInfo( toCheck, BindableType.Unsupported );
         }
 
-        #region AddJ4JCommandLine
+        #region AddJ4JCommandLine: IServiceProvider-based
 
         // This version works with an explicit CommandLineSource object.
         // It is used by all the other versions
@@ -73,8 +72,8 @@ namespace J4JSoftware.Configuration.CommandLine
         public static IConfigurationBuilder AddJ4JCommandLine(
             this IConfigurationBuilder builder,
             CommandLineStyle style,
-            CommandLineSource cmdLineSource,
             IServiceProvider svcProvider,
+            out CommandLineSource cmdLineSource,
             out IParser? parser,
             StringComparison? textComparison = null,
             params ICleanupTokens[] cleanupTokens
@@ -84,85 +83,235 @@ namespace J4JSoftware.Configuration.CommandLine
                 style,
                 svcProvider.GetRequiredService<IParserFactory>(),
                 svcProvider.GetRequiredService<IJ4JLoggerFactory>(),
-                cmdLineSource,
                 textComparison,
                 cleanupTokens);
 
             builder.Add(source);
 
             parser = source.Parser;
+            cmdLineSource = source.CommandLineSource;
 
             return builder;
         }
 
-        // This version parses an explicitly-provided command line 
         public static IConfigurationBuilder AddJ4JCommandLine(
             this IConfigurationBuilder builder,
             CommandLineStyle style,
-            string cmdLine,
             IServiceProvider svcProvider,
-            out IParser? parser,
             StringComparison? textComparison = null,
             params ICleanupTokens[] cleanupTokens
-        ) => builder.AddJ4JCommandLine(
-            style,
-            new CommandLineSource( cmdLine ),
-            svcProvider,
-            out parser,
-            textComparison,
-            cleanupTokens );
+        )
+        {
+            var source = new J4JCommandLineSource(
+                style,
+                svcProvider.GetRequiredService<IParserFactory>(),
+                svcProvider.GetRequiredService<IJ4JLoggerFactory>(),
+                textComparison,
+                cleanupTokens);
 
-        // This version retrieves the command line via RawCommandLine.GetRawCommandLine(),
-        // which works behind the scenes to grab the command line provided to the app
-        // that's running
-        public static IConfigurationBuilder AddJ4JCommandLine(
-            this IConfigurationBuilder builder,
-            CommandLineStyle style,
-            IServiceProvider svcProvider,
-            out IParser? parser,
-            StringComparison? textComparison = null,
-            params ICleanupTokens[] cleanupTokens
-        ) => builder.AddJ4JCommandLine(
-            style,
-            new CommandLineSource( new RawCommandLine().GetRawCommandLine() ),
-            svcProvider,
-            out parser,
-            textComparison,
-            cleanupTokens );
+            builder.Add(source);
 
-        // This version parses an explicitly-provided string[] of arguments
-        public static IConfigurationBuilder AddJ4JCommandLine(
-            this IConfigurationBuilder builder,
-            CommandLineStyle style,
-            string[] args,
-            IServiceProvider svcProvider,
-            out IParser? parser,
-            StringComparison? textComparison = null,
-            params ICleanupTokens[] cleanupTokens
-        ) => builder.AddJ4JCommandLine(
-            style,
-            new CommandLineSource(args),
-            svcProvider,
-            out parser,
-            textComparison,
-            cleanupTokens);
+            return builder;
+        }
 
-        // This version parses an explicitly-provided IEnumerable<string> of arguments
+        //// This version parses an explicitly-provided command line 
+        //public static IConfigurationBuilder AddJ4JCommandLine(
+        //    this IConfigurationBuilder builder,
+        //    CommandLineStyle style,
+        //    string cmdLine,
+        //    IServiceProvider svcProvider,
+        //    out IParser? parser,
+        //    StringComparison? textComparison = null,
+        //    params ICleanupTokens[] cleanupTokens
+        //) => builder.AddJ4JCommandLine(
+        //    style,
+        //    new CommandLineSource( cmdLine ),
+        //    svcProvider,
+        //    out parser,
+        //    textComparison,
+        //    cleanupTokens );
+
+        //// This version retrieves the command line via RawCommandLine.GetRawCommandLine(),
+        //// which works behind the scenes to grab the command line provided to the app
+        //// that's running
+        //public static IConfigurationBuilder AddJ4JCommandLine(
+        //    this IConfigurationBuilder builder,
+        //    CommandLineStyle style,
+        //    IServiceProvider svcProvider,
+        //    out IParser? parser,
+        //    StringComparison? textComparison = null,
+        //    params ICleanupTokens[] cleanupTokens
+        //) => builder.AddJ4JCommandLine(
+        //    style,
+        //    new CommandLineSource( new RawCommandLine().GetRawCommandLine() ),
+        //    svcProvider,
+        //    out parser,
+        //    textComparison,
+        //    cleanupTokens );
+
+        //// This version parses an explicitly-provided string[] of arguments
+        //public static IConfigurationBuilder AddJ4JCommandLine(
+        //    this IConfigurationBuilder builder,
+        //    CommandLineStyle style,
+        //    string[] args,
+        //    IServiceProvider svcProvider,
+        //    out IParser? parser,
+        //    StringComparison? textComparison = null,
+        //    params ICleanupTokens[] cleanupTokens
+        //) => builder.AddJ4JCommandLine(
+        //    style,
+        //    new CommandLineSource(args),
+        //    svcProvider,
+        //    out parser,
+        //    textComparison,
+        //    cleanupTokens);
+
+        //// This version parses an explicitly-provided IEnumerable<string> of arguments
+        //public static IConfigurationBuilder AddJ4JCommandLine(
+        //    this IConfigurationBuilder builder,
+        //    CommandLineStyle style,
+        //    IEnumerable<string> args,
+        //    IServiceProvider svcProvider,
+        //    out IParser? parser,
+        //    StringComparison? textComparison = null,
+        //    params ICleanupTokens[] cleanupTokens
+        //) => builder.AddJ4JCommandLine(
+        //    style,
+        //    new CommandLineSource(args),
+        //    svcProvider,
+        //    out parser,
+        //    textComparison,
+        //    cleanupTokens);
+
+        #endregion
+
+        #region AddJ4JCommandLine: explicit factories
+
+        // This version works with an explicit CommandLineSource object.
+        // It is used by all the other versions
         public static IConfigurationBuilder AddJ4JCommandLine(
             this IConfigurationBuilder builder,
             CommandLineStyle style,
-            IEnumerable<string> args,
-            IServiceProvider svcProvider,
+            IParserFactory parserFactory,
+            IJ4JLoggerFactory loggerFactory,
+            out CommandLineSource cmdLineSource,
             out IParser? parser,
             StringComparison? textComparison = null,
             params ICleanupTokens[] cleanupTokens
-        ) => builder.AddJ4JCommandLine(
-            style,
-            new CommandLineSource(args),
-            svcProvider,
-            out parser,
-            textComparison,
-            cleanupTokens);
+        )
+        {
+            var source = new J4JCommandLineSource(
+                style,
+                parserFactory,
+                loggerFactory,
+                textComparison,
+                cleanupTokens);
+
+            builder.Add(source);
+
+            parser = source.Parser;
+            cmdLineSource = source.CommandLineSource;
+
+            return builder;
+        }
+
+        public static IConfigurationBuilder AddJ4JCommandLine(
+            this IConfigurationBuilder builder,
+            CommandLineStyle style,
+            IParserFactory parserFactory,
+            IJ4JLoggerFactory loggerFactory,
+            StringComparison? textComparison = null,
+            params ICleanupTokens[] cleanupTokens
+        )
+        {
+            var source = new J4JCommandLineSource(
+                style,
+                parserFactory,
+                loggerFactory,
+                textComparison,
+                cleanupTokens);
+
+            builder.Add(source);
+
+            return builder;
+        }
+
+        //// This version parses an explicitly-provided command line 
+        //public static IConfigurationBuilder AddJ4JCommandLine(
+        //    this IConfigurationBuilder builder,
+        //    CommandLineStyle style,
+        //    string cmdLine,
+        //    IParserFactory parserFactory,
+        //    IJ4JLoggerFactory loggerFactory,
+        //    out IParser? parser,
+        //    StringComparison? textComparison = null,
+        //    params ICleanupTokens[] cleanupTokens
+        //) => builder.AddJ4JCommandLine(
+        //    style,
+        //    new CommandLineSource(cmdLine),
+        //    parserFactory,
+        //    loggerFactory,
+        //    out parser,
+        //    textComparison,
+        //    cleanupTokens);
+
+        //// This version retrieves the command line via RawCommandLine.GetRawCommandLine(),
+        //// which works behind the scenes to grab the command line provided to the app
+        //// that's running
+        //public static IConfigurationBuilder AddJ4JCommandLine(
+        //    this IConfigurationBuilder builder,
+        //    CommandLineStyle style,
+        //    IParserFactory parserFactory,
+        //    IJ4JLoggerFactory loggerFactory,
+        //    out IParser? parser,
+        //    StringComparison? textComparison = null,
+        //    params ICleanupTokens[] cleanupTokens
+        //) => builder.AddJ4JCommandLine(
+        //    style,
+        //    new CommandLineSource(new RawCommandLine().GetRawCommandLine()),
+        //    parserFactory,
+        //    loggerFactory,
+        //    out parser,
+        //    textComparison,
+        //    cleanupTokens);
+
+        //// This version parses an explicitly-provided string[] of arguments
+        //public static IConfigurationBuilder AddJ4JCommandLine(
+        //    this IConfigurationBuilder builder,
+        //    CommandLineStyle style,
+        //    string[] args,
+        //    IParserFactory parserFactory,
+        //    IJ4JLoggerFactory loggerFactory,
+        //    out IParser? parser,
+        //    StringComparison? textComparison = null,
+        //    params ICleanupTokens[] cleanupTokens
+        //) => builder.AddJ4JCommandLine(
+        //    style,
+        //    new CommandLineSource(args),
+        //    parserFactory,
+        //    loggerFactory,
+        //    out parser,
+        //    textComparison,
+        //    cleanupTokens);
+
+        //// This version parses an explicitly-provided IEnumerable<string> of arguments
+        //public static IConfigurationBuilder AddJ4JCommandLine(
+        //    this IConfigurationBuilder builder,
+        //    CommandLineStyle style,
+        //    IEnumerable<string> args,
+        //    IParserFactory parserFactory,
+        //    IJ4JLoggerFactory loggerFactory,
+        //    out IParser? parser,
+        //    StringComparison? textComparison = null,
+        //    params ICleanupTokens[] cleanupTokens
+        //) => builder.AddJ4JCommandLine(
+        //    style,
+        //    new CommandLineSource(args),
+        //    parserFactory,
+        //    loggerFactory,
+        //    out parser,
+        //    textComparison,
+        //    cleanupTokens);
 
         #endregion
     }

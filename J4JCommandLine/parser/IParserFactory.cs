@@ -18,7 +18,6 @@
 #endregion
 
 using System;
-using System.Collections.ObjectModel;
 
 namespace J4JSoftware.Configuration.CommandLine
 {

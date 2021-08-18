@@ -112,7 +112,10 @@ namespace J4JSoftware.Configuration.CommandLine
                 cmdLine = cmdLine[ ( firstMatch.startChar + firstMatch.token.Length ).. ];
             }
 
-            foreach( var cleanupProc in _cleanupProcessors ) cleanupProc.Process( retVal );
+            foreach( var cleanupProc in _cleanupProcessors )
+            {
+                cleanupProc.Process( retVal );
+            }
 
             return retVal;
         }

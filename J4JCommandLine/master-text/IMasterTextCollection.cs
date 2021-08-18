@@ -17,14 +17,12 @@
 
 #endregion
 
-using System;
 using System.Collections.Generic;
 
 namespace J4JSoftware.Configuration.CommandLine
 {
-    public interface IMasterTextCollection : ICustomized
+    public interface IMasterTextCollection : ICustomizedWithStyle
     {
-        CommandLineStyle Style { get; }
         void Initialize();
 
         List<string> this[ TextUsageType usage ] { get; }

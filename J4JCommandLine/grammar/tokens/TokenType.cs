@@ -30,12 +30,12 @@ namespace J4JSoftware.Configuration.CommandLine
         // created by the tokenizer.
         Text,
 
-        //// EndOfInput cannot be created by user code. It only gets
-        //// created by the tokenizer.
-        //EndOfInput,
+        // EndOfInput cannot be created by user code. It only gets
+        // created by the tokenizer.
+        EndOfInput,
 
-        StartOfInput
         // StartOfInput cannot be created by user code. It only gets
         // created by the tokenizer.
+        StartOfInput
     }
 }

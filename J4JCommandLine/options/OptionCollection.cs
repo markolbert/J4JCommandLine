@@ -24,7 +24,6 @@ using System.Collections.ObjectModel;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
-using System.Runtime.CompilerServices;
 using System.Text;
 using J4JSoftware.Logging;
 
@@ -73,7 +72,7 @@ namespace J4JSoftware.Configuration.CommandLine
         }
 
         public List<string> UnkeyedValues { get; } = new();
-        public List<TokenEntry> UnknownKeys { get; } = new();
+        public List<CommandLineArgument> UnknownKeys { get; } = new();
 
         public void SetTypePrefix<TTarget>( string prefix )
             where TTarget : class, new()
@@ -287,7 +286,10 @@ namespace J4JSoftware.Configuration.CommandLine
 
         public IEnumerator<IOption> GetEnumerator()
         {
-            foreach( var option in _options ) yield return option;
+            foreach( var option in _options )
+            {
+                yield return option;
+            }
         }
 
         IEnumerator IEnumerable.GetEnumerator()
@@ -298,8 +300,10 @@ namespace J4JSoftware.Configuration.CommandLine
         private IEnumerable<string> ValidateCommandLineKeys( string[] cmdLineKeys )
         {
             foreach( var key in cmdLineKeys )
+            {
                 if( !UsesCommandLineKey( key ) )
                     yield return key;
+            }
         }
 
         private static string GetContextPath( List<PropertyInfo> propElements )

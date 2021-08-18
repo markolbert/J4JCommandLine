@@ -17,7 +17,6 @@
 
 #endregion
 
-using System.Runtime.InteropServices.ComTypes;
 using J4JSoftware.Logging;
 
 namespace J4JSoftware.Configuration.CommandLine
@@ -28,11 +27,13 @@ namespace J4JSoftware.Configuration.CommandLine
         private readonly IJ4JLogger? _logger;
 
         internal Parser(
+            IOptionCollection options,
             ParsingTable parsingTable,
             ITokenizer tokenizer,
             IJ4JLogger? logger
         )
         {
+            Options = options;
             _parsingTable = parsingTable;
             Tokenizer = tokenizer;
 
@@ -40,37 +41,30 @@ namespace J4JSoftware.Configuration.CommandLine
         }
 
         public ITokenizer Tokenizer { get; }
-        public IOptionCollection Options => _parsingTable.Options;
+        public IOptionCollection Options { get; }
 
         public bool Parse( string cmdLine )
         {
-            var prevToken = new Token( TokenType.StartOfInput, string.Empty );
+            var tokenList = Tokenizer!.Tokenize( cmdLine );
 
-            var allOkay = true;
-
-            foreach( var token in Tokenizer!.Tokenize( cmdLine ) )
+            foreach( var tokenPair in tokenList.EnumerateTokenPairs() )
             {
-                var parsingAction = _parsingTable[ prevToken.Type, token.Type ];
+                var parsingAction = _parsingTable[ tokenPair.TokenTypePair ];
 
                 if( parsingAction == null )
                 {
-                    _logger?.Error( "Undefined parsing action for (row, column) '({0}, {1})'", 
-                        prevToken.Type,
-                        token.Type );
+                    _logger?.Error( "Undefined parsing action for token sequence '{0} => {1}'", 
+                        tokenPair.Previous.Type,
+                        tokenPair.Current.Type );
 
                     return false;
                 }
 
-                allOkay &= parsingAction( prevToken, token, token.Text );
-
-                prevToken = token;
+                if( !parsingAction( tokenPair ) )
+                    return false;
             }
 
-            // always end processing with a commit because there will generally be
-            // a pending entry
-            allOkay &= _parsingTable.Entries.Commit( prevToken, prevToken, string.Empty );
-
-            return allOkay;
+            return true;
         }
     }
 }

@@ -22,17 +22,6 @@
 	</PropertyGroup>
 
 	<ItemGroup>
-	  <Compile Remove="convert\Converters.cs" />
-	  <Compile Remove="convert\IConverters.cs" />
-	  <Compile Remove="bindability\DefaultPropertyValidator.cs" />
-	  <Compile Remove="parser\ParserConfiguration.cs" />
-	  <Compile Remove="LogEntry.cs" />
-	  <Compile Remove="options\LinuxOptionCollection.cs" />
-	  <Compile Remove="options\UniversalOptionCollection.cs" />
-	  <Compile Remove="options\WindowsOptionCollection.cs" />
-	</ItemGroup>
-
-	<ItemGroup>
 		<PackageReference Include="Microsoft.Extensions.Configuration" Version="5.0.0" />
 	</ItemGroup>
 

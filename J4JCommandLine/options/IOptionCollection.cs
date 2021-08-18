@@ -21,7 +21,6 @@ using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq.Expressions;
-using J4JSoftware.Logging;
 
 namespace J4JSoftware.Configuration.CommandLine
 {
@@ -34,7 +33,7 @@ namespace J4JSoftware.Configuration.CommandLine
         bool TargetsMultipleTypes { get; }
 
         List<string> UnkeyedValues { get; }
-        List<TokenEntry> UnknownKeys { get; }
+        List<CommandLineArgument> UnknownKeys { get; }
         IOption? this[ string key ] { get; }
         void ClearValues();
 

@@ -17,46 +17,45 @@
 
 #endregion
 
+using System;
 using System.Collections.Generic;
+using System.Threading;
 
 namespace J4JSoftware.Configuration.CommandLine
 {
     public class CommandLineSource
     {
-        private readonly ChangeObserver _changeObserver = ChangeObserver.Instance;
-
-        public CommandLineSource( string cmdLine )
-        {
-            CommandLine = cmdLine;
-            IsFixed = true;
-        }
-
-        public CommandLineSource( string[] args )
-            : this( string.Join( " ", args ) )
-        {
-        }
-
-        public CommandLineSource( IEnumerable<string> args )
-            : this(string.Join(" ", args))
-        {
-        }
+        public event EventHandler<ConfigurationChangedEventArgs>? Changed;
 
         public CommandLineSource()
         {
+            var rawCmdLine = new RawCommandLine();
+            CommandLine = rawCmdLine.GetRawCommandLine();
         }
 
-        public bool IsFixed { get; }
+        public void OptionsConfigurationChanged() => OnChanged();
+
         public string CommandLine { get; private set; } = string.Empty;
 
-        public bool SetValue( string newCmdLine )
+        public void SetCommandLine( string newCmdLine )
         {
-            if( IsFixed )
-                return false;
-
             CommandLine = newCmdLine;
-            _changeObserver.OnChanged( newCmdLine );
-
-            return true;
+            OnChanged( newCmdLine );
         }
+
+        public void SetCommandLine( string[] args ) => SetCommandLine( string.Join( " ", args ) );
+        public void SetCommandLine( IEnumerable<string> args ) => SetCommandLine( string.Join( " ", args ) );
+
+        private void OnChanged( string newCommandLine ) => Changed?.Invoke( this,
+            new ConfigurationChangedEventArgs { NewCommandLine = newCommandLine } );
+
+        private void OnChanged() =>
+            Changed?.Invoke( this, new ConfigurationChangedEventArgs { OptionsConfigurationChanged = true } );
+
+        //private void OnChanged(string newCommandLine) => ThreadPool.QueueUserWorkItem((_) =>
+        //    Changed?.Invoke(this, new ConfigurationChangedEventArgs { NewCommandLine = newCommandLine }));
+
+        //private void OnChanged() => ThreadPool.QueueUserWorkItem((_) =>
+        //    Changed?.Invoke(this, new ConfigurationChangedEventArgs { OptionsConfigurationChanged = true }));
     }
 }

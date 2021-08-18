@@ -19,7 +19,6 @@
 
 using System;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using System.Linq;
 using J4JSoftware.Logging;
 
@@ -30,6 +29,7 @@ namespace J4JSoftware.Configuration.CommandLine
         private readonly List<IAvailableTokens> _tokens;
         private readonly List<IMasterTextCollection> _mtCollections;
         private readonly List<IBindabilityValidator> _bindabilityValidators;
+        private readonly List<IOptionsGenerator> _generators;
         private readonly IDisplayHelp _displayHelp;
 
         private readonly IJ4JLoggerFactory? _loggerFactory;
@@ -39,6 +39,7 @@ namespace J4JSoftware.Configuration.CommandLine
             IEnumerable<IAvailableTokens> tokens,
             IEnumerable<IMasterTextCollection> mtCollections,
             IEnumerable<IBindabilityValidator> bindabilityValidators,
+            IEnumerable<IOptionsGenerator> generators,
             IDisplayHelp displayHelp,
             IJ4JLoggerFactory? loggerFactory = null
         )
@@ -55,14 +56,18 @@ namespace J4JSoftware.Configuration.CommandLine
                 .ThenByDescending(x => x.Priority)
                 .ToList();
 
+            _generators = generators.OrderByDescending( x => x.Customization )
+                .ThenByDescending( x => x.Priority )
+                .ToList();
+
             _displayHelp = displayHelp;
 
             _loggerFactory = loggerFactory;
             _logger = _loggerFactory?.CreateLogger( GetType() );
         }
 
-        public bool Create( CommandLineStyle style, 
-            out IParser? result, 
+        public bool Create( CommandLineStyle style,
+            out IParser? result,
             StringComparison? textComparison = null,
             params ICleanupTokens[] cleanupTokens )
         {
@@ -103,9 +108,19 @@ namespace J4JSoftware.Configuration.CommandLine
                 _displayHelp,
                 _loggerFactory?.CreateLogger<OptionCollection>() );
 
+            var generator = _generators.FirstOrDefault();
+            if (generator == null)
+            {
+                _logger?.Error("No IOptionsGenerator available");
+                return false;
+            }
+
+            generator.Initialize( textComparison.Value, optionCollection );
+
             var tokenizer = new Tokenizer( textComparison.Value, tokens, _loggerFactory, cleanupTokens );
 
-            result = new Parser( new ParsingTable( textComparison.Value, optionCollection, _loggerFactory ),
+            result = new Parser( optionCollection,
+                new ParsingTable( generator, _loggerFactory?.CreateLogger<IOptionsGenerator>() ),
                 tokenizer,
                 _loggerFactory?.CreateLogger<Parser>() );
 

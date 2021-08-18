@@ -19,6 +19,8 @@
 
 using System.Collections.Generic;
 using System.Linq;
+using J4JSoftware.Logging;
+using Serilog.Events;
 
 namespace J4JSoftware.Configuration.CommandLine
 {
@@ -37,6 +39,19 @@ namespace J4JSoftware.Configuration.CommandLine
                 return;
 
             list.RemoveRange( Enumerable.Range( startIdx, list.Count - 1 ) );
+        }
+
+        public static IEnumerable<TokenPair> EnumerateTokenPairs( this List<Token> tokens )
+        {
+            var prevToken = new Token( TokenType.StartOfInput, string.Empty );
+
+            foreach( var token in tokens )
+            {
+                yield return new TokenPair( token, prevToken );
+                prevToken = token;
+            }
+
+            yield return new TokenPair( new Token( TokenType.EndOfInput, string.Empty ), prevToken );
         }
     }
 }

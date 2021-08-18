@@ -18,7 +18,6 @@
 #endregion
 
 using System;
-using System.Linq;
 using J4JSoftware.Logging;
 using Microsoft.Extensions.Configuration;
 
@@ -26,20 +25,16 @@ namespace J4JSoftware.Configuration.CommandLine
 {
     public class J4JCommandLineSource : IConfigurationSource
     {
-        private readonly CommandLineSource _cmdLineSource;
         private readonly IJ4JLogger? _logger;
 
         public J4JCommandLineSource(
             CommandLineStyle style,
             IParserFactory parserFactory,
             IJ4JLoggerFactory? loggerFactory,
-            CommandLineSource cmdLineSource,
             StringComparison? textComparison = null,
             params ICleanupTokens[] cleanupTokens
         )
         {
-            _cmdLineSource = cmdLineSource;
-
             _logger = loggerFactory?.CreateLogger<J4JCommandLineSource>();
 
             if( !parserFactory.Create( style, out var temp, textComparison, cleanupTokens ) )
@@ -48,10 +43,9 @@ namespace J4JSoftware.Configuration.CommandLine
             Parser = temp;
         }
 
+        public CommandLineSource CommandLineSource { get; } = new();
         public IParser? Parser { get; }
 
-        public bool Parse() => Parser?.Parse( _cmdLineSource.CommandLine ) ?? false;
-        
         public IConfigurationProvider Build( IConfigurationBuilder builder )
         {
             return new J4JCommandLineProvider( this );

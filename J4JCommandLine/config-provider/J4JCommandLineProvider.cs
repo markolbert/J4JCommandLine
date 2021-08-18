@@ -30,7 +30,7 @@ namespace J4JSoftware.Configuration.CommandLine
 
             // watch for changes, to the command line text 
             // and the OptionsCollection
-            ChangeObserver.Instance.Changed += OnChanged;
+            source.CommandLineSource.Changed += OnChanged;
         }
 
         private void OnChanged( object? sender, ConfigurationChangedEventArgs e )
@@ -42,10 +42,15 @@ namespace J4JSoftware.Configuration.CommandLine
 
         public override void Load()
         {
-            if( !Source.Parse() )
+            if( Source.Parser == null )
                 return;
 
-            foreach( var option in Source.Parser!.Options )
+            Source.Parser.Options.ClearValues();
+
+            if( !Source.Parser.Parse( Source.CommandLineSource.CommandLine ) )
+                return;
+
+            foreach( var option in Source.Parser.Options )
             {
                 switch( option.Style )
                 {
@@ -54,13 +59,11 @@ namespace J4JSoftware.Configuration.CommandLine
                             string.IsNullOrEmpty( option.CommandLineKeyProvided )
                                 ? "false"
                                 : "true" );
-
                         break;
 
                     case OptionStyle.SingleValued:
                         if( option.NumValuesAllocated > 0 )
                             Set( option.ContextPath, option.Values[ 0 ] );
-
                         break;
 
                     case OptionStyle.ConcatenatedSingleValue:
@@ -70,13 +73,11 @@ namespace J4JSoftware.Configuration.CommandLine
                         // allocating the command line
                         if( option.NumValuesAllocated > 0 )
                             Set( option.ContextPath, string.Join( ", ", option.Values ) );
-
                         break;
 
                     case OptionStyle.Collection:
                         for( var idx = 0; idx < option.NumValuesAllocated; idx++ )
                             Set( $"{option.ContextPath}:{idx}", option.Values[ idx ] );
-
                         break;
 
                     default:
