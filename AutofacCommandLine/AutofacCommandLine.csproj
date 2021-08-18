@@ -22,17 +22,6 @@
 	</PropertyGroup>
 
 	<ItemGroup>
-	  <Compile Remove="ConstructorTester.cs" />
-	  <Compile Remove="ConstructorTesterBase.cs" />
-	  <Compile Remove="ConstructorTesterPermuted.cs" />
-	  <Compile Remove="ITypeTester.cs" />
-	  <Compile Remove="Permute.cs" />
-	  <Compile Remove="PredefinedTypeTests.cs" />
-	  <Compile Remove="RequiredParameter.cs" />
-	  <Compile Remove="TypeTester.cs" />
-	</ItemGroup>
-
-	<ItemGroup>
 		<None Include="..\..\Media\JumpForJoy\Diego nuspec.png">
 			<Pack>True</Pack>
 			<PackagePath></PackagePath>

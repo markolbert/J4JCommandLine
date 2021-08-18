@@ -23,7 +23,6 @@ using System.ComponentModel;
 using System.Linq;
 using System.Reflection;
 using Autofac;
-using Autofac.Features.ResolveAnything;
 using J4JSoftware.DependencyInjection;
 using J4JSoftware.Logging;
 
@@ -104,6 +103,24 @@ namespace J4JSoftware.Configuration.CommandLine
 
         #endregion
 
+        #region CommandLineGenerators
+
+        public static ContainerBuilder RegisterCommandLineGeneratorAssemblies(
+            this ContainerBuilder builder,
+            IEnumerable<Assembly> assemblies) =>
+            builder.RegisterTypeAssemblies<IOptionsGenerator>(
+                assemblies,
+                false,
+                TypeTester.NonAbstract,
+                new ConstructorTesterPermuted<IOptionsGenerator>(typeof(IJ4JLogger)));
+
+        public static ContainerBuilder RegisterCommandLineGeneratorAssemblies(
+            this ContainerBuilder builder,
+            params Type[] typesInAssemblies)
+            => builder.RegisterCommandLineGeneratorAssemblies(typesInAssemblies.Select(x => x.Assembly));
+
+        #endregion
+
         #region DisplayHelp
 
         public static ContainerBuilder RegisterDisplayHelpAssemblies(
@@ -119,120 +136,6 @@ namespace J4JSoftware.Configuration.CommandLine
             this ContainerBuilder builder,
             params Type[] typesInAssemblies)
             => builder.RegisterDisplayHelpAssemblies(typesInAssemblies.Select(x => x.Assembly).ToList());
-
-        #endregion
-
-        public static ContainerBuilder RegisterTypeAssemblies<T>(
-            this ContainerBuilder builder,
-            IEnumerable<Assembly> assemblies,
-            bool registerAsSelf = false,
-            params ITypeTester[] tests )
-            where T : class
-        {
-            var assemblyList = assemblies.ToList();
-
-            // add default
-            assemblyList.Add( typeof(T).Assembly );
-
-            var temp = builder.RegisterAssemblyTypes( assemblyList.Distinct().ToArray() )
-                .Where( t => tests.All( x =>
-                {
-                    var retVal = x.MeetsRequirements( t );
-                    return retVal;
-                } ) )
-                .AsImplementedInterfaces();
-
-            if( registerAsSelf )
-                temp.AsSelf();
-
-            return builder;
-        }
-
-        public static ContainerBuilder RegisterTypeAssemblies<T>(
-            this ContainerBuilder builder,
-            IEnumerable<Assembly> assemblies,
-            bool registerAsSelf = false,
-            params PredefinedTypeTests[] typeTests )
-            where T : class
-        {
-            var assemblyList = assemblies.ToList();
-
-            // add default
-            assemblyList.Add( typeof(T).Assembly );
-
-            var tests = new List<ITypeTester>();
-
-            foreach( var test in typeTests.Distinct() )
-            {
-                switch( test )
-                {
-                    case PredefinedTypeTests.ParameterlessConstructor:
-                        tests.Add( new ConstructorTester<T>() );
-                        break;
-
-                    case PredefinedTypeTests.OnlyJ4JLoggerRequired:
-                        tests.Add( new ConstructorTester<T>( typeof(IJ4JLogger) ) );
-                        break;
-
-                    case PredefinedTypeTests.OnlyJ4JLoggerFactoryRequired:
-                        tests.Add( new ConstructorTester<T>( typeof(IJ4JLoggerFactory) ) );
-                        break;
-
-                    case PredefinedTypeTests.NonAbstract:
-                        tests.Add( TypeTester.NonAbstract );
-                        break;
-
-                    default:
-                        throw new InvalidEnumArgumentException(
-                            $"Unsupported {nameof(PredefinedTypeTests)} value '{test}'" );
-                }
-            }
-
-            var temp = builder.RegisterAssemblyTypes( assemblyList.Distinct().ToArray() )
-                .Where( t => tests.All( x => x.MeetsRequirements( t ) ) )
-                .AsImplementedInterfaces();
-
-            if( registerAsSelf )
-                temp.AsSelf();
-
-            return builder;
-        }
-
-        #region Type checks
-
-        //private static bool TypeMeetsRequirements( Type toCheck, params Func<Type, bool>[] tests )
-        //    => tests.All( x => x( toCheck ) );
-
-        //private static bool TypeIsNonAbstract( Type toCheck ) => !toCheck.IsAbstract;
-
-        //private static bool TypeCanBeAssignedTo<TTarget>( Type toCheck ) =>
-        //    !typeof(TTarget).IsAssignableFrom( toCheck );
-
-        //private static bool TypeCanBeAssignedTo(Type targetType, Type toCheck) =>
-        //    !targetType.IsAssignableFrom(toCheck);
-
-        //private static bool PublicConstructorHasRequiredParameters( Type toCheck, params Type[] ctorParamTypes )
-        //{
-        //    var ctors = toCheck.GetConstructors();
-        //    if( !ctors.Any() )
-        //        return false;
-
-        //    return ctors.Any( c =>
-        //    {
-        //        var parameters = c.GetParameters();
-
-        //        if( parameters.Length != ctorParamTypes.Length )
-        //            return false;
-
-        //        for( var idx = 0; idx < ctorParamTypes.Length; idx++)
-        //        {
-        //            if( !parameters[ idx ].ParameterType.IsAssignableFrom( ctorParamTypes[ idx ] ) )
-        //                return false;
-        //        }
-
-        //        return true;
-        //    } );
-        //}
 
         #endregion
     }
