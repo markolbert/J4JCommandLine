@@ -31,13 +31,12 @@ namespace J4JSoftware.Configuration.CommandLine
         private readonly IJ4JLogger? _logger;
 
         internal Tokenizer(
-            StringComparison textComparison,
             IAvailableTokens tokens,
             IJ4JLoggerFactory? loggerFactory,
             params ICleanupTokens[] cleanupProcessors
         )
         {
-            _textComparison = textComparison;
+            _textComparison = tokens.TextComparison;
             _tokens = tokens;
 
             _logger = loggerFactory?.CreateLogger( GetType() );

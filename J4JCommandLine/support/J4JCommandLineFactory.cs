@@ -17,20 +17,22 @@ namespace J4JSoftware.Configuration.CommandLine.support
             string OperatingSystem,
             Customization Customization,
             int Priority,
-            Type Type
+            Type Type,
+            object[]? ConstructorParameters
         );
 
         private static Type[] _supportedTypes = new[]
         {
             typeof( ITextToValue ),
-            typeof(IMasterTextCollection),
-            typeof(IAvailableTokens),
-            typeof(IOptionsGenerator),
+            typeof( IAvailableTokens ),
+            typeof( IMasterTextCollection ),
+            typeof( IBindabilityValidator ),
+            typeof( IOptionsGenerator ),
         };
 
         private readonly List<Type> _exportedTypes;
         private readonly Dictionary<string, List<string>> _osSynonyms = new(StringComparer.OrdinalIgnoreCase);
-        private readonly Func<IJ4JLogger>? _loggerFactory;
+        private readonly IJ4JLoggerFactory? _loggerFactory;
         private readonly IJ4JLogger? _logger;
 
         private readonly List<TypeInfo> _textToValue;
@@ -40,16 +42,17 @@ namespace J4JSoftware.Configuration.CommandLine.support
         private readonly List<TypeInfo> _optionGenerators;
 
         public J4JCommandLineFactory(
-            IEnumerable<Assembly> assemblies,
-            Func<IJ4JLogger>? loggerFactory
+            IEnumerable<Assembly>? assemblies = null,
+            IJ4JLoggerFactory? loggerFactory = null
         )
         {
+            assemblies ??= Enumerable.Empty<Assembly>();
             var assemblyList = assemblies.ToList();
             assemblyList.Add( GetType().Assembly );
             assemblyList = assemblyList.Distinct().ToList();
 
             _loggerFactory = loggerFactory;
-            _logger = _loggerFactory?.Invoke();
+            _logger = _loggerFactory?.CreateLogger( GetType() );
             _logger?.SetLoggedType( GetType() );
 
             _exportedTypes = assemblyList.SelectMany( x => x.ExportedTypes )
@@ -57,9 +60,7 @@ namespace J4JSoftware.Configuration.CommandLine.support
                              && x.GetConstructors().Any() )
                 .ToList();
 
-            _textToValue = GetTypeInfos<ITextToValue>(
-                PredefinedTypeTests.NonAbstract,
-                PredefinedTypeTests.OnlyJ4JLoggerRequired );
+            _textToValue = GetTextToValueConverterTypes();
 
             _tokens = GetTypeInfos<IAvailableTokens>(
                 PredefinedTypeTests.NonAbstract,
@@ -84,15 +85,43 @@ namespace J4JSoftware.Configuration.CommandLine.support
         private List<TypeInfo> GetTypeInfos<T>( params PredefinedTypeTests[] predefinedTests )
             where T: class =>
             _exportedTypes.MeetRequirements<T>( predefinedTests )
-                .Where( x => x.GetCustomAttribute<CommandLineOperatingSystemAttribute>() != null )
+                .Where( x => x.GetCustomAttribute<CommandLineCustomizationAttribute>() != null )
                 .Select( x =>
                 {
                     var attr = x.GetCustomAttribute<CommandLineCustomizationAttribute>();
                     var attrOS = x.GetCustomAttribute<CommandLineOperatingSystemAttribute>();
 
-                    return new TypeInfo( attrOS?.OperatingSystem ?? string.Empty, attr!.Customization, attr!.Priority, x );
+                    return new TypeInfo( attrOS?.OperatingSystem ?? OSNames.Universal, attr!.Customization, attr!.Priority, x, null );
                 } )
                 .ToList();
+
+        private List<TypeInfo> GetTextToValueConverterTypes()
+        {
+            // we need to include the built-in converters, which derive from a generic type
+            var retVal = GetTypeInfos<ITextToValue>( PredefinedTypeTests.NonAbstract,
+                PredefinedTypeTests.OnlyJ4JLoggerRequired, 
+                PredefinedTypeTests.NonGeneric );
+
+            foreach (var convMethod in typeof(Convert)
+                .GetMethods(BindingFlags.Static | BindingFlags.Public)
+                .Where(m =>
+                {
+                    var parameters = m.GetParameters();
+
+                    return parameters.Length == 1 && !typeof(string).IsAssignableFrom(parameters[0].ParameterType);
+                }))
+            {
+                retVal.Add( new TypeInfo(
+                    OSNames.Universal,
+                    Customization.BuiltIn,
+                    Int32.MinValue,
+                    typeof( BuiltInTextToValue<> ).MakeGenericType( convMethod.ReturnType ),
+                    new object[] { convMethod } )
+                );
+            }
+
+            return retVal;
+        }
 
         private List<TypeInfo> GetTypeInfos<T>(params ITypeTester[] tests)
             where T : class =>
@@ -103,7 +132,7 @@ namespace J4JSoftware.Configuration.CommandLine.support
                     var attr = x.GetCustomAttribute<CommandLineCustomizationAttribute>();
                     var attrOS = x.GetCustomAttribute<CommandLineOperatingSystemAttribute>();
 
-                    return new TypeInfo(attrOS?.OperatingSystem ?? string.Empty, attr!.Customization, attr!.Priority, x);
+                    return new TypeInfo(attrOS?.OperatingSystem ?? string.Empty, attr!.Customization, attr!.Priority, x, null);
                 })
                 .ToList();
 
@@ -120,7 +149,7 @@ namespace J4JSoftware.Configuration.CommandLine.support
         {
             // create a list of instances and then filter it to eliminate
             // overridden types
-            var rawList = CreateInstances<ITextToValue>( _textToValue, null, _loggerFactory?.Invoke() );
+            var rawList = CreateTextToValueConverters();
 
             if( rawList == null )
                 return null;
@@ -138,35 +167,69 @@ namespace J4JSoftware.Configuration.CommandLine.support
             return retVal;
         }
 
-        private List<T>? CreateInstances<T>( List<TypeInfo> typeInfos, string? osName, params object?[] ctorParams )
+        private List<ITextToValue>? CreateTextToValueConverters()
         {
             // create a list of instances and then filter it to eliminate
             // overridden types
-            List<T>? retVal = null;
+            List<ITextToValue>? retVal = new List<ITextToValue>();
 
-            try
+            foreach( var typeInfo in _textToValue )
             {
-                retVal = typeInfos.Select(x => (T)Activator.CreateInstance(typeof(T),ctorParams)!)
-                    .ToList();
-            }
-            catch (Exception e)
-            {
-                if( string.IsNullOrEmpty(osName))
-                    _logger?.Error<Type, string>(
-                    "Could not create list of {0} objects. Exception was '{1}'",
-                    typeof(T),
-                    e.Message);
-                else
-                    _logger?.Error<Type, string>(
-                        "Could not create list of {0} objects for operating system '{1}'. Exception was '{2}'",
-                        typeof(T),
-                        osName,
-                        e.Message);
+                try
+                {
+                    var ctorParams = new List<object?>();
+                    ctorParams.AddRange( typeInfo.ConstructorParameters! );
+                    ctorParams.Add( _loggerFactory?.CreateLogger<ITypeTester>() );
 
-                return null;
+                    retVal.Add( (ITextToValue) Activator.CreateInstance( typeInfo.Type, ctorParams.ToArray() )! );
+                }
+                catch( Exception e )
+                {
+                    _logger?.Error<string>(
+                        "Could not create list of ITextToValue objects. Exception was '{0}'",
+                        e.Message );
+
+                    return null;
+                }
+
             }
+            //retVal = typeInfos.Select(x => (T)Activator.CreateInstance(typeof(T),ctorParams)!)
+            //    .ToList();
 
             return retVal;
+        }
+
+        public IParser? GetParser( string osName, IDisplayHelp? displayHelp = null, params ICleanupTokens[] cleanupTokens )
+        {
+            displayHelp ??= new DefaultDisplayHelp( _loggerFactory?.CreateLogger<IDisplayHelp>() );
+
+            var mtCollection = GetMasterTextCollection( osName );
+            if( mtCollection == null )
+                return null;
+
+            var bindabilityValidator = GetBindabilityValidator( osName );
+            if( bindabilityValidator == null )
+                return null;
+
+            var options = new OptionCollection( mtCollection, 
+                bindabilityValidator, 
+                displayHelp,
+                _loggerFactory?.CreateLogger<IOptionCollection>() );
+
+            var generator = GetOptionsGenerator( mtCollection.TextComparison, options );
+            if( generator == null )
+                return null;
+
+            var tokens = GetAvailableTokens( osName );
+            if( tokens == null )
+                return null;
+
+            var tokenizer = new Tokenizer( tokens, _loggerFactory );
+
+            return new Parser( options,
+                new ParsingTable( generator, _loggerFactory?.CreateLogger<IParsingTable>() ),
+                tokenizer,
+                _loggerFactory?.CreateLogger<IParser>() );
         }
 
         public IAvailableTokens? GetAvailableTokens( string osName )
@@ -176,7 +239,8 @@ namespace J4JSoftware.Configuration.CommandLine.support
                 .ThenByDescending( x => x.Priority )
                 .FirstOrDefault();
 
-            return CreateInstance<IAvailableTokens>( conformingType, osName, _loggerFactory?.Invoke() );
+            return CreateInstance<IAvailableTokens>( conformingType, osName,
+                _loggerFactory?.CreateLogger<IAvailableTokens>() );
         }
 
         public IMasterTextCollection? GetMasterTextCollection( string osName )
@@ -186,7 +250,8 @@ namespace J4JSoftware.Configuration.CommandLine.support
                 .ThenByDescending(x => x.Priority)
                 .FirstOrDefault();
 
-            return CreateInstance<IMasterTextCollection>(conformingType, osName, _loggerFactory?.Invoke());
+            return CreateInstance<IMasterTextCollection>( conformingType, osName,
+                _loggerFactory?.CreateLogger<IMasterTextCollection>() );
         }
 
         public IBindabilityValidator? GetBindabilityValidator(string osName)
@@ -218,8 +283,8 @@ namespace J4JSoftware.Configuration.CommandLine.support
 
             try
             {
-                return (IBindabilityValidator) Activator.CreateInstance( typeof( IBindabilityValidator ),
-                    new object?[] { converters, _loggerFactory?.Invoke() } )!;
+                return (IBindabilityValidator) Activator.CreateInstance( conformingType.Type,
+                    new object?[] { converters, _loggerFactory?.CreateLogger<IBindabilityValidator>() } )!;
             }
             catch( Exception e )
             {
@@ -232,14 +297,19 @@ namespace J4JSoftware.Configuration.CommandLine.support
             }
         }
 
-        public IOptionsGenerator? GetOptionsGenerator()
+        public IOptionsGenerator? GetOptionsGenerator( StringComparison textComparison, IOptionCollection options )
         {
             var conformingType = _optionGenerators
-                .OrderByDescending(x => x.Customization)
-                .ThenByDescending(x => x.Priority)
+                .OrderByDescending( x => x.Customization )
+                .ThenByDescending( x => x.Priority )
                 .FirstOrDefault();
 
-            return CreateInstance<IOptionsGenerator>( conformingType, null, _loggerFactory?.Invoke() );
+            var retVal = CreateInstance<IOptionsGenerator>( conformingType, null,
+                _loggerFactory?.CreateLogger<IOptionsGenerator>() );
+
+            retVal?.Initialize( textComparison, options );
+
+            return retVal;
         }
 
         private List<TypeInfo> GetConformingTypes( List<TypeInfo> typeInfoList, string osName )

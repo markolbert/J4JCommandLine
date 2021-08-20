@@ -81,8 +81,26 @@ namespace J4JSoftware.Configuration.CommandLine
             var source = new J4JCommandLineSource(
                 osName,
                 svcProvider.GetRequiredService<IParserFactory>(),
-                svcProvider.GetRequiredService<IJ4JLoggerFactory>(),
+                svcProvider.GetRequiredService<IJ4JLogger>(),
                 cleanupTokens);
+
+            builder.Add(source);
+
+            cmdLineSource = source.CommandLineSource;
+            options = source.Parser?.Options;
+
+            return builder;
+        }
+
+        public static IConfigurationBuilder AddJ4JCommandLine(
+            this IConfigurationBuilder builder,
+            IParser parser,
+            IJ4JLogger? logger,
+            out IOptionCollection? options,
+            out CommandLineSource cmdLineSource
+        )
+        {
+            var source = new J4JCommandLineSource( parser, logger);
 
             builder.Add(source);
 
@@ -103,7 +121,7 @@ namespace J4JSoftware.Configuration.CommandLine
             var source = new J4JCommandLineSource(
                 osName,
                 svcProvider.GetRequiredService<IParserFactory>(),
-                svcProvider.GetRequiredService<IJ4JLoggerFactory>(),
+                svcProvider.GetRequiredService<IJ4JLogger>(),
                 cleanupTokens);
 
             builder.Add(source);
@@ -123,7 +141,7 @@ namespace J4JSoftware.Configuration.CommandLine
             this IConfigurationBuilder builder,
             string osName,
             IParserFactory parserFactory,
-            IJ4JLoggerFactory loggerFactory,
+            IJ4JLogger? logger,
             out IOptionCollection? options,
             out CommandLineSource cmdLineSource,
             params ICleanupTokens[] cleanupTokens
@@ -132,7 +150,7 @@ namespace J4JSoftware.Configuration.CommandLine
             var source = new J4JCommandLineSource(
                 osName,
                 parserFactory,
-                loggerFactory,
+                logger,
                 cleanupTokens);
 
             builder.Add(source);
@@ -147,7 +165,7 @@ namespace J4JSoftware.Configuration.CommandLine
             this IConfigurationBuilder builder,
             string osName,
             IParserFactory parserFactory,
-            IJ4JLoggerFactory loggerFactory,
+            IJ4JLogger? logger,
             out IOptionCollection? options,
             params ICleanupTokens[] cleanupTokens
         )
@@ -155,7 +173,7 @@ namespace J4JSoftware.Configuration.CommandLine
             var source = new J4JCommandLineSource(
                 osName,
                 parserFactory,
-                loggerFactory,
+                logger,
                 cleanupTokens);
 
             builder.Add(source);

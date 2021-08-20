@@ -17,6 +17,7 @@
 
 #endregion
 
+using J4JSoftware.Configuration.CommandLine.support;
 using J4JSoftware.Logging;
 
 namespace J4JSoftware.Configuration.CommandLine

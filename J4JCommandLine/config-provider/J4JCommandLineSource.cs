@@ -30,16 +30,28 @@ namespace J4JSoftware.Configuration.CommandLine
         public J4JCommandLineSource(
             string osName,
             IParserFactory parserFactory,
-            IJ4JLoggerFactory? loggerFactory,
+            IJ4JLogger? logger,
             params ICleanupTokens[] cleanupTokens
         )
         {
-            _logger = loggerFactory?.CreateLogger<J4JCommandLineSource>();
+            _logger = logger;
+            _logger?.SetLoggedType( GetType() );
 
             if( !parserFactory.Create( osName, out var temp, cleanupTokens ) )
                 _logger?.Fatal("Could not create instance of IParser");
 
             Parser = temp;
+        }
+
+        public J4JCommandLineSource(
+            IParser parser,
+            IJ4JLogger? logger
+        )
+        {
+            Parser = parser;
+
+            _logger = logger;
+            _logger?.SetLoggedType( GetType() );
         }
 
         public CommandLineSource CommandLineSource { get; } = new();

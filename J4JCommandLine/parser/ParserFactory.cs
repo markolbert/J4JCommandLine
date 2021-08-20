@@ -106,8 +106,7 @@ namespace J4JSoftware.Configuration.CommandLine
 
             _displayHelp.Initialize( masterText );
 
-            var optionCollection = new OptionCollection( masterText!.TextComparison,
-                masterText,
+            var optionCollection = new OptionCollection( masterText,
                 bindabilityValidator,
                 _displayHelp,
                 _loggerFactory?.CreateLogger<OptionCollection>() );
@@ -121,7 +120,7 @@ namespace J4JSoftware.Configuration.CommandLine
 
             generator.Initialize( masterText!.TextComparison, optionCollection );
 
-            var tokenizer = new Tokenizer( masterText!.TextComparison, tokens, _loggerFactory, cleanupTokens );
+            var tokenizer = new Tokenizer( tokens, _loggerFactory, cleanupTokens );
 
             result = new Parser( optionCollection,
                 new ParsingTable( generator, _loggerFactory?.CreateLogger<IOptionsGenerator>() ),

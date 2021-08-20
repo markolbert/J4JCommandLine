@@ -45,14 +45,13 @@ namespace J4JSoftware.Configuration.CommandLine
         private readonly ChangeObserver _changeObserver = ChangeObserver.Instance;
 
         internal OptionCollection(
-            StringComparison textComparison,
             IMasterTextCollection mtCollection,
             IBindabilityValidator propValidator,
             IDisplayHelp displayHelp,
             IJ4JLogger? logger
         )
         {
-            _textComparison = textComparison;
+            _textComparison = mtCollection.TextComparison;
             _mtCollection = mtCollection;
             _propValidator = propValidator;
             _displayHelp = displayHelp;
