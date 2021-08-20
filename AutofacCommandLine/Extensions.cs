@@ -103,7 +103,7 @@ namespace J4JSoftware.Configuration.CommandLine
 
         #endregion
 
-        #region CommandLineGenerators
+        #region OptionsGenerators
 
         public static ContainerBuilder RegisterCommandLineGeneratorAssemblies(
             this ContainerBuilder builder,
@@ -111,8 +111,8 @@ namespace J4JSoftware.Configuration.CommandLine
             builder.RegisterTypeAssemblies<IOptionsGenerator>(
                 assemblies,
                 false,
-                TypeTester.NonAbstract,
-                new ConstructorTesterPermuted<IOptionsGenerator>(typeof(IJ4JLogger)));
+                PredefinedTypeTests.NonAbstract,
+                PredefinedTypeTests.OnlyJ4JLoggerRequired);
 
         public static ContainerBuilder RegisterCommandLineGeneratorAssemblies(
             this ContainerBuilder builder,

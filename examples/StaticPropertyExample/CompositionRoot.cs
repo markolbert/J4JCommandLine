@@ -79,7 +79,7 @@ namespace J4JSoftware.CommandLine.Examples
             {
                 if( _parser == null )
                 {
-                    if( !ParserFactory.Create( CommandLineStyle.Windows, out var temp ) )
+                    if( !ParserFactory.Create( OSNames.Windows, out var temp ) )
                         throw new InvalidOperationException( $"Could not create an instance of IParser" );
 
                     _parser = temp;

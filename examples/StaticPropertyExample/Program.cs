@@ -11,24 +11,26 @@ namespace J4JSoftware.CommandLine.Examples
     {
         static void Main(string[] args)
         {
-            var parser = CompositionRoot.Default.Parser;
             var displayHelp = CompositionRoot.Default.DisplayHelp;
 
-            var intValue = parser.Options.Bind<Program, int>(x => Program.IntValue, "i")!
-                .SetDefaultValue( 75 )
-                .SetDescription( "An integer value" );
-
-            var textValue = parser.Options.Bind<Program, string>(x => Program.TextValue, "t")!
-                .SetDefaultValue( "a cool default" )
-                .SetDescription( "A string value" );
-
-            parser.Options.DisplayHelp( displayHelp );
-            Console.WriteLine("\n===============\n");
-            parser.Options.DisplayHelp( new DisplayColorHelp( null ) );
-
             var config = new ConfigurationBuilder()
-                .AddJ4JCommandLine( CommandLineStyle.Windows, CompositionRoot.Default.Host!.Services )
+                .AddJ4JCommandLine( OSNames.Windows, CompositionRoot.Default.Host!.Services, out var options )
                 .Build();
+
+            if (options == null)
+                throw new NullReferenceException(nameof(options));
+
+            var intValue = options.Bind<Program, int>(x => Program.IntValue, "i")!
+                .SetDefaultValue(75)
+                .SetDescription("An integer value");
+
+            var textValue = options.Bind<Program, string>(x => Program.TextValue, "t")!
+                .SetDefaultValue("a cool default")
+                .SetDescription("A string value");
+
+            options.DisplayHelp(displayHelp);
+            Console.WriteLine("\n===============\n");
+            options.DisplayHelp(new DisplayColorHelp(null));
 
             var parsed = config.Get<Program>();
 
@@ -44,11 +46,6 @@ namespace J4JSoftware.CommandLine.Examples
 
             Console.WriteLine($"IntValue is {IntValue}");
             Console.WriteLine($"TextValue is {TextValue}");
-
-            var provider = config.Providers
-                .FirstOrDefault(x => x is J4JCommandLineProvider) as J4JCommandLineProvider;
-
-            var options = provider!.Source.Parser!.Options;
 
             Console.WriteLine(options.UnkeyedValues.Count == 0
                 ? "No unkeyed parameters"
