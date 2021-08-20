@@ -8,7 +8,7 @@ using Xunit;
 
 namespace J4JSoftware.Binder.Tests
 {
-    public class ConfigurationTests : TestBase
+    public class ConfigurationTestsNoDI : TestBaseNoDI
     {
         private IOptionCollection? _options;
         private IConfigurationRoot? _configRoot;
@@ -80,11 +80,13 @@ namespace J4JSoftware.Binder.Tests
 
         private void CreateConfigurationRootAndParser( TestConfig testConfig )
         {
+            var parser = Factory.GetParser( testConfig.OperatingSystem );
+            parser.Should().NotBeNull();
+
             _configRoot = new ConfigurationBuilder()
                 .AddJ4JCommandLine(
-                    testConfig.OperatingSystem,
-                    ParserFactory,
-                    LoggerFactory?.CreateLogger<IParser>(),
+                    parser!,
+                    LoggerFactory.CreateLogger<IParser>(),
                     out _options,
                     out _cmdLineSrc)
                 .Build();
