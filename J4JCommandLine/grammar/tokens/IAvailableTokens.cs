@@ -21,7 +21,7 @@ using System.Collections.Generic;
 
 namespace J4JSoftware.Configuration.CommandLine
 {
-    public interface IAvailableTokens : ICustomizedWithStyle
+    public interface IAvailableTokens : ICustomized
     {
         void Initialize();
 

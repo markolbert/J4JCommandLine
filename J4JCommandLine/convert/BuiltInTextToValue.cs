@@ -17,11 +17,13 @@
 
 #endregion
 
+using System;
 using System.Reflection;
 using J4JSoftware.Logging;
 
 namespace J4JSoftware.Configuration.CommandLine
 {
+    [CommandLineCustomization(Customization.BuiltIn, Int32.MinValue)]
     public class BuiltInTextToValue<TBaseType> : TextToValue<TBaseType>, ITextToValue
     {
         private readonly MethodInfo _convMethod;

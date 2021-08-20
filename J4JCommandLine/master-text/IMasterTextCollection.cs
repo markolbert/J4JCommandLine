@@ -21,7 +21,7 @@ using System.Collections.Generic;
 
 namespace J4JSoftware.Configuration.CommandLine
 {
-    public interface IMasterTextCollection : ICustomizedWithStyle
+    public interface IMasterTextCollection : ICustomized
     {
         void Initialize();
 

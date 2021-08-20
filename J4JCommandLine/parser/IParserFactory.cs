@@ -23,9 +23,8 @@ namespace J4JSoftware.Configuration.CommandLine
 {
     public interface IParserFactory
     {
-        bool Create( CommandLineStyle style,
+        bool Create( string osName,
             out IParser? result,
-            StringComparison? textComparison = null,
             params ICleanupTokens[] cleanupTokens );
     }
 }

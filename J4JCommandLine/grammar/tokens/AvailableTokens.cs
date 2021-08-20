@@ -20,33 +20,23 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using J4JSoftware.Logging;
 
 namespace J4JSoftware.Configuration.CommandLine
 {
-    public class AvailableTokens : IAvailableTokens
+    public class AvailableTokens : CustomizedEntity, IAvailableTokens
     {
-        private readonly StringComparison _textComparison;
         private readonly Dictionary<TokenType, List<string>> _available = new();
 
         protected AvailableTokens( 
-            CommandLineStyle style,
-            Customization customization,
-            int priority,
             IJ4JLogger? logger )
+        :base(false)
         {
-            Style = style;
-            _textComparison = Style.GetStringComparison();
-
-            Customization = customization;
-            Priority = priority;
-
             Logger = logger;
         }
 
         protected IJ4JLogger? Logger { get; }
-
-        public CommandLineStyle Style { get; }
 
         public virtual void Initialize()
         {
@@ -57,9 +47,6 @@ namespace J4JSoftware.Configuration.CommandLine
             Add(TokenType.Separator, "\t");
             Add(TokenType.ValuePrefix, "=");
         }
-
-        public Customization Customization { get; }
-        public int Priority { get; }
 
         public IEnumerable<(string text, TokenType type)> Available
         {
@@ -82,7 +69,7 @@ namespace J4JSoftware.Configuration.CommandLine
             }
 
             if( _available.SelectMany( kvp => kvp.Value )
-                .Any( t => t.Equals( text, _textComparison ) ) )
+                .Any( t => t.Equals( text, TextComparison ) ) )
             {
                 Logger?.Error( "Duplicate token text '{0}' ({1})", text, type );
                 return false;
@@ -98,9 +85,9 @@ namespace J4JSoftware.Configuration.CommandLine
         public bool Remove( string text )
         {
             var kvp = _available.FirstOrDefault(
-                x => x.Value.Any( t => t.Equals( text, _textComparison ) ) );
+                x => x.Value.Any( t => t.Equals( text, TextComparison ) ) );
 
-            var idx = kvp.Value.FindIndex( x => x.Equals( text, _textComparison ) );
+            var idx = kvp.Value.FindIndex( x => x.Equals( text, TextComparison ) );
 
             if( idx < 0 )
             {

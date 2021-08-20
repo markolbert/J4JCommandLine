@@ -22,12 +22,14 @@ using J4JSoftware.Logging;
 
 namespace J4JSoftware.Configuration.CommandLine
 {
+    [CommandLineCustomization(Customization.BuiltIn, Int32.MinValue)]
+    [CommandLineOperatingSystem(OSNames.Linux, StringComparison.Ordinal)]
     public class MasterTextLinux : MasterTextCollection
     {
         public MasterTextLinux(
             IJ4JLogger? logger
         )
-            : base( CommandLineStyle.Linux, StringComparison.Ordinal, Customization.BuiltIn, Int32.MinValue, logger )
+            : base( logger )
         {
             AddRange( TextUsageType.Prefix, "-", "--" );
             AddRange( TextUsageType.Quote, "\"", "'" );

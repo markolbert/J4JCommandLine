@@ -27,12 +27,7 @@ namespace J4JSoftware.Configuration.CommandLine
         public MasterTextUniversal(
             IJ4JLogger? logger
         )
-            : base( 
-                CommandLineStyle.Universal, 
-                StringComparison.OrdinalIgnoreCase, 
-                Customization.BuiltIn,
-                Int32.MinValue, 
-                logger )
+            : base( logger )
         {
             AddRange( TextUsageType.Prefix, "-", "--", "/" );
             AddRange( TextUsageType.Quote, "\"", "'" );

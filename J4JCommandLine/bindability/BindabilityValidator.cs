@@ -26,7 +26,7 @@ using J4JSoftware.Logging;
 
 namespace J4JSoftware.Configuration.CommandLine
 {
-    public class BindabilityValidator : IBindabilityValidator
+    public class BindabilityValidator : CustomizedEntity, IBindabilityValidator
     {
         private enum GetterSetter
         {
@@ -37,24 +37,15 @@ namespace J4JSoftware.Configuration.CommandLine
         private readonly List<ITextToValue> _converters;
 
         protected BindabilityValidator(
-            CommandLineStyle style,
             IEnumerable<ITextToValue> converters,
-            Customization customization,
-            int priority,
             IJ4JLogger? logger )
+        :base(false)
         {
-            Style = style;
             _converters = converters.ToList();
-            Customization = customization;
-            Priority = priority;
 
             Logger = logger;
             Logger?.SetLoggedType( GetType() );
         }
-
-        public CommandLineStyle Style { get; }
-        public Customization Customization { get; }
-        public int Priority { get; }
 
         protected IJ4JLogger? Logger { get; }
         protected bool IsBindable { get; private set; }

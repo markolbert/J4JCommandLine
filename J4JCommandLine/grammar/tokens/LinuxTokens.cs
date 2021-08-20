@@ -22,12 +22,14 @@ using J4JSoftware.Logging;
 
 namespace J4JSoftware.Configuration.CommandLine
 {
+    [CommandLineCustomization(Customization.BuiltIn, Int32.MinValue)]
+    [CommandLineOperatingSystem(OSNames.Linux, StringComparison.Ordinal)]
     public sealed class LinuxTokens : AvailableTokens
     {
         public LinuxTokens(
             IJ4JLogger? logger
             )
-            : base( CommandLineStyle.Linux, Customization.BuiltIn, Int32.MinValue, logger )
+            : base( logger )
         {
             Initialize();
         }

@@ -22,6 +22,7 @@ namespace J4JSoftware.Configuration.CommandLine
     public enum Customization
     {
         BuiltIn = 0,
-        UserDefined = 1
+        UserDefined = 1,
+        Invalid = int.MinValue
     }
 }

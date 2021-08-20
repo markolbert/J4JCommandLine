@@ -24,7 +24,7 @@ using Serilog.Events;
 
 namespace J4JSoftware.Configuration.CommandLine
 {
-    public class OptionsGenerator : IOptionsGenerator
+    public class OptionsGenerator : CustomizedEntity, IOptionsGenerator
     {
         private readonly IJ4JLogger? _logger;
 
@@ -34,18 +34,13 @@ namespace J4JSoftware.Configuration.CommandLine
         private CommandLineArgument? _current;
 
         protected OptionsGenerator(
-            Customization customization,
-            int priority,
             IJ4JLogger? logger
         )
+        :base(true)
         {
-            Customization = customization;
-            Priority = priority;
             _logger = logger;
         }
 
-        public Customization Customization { get; }
-        public int Priority { get; }
         public bool IsInitialized => _initialized;
 
         public void Initialize( StringComparison textComparision, IOptionCollection options )

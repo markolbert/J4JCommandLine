@@ -66,35 +66,39 @@ namespace J4JSoftware.Configuration.CommandLine
             _logger = _loggerFactory?.CreateLogger( GetType() );
         }
 
-        public bool Create( CommandLineStyle style,
+        public bool Create( 
+            string osName,
             out IParser? result,
-            StringComparison? textComparison = null,
             params ICleanupTokens[] cleanupTokens )
         {
-            textComparison ??= style.GetStringComparison();
-
             result = null;
 
-            var masterText = _mtCollections.FirstOrDefault( x => x.Style == style );
+            var masterText = _mtCollections
+                .FirstOrDefault( x => x.OperatingSystem.Equals( osName, StringComparison.OrdinalIgnoreCase ) );
+
             if( masterText == null )
             {
-                _logger?.Error( "No IMasterTextCollection available for CommandLineStyle '{0}'", style );
+                _logger?.Error<string>( "No IMasterTextCollection available for operating system '{0}'", osName );
                 return false;
             }
 
             masterText.Initialize();
 
-            var bindabilityValidator = _bindabilityValidators.FirstOrDefault( x => x.Style == style );
+            var bindabilityValidator = _bindabilityValidators
+                .FirstOrDefault( x => x.OperatingSystem.Equals( osName, StringComparison.OrdinalIgnoreCase ) );
+
             if( bindabilityValidator == null )
             {
-                _logger?.Error( "No IBindabilityValidator available for CommandLineStyle '{0}'", style );
+                _logger?.Error<string>("No IBindabilityValidator available for operating system '{0}'", osName);
                 return false;
             }
 
-            var tokens = _tokens.FirstOrDefault( x => x.Style == style );
+            var tokens = _tokens
+                .FirstOrDefault( x => x.OperatingSystem.Equals( osName, StringComparison.OrdinalIgnoreCase ) );
+
             if( tokens == null )
             {
-                _logger?.Error( "No IAvailableTokens available for CommandLineStyle '{0}'", style );
+                _logger?.Error<string>("No IAvailableTokens available for operating system '{0}'", osName);
                 return false;
             }
 
@@ -102,7 +106,7 @@ namespace J4JSoftware.Configuration.CommandLine
 
             _displayHelp.Initialize( masterText );
 
-            var optionCollection = new OptionCollection( textComparison.Value,
+            var optionCollection = new OptionCollection( masterText!.TextComparison,
                 masterText,
                 bindabilityValidator,
                 _displayHelp,
@@ -115,9 +119,9 @@ namespace J4JSoftware.Configuration.CommandLine
                 return false;
             }
 
-            generator.Initialize( textComparison.Value, optionCollection );
+            generator.Initialize( masterText!.TextComparison, optionCollection );
 
-            var tokenizer = new Tokenizer( textComparison.Value, tokens, _loggerFactory, cleanupTokens );
+            var tokenizer = new Tokenizer( masterText!.TextComparison, tokens, _loggerFactory, cleanupTokens );
 
             result = new Parser( optionCollection,
                 new ParsingTable( generator, _loggerFactory?.CreateLogger<IOptionsGenerator>() ),

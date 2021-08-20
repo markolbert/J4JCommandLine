@@ -26,32 +26,19 @@ namespace J4JSoftware.Configuration.CommandLine
 {
     // a class which keeps track of every text element (e.g., prefix, value encloser, quote character,
     // option key) used in the framework and ensures they are all used uniquely.
-    public class MasterTextCollection : IMasterTextCollection
+    public class MasterTextCollection : CustomizedEntity, IMasterTextCollection
     {
         private readonly List<TextUsage> _items = new();
-        private readonly StringComparison _textComparison;
         private readonly IJ4JLogger? _logger;
 
-        protected MasterTextCollection( 
-            CommandLineStyle style,
-            StringComparison textComparison,
-            Customization customization,
-            int priority,
-            IJ4JLogger? logger = null 
-            )
+        protected MasterTextCollection(
+            IJ4JLogger? logger = null
+        )
+            : base( false )
         {
-            Style = style;
-            _textComparison = textComparison;
-            Priority = priority;
-            Customization = customization;
-
             _logger = logger;
             _logger?.SetLoggedType( GetType() );
         }
-
-        public CommandLineStyle Style { get; }
-        public Customization Customization { get; }
-        public int Priority { get; }
 
         public void Initialize() => _items.Clear();
 
@@ -64,18 +51,18 @@ namespace J4JSoftware.Configuration.CommandLine
         // indicates whether the supplied text exists in the collection
         public bool Contains( string text )
         {
-            return _items.Any( x => string.Equals( x.Text, text, _textComparison ) );
+            return _items.Any( x => string.Equals( x.Text, text, TextComparison ) );
         }
 
         // indicates whether the supplied text exists in the collection for the specified usage
         public bool Contains( string text, TextUsageType usage )
         {
-            return _items.Any( x => x.Usage == usage && string.Equals( x.Text, text, _textComparison ) );
+            return _items.Any( x => x.Usage == usage && string.Equals( x.Text, text, TextComparison ) );
         }
 
         public TextUsageType GetTextUsageType( string toCheck )
         {
-            var item = _items.FirstOrDefault( x => x.Text.Equals( toCheck, _textComparison ) );
+            var item = _items.FirstOrDefault( x => x.Text.Equals( toCheck, TextComparison ) );
 
             return item?.Usage ?? TextUsageType.Undefined;
         }

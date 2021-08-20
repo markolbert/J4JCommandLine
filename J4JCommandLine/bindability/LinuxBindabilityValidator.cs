@@ -17,18 +17,21 @@
 
 #endregion
 
+using System;
 using System.Collections.Generic;
 using J4JSoftware.Logging;
 
 namespace J4JSoftware.Configuration.CommandLine
 {
+    [CommandLineCustomization(Customization.BuiltIn, Int32.MinValue)]
+    [CommandLineOperatingSystem(OSNames.Linux, StringComparison.Ordinal)]
     public class LinuxBindabilityValidator : BindabilityValidator
     {
         public LinuxBindabilityValidator(
             IEnumerable<ITextToValue> converters,
             IJ4JLogger? logger
         )
-            : base( CommandLineStyle.Linux, converters, Customization.BuiltIn, int.MinValue, logger )
+            : base( converters, logger )
         {
         }
     }
