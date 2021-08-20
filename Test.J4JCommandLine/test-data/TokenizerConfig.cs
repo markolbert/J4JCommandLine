@@ -26,7 +26,7 @@ namespace J4JSoftware.Binder.Tests
 {
     public class TokenizerConfig
     {
-        public CommandLineStyle Style { get; set; }
+        public string OperatingSystem { get; set; }
         public string CommandLine { get; set; }
         public List<TokenizerData> Data { get; set; }
     }

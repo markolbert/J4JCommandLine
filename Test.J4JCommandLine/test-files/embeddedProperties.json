@@ -1,7 +1,7 @@
 [
   {
     "CommandLine": "-a -b ASingleValue -c EnumValue1 -d EnumValue1 EnumValue2 -e Item1 Item2 Item3",
-    "Style": "Linux",
+    "OperatingSystem": "Linux",
     "UnkeyedParameters": 0,
     "UnknownKeys": 0,
     "OptionConfigurations": [
@@ -48,7 +48,7 @@
   },
   {
     "CommandLine": "-a -b -c EnumValue1 -d EnumValue1 EnumValue2 -e Item1 Item2 Item3",
-    "Style": "Linux",
+    "OperatingSystem": "Linux",
     "UnkeyedParameters": 0,
     "UnknownKeys": 0,
     "OptionConfigurations": [

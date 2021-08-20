@@ -1,7 +1,7 @@
 [
   {
     "CommandLine": "/x",
-    "Style": "Windows",
+    "OperatingSystem": "Windows",
     "Data": [
       {
         "Type": "KeyPrefix",
@@ -15,7 +15,7 @@
   },
   {
     "CommandLine": "/x abcd",
-    "Style": "Windows",
+    "OperatingSystem": "Windows",
     "Data": [
       {
         "Type": "KeyPrefix",
@@ -37,7 +37,7 @@
   },
   {
     "CommandLine": "/x \"ab cd\"",
-    "Style": "Windows",
+    "OperatingSystem": "Windows",
     "Data": [
       {
         "Type": "KeyPrefix",
@@ -59,7 +59,7 @@
   },
   {
     "CommandLine": "/x \"'Now is the time for all good men'\"",
-    "Style": "Windows",
+    "OperatingSystem": "Windows",
     "Data": [
       {
         "Type": "KeyPrefix",
@@ -81,7 +81,7 @@
   },
   {
     "CommandLine": "/x \"ab cd /y def",
-    "Style": "Windows",
+    "OperatingSystem": "Windows",
     "Data": [
       {
         "Type": "KeyPrefix",
@@ -99,7 +99,7 @@
   },
   {
     "CommandLine": "/ x",
-    "Style": "Windows",
+    "OperatingSystem": "Windows",
     "Data": [
       {
         "Type": "KeyPrefix",
@@ -117,7 +117,7 @@
   },
   {
     "CommandLine": "abcd",
-    "Style": "Windows",
+    "OperatingSystem": "Windows",
     "Data": [
       {
         "Type": "Text",
@@ -127,7 +127,7 @@
   },
   {
     "CommandLine": "     abcd",
-    "Style": "Windows",
+    "OperatingSystem": "Windows",
     "Data": [
       {
         "Type": "Separator",
@@ -141,7 +141,7 @@
   },
   {
     "CommandLine": "/x /y abc /z abc def",
-    "Style": "Windows",
+    "OperatingSystem": "Windows",
     "Data": [
       {
         "Type": "KeyPrefix",

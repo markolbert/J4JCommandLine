@@ -1,7 +1,7 @@
 [
   {
     "CommandLine": "/x",
-    "Style": "Windows",
+    "OperatingSystem": "Windows",
     "TargetType": "BasicTarget",
     "UnkeyedParameters": 0,
     "UnknownKeys": 0,

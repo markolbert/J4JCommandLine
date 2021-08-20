@@ -10,7 +10,7 @@ namespace J4JSoftware.Binder.Tests
 {
     public class ConfigurationTests : TestBase
     {
-        private IParser? _parser;
+        private IOptionCollection? _options;
         private IConfigurationRoot? _configRoot;
         private CommandLineSource? _cmdLineSrc;
 
@@ -19,9 +19,11 @@ namespace J4JSoftware.Binder.Tests
         public void Simple( TestConfig testConfig )
         {
             CreateConfigurationRootAndParser( testConfig );
-            
-            ConfigureOptions( testConfig );
-            _parser!.Options.Count.Should().Be( testConfig.OptionConfigurations.Count );
+
+            CreateOptionsFromContextKeys(_options!, testConfig.OptionConfigurations);
+            _options!.FinishConfiguration();
+
+            _options.Count.Should().Be(testConfig.OptionConfigurations.Count);
 
             ValidateConfiguration<BasicTarget>( testConfig );
         }
@@ -32,8 +34,10 @@ namespace J4JSoftware.Binder.Tests
         {
             CreateConfigurationRootAndParser(testConfig);
 
-            ConfigureOptions(testConfig);
-            _parser!.Options.Count.Should().Be(testConfig.OptionConfigurations.Count);
+            CreateOptionsFromContextKeys(_options!, testConfig.OptionConfigurations);
+            _options!.FinishConfiguration();
+
+            _options.Count.Should().Be(testConfig.OptionConfigurations.Count);
 
             ValidateConfiguration<BasicTarget>(testConfig);
         }
@@ -44,14 +48,14 @@ namespace J4JSoftware.Binder.Tests
         {
             CreateConfigurationRootAndParser(testConfig);
 
-            Bind<EmbeddedTarget, bool>(_parser!, x => x.Target1.ASwitch, testConfig);
-            Bind<EmbeddedTarget, string>(_parser!, x => x.Target1.ASingleValue, testConfig);
-            Bind<EmbeddedTarget, TestEnum>(_parser!, x => x.Target1.AnEnumValue, testConfig);
-            Bind<EmbeddedTarget, TestFlagEnum>(_parser!, x => x.Target1.AFlagEnumValue, testConfig);
-            Bind<EmbeddedTarget, List<string>>(_parser!, x => x.Target1.ACollection, testConfig);
+            Bind<EmbeddedTarget, bool>(_options!, x => x.Target1.ASwitch, testConfig);
+            Bind<EmbeddedTarget, string>(_options!, x => x.Target1.ASingleValue, testConfig);
+            Bind<EmbeddedTarget, TestEnum>(_options!, x => x.Target1.AnEnumValue, testConfig);
+            Bind<EmbeddedTarget, TestFlagEnum>(_options!, x => x.Target1.AFlagEnumValue, testConfig);
+            Bind<EmbeddedTarget, List<string>>(_options!, x => x.Target1.ACollection, testConfig);
 
-            _parser!.Options.FinishConfiguration();
-            _parser.Options.Count.Should().Be(5);
+            _options!.FinishConfiguration();
+            _options.Count.Should().Be(5);
 
             ValidateConfiguration<EmbeddedTarget>(testConfig);
         }
@@ -62,14 +66,14 @@ namespace J4JSoftware.Binder.Tests
         {
             CreateConfigurationRootAndParser( testConfig );
 
-            Bind<EmbeddedTargetNoSetter, bool>( _parser!, x => x.Target1.ASwitch, testConfig );
-            Bind<EmbeddedTargetNoSetter, string>( _parser!, x => x.Target1.ASingleValue, testConfig );
-            Bind<EmbeddedTargetNoSetter, TestEnum>( _parser!, x => x.Target1.AnEnumValue, testConfig );
-            Bind<EmbeddedTargetNoSetter, TestFlagEnum>( _parser!, x => x.Target1.AFlagEnumValue, testConfig );
-            Bind<EmbeddedTargetNoSetter, List<string>>( _parser!, x => x.Target1.ACollection, testConfig );
+            Bind<EmbeddedTargetNoSetter, bool>( _options!, x => x.Target1.ASwitch, testConfig );
+            Bind<EmbeddedTargetNoSetter, string>( _options!, x => x.Target1.ASingleValue, testConfig );
+            Bind<EmbeddedTargetNoSetter, TestEnum>( _options!, x => x.Target1.AnEnumValue, testConfig );
+            Bind<EmbeddedTargetNoSetter, TestFlagEnum>( _options!, x => x.Target1.AFlagEnumValue, testConfig );
+            Bind<EmbeddedTargetNoSetter, List<string>>( _options!, x => x.Target1.ACollection, testConfig );
 
-            _parser!.Options.FinishConfiguration();
-            _parser.Options.Count.Should().BeGreaterThan( 0 );
+            _options!.FinishConfiguration();
+            _options.Count.Should().BeGreaterThan( 0 );
 
             ValidateConfiguration<EmbeddedTargetNoSetter>( testConfig );
         }
@@ -78,30 +82,21 @@ namespace J4JSoftware.Binder.Tests
         {
             _configRoot = new ConfigurationBuilder()
                 .AddJ4JCommandLine(
-                    testConfig.Style,
+                    testConfig.OperatingSystem,
                     ParserFactory,
                     LoggerFactory,
-                    out _cmdLineSrc,
-                    out var parser)
+                    out _options,
+                    out _cmdLineSrc)
                 .Build();
 
-            parser.Should().NotBeNull();
-            _parser = parser;
-        }
-
-        private void ConfigureOptions( TestConfig testConfig )
-        {
-            CreateOptionsFromContextKeys(_parser!.Options, testConfig.OptionConfigurations);
-            _parser.Options.FinishConfiguration();
-            
-            _parser.Options.Count.Should().Be(testConfig.OptionConfigurations.Count);
+            _options.Should().NotBeNull();
         }
 
         private void ValidateConfiguration<TParsed>( TestConfig testConfig )
             where TParsed: class, new()
         {
-            _parser.Should().NotBeNull();
-            _parser!.Parse(testConfig.CommandLine).Should().BeTrue();
+            //_parser.Should().NotBeNull();
+            //_parser!.Parse(testConfig.CommandLine).Should().BeTrue();
 
             _cmdLineSrc.Should().NotBeNull();
             _cmdLineSrc!.SetCommandLine(testConfig.CommandLine);

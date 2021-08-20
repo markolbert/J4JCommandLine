@@ -16,7 +16,7 @@ namespace J4JSoftware.Binder.Tests
         {
             var consolidatedLogger = LoggerFactory.CreateLogger<ConsolidateQuotedText>();
 
-            Initialize(config.Style,
+            Initialize(config.OperatingSystem,
                 StringComparison.OrdinalIgnoreCase,
                 new ConsolidateQuotedText(StringComparison.OrdinalIgnoreCase, consolidatedLogger),
                 new MergeSequentialSeparators());
@@ -38,7 +38,7 @@ namespace J4JSoftware.Binder.Tests
         [MemberData(nameof(TestDataSource.GetSinglePropertyData), MemberType = typeof(TestDataSource))]
         public void SingleProperties(TestConfig testConfig)
         {
-            Initialize(testConfig.Style);
+            Initialize(testConfig.OperatingSystem);
 
             CreateOptionsFromContextKeys(_parser!.Options, testConfig.OptionConfigurations);
             _parser.Options.FinishConfiguration();
@@ -50,13 +50,13 @@ namespace J4JSoftware.Binder.Tests
         [MemberData(nameof(TestDataSource.GetEmbeddedPropertyData), MemberType = typeof(TestDataSource))]
         public void Embedded(TestConfig testConfig)
         {
-            Initialize(testConfig.Style);
+            Initialize(testConfig.OperatingSystem);
 
-            Bind<EmbeddedTarget, bool>(_parser!, x => x.Target1.ASwitch, testConfig);
-            Bind<EmbeddedTarget, string>(_parser!, x => x.Target1.ASingleValue, testConfig);
-            Bind<EmbeddedTarget, TestEnum>(_parser!, x => x.Target1.AnEnumValue, testConfig);
-            Bind<EmbeddedTarget, TestFlagEnum>(_parser!, x => x.Target1.AFlagEnumValue, testConfig);
-            Bind<EmbeddedTarget, List<string>>(_parser!, x => x.Target1.ACollection, testConfig);
+            Bind<EmbeddedTarget, bool>(_parser!.Options!, x => x.Target1.ASwitch, testConfig);
+            Bind<EmbeddedTarget, string>(_parser!.Options!, x => x.Target1.ASingleValue, testConfig);
+            Bind<EmbeddedTarget, TestEnum>(_parser!.Options!, x => x.Target1.AnEnumValue, testConfig);
+            Bind<EmbeddedTarget, TestFlagEnum>(_parser!.Options!, x => x.Target1.AFlagEnumValue, testConfig);
+            Bind<EmbeddedTarget, List<string>>(_parser!.Options!, x => x.Target1.ACollection, testConfig);
 
             ValidateTokenizing(testConfig);
         }
@@ -65,30 +65,30 @@ namespace J4JSoftware.Binder.Tests
         [MemberData(nameof(TestDataSource.GetEmbeddedPropertyData), MemberType = typeof(TestDataSource))]
         public void EmbeddedNoSetters(TestConfig testConfig)
         {
-            Initialize(testConfig.Style);
+            Initialize(testConfig.OperatingSystem);
 
-            Bind<EmbeddedTargetNoSetter, bool>(_parser!, x => x.Target1.ASwitch, testConfig);
-            Bind<EmbeddedTargetNoSetter, string>(_parser!, x => x.Target1.ASingleValue, testConfig);
-            Bind<EmbeddedTargetNoSetter, TestEnum>(_parser!, x => x.Target1.AnEnumValue, testConfig);
-            Bind<EmbeddedTargetNoSetter, TestFlagEnum>(_parser!, x => x.Target1.AFlagEnumValue, testConfig);
-            Bind<EmbeddedTargetNoSetter, List<string>>(_parser!, x => x.Target1.ACollection, testConfig);
+            Bind<EmbeddedTargetNoSetter, bool>(_parser!.Options!, x => x.Target1.ASwitch, testConfig);
+            Bind<EmbeddedTargetNoSetter, string>(_parser!.Options!, x => x.Target1.ASingleValue, testConfig);
+            Bind<EmbeddedTargetNoSetter, TestEnum>(_parser!.Options!, x => x.Target1.AnEnumValue, testConfig);
+            Bind<EmbeddedTargetNoSetter, TestFlagEnum>(_parser!.Options!, x => x.Target1.AFlagEnumValue, testConfig);
+            Bind<EmbeddedTargetNoSetter, List<string>>(_parser!.Options!, x => x.Target1.ACollection, testConfig);
 
             ValidateTokenizing(testConfig);
         }
 
-        private void Initialize( CommandLineStyle style, 
+        private void Initialize( string osName, 
             StringComparison? textComparison = null,
             params ICleanupTokens[] cleanupTokens )
         {
 
-            ParserFactory.Create(style, 
+            ParserFactory.Create(osName,
                     out _parser, 
-                    textComparison, 
                     cleanupTokens)
                 .Should()
                 .BeTrue();
 
             _parser.Should().NotBeNull();
+            _parser!.Options.Should().NotBeNull();
         }
 
         private void ValidateTokenizing(TestConfig testConfig)

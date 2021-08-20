@@ -26,7 +26,7 @@ namespace J4JSoftware.Binder.Tests
 {
     public class TestConfig
     {
-        public CommandLineStyle Style { get; set; }
+        public string OperatingSystem { get; set; }
         public string CommandLine { get; set; }
         public int UnknownKeys { get; set; }
         public int UnkeyedValues { get; set; }

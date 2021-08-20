@@ -27,11 +27,11 @@ namespace J4JSoftware.Binder.Tests
     public class MiscTests : TestBase
     {
         [ Theory ]
-        [ InlineData( CommandLineStyle.Linux, "-x abc", "abc" ) ]
-        [ InlineData( CommandLineStyle.Linux, "-x \"abc\"", "abc" ) ]
-        public void StringHandling( CommandLineStyle style, string cmdLine, params string[] result )
+        [ InlineData( OSNames.Linux, "-x abc", "abc" ) ]
+        [ InlineData( OSNames.Linux, "-x \"abc\"", "abc" ) ]
+        public void StringHandling( string osName, string cmdLine, params string[] result )
         {
-            ParserFactory.Create(style, out var parser)
+            ParserFactory.Create(osName, out var parser)
                 .Should()
                 .BeTrue();
 

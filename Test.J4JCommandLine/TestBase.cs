@@ -146,11 +146,11 @@ namespace J4JSoftware.Binder.Tests
         protected IParserFactory ParserFactory { get; }
         protected IJ4JLoggerFactory LoggerFactory { get; }
 
-        protected IOption Bind<TTarget, TProp>(IParser parser, Expression<Func<TTarget, TProp>> propSelector,
+        protected IOption Bind<TTarget, TProp>(IOptionCollection options, Expression<Func<TTarget, TProp>> propSelector,
             TestConfig testConfig)
             where TTarget : class, new()
         {
-            var option = parser.Options.Bind(propSelector);
+            var option = options.Bind(propSelector);
             option.Should().NotBeNull();
 
             var optConfig = testConfig.OptionConfigurations

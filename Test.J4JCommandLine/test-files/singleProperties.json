@@ -1,7 +1,7 @@
 [
   {
     "CommandLine": "-x",
-    "Style": "Linux",
+    "OperatingSystem": "Linux",
     "UnkeyedValues": 0,
     "UnknownKeys": 0,
     "OptionConfigurations": [
@@ -17,7 +17,7 @@
   },
   {
     "CommandLine": "-z",
-    "Style": "Linux",
+    "OperatingSystem": "Linux",
     "UnkeyedValues": 0,
     "UnknownKeys": 1,
     "OptionConfigurations": [
@@ -32,7 +32,7 @@
   },
   {
     "CommandLine": "-x excess",
-    "Style": "Linux",
+    "OperatingSystem": "Linux",
     "UnkeyedValues": 1,
     "UnknownKeys": 0,
     "OptionConfigurations": [
@@ -48,7 +48,7 @@
   },
   {
     "CommandLine": "-z excess",
-    "Style": "Linux",
+    "OperatingSystem": "Linux",
     "UnkeyedValues": 0,
     "UnknownKeys": 1,
     "OptionConfigurations": [
@@ -63,7 +63,7 @@
   },
   {
     "CommandLine": "-x",
-    "Style": "Linux",
+    "OperatingSystem": "Linux",
     "UnkeyedValues": 0,
     "UnknownKeys": 0,
     "OptionConfigurations": [
@@ -77,7 +77,7 @@
   },
   {
     "CommandLine": "-z",
-    "Style": "Linux",
+    "OperatingSystem": "Linux",
     "UnkeyedValues": 0,
     "UnknownKeys": 1,
     "OptionConfigurations": [
@@ -91,7 +91,7 @@
   },
   {
     "CommandLine": "-x expected",
-    "Style": "Linux",
+    "OperatingSystem": "Linux",
     "UnkeyedValues": 0,
     "UnknownKeys": 0,
     "OptionConfigurations": [
@@ -107,7 +107,7 @@
   },
   {
     "CommandLine": "-z expected",
-    "Style": "Linux",
+    "OperatingSystem": "Linux",
     "UnkeyedValues": 0,
     "UnknownKeys": 1,
     "OptionConfigurations": [
@@ -121,7 +121,7 @@
   },
   {
     "CommandLine": "-x expected excess",
-    "Style": "Linux",
+    "OperatingSystem": "Linux",
     "UnkeyedValues": 1,
     "UnknownKeys": 0,
     "OptionConfigurations": [
@@ -137,7 +137,7 @@
   },
   {
     "CommandLine": "-z expected excess",
-    "Style": "Linux",
+    "OperatingSystem": "Linux",
     "UnkeyedValues": 0,
     "UnknownKeys": 1,
     "OptionConfigurations": [
@@ -151,7 +151,7 @@
   },
   {
     "CommandLine": "-x EnumValue1",
-    "Style": "Linux",
+    "OperatingSystem": "Linux",
     "UnkeyedValues": 0,
     "UnknownKeys": 0,
     "OptionConfigurations": [
@@ -167,7 +167,7 @@
   },
   {
     "CommandLine": "-x EnumValue2",
-    "Style": "Linux",
+    "OperatingSystem": "Linux",
     "UnkeyedValues": 0,
     "UnknownKeys": 0,
     "OptionConfigurations": [
@@ -183,7 +183,7 @@
   },
   {
     "CommandLine": "-x EnumValue3",
-    "Style": "Linux",
+    "OperatingSystem": "Linux",
     "UnkeyedValues": 0,
     "UnknownKeys": 0,
     "OptionConfigurations": [
@@ -199,7 +199,7 @@
   },
   {
     "CommandLine": "-x enumvalue1",
-    "Style": "Linux",
+    "OperatingSystem": "Linux",
     "UnkeyedValues": 0,
     "UnknownKeys": 0,
     "OptionConfigurations": [
@@ -215,7 +215,7 @@
   },
   {
     "CommandLine": "-x EnumValue1",
-    "Style": "Linux",
+    "OperatingSystem": "Linux",
     "UnkeyedValues": 0,
     "UnknownKeys": 0,
     "OptionConfigurations": [
@@ -231,7 +231,7 @@
   },
   {
     "CommandLine": "-x EnumValue2",
-    "Style": "Linux",
+    "OperatingSystem": "Linux",
     "UnkeyedValues": 0,
     "UnknownKeys": 0,
     "OptionConfigurations": [
@@ -247,7 +247,7 @@
   },
   {
     "CommandLine": "-x EnumValue1 EnumValue2",
-    "Style": "Linux",
+    "OperatingSystem": "Linux",
     "UnkeyedValues": 0,
     "UnknownKeys": 0,
     "OptionConfigurations": [
@@ -263,7 +263,7 @@
   },
   {
     "CommandLine": "-x",
-    "Style": "Linux",
+    "OperatingSystem": "Linux",
     "UnkeyedValues": 0,
     "UnknownKeys": 0,
     "OptionConfigurations": [
@@ -277,7 +277,7 @@
   },
   {
     "CommandLine": "-z",
-    "Style": "Linux",
+    "OperatingSystem": "Linux",
     "UnkeyedValues": 0,
     "UnknownKeys": 1,
     "OptionConfigurations": [
@@ -291,7 +291,7 @@
   },
   {
     "CommandLine": "-x item1",
-    "Style": "Linux",
+    "OperatingSystem": "Linux",
     "UnkeyedValues": 0,
     "UnknownKeys": 0,
     "OptionConfigurations": [
@@ -309,7 +309,7 @@
   },
   {
     "CommandLine": "-z item1",
-    "Style": "Linux",
+    "OperatingSystem": "Linux",
     "UnkeyedValues": 0,
     "UnknownKeys": 1,
     "OptionConfigurations": [
@@ -323,7 +323,7 @@
   },
   {
     "CommandLine": "-z item1 -q item2",
-    "Style": "Linux",
+    "OperatingSystem": "Linux",
     "UnkeyedValues": 0,
     "UnknownKeys": 2,
     "OptionConfigurations": [
@@ -337,7 +337,7 @@
   },
   {
     "CommandLine": "-x item1 item2",
-    "Style": "Linux",
+    "OperatingSystem": "Linux",
     "UnkeyedValues": 0,
     "UnknownKeys": 0,
     "OptionConfigurations": [
@@ -356,7 +356,7 @@
   },
   {
     "CommandLine": "-z item1 item2",
-    "Style": "Linux",
+    "OperatingSystem": "Linux",
     "UnkeyedValues": 0,
     "UnknownKeys": 1,
     "OptionConfigurations": [
