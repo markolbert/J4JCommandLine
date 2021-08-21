@@ -26,7 +26,7 @@
 	  <Compile Remove="grammar\tokens\UniversalTokens.cs" />
 	  <Compile Remove="master-text\MasterTextUniversal.cs" />
 	  <Compile Remove="options\CommandLineStyle.cs" />
-	  <Compile Remove="support\ICustomizedWithStyle.cs" />
+	  <Compile Remove="extensions\ICustomizedWithStyle.cs" />
 	</ItemGroup>
 
 	<ItemGroup>

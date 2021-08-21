@@ -13,6 +13,48 @@ namespace J4JSoftware.Configuration.CommandLine.support
 {
     public class J4JCommandLineFactory
     {
+        public static J4JCommandLineFactory DefaultDebug { get; } = new(
+            loggerFactory: new J4JLoggerFactory(
+                () =>
+                {
+                    var retVal = new J4JLogger();
+                    retVal.AddDebug();
+
+                    return retVal;
+                } )
+        );
+
+        public static J4JCommandLineFactory DefaultConsole { get; } = new(
+            loggerFactory: new J4JLoggerFactory(
+                () =>
+                {
+                    var retVal = new J4JLogger();
+                    retVal.AddConsole();
+
+                    return retVal;
+                })
+        );
+
+        public static J4JCommandLineFactory DefaultFile { get; } = new(
+            loggerFactory: new J4JLoggerFactory(
+                () =>
+                {
+                    var retVal = new J4JLogger();
+                    retVal.AddFile();
+
+                    return retVal;
+                })
+        );
+
+        public static J4JCommandLineFactory Create( params IChannel[] channels ) =>
+            new( loggerFactory: new J4JLoggerFactory( () =>
+            {
+                var logger = new J4JLogger();
+                logger.Channels.AddRange( channels );
+
+                return logger;
+            } ) );
+
         private record TypeInfo(
             string OperatingSystem,
             Customization Customization,

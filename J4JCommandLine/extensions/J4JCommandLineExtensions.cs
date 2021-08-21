@@ -28,15 +28,6 @@ namespace J4JSoftware.Configuration.CommandLine
 {
     public static class J4JCommandLineExtensions
     {
-        //public static StringComparison GetStringComparison( this CommandLineStyle style ) =>
-        //    style switch
-        //    {
-        //        CommandLineStyle.Linux => StringComparison.Ordinal,
-        //        CommandLineStyle.Windows => StringComparison.OrdinalIgnoreCase,
-        //        CommandLineStyle.Universal => StringComparison.OrdinalIgnoreCase,
-        //        _ => throw new InvalidEnumArgumentException( $"Unsupported {nameof(CommandLineStyle)} value '{style}'" )
-        //    };
-
         public static BindableTypeInfo GetBindableInfo( this Type toCheck )
         {
             if( toCheck.IsArray )
@@ -64,11 +55,6 @@ namespace J4JSoftware.Configuration.CommandLine
 
         #region AddJ4JCommandLine: IServiceProvider-based
 
-        // This version works with an explicit CommandLineSource object.
-        // It is used by all the other versions
-        //
-        // All versions requires IJ4JParserFactory and IJ4JLoggerFactory to be
-        // registered with the IServiceProvider
         public static IConfigurationBuilder AddJ4JCommandLine(
             this IConfigurationBuilder builder,
             string osName,
@@ -83,24 +69,6 @@ namespace J4JSoftware.Configuration.CommandLine
                 svcProvider.GetRequiredService<IParserFactory>(),
                 svcProvider.GetRequiredService<IJ4JLogger>(),
                 cleanupTokens);
-
-            builder.Add(source);
-
-            cmdLineSource = source.CommandLineSource;
-            options = source.Parser?.Options;
-
-            return builder;
-        }
-
-        public static IConfigurationBuilder AddJ4JCommandLine(
-            this IConfigurationBuilder builder,
-            IParser parser,
-            IJ4JLogger? logger,
-            out IOptionCollection? options,
-            out CommandLineSource cmdLineSource
-        )
-        {
-            var source = new J4JCommandLineSource( parser, logger);
 
             builder.Add(source);
 
@@ -133,10 +101,46 @@ namespace J4JSoftware.Configuration.CommandLine
 
         #endregion
 
+        #region AddJ4JCommandLine: built-in dependency injection
+
+        public static IConfigurationBuilder AddJ4JCommandLine(
+            this IConfigurationBuilder builder,
+            IParser parser,
+            IJ4JLogger? logger,
+            out IOptionCollection? options,
+            out CommandLineSource cmdLineSource
+        )
+        {
+            var source = new J4JCommandLineSource(parser, logger);
+
+            builder.Add(source);
+
+            cmdLineSource = source.CommandLineSource;
+            options = source.Parser?.Options;
+
+            return builder;
+        }
+
+        public static IConfigurationBuilder AddJ4JCommandLine(
+            this IConfigurationBuilder builder,
+            IParser parser,
+            IJ4JLogger? logger,
+            out IOptionCollection? options
+        )
+        {
+            var source = new J4JCommandLineSource(parser, logger);
+
+            builder.Add(source);
+
+            options = source.Parser?.Options;
+
+            return builder;
+        }
+
+        #endregion
+
         #region AddJ4JCommandLine: explicit factories
 
-        // This version works with an explicit CommandLineSource object.
-        // It is used by all the other versions
         public static IConfigurationBuilder AddJ4JCommandLine(
             this IConfigurationBuilder builder,
             string osName,
