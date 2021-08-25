@@ -14,11 +14,9 @@ namespace J4JSoftware.Binder.Tests
         [MemberData(nameof(TestDataSource.GetTokenizerData), MemberType = typeof(TestDataSource))]
         public void Simple(TokenizerConfig config)
         {
-            var consolidatedLogger = LoggerFactory.CreateLogger<ConsolidateQuotedText>();
-
             Initialize(config.OperatingSystem,
                 StringComparison.OrdinalIgnoreCase,
-                new ConsolidateQuotedText(StringComparison.OrdinalIgnoreCase, consolidatedLogger),
+                new ConsolidateQuotedText(StringComparison.OrdinalIgnoreCase, Logger),
                 new MergeSequentialSeparators());
 
             var tokens = _parser!.Tokenizer.Tokenize(config.CommandLine);
@@ -80,7 +78,6 @@ namespace J4JSoftware.Binder.Tests
             StringComparison? textComparison = null,
             params ICleanupTokens[] cleanupTokens )
         {
-
             ParserFactory.Create(osName,
                     out _parser, 
                     cleanupTokens)

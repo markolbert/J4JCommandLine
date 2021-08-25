@@ -1,13 +1,16 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
+using System.Runtime.CompilerServices;
 using Autofac;
 using FluentAssertions;
 using J4JSoftware.Configuration.CommandLine;
 using J4JSoftware.Configuration.CommandLine.support;
 using J4JSoftware.Logging;
+using Serilog;
 
 namespace J4JSoftware.Binder.Tests
 {
@@ -15,22 +18,23 @@ namespace J4JSoftware.Binder.Tests
     {
         protected TestBaseNoDI()
         {
-            LoggerFactory = new J4JLoggerFactory( () =>
-            {
-                var retVal = new J4JLogger();
-                retVal.AddDebug();
+            var loggerConfig = new J4JLoggerConfiguration()
+                {
+                    CallingContextToText = ConvertCallingContextToText
+                }
+                .AddEnricher<CallingContextEnricher>();
 
-                return retVal;
-            } );
+            loggerConfig.SerilogConfiguration
+                .WriteTo.Debug(outputTemplate: J4JLoggerConfiguration.GetOutputTemplate(true));
 
-            Factory = new J4JCommandLineFactory( loggerFactory: LoggerFactory );
+            Logger = loggerConfig.CreateLogger();
+            Logger.SetLoggedType( GetType() );
 
-            Logger = LoggerFactory.CreateLogger( GetType() );
+            Factory = new J4JCommandLineFactory( logger: Logger );
         }
 
         protected J4JCommandLineFactory Factory { get; }
         protected IJ4JLogger Logger { get; }
-        protected IJ4JLoggerFactory LoggerFactory { get; }
 
         protected IOption Bind<TTarget, TProp>(IOptionCollection options, Expression<Func<TTarget, TProp>> propSelector,
             TestConfig testConfig)
@@ -76,6 +80,35 @@ namespace J4JSoftware.Binder.Tests
             else option.IsOptional();
 
             optConfig.Option = option;
+        }
+
+        // these next two methods serve to strip the project path off of source code
+        // file paths
+        private static string ConvertCallingContextToText(
+            Type? loggedType,
+            string callerName,
+            int lineNum,
+            string srcFilePath)
+        {
+            return CallingContextEnricher.DefaultConvertToText(loggedType,
+                callerName,
+                lineNum,
+                CallingContextEnricher.RemoveProjectPath(srcFilePath, GetProjectPath()));
+        }
+
+        private static string GetProjectPath([CallerFilePath] string filePath = "")
+        {
+            var dirInfo = new DirectoryInfo(Path.GetDirectoryName(filePath)!);
+
+            while (dirInfo.Parent != null)
+            {
+                if (dirInfo.EnumerateFiles("*.csproj").Any())
+                    break;
+
+                dirInfo = dirInfo.Parent;
+            }
+
+            return dirInfo.FullName;
         }
     }
 }

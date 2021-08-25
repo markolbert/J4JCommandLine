@@ -25,6 +25,8 @@ namespace J4JSoftware.Configuration.CommandLine
 {
     public class J4JCommandLineSource : IConfigurationSource
     {
+        public event EventHandler? SourceChanged;
+
         private readonly IJ4JLogger? _logger;
 
         public J4JCommandLineSource(
@@ -41,6 +43,8 @@ namespace J4JSoftware.Configuration.CommandLine
                 _logger?.Fatal("Could not create instance of IParser");
 
             Parser = temp;
+
+            CommandLineSource = Initialize();
         }
 
         public J4JCommandLineSource(
@@ -52,9 +56,28 @@ namespace J4JSoftware.Configuration.CommandLine
 
             _logger = logger;
             _logger?.SetLoggedType( GetType() );
+
+            CommandLineSource = Initialize();
         }
 
-        public CommandLineSource CommandLineSource { get; } = new();
+        private CommandLineSource Initialize()
+        {
+            if (Parser != null)
+                Parser.Options.Configured += Options_Configured;
+
+            var retVal = new CommandLineSource();
+            retVal.Changed += OnCommandLineSourceChanged;
+
+            return retVal;
+        }
+
+        private void Options_Configured(object? sender, EventArgs e) =>
+            SourceChanged?.Invoke(this, EventArgs.Empty);
+
+        private void OnCommandLineSourceChanged( object? sender, ConfigurationChangedEventArgs e ) =>
+            SourceChanged?.Invoke(this, EventArgs.Empty);
+
+        public CommandLineSource CommandLineSource { get; }
         public IParser? Parser { get; }
 
         public IConfigurationProvider Build( IConfigurationBuilder builder )

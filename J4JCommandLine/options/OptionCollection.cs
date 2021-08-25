@@ -31,6 +31,8 @@ namespace J4JSoftware.Configuration.CommandLine
 {
     public partial class OptionCollection : IOptionCollection
     {
+        public event EventHandler? Configured;
+
         private readonly StringComparison _textComparison;
         private readonly IMasterTextCollection _mtCollection;
         private readonly IBindabilityValidator _propValidator;
@@ -42,7 +44,6 @@ namespace J4JSoftware.Configuration.CommandLine
         private readonly List<IOption> _options = new();
 
         private readonly Dictionary<Type, string> _typePrefixes = new();
-        private readonly ChangeObserver _changeObserver = ChangeObserver.Instance;
 
         internal OptionCollection(
             IMasterTextCollection mtCollection,
@@ -60,7 +61,12 @@ namespace J4JSoftware.Configuration.CommandLine
             _logger?.SetLoggedType( GetType() );
         }
 
-        public void FinishConfiguration() => _changeObserver.OnChanged();
+        public bool IsConfigured { get; private set; }
+        public void FinishConfiguration()
+        {
+            IsConfigured = true;
+            Configured?.Invoke( this, EventArgs.Empty );
+        }
 
         public ReadOnlyCollection<IOption> Options => _options.AsReadOnly();
         public int Count => _options.Count;

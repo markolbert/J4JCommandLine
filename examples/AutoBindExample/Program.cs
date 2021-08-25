@@ -14,28 +14,15 @@ namespace J4JSoftware.CommandLine.Examples
     {
         static void Main( string[] args )
         {
-            var displayHelp = CompositionRoot.Default.DisplayHelp;
-
-            var config = new ConfigurationBuilder()
-                .AddJ4JCommandLine( OSNames.Windows, CompositionRoot.Default.Host!.Services, out var options )
-                .Build();
-
+            var options = CompositionRoot.Default.Options;
             if( options == null )
-                throw new NullReferenceException( nameof( options ) );
+                throw new NullReferenceException( "Undefined IOptionCollection" );
 
-            var intValue = options.Bind<Program, int>(x => Program.IntValue, "i")!
-                .SetDefaultValue(75)
-                .SetDescription("An integer value");
+            var config = CompositionRoot.Default.ConfigurationRoot;
+            if( config == null )
+                throw new NullReferenceException("Undefined IConfigurationRoot");
 
-            var textValue = options.Bind<Program, string>(x => Program.TextValue, "t")!
-                .SetDefaultValue("a cool default")
-                .SetDescription("A string value");
-
-            options.FinishConfiguration();
-
-            options.DisplayHelp(displayHelp);
-            Console.WriteLine("\n===============\n");
-            options.DisplayHelp(new DisplayColorHelp());
+            options.DisplayHelp(CompositionRoot.Default.DisplayHelp);
 
             var parsed = config.Get<Program>();
 

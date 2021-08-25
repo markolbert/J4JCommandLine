@@ -84,7 +84,7 @@ namespace J4JSoftware.Binder.Tests
                 .AddJ4JCommandLine(
                     testConfig.OperatingSystem,
                     ParserFactory,
-                    LoggerFactory?.CreateLogger<IParser>(),
+                    Logger,
                     out _options,
                     out _cmdLineSrc)
                 .Build();

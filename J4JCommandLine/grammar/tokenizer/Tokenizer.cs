@@ -32,21 +32,22 @@ namespace J4JSoftware.Configuration.CommandLine
 
         internal Tokenizer(
             IAvailableTokens tokens,
-            IJ4JLoggerFactory? loggerFactory,
+            IJ4JLogger? logger,
             params ICleanupTokens[] cleanupProcessors
         )
         {
             _textComparison = tokens.TextComparison;
             _tokens = tokens;
 
-            _logger = loggerFactory?.CreateLogger( GetType() );
+            _logger = logger;
+            _logger?.SetLoggedType( GetType() );
 
             if( cleanupProcessors.Length > 0 )
                 _cleanupProcessors = cleanupProcessors;
             else
                 _cleanupProcessors = new ICleanupTokens[]
                 {
-                    new ConsolidateQuotedText( _textComparison, loggerFactory?.CreateLogger<ConsolidateQuotedText>() ),
+                    new ConsolidateQuotedText( _textComparison, _logger ),
                     new MergeSequentialSeparators()
                 };
         }

@@ -32,7 +32,6 @@ namespace J4JSoftware.Configuration.CommandLine
         private readonly List<IOptionsGenerator> _generators;
         private readonly IDisplayHelp _displayHelp;
 
-        private readonly IJ4JLoggerFactory? _loggerFactory;
         private readonly IJ4JLogger? _logger;
 
         public ParserFactory(
@@ -41,7 +40,7 @@ namespace J4JSoftware.Configuration.CommandLine
             IEnumerable<IBindabilityValidator> bindabilityValidators,
             IEnumerable<IOptionsGenerator> generators,
             IDisplayHelp displayHelp,
-            IJ4JLoggerFactory? loggerFactory = null
+            IJ4JLogger? logger = null
         )
         {
             _tokens = tokens.OrderByDescending(x=>x.Customization)
@@ -62,16 +61,16 @@ namespace J4JSoftware.Configuration.CommandLine
 
             _displayHelp = displayHelp;
 
-            _loggerFactory = loggerFactory;
-            _logger = _loggerFactory?.CreateLogger( GetType() );
+            _logger = logger;
+            _logger?.SetLoggedType( GetType() );
         }
 
         public bool Create( 
             string osName,
-            out IParser? result,
+            out IParser? parser,
             params ICleanupTokens[] cleanupTokens )
         {
-            result = null;
+            parser = null;
 
             var masterText = _mtCollections
                 .FirstOrDefault( x => x.OperatingSystem.Equals( osName, StringComparison.OrdinalIgnoreCase ) );
@@ -109,7 +108,7 @@ namespace J4JSoftware.Configuration.CommandLine
             var optionCollection = new OptionCollection( masterText,
                 bindabilityValidator,
                 _displayHelp,
-                _loggerFactory?.CreateLogger<OptionCollection>() );
+                _logger );
 
             var generator = _generators.FirstOrDefault();
             if (generator == null)
@@ -120,12 +119,12 @@ namespace J4JSoftware.Configuration.CommandLine
 
             generator.Initialize( masterText!.TextComparison, optionCollection );
 
-            var tokenizer = new Tokenizer( tokens, _loggerFactory, cleanupTokens );
+            var tokenizer = new Tokenizer( tokens, _logger, cleanupTokens );
 
-            result = new Parser( optionCollection,
-                new ParsingTable( generator, _loggerFactory?.CreateLogger<IOptionsGenerator>() ),
+            parser = new Parser( optionCollection,
+                new ParsingTable( generator, _logger ),
                 tokenizer,
-                _loggerFactory?.CreateLogger<Parser>() );
+                _logger );
 
             return true;
         }

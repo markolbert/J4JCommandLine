@@ -29,13 +29,13 @@ namespace J4JSoftware.Configuration.CommandLine
 
         public CommandLineSource()
         {
-            var rawCmdLine = new RawCommandLine();
-            CommandLine = rawCmdLine.GetRawCommandLine();
+            var temp = Environment.GetCommandLineArgs();
+            CommandLine = temp.Length > 0 ? string.Join( " ", temp[ 1.. ] ) : string.Empty;
         }
 
         public void OptionsConfigurationChanged() => OnChanged();
 
-        public string CommandLine { get; private set; } = string.Empty;
+        public string CommandLine { get; private set; }
 
         public void SetCommandLine( string newCmdLine )
         {
@@ -51,11 +51,5 @@ namespace J4JSoftware.Configuration.CommandLine
 
         private void OnChanged() =>
             Changed?.Invoke( this, new ConfigurationChangedEventArgs { OptionsConfigurationChanged = true } );
-
-        //private void OnChanged(string newCommandLine) => ThreadPool.QueueUserWorkItem((_) =>
-        //    Changed?.Invoke(this, new ConfigurationChangedEventArgs { NewCommandLine = newCommandLine }));
-
-        //private void OnChanged() => ThreadPool.QueueUserWorkItem((_) =>
-        //    Changed?.Invoke(this, new ConfigurationChangedEventArgs { OptionsConfigurationChanged = true }));
     }
 }

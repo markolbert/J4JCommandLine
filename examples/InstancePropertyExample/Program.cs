@@ -10,8 +10,6 @@ namespace J4JSoftware.CommandLine.Examples
     {
         static void Main(string[] args)
         {
-            var displayHelp = CompositionRoot.Default.DisplayHelp;
-
             var config = new ConfigurationBuilder()
                 .AddJ4JCommandLine( OSNames.Windows, CompositionRoot.Default.Host!.Services, out var options)
                 .Build();
@@ -27,9 +25,7 @@ namespace J4JSoftware.CommandLine.Examples
                 .SetDefaultValue("a cool default")
                 .SetDescription("A string value");
 
-            options.DisplayHelp(displayHelp);
-            Console.WriteLine("\n===============\n");
-            options.DisplayHelp(new DisplayColorHelp(null));
+            options.DisplayHelp(CompositionRoot.Default.DisplayHelp);
 
             var parsed = config.Get<Configuration>();
 

@@ -20,10 +20,10 @@ namespace J4JSoftware.Configuration.CommandLine
         {
         }
 
-        public void OnChanged( string newCommandLine ) => ThreadPool.QueueUserWorkItem( ( _ ) =>
-            Changed?.Invoke( this, new ConfigurationChangedEventArgs { NewCommandLine = newCommandLine } ) );
+        public void OnChanged( string newCommandLine ) =>
+            Changed?.Invoke( this, new ConfigurationChangedEventArgs { NewCommandLine = newCommandLine } );
 
-        public void OnChanged() => ThreadPool.QueueUserWorkItem( ( _ ) =>
-            Changed?.Invoke( this, new ConfigurationChangedEventArgs { OptionsConfigurationChanged = true } ) );
+        public void OnChanged() =>
+            Changed?.Invoke( this, new ConfigurationChangedEventArgs { OptionsConfigurationChanged = true } );
     }
 }

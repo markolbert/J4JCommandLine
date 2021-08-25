@@ -18,6 +18,9 @@
 #endregion
 
 using System;
+using System.IO;
+using System.Linq;
+using System.Runtime.CompilerServices;
 using Autofac;
 using J4JSoftware.Configuration.CommandLine;
 using J4JSoftware.Configuration.J4JCommandLine;
@@ -26,6 +29,7 @@ using J4JSoftware.Logging;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Serilog;
 
 namespace J4JSoftware.CommandLine.Examples
 {
@@ -52,14 +56,13 @@ namespace J4JSoftware.CommandLine.Examples
         }
 
         private CompositionRoot()
-            : base( "J4JSoftware", "BinderTests",true )
+            : base( "J4JSoftware", "BinderTests", true, osName: OSNames.Linux )
         {
         }
 
-        protected override void ConfigureLogger( J4JLogger logger )
+        protected override void ConfigureLogger( J4JLoggerConfiguration loggerConfig )
         {
-            logger.AddDebug();
-            logger.AddConsole();
+            loggerConfig.CallingContextToText = ConvertCallingContextToText;
         }
 
         public IJ4JLogger Logger => Host!.Services.GetRequiredService<IJ4JLogger>();
@@ -89,13 +92,20 @@ namespace J4JSoftware.CommandLine.Examples
             }
         }
 
-        public IDisplayHelp DisplayHelp
+        public IDisplayHelp DisplayHelp => Host!.Services.GetRequiredService<IDisplayHelp>();
+
+        protected override void ConfigureCommandLineParsing()
         {
-            get
-            {
-                _displayHelp = new DisplayColorHelp( Logger );
-                return _displayHelp;
-            }
+            base.ConfigureCommandLineParsing();
+
+            Options!.Bind<Program, int>(x => Program.IntValue, "i")!
+                .SetDefaultValue(75)
+                .SetDescription("An integer value");
+
+            Options.Bind<Program, string>(x => Program.TextValue, "t")!
+                .SetDefaultValue("a cool default")
+                .SetDescription("A string value");
+
         }
 
         protected override void SetupDependencyInjection( HostBuilderContext hbc, ContainerBuilder builder )
@@ -107,14 +117,37 @@ namespace J4JSoftware.CommandLine.Examples
             builder.RegisterTokenAssemblies();
             builder.RegisterMasterTextCollectionAssemblies();
             builder.RegisterBindabilityValidatorAssemblies();
+            builder.RegisterCommandLineGeneratorAssemblies();
+            builder.RegisterDisplayHelpAssemblies( typeof(DisplayColorHelp) );
         }
 
-        protected override void SetupConfigurationEnvironment( IConfigurationBuilder builder )
+        // these next two methods serve to strip the project path off of source code
+        // file paths
+        private static string ConvertCallingContextToText(
+            Type? loggedType,
+            string callerName,
+            int lineNum,
+            string srcFilePath)
         {
-            base.SetupConfigurationEnvironment( builder );
+            return CallingContextEnricher.DefaultConvertToText(loggedType,
+                callerName,
+                lineNum,
+                CallingContextEnricher.RemoveProjectPath(srcFilePath, GetProjectPath()));
+        }
 
-            builder.SetBasePath( Environment.CurrentDirectory )
-                .AddJsonFile( "appConfig.json" );
+        private static string GetProjectPath([CallerFilePath] string filePath = "")
+        {
+            var dirInfo = new DirectoryInfo(Path.GetDirectoryName(filePath)!);
+
+            while (dirInfo.Parent != null)
+            {
+                if (dirInfo.EnumerateFiles("*.csproj").Any())
+                    break;
+
+                dirInfo = dirInfo.Parent;
+            }
+
+            return dirInfo.FullName;
         }
     }
 }

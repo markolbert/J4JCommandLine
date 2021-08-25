@@ -16,10 +16,6 @@ namespace J4JSoftware.Configuration.CommandLine
         {
             base.Load( builder );
 
-            builder.RegisterType<J4JLoggerFactory>()
-                .As<IJ4JLoggerFactory>()
-                .SingleInstance();
-
             builder.RegisterType<ParserFactory>()
                 .As<IParserFactory>()
                 .SingleInstance();

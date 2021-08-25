@@ -26,6 +26,8 @@ namespace J4JSoftware.Configuration.CommandLine
 {
     public interface IOptionCollection : IEnumerable<IOption>
     {
+        event EventHandler? Configured;
+        bool IsConfigured { get; }
         void FinishConfiguration();
 
         ReadOnlyCollection<IOption> Options { get; }

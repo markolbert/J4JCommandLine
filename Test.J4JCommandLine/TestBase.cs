@@ -1,12 +1,15 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
+using System.Runtime.CompilerServices;
 using Autofac;
 using FluentAssertions;
 using J4JSoftware.Configuration.CommandLine;
 using J4JSoftware.Logging;
+using Serilog;
 
 namespace J4JSoftware.Binder.Tests
 {
@@ -19,8 +22,9 @@ namespace J4JSoftware.Binder.Tests
             Container = Configure();
 
             ParserFactory = Container.Resolve<IParserFactory>();
-            LoggerFactory = Container.Resolve<IJ4JLoggerFactory>();
-            Logger = LoggerFactory.CreateLogger( GetType() );
+
+            Logger = Container.Resolve<IJ4JLogger>();
+            Logger.SetLoggedType( GetType() );
         }
 
         protected IContainer Container { get; }
@@ -44,80 +48,21 @@ namespace J4JSoftware.Binder.Tests
             builder.RegisterCommandLineGeneratorAssemblies();
             builder.RegisterDisplayHelpAssemblies();
 
-            builder.RegisterAssemblyTypes(typeof(IJ4JLogger).Assembly)
-                .Where(t => !t.IsAbstract
-                            && typeof(IChannel).IsAssignableFrom(t)
-                            && t.GetConstructors().Any(c =>
-                            {
-                                // constructor must be parameterless
-                                var parameters = c.GetParameters();
-
-                                if (parameters.Length != 0)
-                                    return false;
-
-                                var attr = t.GetCustomAttribute<ChannelIDAttribute>(false);
-
-                                return attr != null;
-                            }))
-                .AsImplementedInterfaces()
-                .AsSelf()
-                .SingleInstance();
-
             builder.Register(c =>
-               {
-                   var retVal = new J4JLogger();
-                   retVal.Channels.Add(c.Resolve<DebugChannel>());
+                {
+                    var loggerConfig = new J4JLoggerConfiguration()
+                        {
+                            CallingContextToText = ConvertCallingContextToText
+                        }
+                        .AddEnricher<CallingContextEnricher>();
+                        
+                    loggerConfig.SerilogConfiguration
+                        .WriteTo.Debug( outputTemplate: J4JLoggerConfiguration.GetOutputTemplate( true ) );
 
-                   return retVal;
+                    return loggerConfig.CreateLogger();
                })
-                .As<IJ4JLogger>()
-                .AsSelf()
+                .AsImplementedInterfaces()
                 .SingleInstance();
-
-            //    builder.RegisterType<J4JLoggerFactory>()
-            //        .As<IJ4JLoggerFactory>();
-
-            //    builder.RegisterType<ParserFactory>()
-            //        .As<IParserFactory>();
-
-            //    RegisterBuiltInTextToValue(builder);
-
-            //    builder.RegisterTypeAssemblies<ITextToValue>(
-            //        Enumerable.Empty<Assembly>(),
-            //        false,
-            //        PredefinedTypeTests.NonAbstract,
-            //        PredefinedTypeTests.OnlyJ4JLoggerRequired );
-
-            //    builder.RegisterTypeAssemblies<IAvailableTokens>(
-            //        Enumerable.Empty<Assembly>(),
-            //        false,
-            //        PredefinedTypeTests.NonAbstract,
-            //        PredefinedTypeTests.OnlyJ4JLoggerRequired);
-
-            //    builder.RegisterTypeAssemblies<IMasterTextCollection>(
-            //        Enumerable.Empty<Assembly>(),
-            //        false,
-            //        PredefinedTypeTests.NonAbstract,
-            //        PredefinedTypeTests.OnlyJ4JLoggerRequired);
-
-            //    builder.RegisterTypeAssemblies<IBindabilityValidator>(
-            //        Enumerable.Empty<Assembly>(),
-            //        false,
-            //        TypeTester.NonAbstract,
-            //        new ConstructorTesterPermuted<IBindabilityValidator>(typeof(IJ4JLogger), typeof(IEnumerable<ITextToValue>)));
-
-            //    builder.RegisterTypeAssemblies<IOptionsGenerator>(
-            //        Enumerable.Empty<Assembly>(),
-            //        false, 
-            //        TypeTester.NonAbstract,
-            //        new ConstructorTesterPermuted<IOptionsGenerator>(typeof(IJ4JLogger)));
-
-            //    builder.RegisterTypeAssemblies<IDisplayHelp>(
-            //        Enumerable.Empty<Assembly>(),
-            //        false,
-            //        PredefinedTypeTests.NonAbstract,
-            //        PredefinedTypeTests.OnlyJ4JLoggerRequired);
-            //
         }
 
         private void RegisterBuiltInTextToValue(ContainerBuilder builder)
@@ -144,7 +89,6 @@ namespace J4JSoftware.Binder.Tests
         }
 
         protected IParserFactory ParserFactory { get; }
-        protected IJ4JLoggerFactory LoggerFactory { get; }
 
         protected IOption Bind<TTarget, TProp>(IOptionCollection options, Expression<Func<TTarget, TProp>> propSelector,
             TestConfig testConfig)
@@ -190,6 +134,35 @@ namespace J4JSoftware.Binder.Tests
             else option.IsOptional();
 
             optConfig.Option = option;
+        }
+
+        // these next two methods serve to strip the project path off of source code
+        // file paths
+        private static string ConvertCallingContextToText(
+            Type? loggedType,
+            string callerName,
+            int lineNum,
+            string srcFilePath)
+        {
+            return CallingContextEnricher.DefaultConvertToText(loggedType,
+                callerName,
+                lineNum,
+                CallingContextEnricher.RemoveProjectPath(srcFilePath, GetProjectPath()));
+        }
+
+        private static string GetProjectPath([CallerFilePath] string filePath = "")
+        {
+            var dirInfo = new DirectoryInfo(Path.GetDirectoryName(filePath)!);
+
+            while (dirInfo.Parent != null)
+            {
+                if (dirInfo.EnumerateFiles("*.csproj").Any())
+                    break;
+
+                dirInfo = dirInfo.Parent;
+            }
+
+            return dirInfo.FullName;
         }
     }
 }

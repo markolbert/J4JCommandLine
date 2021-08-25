@@ -17,6 +17,7 @@
 
 #endregion
 
+using System;
 using System.ComponentModel;
 using Microsoft.Extensions.Configuration;
 
@@ -30,10 +31,10 @@ namespace J4JSoftware.Configuration.CommandLine
 
             // watch for changes, to the command line text 
             // and the OptionsCollection
-            source.CommandLineSource.Changed += OnChanged;
+            Source.SourceChanged += OnSourceChanged;
         }
 
-        private void OnChanged( object? sender, ConfigurationChangedEventArgs e )
+        private void OnSourceChanged( object? sender, EventArgs e )
         {
             Load();
         }
@@ -42,7 +43,7 @@ namespace J4JSoftware.Configuration.CommandLine
 
         public override void Load()
         {
-            if( Source.Parser == null )
+            if( Source.Parser == null || !Source.Parser.Options.IsConfigured )
                 return;
 
             Source.Parser.Options.ClearValues();
@@ -62,7 +63,7 @@ namespace J4JSoftware.Configuration.CommandLine
                         break;
 
                     case OptionStyle.SingleValued:
-                        if( option.NumValuesAllocated > 0 )
+                        if( option.NumValuesAllocated != 0 )
                             Set( option.ContextPath, option.Values[ 0 ] );
                         break;
 

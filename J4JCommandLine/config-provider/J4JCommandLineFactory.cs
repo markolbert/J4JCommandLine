@@ -13,48 +13,6 @@ namespace J4JSoftware.Configuration.CommandLine.support
 {
     public class J4JCommandLineFactory
     {
-        public static J4JCommandLineFactory DefaultDebug { get; } = new(
-            loggerFactory: new J4JLoggerFactory(
-                () =>
-                {
-                    var retVal = new J4JLogger();
-                    retVal.AddDebug();
-
-                    return retVal;
-                } )
-        );
-
-        public static J4JCommandLineFactory DefaultConsole { get; } = new(
-            loggerFactory: new J4JLoggerFactory(
-                () =>
-                {
-                    var retVal = new J4JLogger();
-                    retVal.AddConsole();
-
-                    return retVal;
-                })
-        );
-
-        public static J4JCommandLineFactory DefaultFile { get; } = new(
-            loggerFactory: new J4JLoggerFactory(
-                () =>
-                {
-                    var retVal = new J4JLogger();
-                    retVal.AddFile();
-
-                    return retVal;
-                })
-        );
-
-        public static J4JCommandLineFactory Create( params IChannel[] channels ) =>
-            new( loggerFactory: new J4JLoggerFactory( () =>
-            {
-                var logger = new J4JLogger();
-                logger.Channels.AddRange( channels );
-
-                return logger;
-            } ) );
-
         private record TypeInfo(
             string OperatingSystem,
             Customization Customization,
@@ -74,7 +32,6 @@ namespace J4JSoftware.Configuration.CommandLine.support
 
         private readonly List<Type> _exportedTypes;
         private readonly Dictionary<string, List<string>> _osSynonyms = new(StringComparer.OrdinalIgnoreCase);
-        private readonly IJ4JLoggerFactory? _loggerFactory;
         private readonly IJ4JLogger? _logger;
 
         private readonly List<TypeInfo> _textToValue;
@@ -85,7 +42,7 @@ namespace J4JSoftware.Configuration.CommandLine.support
 
         public J4JCommandLineFactory(
             IEnumerable<Assembly>? assemblies = null,
-            IJ4JLoggerFactory? loggerFactory = null
+            IJ4JLogger? logger = null
         )
         {
             assemblies ??= Enumerable.Empty<Assembly>();
@@ -93,8 +50,7 @@ namespace J4JSoftware.Configuration.CommandLine.support
             assemblyList.Add( GetType().Assembly );
             assemblyList = assemblyList.Distinct().ToList();
 
-            _loggerFactory = loggerFactory;
-            _logger = _loggerFactory?.CreateLogger( GetType() );
+            _logger = logger;
             _logger?.SetLoggedType( GetType() );
 
             _exportedTypes = assemblyList.SelectMany( x => x.ExportedTypes )
@@ -221,7 +177,7 @@ namespace J4JSoftware.Configuration.CommandLine.support
                 {
                     var ctorParams = new List<object?>();
                     ctorParams.AddRange( typeInfo.ConstructorParameters! );
-                    ctorParams.Add( _loggerFactory?.CreateLogger<ITypeTester>() );
+                    ctorParams.Add( _logger);
 
                     retVal.Add( (ITextToValue) Activator.CreateInstance( typeInfo.Type, ctorParams.ToArray() )! );
                 }
@@ -241,9 +197,12 @@ namespace J4JSoftware.Configuration.CommandLine.support
             return retVal;
         }
 
-        public IParser? GetParser( string osName, IDisplayHelp? displayHelp = null, params ICleanupTokens[] cleanupTokens )
+        public IParser? GetParser( 
+            string osName, 
+            IDisplayHelp? displayHelp = null, 
+            params ICleanupTokens[] cleanupTokens )
         {
-            displayHelp ??= new DefaultDisplayHelp( _loggerFactory?.CreateLogger<IDisplayHelp>() );
+            displayHelp ??= new DefaultDisplayHelp( _logger );
 
             var mtCollection = GetMasterTextCollection( osName );
             if( mtCollection == null )
@@ -256,7 +215,7 @@ namespace J4JSoftware.Configuration.CommandLine.support
             var options = new OptionCollection( mtCollection, 
                 bindabilityValidator, 
                 displayHelp,
-                _loggerFactory?.CreateLogger<IOptionCollection>() );
+                _logger );
 
             var generator = GetOptionsGenerator( mtCollection.TextComparison, options );
             if( generator == null )
@@ -266,12 +225,12 @@ namespace J4JSoftware.Configuration.CommandLine.support
             if( tokens == null )
                 return null;
 
-            var tokenizer = new Tokenizer( tokens, _loggerFactory );
+            var tokenizer = new Tokenizer( tokens, _logger );
 
             return new Parser( options,
-                new ParsingTable( generator, _loggerFactory?.CreateLogger<IParsingTable>() ),
+                new ParsingTable( generator, _logger ),
                 tokenizer,
-                _loggerFactory?.CreateLogger<IParser>() );
+                _logger );
         }
 
         public IAvailableTokens? GetAvailableTokens( string osName )
@@ -281,8 +240,7 @@ namespace J4JSoftware.Configuration.CommandLine.support
                 .ThenByDescending( x => x.Priority )
                 .FirstOrDefault();
 
-            return CreateInstance<IAvailableTokens>( conformingType, osName,
-                _loggerFactory?.CreateLogger<IAvailableTokens>() );
+            return CreateInstance<IAvailableTokens>( conformingType, osName, _logger );
         }
 
         public IMasterTextCollection? GetMasterTextCollection( string osName )
@@ -292,8 +250,7 @@ namespace J4JSoftware.Configuration.CommandLine.support
                 .ThenByDescending(x => x.Priority)
                 .FirstOrDefault();
 
-            return CreateInstance<IMasterTextCollection>( conformingType, osName,
-                _loggerFactory?.CreateLogger<IMasterTextCollection>() );
+            return CreateInstance<IMasterTextCollection>( conformingType, osName, _logger );
         }
 
         public IBindabilityValidator? GetBindabilityValidator(string osName)
@@ -326,7 +283,7 @@ namespace J4JSoftware.Configuration.CommandLine.support
             try
             {
                 return (IBindabilityValidator) Activator.CreateInstance( conformingType.Type,
-                    new object?[] { converters, _loggerFactory?.CreateLogger<IBindabilityValidator>() } )!;
+                    new object?[] { converters, _logger } )!;
             }
             catch( Exception e )
             {
@@ -346,8 +303,7 @@ namespace J4JSoftware.Configuration.CommandLine.support
                 .ThenByDescending( x => x.Priority )
                 .FirstOrDefault();
 
-            var retVal = CreateInstance<IOptionsGenerator>( conformingType, null,
-                _loggerFactory?.CreateLogger<IOptionsGenerator>() );
+            var retVal = CreateInstance<IOptionsGenerator>( conformingType, null, _logger );
 
             retVal?.Initialize( textComparison, options );
 

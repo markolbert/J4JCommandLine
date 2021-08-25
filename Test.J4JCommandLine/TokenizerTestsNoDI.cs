@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using FluentAssertions;
 using J4JSoftware.Configuration.CommandLine;
+using Serilog;
 using Xunit;
 
 namespace J4JSoftware.Binder.Tests
@@ -14,10 +15,8 @@ namespace J4JSoftware.Binder.Tests
         [MemberData(nameof(TestDataSource.GetTokenizerData), MemberType = typeof(TestDataSource))]
         public void Simple(TokenizerConfig config)
         {
-            var consolidatedLogger = LoggerFactory.CreateLogger<ConsolidateQuotedText>();
-
             Initialize(config.OperatingSystem,
-                new ConsolidateQuotedText(StringComparison.OrdinalIgnoreCase, consolidatedLogger),
+                new ConsolidateQuotedText(StringComparison.OrdinalIgnoreCase, Logger),
                 new MergeSequentialSeparators());
 
             var tokens = _parser!.Tokenizer.Tokenize(config.CommandLine);
@@ -81,7 +80,7 @@ namespace J4JSoftware.Binder.Tests
 
             _parser = Factory.GetParser( 
                 osName, 
-                new DefaultDisplayHelp( LoggerFactory?.CreateLogger<IDisplayHelp>() ),
+                new DefaultDisplayHelp( Logger ),
                 cleanupTokens );
 
             _parser.Should().NotBeNull();
