@@ -199,11 +199,8 @@ namespace J4JSoftware.Configuration.CommandLine.support
 
         public IParser? GetParser( 
             string osName, 
-            IDisplayHelp? displayHelp = null, 
             params ICleanupTokens[] cleanupTokens )
         {
-            displayHelp ??= new DefaultDisplayHelp( _logger );
-
             var mtCollection = GetMasterTextCollection( osName );
             if( mtCollection == null )
                 return null;
@@ -214,7 +211,6 @@ namespace J4JSoftware.Configuration.CommandLine.support
 
             var options = new OptionCollection( mtCollection, 
                 bindabilityValidator, 
-                displayHelp,
                 _logger );
 
             var generator = GetOptionsGenerator( mtCollection.TextComparison, options );

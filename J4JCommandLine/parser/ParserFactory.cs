@@ -30,7 +30,7 @@ namespace J4JSoftware.Configuration.CommandLine
         private readonly List<IMasterTextCollection> _mtCollections;
         private readonly List<IBindabilityValidator> _bindabilityValidators;
         private readonly List<IOptionsGenerator> _generators;
-        private readonly IDisplayHelp _displayHelp;
+        private readonly List<IHelpDisplay> _helpDisplays;
 
         private readonly IJ4JLogger? _logger;
 
@@ -39,7 +39,7 @@ namespace J4JSoftware.Configuration.CommandLine
             IEnumerable<IMasterTextCollection> mtCollections,
             IEnumerable<IBindabilityValidator> bindabilityValidators,
             IEnumerable<IOptionsGenerator> generators,
-            IDisplayHelp displayHelp,
+            IEnumerable<IHelpDisplay> helpDisplays,
             IJ4JLogger? logger = null
         )
         {
@@ -59,13 +59,13 @@ namespace J4JSoftware.Configuration.CommandLine
                 .ThenByDescending( x => x.Priority )
                 .ToList();
 
-            _displayHelp = displayHelp;
+            _helpDisplays = helpDisplays.ToList();
 
             _logger = logger;
             _logger?.SetLoggedType( GetType() );
         }
 
-        public bool Create( 
+        public bool Create(
             string osName,
             out IParser? parser,
             params ICleanupTokens[] cleanupTokens )
@@ -88,7 +88,7 @@ namespace J4JSoftware.Configuration.CommandLine
 
             if( bindabilityValidator == null )
             {
-                _logger?.Error<string>("No IBindabilityValidator available for operating system '{0}'", osName);
+                _logger?.Error<string>( "No IBindabilityValidator available for operating system '{0}'", osName );
                 return false;
             }
 
@@ -97,23 +97,20 @@ namespace J4JSoftware.Configuration.CommandLine
 
             if( tokens == null )
             {
-                _logger?.Error<string>("No IAvailableTokens available for operating system '{0}'", osName);
+                _logger?.Error<string>( "No IAvailableTokens available for operating system '{0}'", osName );
                 return false;
             }
 
             tokens.Initialize();
 
-            _displayHelp.Initialize( masterText );
-
             var optionCollection = new OptionCollection( masterText,
                 bindabilityValidator,
-                _displayHelp,
                 _logger );
 
             var generator = _generators.FirstOrDefault();
-            if (generator == null)
+            if( generator == null )
             {
-                _logger?.Error("No IOptionsGenerator available");
+                _logger?.Error( "No IOptionsGenerator available" );
                 return false;
             }
 

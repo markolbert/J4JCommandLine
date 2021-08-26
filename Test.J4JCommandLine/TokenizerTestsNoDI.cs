@@ -80,7 +80,6 @@ namespace J4JSoftware.Binder.Tests
 
             _parser = Factory.GetParser( 
                 osName, 
-                new DefaultDisplayHelp( Logger ),
                 cleanupTokens );
 
             _parser.Should().NotBeNull();

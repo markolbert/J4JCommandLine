@@ -121,12 +121,12 @@ namespace J4JSoftware.Configuration.CommandLine
 
         #endregion
 
-        #region DisplayHelp
+        #region HelpDisplay
 
         public static ContainerBuilder RegisterDisplayHelpAssemblies(
             this ContainerBuilder builder,
             IEnumerable<Assembly> assemblies ) =>
-            builder.RegisterTypeAssemblies<IDisplayHelp>(
+            builder.RegisterTypeAssemblies<IHelpDisplay>(
                 assemblies,
                 false,
                 PredefinedTypeTests.NonAbstract,
