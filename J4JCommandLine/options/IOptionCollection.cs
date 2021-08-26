@@ -27,6 +27,7 @@ namespace J4JSoftware.Configuration.CommandLine
     public interface IOptionCollection : IEnumerable<IOption>
     {
         event EventHandler? Configured;
+        IMasterTextCollection MasterTextCollection { get; }
         bool IsConfigured { get; }
         void FinishConfiguration();
 
@@ -57,6 +58,6 @@ namespace J4JSoftware.Configuration.CommandLine
         bool UsesContextPath( string contextPath );
 
         bool KeysSpecified( params string[] keys );
-        void DisplayHelp( IDisplayHelp? displayHelp );
+        //void HelpDisplay( IHelpDisplay? displayHelp );
     }
 }

@@ -24,37 +24,24 @@ using J4JSoftware.Logging;
 
 namespace J4JSoftware.Configuration.CommandLine
 {
-    public abstract class DisplayHelp : IDisplayHelp
+    public abstract class HelpDisplay : IHelpDisplay
     {
-        protected DisplayHelp( 
-            IJ4JLogger? logger 
+        protected HelpDisplay( 
+            IOptionCollection options 
             )
         {
-            Logger = logger;
-            Logger?.SetLoggedType(GetType());
+            Options = options;
         }
 
-        protected IJ4JLogger? Logger { get; }
-        protected  IMasterTextCollection? MasterText { get; private set; }
+        protected IOptionCollection Options { get; }
 
-        public bool IsValid => MasterText != null;
-
-        public void Initialize( IMasterTextCollection masterText )
-            => MasterText = masterText;
-
-        public abstract void ProcessOptions( IOptionCollection options );
+        public abstract void Display();
 
         protected List<string> GetKeys( IOption option )
         {
             var retVal = new List<string>();
 
-            if( MasterText == null )
-            {
-                Logger?.Error("IDisplayHelp is not initialized, help display not available");
-                return retVal;
-            }
-
-            foreach( var prefix in MasterText[ TextUsageType.Prefix ] )
+            foreach( var prefix in Options.MasterTextCollection[ TextUsageType.Prefix ] )
             {
                 foreach( var key in option.Keys )
                 {

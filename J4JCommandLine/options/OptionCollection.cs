@@ -34,9 +34,7 @@ namespace J4JSoftware.Configuration.CommandLine
         public event EventHandler? Configured;
 
         private readonly StringComparison _textComparison;
-        private readonly IMasterTextCollection _mtCollection;
         private readonly IBindabilityValidator _propValidator;
-        private readonly IDisplayHelp _displayHelp;
 
         private readonly TypeBoundOptionComparer _comparer = new();
         
@@ -48,18 +46,18 @@ namespace J4JSoftware.Configuration.CommandLine
         internal OptionCollection(
             IMasterTextCollection mtCollection,
             IBindabilityValidator propValidator,
-            IDisplayHelp displayHelp,
             IJ4JLogger? logger
         )
         {
             _textComparison = mtCollection.TextComparison;
-            _mtCollection = mtCollection;
+            MasterTextCollection = mtCollection;
             _propValidator = propValidator;
-            _displayHelp = displayHelp;
 
             _logger = logger;
             _logger?.SetLoggedType( GetType() );
         }
+
+        public IMasterTextCollection MasterTextCollection { get; }
 
         public bool IsConfigured { get; private set; }
         public void FinishConfiguration()
@@ -120,7 +118,7 @@ namespace J4JSoftware.Configuration.CommandLine
                 return null;
             }
 
-            var retVal = new Option<TProp>( this, contextPath, _mtCollection );
+            var retVal = new Option<TProp>( this, contextPath, MasterTextCollection );
 
             _options.Add( retVal );
 
@@ -152,7 +150,7 @@ namespace J4JSoftware.Configuration.CommandLine
                 return null;
             }
 
-            var retVal = ctor.Invoke( new object?[] { this, contextPath, _mtCollection } ) as IOption;
+            var retVal = ctor.Invoke( new object?[] { this, contextPath, MasterTextCollection } ) as IOption;
 
             if( retVal == null )
             {
@@ -239,7 +237,7 @@ namespace J4JSoftware.Configuration.CommandLine
             var retVal = new TypeBoundOption<TContainer, TProp>(
                 this,
                 contextPath,
-                _mtCollection );
+                MasterTextCollection );
 
             retVal.SetStyle( firstStyle!.Value );
 
@@ -254,7 +252,7 @@ namespace J4JSoftware.Configuration.CommandLine
         // case sensitivity is in use
         public bool UsesCommandLineKey( string key )
         {
-            return _mtCollection.Contains( key, TextUsageType.OptionKey );
+            return MasterTextCollection.Contains( key, TextUsageType.OptionKey );
         }
 
         public bool UsesContextPath( string contextPath )
@@ -272,12 +270,6 @@ namespace J4JSoftware.Configuration.CommandLine
                     && opt.Keys.Any( k => string.Equals( k, key, _textComparison) )
                 );
             }
-        }
-
-        public void DisplayHelp( IDisplayHelp? displayHelp = null )
-        {
-            displayHelp ??= _displayHelp;
-            displayHelp.ProcessOptions( this );
         }
 
         public bool KeysSpecified( params string[] keys )

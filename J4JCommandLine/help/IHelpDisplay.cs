@@ -19,12 +19,8 @@
 
 namespace J4JSoftware.Configuration.CommandLine
 {
-    public interface IDisplayHelp
+    public interface IHelpDisplay
     {
-        bool IsValid { get; }
-
-        void Initialize(IMasterTextCollection masterText);
-
-        void ProcessOptions( IOptionCollection options );
+        void Display();
     }
 }

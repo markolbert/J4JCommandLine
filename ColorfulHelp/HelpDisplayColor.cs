@@ -26,10 +26,12 @@ using J4JSoftware.Logging;
 
 namespace J4JSoftware.Configuration.J4JCommandLine
 {
-    public class DisplayColorHelp : DisplayHelp
+    public class HelpDisplayColor : HelpDisplay
     {
-        public DisplayColorHelp( IJ4JLogger? logger = null )
-            : base( logger )
+        public HelpDisplayColor(
+            IOptionCollection options
+        )
+            : base( options )
         {
         }
 
@@ -40,7 +42,7 @@ namespace J4JSoftware.Configuration.J4JCommandLine
         public ConsoleColor EmphasisColor { get; set; } = ConsoleColor.Cyan;
         public ConsoleColor TextColor { get; set; } = ConsoleColor.White;
 
-        public override void ProcessOptions( IOptionCollection options )
+        public override void Display()
         {
             var grid = new Grid { Color = GridColor };
 
@@ -50,14 +52,15 @@ namespace J4JSoftware.Configuration.J4JCommandLine
                 NewCell( "Required", HeadingColor ),
                 NewCell( "Description", HeadingColor ) );
 
-            grid.Children.Add( options.Select( x =>
+            grid.Children.Add( Options.Select( x =>
             {
-                var retVal = new List<object>();
-
-                retVal.Add( NewCell( string.Join( ", ", GetKeys( x ) ), EmphasisColor, border: Borders.NoBottom ) );
-                retVal.Add( NewCell( x.Required ? "Y" : "N", EmphasisColor ) );
-                retVal.Add( NewCell( x.Description, TextColor ) );
-
+                var retVal = new List<object>
+                {
+                    NewCell( string.Join( ", ", GetKeys( x ) ), EmphasisColor, border: Borders.NoBottom ),
+                    NewCell( x.Required ? "Y" : "N", EmphasisColor ),
+                    NewCell( x.Description, TextColor )
+                };
+                
                 var styleDefCell = NewCell( colSpan: 2,
                     align: Align.Left,
                     padding: new Thickness( 2, 0, 2, 0 ) );

@@ -22,18 +22,20 @@ using J4JSoftware.Logging;
 
 namespace J4JSoftware.Configuration.CommandLine
 {
-    public class DefaultDisplayHelp : DisplayHelp
+    public class DefaultHelpDisplay : HelpDisplay
     {
-        public DefaultDisplayHelp( IJ4JLogger? logger )
-            : base( logger )
+        public DefaultHelpDisplay(
+            IOptionCollection options
+        )
+            : base( options )
         {
         }
 
-        public override void ProcessOptions( IOptionCollection options )
+        public override void Display()
         {
             Console.WriteLine( "Command line help\n" );
 
-            foreach( var option in options )
+            foreach( var option in Options )
             {
                 Console.WriteLine( $"Keys: {string.Join( ", ", GetKeys( option ) )}" );
                 Console.WriteLine( $"Description:  {option.Description}" );
