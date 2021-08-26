@@ -18,11 +18,12 @@ namespace J4JSoftware.CommandLine.Examples
             if( options == null )
                 throw new NullReferenceException( "Undefined IOptionCollection" );
 
-            var config = CompositionRoot.Default.ConfigurationRoot;
+            var config = CompositionRoot.Default.Configuration;
             if( config == null )
-                throw new NullReferenceException("Undefined IConfigurationRoot");
+                throw new NullReferenceException("Undefined IConfiguration");
 
-            options.DisplayHelp(CompositionRoot.Default.DisplayHelp);
+            var help = new HelpDisplayColor(options);
+            help.Display();
 
             var parsed = config.Get<Program>();
 

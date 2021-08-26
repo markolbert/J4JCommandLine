@@ -38,8 +38,6 @@ namespace J4JSoftware.CommandLine.Examples
         private static CompositionRoot? _compRoot;
 
         private IParserFactory? _parserFactory;
-        private IParser? _parser;
-        private IDisplayHelp? _displayHelp;
 
         public static CompositionRoot Default
         {
@@ -76,24 +74,6 @@ namespace J4JSoftware.CommandLine.Examples
             }
         }
 
-        public IParser Parser
-        {
-            get
-            {
-                if( _parser == null )
-                {
-                    if( !ParserFactory.Create( OSNames.Windows, out var temp ) )
-                        throw new InvalidOperationException( $"Could not create an instance of IParser" );
-
-                    _parser = temp;
-                }
-
-                return _parser!;
-            }
-        }
-
-        public IDisplayHelp DisplayHelp => Host!.Services.GetRequiredService<IDisplayHelp>();
-
         protected override void ConfigureCommandLineParsing()
         {
             base.ConfigureCommandLineParsing();
@@ -105,7 +85,6 @@ namespace J4JSoftware.CommandLine.Examples
             Options.Bind<Program, string>(x => Program.TextValue, "t")!
                 .SetDefaultValue("a cool default")
                 .SetDescription("A string value");
-
         }
 
         protected override void SetupDependencyInjection( HostBuilderContext hbc, ContainerBuilder builder )
@@ -118,7 +97,7 @@ namespace J4JSoftware.CommandLine.Examples
             builder.RegisterMasterTextCollectionAssemblies();
             builder.RegisterBindabilityValidatorAssemblies();
             builder.RegisterCommandLineGeneratorAssemblies();
-            builder.RegisterDisplayHelpAssemblies( typeof(DisplayColorHelp) );
+            builder.RegisterDisplayHelpAssemblies( typeof(HelpDisplayColor) );
         }
 
         // these next two methods serve to strip the project path off of source code
