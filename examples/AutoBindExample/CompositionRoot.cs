@@ -78,11 +78,11 @@ namespace J4JSoftware.CommandLine.Examples
         {
             base.ConfigureCommandLineParsing();
 
-            Options!.Bind<Program, int>(x => Program.IntValue, "i")!
+            CommandLineOptions!.Bind<Program, int>(x => Program.IntValue, "i")!
                 .SetDefaultValue(75)
                 .SetDescription("An integer value");
 
-            Options.Bind<Program, string>(x => Program.TextValue, "t")!
+            CommandLineOptions.Bind<Program, string>(x => Program.TextValue, "t")!
                 .SetDefaultValue("a cool default")
                 .SetDescription("A string value");
         }

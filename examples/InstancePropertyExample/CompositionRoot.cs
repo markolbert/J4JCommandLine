@@ -55,7 +55,7 @@ namespace J4JSoftware.CommandLine.Examples
         }
 
         private CompositionRoot()
-            : base( "J4JSoftware", "BinderTests",true )
+            : base( "J4JSoftware", "BinderTests",true, osName: OSNames.Linux)
         {
         }
 
@@ -79,11 +79,11 @@ namespace J4JSoftware.CommandLine.Examples
         {
             base.ConfigureCommandLineParsing();
 
-            Options!.Bind<Configuration, int>(x => x.IntValue, "i")!
+            CommandLineOptions!.Bind<Configuration, int>(x => x.IntValue, "i")!
                 .SetDefaultValue(75)
                 .SetDescription("An integer value");
 
-            Options.Bind<Configuration, string>(x => x.TextValue, "t")!
+            CommandLineOptions.Bind<Configuration, string>(x => x.TextValue, "t")!
                 .SetDefaultValue("a cool default")
                 .SetDescription("A string value");
         }

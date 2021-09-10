@@ -11,7 +11,7 @@ namespace J4JSoftware.CommandLine.Examples
     {
         static void Main(string[] args)
         {
-            var options = CompositionRoot.Default.Options;
+            var options = CompositionRoot.Default.CommandLineOptions;
             if (options == null)
                 throw new NullReferenceException("Undefined IOptionCollection");
 
