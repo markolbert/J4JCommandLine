@@ -52,7 +52,21 @@ namespace J4JSoftware.Configuration.CommandLine
         protected string? PropertyPath { get; private set; }
         protected bool IsOuterMostLeaf { get; private set; }
 
-        private bool CanConvert( Type toCheck ) => _converters.Any( x => x.CanConvert( toCheck ) );
+        public bool CanConvert( Type toCheck ) => _converters.Any( x => x.CanConvert( toCheck ) );
+
+        public bool Convert( Type targetType, IEnumerable<string> textValues, out object? result )
+        {
+            result = null;
+
+            var converter = _converters.FirstOrDefault( x => x.CanConvert( targetType ) );
+            
+            if( converter != null ) 
+                return converter.Convert( textValues, out result );
+            
+            Logger?.Error( "Cannot convert text to '{0}'", targetType );
+            
+            return false;
+        }
 
         public virtual bool IsPropertyBindable( Stack<PropertyInfo> propertyStack )
         {

@@ -25,6 +25,9 @@ namespace J4JSoftware.Configuration.CommandLine
 {
     public interface IBindabilityValidator : ICustomized
     {
+        bool CanConvert( Type toCheck );
+        bool Convert( Type targetType, IEnumerable<string> textValues, out object? result );
+
         bool IsPropertyBindable( Stack<PropertyInfo> propertyStack );
         bool IsPropertyBindable( Type propType );
     }
