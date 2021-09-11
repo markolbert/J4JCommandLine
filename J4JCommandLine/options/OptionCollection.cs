@@ -118,7 +118,7 @@ namespace J4JSoftware.Configuration.CommandLine
                 return null;
             }
 
-            var retVal = new Option<TProp>( this, contextPath, MasterTextCollection );
+            var retVal = new Option<TProp>( this, contextPath, MasterTextCollection, _propValidator );
 
             _options.Add( retVal );
 
@@ -150,7 +150,7 @@ namespace J4JSoftware.Configuration.CommandLine
                 return null;
             }
 
-            var retVal = ctor.Invoke( new object?[] { this, contextPath, MasterTextCollection } ) as IOption;
+            var retVal = ctor.Invoke( new object?[] { this, contextPath, MasterTextCollection, _propValidator } ) as IOption;
 
             if( retVal == null )
             {
@@ -237,7 +237,8 @@ namespace J4JSoftware.Configuration.CommandLine
             var retVal = new TypeBoundOption<TContainer, TProp>(
                 this,
                 contextPath,
-                MasterTextCollection );
+                MasterTextCollection,
+                _propValidator);
 
             retVal.SetStyle( firstStyle!.Value );
 

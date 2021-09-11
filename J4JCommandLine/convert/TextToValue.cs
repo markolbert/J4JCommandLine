@@ -48,7 +48,13 @@ namespace J4JSoftware.Configuration.CommandLine
         public Customization Customization { get; }
         public int Priority { get; }
 
-        public bool CanConvert( Type toCheck ) => toCheck.GetBindableInfo().BindableType != BindableType.Unsupported;
+        public bool CanConvert( Type toCheck )
+        {
+            var bindableInfo = toCheck.GetBindableInfo();
+
+            return bindableInfo.BindableType != BindableType.Unsupported
+                   && toCheck.IsAssignableFrom( TargetType );
+        }
 
         // TConvType must be one of:
         // - TBaseType

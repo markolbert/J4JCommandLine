@@ -39,6 +39,7 @@ namespace J4JSoftware.Configuration.CommandLine
         int MaxValues { get; }
         int NumValuesAllocated { get; }
         bool ValuesSatisfied { get; }
+        bool GetValue( out object? result );
 
         bool Required { get; }
 

@@ -27,17 +27,20 @@ namespace J4JSoftware.Configuration.CommandLine
     {
         private readonly List<string> _cmdLineKeys = new();
         private readonly IMasterTextCollection _masterText;
+        private readonly IBindabilityValidator _propValidator;
         private readonly List<string> _values = new();
 
         internal Option(
             IOptionCollection container,
             string contextPath,
-            IMasterTextCollection masterText
+            IMasterTextCollection masterText,
+            IBindabilityValidator propValidator
         )
         {
             Container = container;
             ContextPath = contextPath;
             _masterText = masterText;
+            _propValidator = propValidator;
         }
 
         public bool IsInitialized => !string.IsNullOrEmpty( ContextPath ) && _cmdLineKeys.Count > 0;
@@ -122,6 +125,21 @@ namespace J4JSoftware.Configuration.CommandLine
                     _ => throw new InvalidEnumArgumentException( $"Unsupported OptionStyle '{Style}'" )
                 };
             }
+        }
+
+        public bool GetValue( out object? result )
+        {
+            result = default(T);
+            
+            if( !ValuesSatisfied )
+                return false;
+
+            if( Style != OptionStyle.Switch )
+                return _propValidator.Convert( typeof(T), _values, out result );
+
+            result = !string.IsNullOrEmpty( CommandLineKeyProvided );
+            
+            return true;
         }
 
         public bool Required { get; private set; }
