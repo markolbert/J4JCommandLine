@@ -17,12 +17,14 @@
 
 #endregion
 
+using System;
 using System.Collections.Generic;
 
 namespace J4JSoftware.Configuration.CommandLine
 {
     public interface ITokenizer
     {
+        StringComparison TextComparison { get; }
         List<Token> Tokenize( string cmdLine );
     }
 }

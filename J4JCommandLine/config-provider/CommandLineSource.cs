@@ -27,10 +27,18 @@ namespace J4JSoftware.Configuration.CommandLine
     {
         public event EventHandler<ConfigurationChangedEventArgs>? Changed;
 
-        public CommandLineSource()
+        public CommandLineSource( 
+            StringComparison textComparison
+            )
         {
+            // we don't want the name of the executable so we need to remove it
+            // it's the first argument in what gets returned by Environment.GetCommandLineArgs()
             var temp = Environment.GetCommandLineArgs();
-            CommandLine = temp.Length > 0 ? string.Join( " ", temp[ 1.. ] ) : string.Empty;
+
+            var cmdLine = Environment.CommandLine;
+            CommandLine = cmdLine.IndexOf( temp[ 0 ], textComparison ) == 0
+                    ? cmdLine.Replace( temp[ 0 ], string.Empty )
+                    : cmdLine;
         }
 
         public void OptionsConfigurationChanged() => OnChanged();

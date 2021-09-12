@@ -25,7 +25,6 @@ namespace J4JSoftware.Configuration.CommandLine
 {
     public class Tokenizer : ITokenizer
     {
-        private readonly StringComparison _textComparison;
         private readonly ICleanupTokens[] _cleanupProcessors;
         private readonly IAvailableTokens _tokens;
         private readonly IJ4JLogger? _logger;
@@ -36,7 +35,7 @@ namespace J4JSoftware.Configuration.CommandLine
             params ICleanupTokens[] cleanupProcessors
         )
         {
-            _textComparison = tokens.TextComparison;
+            TextComparison = tokens.TextComparison;
             _tokens = tokens;
 
             _logger = logger;
@@ -47,10 +46,12 @@ namespace J4JSoftware.Configuration.CommandLine
             else
                 _cleanupProcessors = new ICleanupTokens[]
                 {
-                    new ConsolidateQuotedText( _textComparison, _logger ),
+                    new ConsolidateQuotedText( TextComparison, _logger ),
                     new MergeSequentialSeparators()
                 };
         }
+
+        public StringComparison TextComparison { get; }
 
         public List<Token> Tokenize( string cmdLine )
         {
@@ -64,7 +65,7 @@ namespace J4JSoftware.Configuration.CommandLine
 
                 foreach( var (text, tokenType) in _tokens.Available )
                 {
-                    var tokenStart = cmdLine.IndexOf( text, _textComparison );
+                    var tokenStart = cmdLine.IndexOf( text, TextComparison );
 
                     // If there was no match, go to next token
                     if( tokenStart < 0 )
