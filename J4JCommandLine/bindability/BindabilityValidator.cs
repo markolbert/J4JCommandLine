@@ -23,6 +23,7 @@ using System.Linq;
 using System.Reflection;
 using System.Text;
 using J4JSoftware.Logging;
+using Serilog;
 
 namespace J4JSoftware.Configuration.CommandLine
 {
@@ -39,7 +40,7 @@ namespace J4JSoftware.Configuration.CommandLine
         protected BindabilityValidator(
             IEnumerable<ITextToValue> converters,
             IJ4JLogger? logger )
-        :base(false)
+            : base( false )
         {
             _converters = converters.ToList();
 
@@ -52,7 +53,8 @@ namespace J4JSoftware.Configuration.CommandLine
         protected string? PropertyPath { get; private set; }
         protected bool IsOuterMostLeaf { get; private set; }
 
-        public bool CanConvert( Type toCheck ) => _converters.Any( x => x.CanConvert( toCheck ) );
+        public bool CanConvert( Type toCheck ) => toCheck.IsEnum
+                                                  || _converters.Any( x => x.CanConvert( toCheck ) );
 
         public bool Convert( Type targetType, IEnumerable<string> textValues, out object? result )
         {
@@ -62,6 +64,15 @@ namespace J4JSoftware.Configuration.CommandLine
             
             if( converter != null ) 
                 return converter.Convert( textValues, out result );
+
+            if( targetType.IsEnum )
+            {
+                var enumConverterType = typeof(TextToEnum<>).MakeGenericType( targetType );
+                converter = Activator.CreateInstance( enumConverterType, new object?[] { Logger } ) as ITextToValue;
+                _converters.Add( converter! );
+
+                return converter!.Convert( textValues, out result );
+            }
             
             Logger?.Error( "Cannot convert text to '{0}'", targetType );
             
@@ -159,6 +170,9 @@ namespace J4JSoftware.Configuration.CommandLine
 
         private bool CheckType( Type toCheck )
         {
+            if( toCheck.IsEnum )
+                return true;
+
             if( toCheck.IsGenericType )
             {
                 if( !CheckGenericType( toCheck ) )
