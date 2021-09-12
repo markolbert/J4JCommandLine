@@ -43,7 +43,9 @@ namespace J4JSoftware.Configuration.CommandLine
 
         public override void Load()
         {
-            if( Source.Parser == null || !Source.Parser.Options.IsConfigured )
+            if( Source.Parser == null 
+                || !Source.Parser.Options.IsConfigured
+                || Source.CommandLineSource == null )
                 return;
 
             Source.Parser.Options.ClearValues();

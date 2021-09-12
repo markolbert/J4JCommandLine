@@ -95,7 +95,7 @@ namespace J4JSoftware.Configuration.CommandLine
 
             _current = null;
 
-            LogTokenPair(tokenPair, "terminated with prejuidice", LogEventLevel.Error);
+            LogTokenPair(tokenPair, "terminated with prejudice", LogEventLevel.Error);
 
             return false;
         }

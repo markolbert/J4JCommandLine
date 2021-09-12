@@ -60,12 +60,14 @@ namespace J4JSoftware.Configuration.CommandLine
             CommandLineSource = Initialize();
         }
 
-        private CommandLineSource Initialize()
+        private CommandLineSource? Initialize()
         {
-            if (Parser != null)
-                Parser.Options.Configured += Options_Configured;
+            if( Parser == null )
+                return null;
 
-            var retVal = new CommandLineSource();
+            Parser.Options.Configured += Options_Configured;
+
+            var retVal = new CommandLineSource( Parser.Tokenizer.TextComparison );
             retVal.Changed += OnCommandLineSourceChanged;
 
             return retVal;
@@ -77,7 +79,7 @@ namespace J4JSoftware.Configuration.CommandLine
         private void OnCommandLineSourceChanged( object? sender, ConfigurationChangedEventArgs e ) =>
             SourceChanged?.Invoke(this, EventArgs.Empty);
 
-        public CommandLineSource CommandLineSource { get; }
+        public CommandLineSource? CommandLineSource { get; }
         public IParser? Parser { get; }
 
         public IConfigurationProvider Build( IConfigurationBuilder builder )

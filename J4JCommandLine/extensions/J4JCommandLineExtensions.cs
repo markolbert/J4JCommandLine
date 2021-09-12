@@ -60,7 +60,7 @@ namespace J4JSoftware.Configuration.CommandLine
             string osName,
             IServiceProvider svcProvider,
             out IOptionCollection? options,
-            out CommandLineSource cmdLineSource,
+            out CommandLineSource? cmdLineSource,
             params ICleanupTokens[] cleanupTokens
         )
         {
@@ -108,7 +108,7 @@ namespace J4JSoftware.Configuration.CommandLine
             IParser parser,
             IJ4JLogger? logger,
             out IOptionCollection? options,
-            out CommandLineSource cmdLineSource
+            out CommandLineSource? cmdLineSource
         )
         {
             var source = new J4JCommandLineSource(parser, logger);
@@ -147,7 +147,7 @@ namespace J4JSoftware.Configuration.CommandLine
             IParserFactory parserFactory,
             IJ4JLogger? logger,
             out IOptionCollection? options,
-            out CommandLineSource cmdLineSource,
+            out CommandLineSource? cmdLineSource,
             params ICleanupTokens[] cleanupTokens
         )
         {

@@ -356,7 +356,7 @@ namespace J4JSoftware.Configuration.CommandLine.support
                 _logger?.Error<Type, string, string>(
                     "Could not create {0} object for operating system '{1}'. Exception was '{2}'",
                     typeof(T),
-                    osName,
+                    osName ?? OSNames.Undefined,
                     e.Message);
 
                 return null;
