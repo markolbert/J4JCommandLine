@@ -53,8 +53,44 @@ namespace J4JSoftware.Configuration.CommandLine
         protected string? PropertyPath { get; private set; }
         protected bool IsOuterMostLeaf { get; private set; }
 
-        public bool CanConvert( Type toCheck ) => toCheck.IsEnum
-                                                  || _converters.Any( x => x.CanConvert( toCheck ) );
+        public bool CanConvert( Type toCheck )
+        {
+            // we can convert any type for which we have a converter, plus lists and arrays of those types
+            if( toCheck.IsArray )
+            {
+                var elementType = toCheck.GetElementType();
+                return elementType != null && can_convert_simple( elementType );
+            }
+
+            if( toCheck.IsGenericType )
+            {
+                var genArgs = toCheck.GetGenericArguments();
+                if( genArgs.Length != 1 )
+                    return false;
+
+                if( !can_convert_simple( genArgs[ 0 ] ) )
+                    return false;
+
+                return ( typeof(List<>).MakeGenericType( genArgs[ 0 ] )
+                    .IsAssignableFrom( toCheck ) );
+            }
+
+            if( can_convert_simple( toCheck ) )
+                return true;
+
+            Logger?.Error( "No ITextToValue converter is defined for {0}", toCheck );
+
+            return false;
+
+            bool can_convert_simple( Type simpleType )
+            {
+                if( simpleType.IsArray || simpleType.IsGenericType )
+                    return false;
+
+                return simpleType.IsEnum 
+                       || _converters.Any( x => x.CanConvert( simpleType ) );
+            }
+        }
 
         public bool Convert( Type targetType, IEnumerable<string> textValues, out object? result )
         {
