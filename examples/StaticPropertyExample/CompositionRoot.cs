@@ -38,7 +38,6 @@ namespace J4JSoftware.CommandLine.Examples
         private static CompositionRoot? _compRoot;
 
         private IParserFactory? _parserFactory;
-        private IParser? _parser;
 
         public static CompositionRoot Default
         {
@@ -55,13 +54,8 @@ namespace J4JSoftware.CommandLine.Examples
         }
 
         private CompositionRoot()
-            : base( "J4JSoftware", "BinderTests",true, osName: OSNames.Linux)
+            : base( "J4JSoftware", "BinderTests",true, osName: OSNames.Linux, filePathTrimmer: FilePathTrimmer)
         {
-        }
-
-        protected override void ConfigureLogger(J4JLoggerConfiguration loggerConfig)
-        {
-            loggerConfig.CallingContextToText = ConvertCallingContextToText;
         }
 
         public IJ4JLogger Logger => Host!.Services.GetRequiredService<IJ4JLogger>();
@@ -103,13 +97,13 @@ namespace J4JSoftware.CommandLine.Examples
 
         // these next two methods serve to strip the project path off of source code
         // file paths
-        private static string ConvertCallingContextToText(
+        private static string FilePathTrimmer(
             Type? loggedType,
             string callerName,
             int lineNum,
             string srcFilePath)
         {
-            return CallingContextEnricher.DefaultConvertToText(loggedType,
+            return CallingContextEnricher.DefaultFilePathTrimmer(loggedType,
                 callerName,
                 lineNum,
                 CallingContextEnricher.RemoveProjectPath(srcFilePath, GetProjectPath()));

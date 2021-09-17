@@ -18,14 +18,10 @@ namespace J4JSoftware.Binder.Tests
     {
         protected TestBaseNoDI()
         {
-            var loggerConfig = new J4JLoggerConfiguration()
-                {
-                    CallingContextToText = ConvertCallingContextToText
-                }
-                .AddEnricher<CallingContextEnricher>();
+            var loggerConfig = new J4JLoggerConfiguration( FilePathTrimmer );
 
             loggerConfig.SerilogConfiguration
-                .WriteTo.Debug(outputTemplate: J4JLoggerConfiguration.GetOutputTemplate(true));
+                .WriteTo.Debug(outputTemplate: loggerConfig.GetOutputTemplate(true));
 
             Logger = loggerConfig.CreateLogger();
             Logger.SetLoggedType( GetType() );
@@ -84,13 +80,13 @@ namespace J4JSoftware.Binder.Tests
 
         // these next two methods serve to strip the project path off of source code
         // file paths
-        private static string ConvertCallingContextToText(
+        private static string FilePathTrimmer(
             Type? loggedType,
             string callerName,
             int lineNum,
             string srcFilePath)
         {
-            return CallingContextEnricher.DefaultConvertToText(loggedType,
+            return CallingContextEnricher.DefaultFilePathTrimmer(loggedType,
                 callerName,
                 lineNum,
                 CallingContextEnricher.RemoveProjectPath(srcFilePath, GetProjectPath()));

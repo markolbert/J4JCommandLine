@@ -242,7 +242,10 @@ namespace J4JSoftware.Configuration.CommandLine
 
             retVal.SetStyle( firstStyle!.Value );
 
-            foreach( var key in ValidateCommandLineKeys( cmdLineKeys ) ) retVal.AddCommandLineKey( key );
+            foreach( var key in ValidateCommandLineKeys( cmdLineKeys ) )
+            {
+                retVal.AddCommandLineKey( key );
+            }
 
             _options.Add( retVal );
 
