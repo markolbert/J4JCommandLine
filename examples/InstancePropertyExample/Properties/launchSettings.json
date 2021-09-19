@@ -2,7 +2,7 @@
   "profiles": {
     "InstancePropertyExample": {
       "commandName": "Project",
-      "commandLineArgs": "-i 50 -t \\\"some text\\\""
+      "commandLineArgs": "/i 50 /t \"some text\""
     }
   }
 }
