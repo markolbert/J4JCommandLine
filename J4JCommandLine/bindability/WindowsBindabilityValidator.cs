@@ -24,7 +24,7 @@ using J4JSoftware.Logging;
 namespace J4JSoftware.Configuration.CommandLine
 {
     [CommandLineCustomization(Customization.BuiltIn, Int32.MinValue)]
-    [CommandLineOperatingSystem(OSNames.Windows, StringComparison.OrdinalIgnoreCase)]
+    [CommandLineOperatingSystem(CommandLine.OperatingSystem.Windows, StringComparison.OrdinalIgnoreCase)]
     public class WindowsBindabilityValidator : BindabilityValidator
     {
         public WindowsBindabilityValidator(

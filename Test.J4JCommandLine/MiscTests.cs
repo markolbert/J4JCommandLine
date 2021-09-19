@@ -27,8 +27,8 @@ namespace J4JSoftware.Binder.Tests
     public class MiscTests : TestBase
     {
         [ Theory ]
-        [ InlineData( OSNames.Linux, "-x abc", "abc" ) ]
-        [ InlineData( OSNames.Linux, "-x \"abc\"", "abc" ) ]
+        [ InlineData( OperatingSystem.Linux, "-x abc", "abc" ) ]
+        [ InlineData( OperatingSystem.Linux, "-x \"abc\"", "abc" ) ]
         public void StringHandling( string osName, string cmdLine, params string[] result )
         {
             ParserFactory.Create(osName, out var parser)

@@ -21,19 +21,9 @@ namespace J4JSoftware.Configuration.CommandLine
             }
             else
             {
-                if( attr == null || !allowNoOperatingSystem )
-                {
-                    OperatingSystem = OSNames.Undefined;
-                    Customization = Customization.Invalid;
-                    Priority = int.MinValue;
-                }
-                else
-                {
-                    OperatingSystem = OSNames.Universal;
-                    Customization = attr.Customization;
-                    Priority = attr.Priority;
-                }
-
+                OperatingSystem = CommandLine.OperatingSystem.Undefined;
+                Customization = Customization.Invalid;
+                Priority = int.MinValue;
                 TextComparison = attrOS?.TextComparison ?? StringComparison.OrdinalIgnoreCase;
             }
         }

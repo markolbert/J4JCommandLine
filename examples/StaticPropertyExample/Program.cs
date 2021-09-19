@@ -10,6 +10,7 @@ using J4JSoftware.Logging;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using OperatingSystem = J4JSoftware.Configuration.CommandLine.OperatingSystem;
 
 #pragma warning disable 8618
 
@@ -20,7 +21,7 @@ namespace J4JSoftware.CommandLine.Examples
         static void Main(string[] args)
         {
             var hostConfig = new J4JHostConfiguration()
-                .OperatingSystem(OSNames.Windows)
+                .OperatingSystem(OperatingSystem.Windows)
                 .Publisher("J4JSoftware")
                 .ApplicationName("StaticPropertyExample")
                 .FilePathTrimmer(FilePathTrimmer)

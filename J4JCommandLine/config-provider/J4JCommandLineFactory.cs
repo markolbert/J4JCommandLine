@@ -14,7 +14,6 @@ namespace J4JSoftware.Configuration.CommandLine.support
     public class J4JCommandLineFactory
     {
         private record TypeInfo(
-            string OperatingSystem,
             Customization Customization,
             int Priority,
             Type Type,
@@ -89,7 +88,7 @@ namespace J4JSoftware.Configuration.CommandLine.support
                     var attr = x.GetCustomAttribute<CommandLineCustomizationAttribute>();
                     var attrOS = x.GetCustomAttribute<CommandLineOperatingSystemAttribute>();
 
-                    return new TypeInfo( attrOS?.OperatingSystem ?? OSNames.Universal, attr!.Customization, attr!.Priority, x, null );
+                    return new TypeInfo( attr!.Customization, attr!.Priority, x, null );
                 } )
                 .ToList();
 
@@ -110,7 +109,6 @@ namespace J4JSoftware.Configuration.CommandLine.support
                 }))
             {
                 retVal.Add( new TypeInfo(
-                    OSNames.Universal,
                     Customization.BuiltIn,
                     Int32.MinValue,
                     typeof( BuiltInTextToValue<> ).MakeGenericType( convMethod.ReturnType ),
@@ -130,7 +128,7 @@ namespace J4JSoftware.Configuration.CommandLine.support
                     var attr = x.GetCustomAttribute<CommandLineCustomizationAttribute>();
                     var attrOS = x.GetCustomAttribute<CommandLineOperatingSystemAttribute>();
 
-                    return new TypeInfo(attrOS?.OperatingSystem ?? string.Empty, attr!.Customization, attr!.Priority, x, null);
+                    return new TypeInfo( attr!.Customization, attr!.Priority, x, null );
                 })
                 .ToList();
 
@@ -231,7 +229,7 @@ namespace J4JSoftware.Configuration.CommandLine.support
 
         public IAvailableTokens? GetAvailableTokens( string osName )
         {
-            var conformingType = GetConformingTypes( _tokens, osName )
+            var conformingType = GetConformingTypes( _tokens )
                 .OrderByDescending( x => x.Customization )
                 .ThenByDescending( x => x.Priority )
                 .FirstOrDefault();
@@ -241,7 +239,7 @@ namespace J4JSoftware.Configuration.CommandLine.support
 
         public IMasterTextCollection? GetMasterTextCollection( string osName )
         {
-            var conformingType = GetConformingTypes(_masterText, osName)
+            var conformingType = GetConformingTypes(_masterText )
                 .OrderByDescending(x => x.Customization)
                 .ThenByDescending(x => x.Priority)
                 .FirstOrDefault();
@@ -261,7 +259,7 @@ namespace J4JSoftware.Configuration.CommandLine.support
                 return null;
             }
 
-            var conformingTypes = GetConformingTypes( _bindabilityValidators, osName );
+            var conformingTypes = GetConformingTypes( _bindabilityValidators );
 
             var conformingType = conformingTypes.OrderByDescending( x => x.Customization )
                 .ThenByDescending( x => x.Priority )
@@ -306,25 +304,11 @@ namespace J4JSoftware.Configuration.CommandLine.support
             return retVal;
         }
 
-        private List<TypeInfo> GetConformingTypes( List<TypeInfo> typeInfoList, string osName )
+        private List<TypeInfo> GetConformingTypes( List<TypeInfo> typeInfoList )
         {
             var retVal = new List<TypeInfo>();
 
-            retVal.AddRange(
-                typeInfoList
-                    .Where( x => x.OperatingSystem.Equals( osName, StringComparison.OrdinalIgnoreCase ) )
-                    .ToList() );
-
-            if( !_osSynonyms.ContainsKey( osName ) )
-                return retVal;
-
-            foreach( var synonym in _osSynonyms[ osName ] )
-            {
-                retVal.AddRange(
-                    typeInfoList
-                        .Where(x => x.OperatingSystem.Equals(synonym, StringComparison.OrdinalIgnoreCase))
-                        .ToList());
-            }
+            retVal.AddRange( typeInfoList.ToList() );
 
             return retVal;
         }
@@ -356,7 +340,7 @@ namespace J4JSoftware.Configuration.CommandLine.support
                 _logger?.Error<Type, string, string>(
                     "Could not create {0} object for operating system '{1}'. Exception was '{2}'",
                     typeof(T),
-                    osName ?? OSNames.Undefined,
+                    osName ?? OperatingSystem.Undefined,
                     e.Message);
 
                 return null;

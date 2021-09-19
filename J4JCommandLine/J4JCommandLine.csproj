@@ -22,14 +22,6 @@
 	</PropertyGroup>
 
 	<ItemGroup>
-	  <Compile Remove="bindability\UniversalBindabilityValidator.cs" />
-	  <Compile Remove="grammar\tokens\UniversalTokens.cs" />
-	  <Compile Remove="master-text\MasterTextUniversal.cs" />
-	  <Compile Remove="options\CommandLineStyle.cs" />
-	  <Compile Remove="extensions\ICustomizedWithStyle.cs" />
-	</ItemGroup>
-
-	<ItemGroup>
 		<PackageReference Include="Microsoft.Extensions.Configuration" Version="5.0.0" />
 	</ItemGroup>
 

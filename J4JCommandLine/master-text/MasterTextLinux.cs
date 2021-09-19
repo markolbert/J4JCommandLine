@@ -23,7 +23,7 @@ using J4JSoftware.Logging;
 namespace J4JSoftware.Configuration.CommandLine
 {
     [CommandLineCustomization(Customization.BuiltIn, Int32.MinValue)]
-    [CommandLineOperatingSystem(OSNames.Linux, StringComparison.Ordinal)]
+    [CommandLineOperatingSystem(CommandLine.OperatingSystem.Linux, StringComparison.Ordinal)]
     public class MasterTextLinux : MasterTextCollection
     {
         public MasterTextLinux(
