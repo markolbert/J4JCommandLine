@@ -23,7 +23,7 @@ using System.Reflection;
 
 namespace J4JSoftware.Configuration.CommandLine
 {
-    public interface IBindabilityValidator : ICustomized
+    public interface IBindabilityValidator
     {
         bool CanConvert( Type toCheck );
         bool Convert( Type targetType, IEnumerable<string> textValues, out object? result );

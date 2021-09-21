@@ -24,54 +24,33 @@ using Serilog.Events;
 
 namespace J4JSoftware.Configuration.CommandLine
 {
-    public class OptionsGenerator : CustomizedEntity, IOptionsGenerator
+    public class OptionsGenerator : IOptionsGenerator
     {
         private readonly IJ4JLogger? _logger;
 
         private IOptionCollection? _options;
         private StringComparison _textComparison;
-        private bool _initialized;
         private CommandLineArgument? _current;
 
-        protected OptionsGenerator(
+        public OptionsGenerator(
+            IOptionCollection options,
+            StringComparison textComparison,
             IJ4JLogger? logger
         )
-        :base(true)
         {
-            _logger = logger;
-        }
-
-        public bool IsInitialized => _initialized;
-
-        public void Initialize( StringComparison textComparision, IOptionCollection options )
-        {
-            _textComparison = textComparision;
             _options = options;
-            _initialized = true;
-        }
-
-        private void Validate()
-        {
-            if( _initialized )
-                return;
-
-            var mesg = "OptionsGenerator is uninitialized, terminating";
-            _logger?.Fatal( mesg );
-            throw new InvalidOperationException( mesg );
+            _textComparison = textComparison;
+            _logger = logger;
         }
 
         public bool Create( TokenPair tokenPair )
         {
-            Validate();
-
             _current = new CommandLineArgument( _options!, _textComparison );
             return true;
         }
 
         public bool EndParsing( TokenPair tokenPair )
         {
-            Validate();
-
             if( tokenPair.Current.Type != TokenType.EndOfInput )
             {
                 LogTokenPair( tokenPair, 
@@ -91,8 +70,6 @@ namespace J4JSoftware.Configuration.CommandLine
 
         public bool TerminateWithPrejuidice( TokenPair tokenPair )
         {
-            Validate();
-
             _current = null;
 
             LogTokenPair(tokenPair, "terminated with prejudice", LogEventLevel.Error);
@@ -102,8 +79,6 @@ namespace J4JSoftware.Configuration.CommandLine
 
         public bool Commit( TokenPair tokenPair )
         {
-            Validate();
-
             if ( _current == null )
             {
                 switch( tokenPair.Current.Type )
@@ -148,17 +123,10 @@ namespace J4JSoftware.Configuration.CommandLine
         }
 
         // a no-op so we just consume a token but do nothing with it
-        public bool ConsumeToken( TokenPair tokenPair )
-        {
-            Validate();
-
-            return true;
-        }
+        public bool ConsumeToken( TokenPair tokenPair ) => true;
 
         public bool ProcessText( TokenPair tokenPair )
         {
-            Validate();
-
             if ( _current == null )
                 _options!.UnkeyedValues.Add( tokenPair.Current.Text );
             else

@@ -27,7 +27,7 @@ using Serilog;
 
 namespace J4JSoftware.Configuration.CommandLine
 {
-    public class BindabilityValidator : CustomizedEntity, IBindabilityValidator
+    public class BindabilityValidator : IBindabilityValidator
     {
         private enum GetterSetter
         {
@@ -35,12 +35,35 @@ namespace J4JSoftware.Configuration.CommandLine
             Setter
         }
 
+        public static List<ITextToValue> GetBuiltInConverters( IJ4JLogger? logger )
+        {
+            var retVal = new List<ITextToValue>();
+
+            foreach( var convMethod in typeof(Convert)
+                .GetMethods( BindingFlags.Static | BindingFlags.Public )
+                .Where( m =>
+                {
+                    var parameters = m.GetParameters();
+
+                    return parameters.Length == 1 && !typeof(string).IsAssignableFrom( parameters[ 0 ].ParameterType );
+                } ) )
+            {
+                var builtInType = typeof(BuiltInTextToValue<>).MakeGenericType( convMethod.ReturnType );
+
+                retVal.Add( (ITextToValue)Activator.CreateInstance(
+                        builtInType,
+                        new object?[] { convMethod, logger } )!
+                );
+            }
+
+            return retVal;
+        }
+
         private readonly List<ITextToValue> _converters;
 
-        protected BindabilityValidator(
+        public BindabilityValidator(
             IEnumerable<ITextToValue> converters,
             IJ4JLogger? logger )
-            : base( false )
         {
             _converters = converters.ToList();
 

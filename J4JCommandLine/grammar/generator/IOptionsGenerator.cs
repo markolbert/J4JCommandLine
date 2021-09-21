@@ -2,12 +2,8 @@
 
 namespace J4JSoftware.Configuration.CommandLine
 {
-    public interface IOptionsGenerator : ICustomized
+    public interface IOptionsGenerator
     {
-        bool IsInitialized { get; }
-
-        void Initialize( StringComparison textComparision, IOptionCollection options );
-
         bool Create( TokenPair tokenPair );
         bool EndParsing( TokenPair tokenPair );
         bool TerminateWithPrejuidice( TokenPair tokenPair );

@@ -27,10 +27,9 @@ namespace J4JSoftware.Configuration.CommandLine
         internal TypeBoundOption(
             IOptionCollection container,
             string typeRelativeContextPath,
-            IMasterTextCollection masterText,
             IBindabilityValidator propValidator
         )
-            : base( container, typeRelativeContextPath, masterText, propValidator )
+            : base( container, typeRelativeContextPath, propValidator )
         {
         }
 

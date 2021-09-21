@@ -17,18 +17,16 @@
 
 #endregion
 
+using System;
 using System.Collections.Generic;
 
 namespace J4JSoftware.Configuration.CommandLine
 {
-    public interface IAvailableTokens : ICustomized
+    public interface IAvailableTokens : IEnumerable<Token>
     {
-        void Initialize();
-
-        IEnumerable<(string text, TokenType type)> Available { get; }
-        
+        StringComparison TextComparison { get; }
         int Count { get; }
+
         bool Add( TokenType type, string text );
-        bool Remove( string text );
     }
 }

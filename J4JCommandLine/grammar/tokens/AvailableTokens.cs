@@ -18,45 +18,39 @@
 #endregion
 
 using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Linq;
 using System.Reflection;
 using J4JSoftware.Logging;
 
 namespace J4JSoftware.Configuration.CommandLine
 {
-    public class AvailableTokens : CustomizedEntity, IAvailableTokens
+    public class AvailableTokens : IAvailableTokens
     {
-        private readonly Dictionary<TokenType, List<string>> _available = new();
+        private readonly Dictionary<TokenType, List<Token>> _available = new();
 
-        protected AvailableTokens( 
-            IJ4JLogger? logger )
-        :base(false)
+        public AvailableTokens( 
+            StringComparison textComparison,
+            IJ4JLogger? logger,
+            bool inclCommon = true
+            )
         {
+            TextComparison = textComparison;
             Logger = logger;
-        }
 
-        protected IJ4JLogger? Logger { get; }
+            if( !inclCommon ) 
+                return;
 
-        public virtual void Initialize()
-        {
-            _available.Clear();
-
-            // common tokens
             Add(TokenType.Separator, " ");
             Add(TokenType.Separator, "\t");
             Add(TokenType.ValuePrefix, "=");
         }
 
-        public IEnumerable<(string text, TokenType type)> Available
-        {
-            get
-            {
-                foreach( var kvp in _available )
-                foreach( var itemText in kvp.Value )
-                    yield return ( itemText, kvp.Key );
-            }
-        }
+        protected IJ4JLogger? Logger { get; }
+
+        public StringComparison TextComparison { get; }
 
         public int Count => _available.Count;
 
@@ -69,35 +63,35 @@ namespace J4JSoftware.Configuration.CommandLine
             }
 
             if( _available.SelectMany( kvp => kvp.Value )
-                .Any( t => t.Equals( text, TextComparison ) ) )
+                .Any( t => t.Text.Equals( text, TextComparison ) ) )
             {
                 Logger?.Error( "Duplicate token text '{0}' ({1})", text, type );
                 return false;
             }
 
+            var newToken = new Token( type, text );
+
             if( _available.ContainsKey( type ) )
-                _available[ type ].Add( text );
-            else _available.Add( type, new List<string> { text } );
+                _available[ type ].Add( newToken );
+            else _available.Add( type, new List<Token> { newToken } );
 
             return true;
         }
 
-        public bool Remove( string text )
+        public IEnumerator<Token> GetEnumerator()
         {
-            var kvp = _available.FirstOrDefault(
-                x => x.Value.Any( t => t.Equals( text, TextComparison ) ) );
-
-            var idx = kvp.Value.FindIndex( x => x.Equals( text, TextComparison ) );
-
-            if( idx < 0 )
+            foreach (var kvp in _available)
             {
-                Logger?.Error<string>( "Couldn't find '{0}' among tokens to delete", text );
-                return false;
+                foreach (var token in kvp.Value)
+                {
+                    yield return token;
+                }
             }
+        }
 
-            kvp.Value.RemoveAt( idx );
-
-            return true;
+        IEnumerator IEnumerable.GetEnumerator()
+        {
+            return GetEnumerator();
         }
     }
 }

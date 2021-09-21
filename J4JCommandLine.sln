@@ -23,8 +23,6 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "StaticPropertyExample", "ex
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ColorfulHelp", "ColorfulHelp\ColorfulHelp.csproj", "{27E8F8C7-D9C0-4C13-A57F-087C7D2E3DE1}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AutofacCommandLine", "AutofacCommandLine\AutofacCommandLine.csproj", "{96B617A1-CE3A-474A-9ADD-3940BBD17B96}"
-EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TypeUtilities", "..\ProgrammingUtilities\TypeUtilities\TypeUtilities.csproj", "{2A296780-BD36-42F9-8920-FB7451998E92}"
 EndProject
 Global
@@ -65,10 +63,6 @@ Global
 		{27E8F8C7-D9C0-4C13-A57F-087C7D2E3DE1}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{27E8F8C7-D9C0-4C13-A57F-087C7D2E3DE1}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{27E8F8C7-D9C0-4C13-A57F-087C7D2E3DE1}.Release|Any CPU.Build.0 = Release|Any CPU
-		{96B617A1-CE3A-474A-9ADD-3940BBD17B96}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{96B617A1-CE3A-474A-9ADD-3940BBD17B96}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{96B617A1-CE3A-474A-9ADD-3940BBD17B96}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{96B617A1-CE3A-474A-9ADD-3940BBD17B96}.Release|Any CPU.Build.0 = Release|Any CPU
 		{2A296780-BD36-42F9-8920-FB7451998E92}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{2A296780-BD36-42F9-8920-FB7451998E92}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{2A296780-BD36-42F9-8920-FB7451998E92}.Release|Any CPU.ActiveCfg = Release|Any CPU

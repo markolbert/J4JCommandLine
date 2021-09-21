@@ -27,14 +27,9 @@ namespace J4JSoftware.Configuration.CommandLine
     public abstract class TextToValue<TBaseType> : ITextToValue
     {
         protected TextToValue( 
-            Customization customization,
-            int priority,
             IJ4JLogger? logger
             )
         {
-            Customization = customization;
-            Priority = priority;
-
             Logger = logger;
             Logger?.SetLoggedType( GetType() );
         }
@@ -44,9 +39,6 @@ namespace J4JSoftware.Configuration.CommandLine
         protected IJ4JLogger? Logger { get; }
 
         public Type TargetType => typeof(TBaseType);
-
-        public Customization Customization { get; }
-        public int Priority { get; }
 
         public bool CanConvert( Type toCheck )
         {

@@ -34,7 +34,7 @@ namespace J4JSoftware.Configuration.CommandLine
         private readonly ParsingAction _endParsing;
         private readonly IJ4JLogger? _logger;
 
-        internal ParsingTable( 
+        public ParsingTable( 
             IOptionsGenerator generator,
             IJ4JLogger? logger = null 
             )

@@ -57,7 +57,6 @@ namespace J4JSoftware.Configuration.CommandLine
 
         public static IConfigurationBuilder AddJ4JCommandLine(
             this IConfigurationBuilder builder,
-            string osName,
             IServiceProvider svcProvider,
             out IOptionCollection? options,
             out CommandLineSource? cmdLineSource,
@@ -65,8 +64,7 @@ namespace J4JSoftware.Configuration.CommandLine
         )
         {
             var source = new J4JCommandLineSource(
-                osName,
-                svcProvider.GetRequiredService<IParserFactory>(),
+                svcProvider.GetRequiredService<IParser>(),
                 svcProvider.GetRequiredService<IJ4JLogger>(),
                 cleanupTokens);
 
@@ -80,55 +78,15 @@ namespace J4JSoftware.Configuration.CommandLine
 
         public static IConfigurationBuilder AddJ4JCommandLine(
             this IConfigurationBuilder builder,
-            string osName,
             IServiceProvider svcProvider,
             out IOptionCollection? options,
             params ICleanupTokens[] cleanupTokens
         )
         {
             var source = new J4JCommandLineSource(
-                osName,
-                svcProvider.GetRequiredService<IParserFactory>(),
+                svcProvider.GetRequiredService<IParser>(),
                 svcProvider.GetRequiredService<IJ4JLogger>(),
                 cleanupTokens);
-
-            builder.Add(source);
-
-            options = source.Parser?.Options;
-
-            return builder;
-        }
-
-        #endregion
-
-        #region AddJ4JCommandLine: built-in dependency injection
-
-        public static IConfigurationBuilder AddJ4JCommandLine(
-            this IConfigurationBuilder builder,
-            IParser parser,
-            IJ4JLogger? logger,
-            out IOptionCollection? options,
-            out CommandLineSource? cmdLineSource
-        )
-        {
-            var source = new J4JCommandLineSource(parser, logger);
-
-            builder.Add(source);
-
-            cmdLineSource = source.CommandLineSource;
-            options = source.Parser?.Options;
-
-            return builder;
-        }
-
-        public static IConfigurationBuilder AddJ4JCommandLine(
-            this IConfigurationBuilder builder,
-            IParser parser,
-            IJ4JLogger? logger,
-            out IOptionCollection? options
-        )
-        {
-            var source = new J4JCommandLineSource(parser, logger);
 
             builder.Add(source);
 
@@ -143,8 +101,7 @@ namespace J4JSoftware.Configuration.CommandLine
 
         public static IConfigurationBuilder AddJ4JCommandLine(
             this IConfigurationBuilder builder,
-            string osName,
-            IParserFactory parserFactory,
+            IParser parser,
             IJ4JLogger? logger,
             out IOptionCollection? options,
             out CommandLineSource? cmdLineSource,
@@ -152,8 +109,7 @@ namespace J4JSoftware.Configuration.CommandLine
         )
         {
             var source = new J4JCommandLineSource(
-                osName,
-                parserFactory,
+                parser,
                 logger,
                 cleanupTokens);
 
@@ -167,16 +123,14 @@ namespace J4JSoftware.Configuration.CommandLine
 
         public static IConfigurationBuilder AddJ4JCommandLine(
             this IConfigurationBuilder builder,
-            string osName,
-            IParserFactory parserFactory,
+            IParser parser,
             IJ4JLogger? logger,
             out IOptionCollection? options,
             params ICleanupTokens[] cleanupTokens
         )
         {
             var source = new J4JCommandLineSource(
-                osName,
-                parserFactory,
+                parser,
                 logger,
                 cleanupTokens);
 

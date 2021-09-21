@@ -29,7 +29,7 @@ namespace J4JSoftware.Configuration.CommandLine
         private readonly IAvailableTokens _tokens;
         private readonly IJ4JLogger? _logger;
 
-        internal Tokenizer(
+        public Tokenizer(
             IAvailableTokens tokens,
             IJ4JLogger? logger,
             params ICleanupTokens[] cleanupProcessors
@@ -63,9 +63,9 @@ namespace J4JSoftware.Configuration.CommandLine
             {
                 firstMatch = ( null, 0 );
 
-                foreach( var (text, tokenType) in _tokens.Available )
+                foreach( var token in _tokens )
                 {
-                    var tokenStart = cmdLine.IndexOf( text, TextComparison );
+                    var tokenStart = cmdLine.IndexOf( token.Text, TextComparison );
 
                     // If there was no match, go to next token
                     if( tokenStart < 0 )
@@ -75,7 +75,7 @@ namespace J4JSoftware.Configuration.CommandLine
                     // move on to the next token.
                     if( firstMatch.token == null )
                     {
-                        firstMatch = ( new Token( tokenType, text ), tokenStart );
+                        firstMatch = ( token.Copy(), tokenStart );
                         continue;
                     }
 
@@ -88,14 +88,14 @@ namespace J4JSoftware.Configuration.CommandLine
                     // make it the first match and move on to the next token
                     if( tokenStart < firstMatch.startChar )
                     {
-                        firstMatch = ( new Token( tokenType, text ), tokenStart );
+                        firstMatch = ( token.Copy(), tokenStart );
                         continue;
                     }
 
                     // if the current match and the existing first match both start
                     // at the same location, make the longest match the first match.
-                    if( firstMatch.token.Length < text.Length )
-                        firstMatch = ( new Token( tokenType, text ), tokenStart );
+                    if( firstMatch.token.Length < token.Length )
+                        firstMatch = ( token.Copy(), tokenStart );
                 }
 
                 // if no first match was defined, there are no tokens remaining in the

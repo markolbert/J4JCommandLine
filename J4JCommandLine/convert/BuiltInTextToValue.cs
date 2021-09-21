@@ -23,7 +23,6 @@ using J4JSoftware.Logging;
 
 namespace J4JSoftware.Configuration.CommandLine
 {
-    [CommandLineCustomization(Customization.BuiltIn, Int32.MinValue)]
     public class BuiltInTextToValue<TBaseType> : TextToValue<TBaseType>, ITextToValue
     {
         private readonly MethodInfo _convMethod;
@@ -32,7 +31,7 @@ namespace J4JSoftware.Configuration.CommandLine
             MethodInfo convMethod,
             IJ4JLogger? logger
         )
-            : base( Customization.BuiltIn, int.MinValue, logger )
+            : base( logger )
         {
             _convMethod = convMethod;
         }

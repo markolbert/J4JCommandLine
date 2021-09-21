@@ -11,7 +11,7 @@ namespace J4JSoftware.Configuration.CommandLine
         where TEnum: Enum
     {
         public TextToEnum( IJ4JLogger? logger ) 
-            : base( Customization.BuiltIn, Int32.MinValue, logger )
+            : base( logger )
         {
         }
 

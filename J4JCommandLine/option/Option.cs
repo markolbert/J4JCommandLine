@@ -26,20 +26,17 @@ namespace J4JSoftware.Configuration.CommandLine
     public class Option<T> : IOption<T>
     {
         private readonly List<string> _cmdLineKeys = new();
-        private readonly IMasterTextCollection _masterText;
         private readonly IBindabilityValidator _propValidator;
         private readonly List<string> _values = new();
 
         internal Option(
             IOptionCollection container,
             string contextPath,
-            IMasterTextCollection masterText,
             IBindabilityValidator propValidator
         )
         {
             Container = container;
             ContextPath = contextPath;
-            _masterText = masterText;
             _propValidator = propValidator;
         }
 
@@ -52,11 +49,8 @@ namespace J4JSoftware.Configuration.CommandLine
 
         public IOption AddCommandLineKey( string cmdLineKey )
         {
-            if( !Container.UsesCommandLineKey( cmdLineKey ) )
-            {
+            if( !Container.CommandLineKeyInUse( cmdLineKey ) )
                 _cmdLineKeys.Add( cmdLineKey );
-                _masterText.Add( TextUsageType.OptionKey, cmdLineKey );
-            }
 
             return this;
         }

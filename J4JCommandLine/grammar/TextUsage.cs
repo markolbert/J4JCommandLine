@@ -17,17 +17,19 @@
 
 #endregion
 
-using System;
-using System.Collections.Generic;
-
 namespace J4JSoftware.Configuration.CommandLine
 {
-    public interface ITextToValue
+    // a class defining how a particular piece of text is uniquely used within
+    // the framework
+    public class TextUsage
     {
-        Type TargetType { get; }
+        public TextUsage( string text, TokenType tokenType )
+        {
+            Text = text;
+            TokenType = tokenType;
+        }
 
-        bool CanConvert( Type toCheck );
-
-        bool Convert<T>( IEnumerable<string> values, out T? result );
+        public string Text { get; }
+        public TokenType TokenType { get; }
     }
 }
