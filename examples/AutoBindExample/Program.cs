@@ -10,7 +10,6 @@ using J4JSoftware.Logging;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using OperatingSystem = J4JSoftware.Configuration.CommandLine.OperatingSystem;
 
 #pragma warning disable 8618
 
@@ -23,16 +22,15 @@ namespace J4JSoftware.CommandLine.Examples
         static void Main( string[] args )
         {
             var hostConfig = new J4JHostConfiguration()
-                .OperatingSystem( OperatingSystem.Windows )
                 .Publisher( "J4JSoftware" )
                 .ApplicationName( "AutoBindExample" )
                 .FilePathTrimmer( FilePathTrimmer )
-                .OptionsInitializer( SetupOptions )
-                .AddDependencyInjectionInitializers( SetupDependencyInjection );
+                .CommandLineOperatingSystem( CommandLineOperatingSystems.Windows )
+                .CommandLineOptionsInitializer( SetupOptions );
 
             if( hostConfig.MissingRequirements != J4JHostRequirements.AllMet )
             {
-                Console.WriteLine($"Missing J4JHostConfiguration items: {hostConfig.MissingRequirements}");
+                Console.WriteLine( $"Missing J4JHostConfiguration items: {hostConfig.MissingRequirements}" );
                 Environment.ExitCode = 1;
 
                 return;
@@ -50,11 +48,13 @@ namespace J4JSoftware.CommandLine.Examples
             var host = hostBuilder.Build();
             if( host == null )
             {
-                Console.WriteLine("Could not create IHost");
+                Console.WriteLine( "Could not create IHost" );
                 Environment.ExitCode = 1;
 
                 return;
             }
+
+            var hostInfo = host.Services.GetRequiredService<J4JHostInfo>();
 
             var options = host.Services.GetRequiredService<IOptionCollection>();
             if( options == null )
@@ -62,9 +62,9 @@ namespace J4JSoftware.CommandLine.Examples
 
             var config = host.Services.GetRequiredService<IConfiguration>();
             if( config == null )
-                throw new NullReferenceException("Undefined IConfiguration");
+                throw new NullReferenceException( "Undefined IConfiguration" );
 
-            var help = new HelpDisplayColor(options);
+            var help = new HelpDisplayColor( hostInfo.CommandLineTokens!, options );
             help.Display();
 
             var parsed = config.Get<Program>();
@@ -79,8 +79,8 @@ namespace J4JSoftware.CommandLine.Examples
 
             Console.WriteLine( "Parsing succeeded" );
 
-            Console.WriteLine( $"IntValue is {IntValue}");
-            Console.WriteLine( $"TextValue is {TextValue}");
+            Console.WriteLine( $"IntValue is {IntValue}" );
+            Console.WriteLine( $"TextValue is {TextValue}" );
 
             Console.WriteLine( options.UnkeyedValues.Count == 0
                 ? "No unkeyed parameters"
@@ -99,17 +99,6 @@ namespace J4JSoftware.CommandLine.Examples
             options.Bind<Program, string>(x => Program.TextValue, "t")!
                 .SetDefaultValue("a cool default")
                 .SetDescription("A string value");
-        }
-
-        private static void SetupDependencyInjection( HostBuilderContext hbc, ContainerBuilder builder )
-        {
-            builder.RegisterModule(new AutofacModule());
-            builder.RegisterTextToValueAssemblies();
-            builder.RegisterTokenAssemblies();
-            builder.RegisterMasterTextCollectionAssemblies();
-            builder.RegisterBindabilityValidatorAssemblies();
-            builder.RegisterCommandLineGeneratorAssemblies();
-            builder.RegisterDisplayHelpAssemblies(typeof(HelpDisplayColor));
         }
 
         // these next two methods serve to strip the project path off of source code

@@ -19,6 +19,7 @@
 
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Linq;
 using System.Text;
 using J4JSoftware.Logging;
 
@@ -27,12 +28,15 @@ namespace J4JSoftware.Configuration.CommandLine
     public abstract class HelpDisplay : IHelpDisplay
     {
         protected HelpDisplay( 
+            IAvailableTokens tokens,
             IOptionCollection options 
             )
         {
+            Tokens = tokens;
             Options = options;
         }
 
+        protected IAvailableTokens Tokens { get; }
         protected IOptionCollection Options { get; }
 
         public abstract void Display();
@@ -41,7 +45,7 @@ namespace J4JSoftware.Configuration.CommandLine
         {
             var retVal = new List<string>();
 
-            foreach( var prefix in Options.MasterTextCollection[ TextUsageType.Prefix ] )
+            foreach( var prefix in Tokens.Where(x=>x.Type == TokenType.KeyPrefix  ) )
             {
                 foreach( var key in option.Keys )
                 {

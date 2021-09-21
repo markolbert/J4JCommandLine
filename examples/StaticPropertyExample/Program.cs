@@ -10,7 +10,6 @@ using J4JSoftware.Logging;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using OperatingSystem = J4JSoftware.Configuration.CommandLine.OperatingSystem;
 
 #pragma warning disable 8618
 
@@ -21,12 +20,11 @@ namespace J4JSoftware.CommandLine.Examples
         static void Main(string[] args)
         {
             var hostConfig = new J4JHostConfiguration()
-                .OperatingSystem(OperatingSystem.Windows)
                 .Publisher("J4JSoftware")
                 .ApplicationName("StaticPropertyExample")
                 .FilePathTrimmer(FilePathTrimmer)
-                .OptionsInitializer(SetupOptions)
-                .AddDependencyInjectionInitializers(SetupDependencyInjection);
+                .CommandLineOperatingSystem(CommandLineOperatingSystems.Windows)
+                .CommandLineOptionsInitializer(SetupOptions);
 
             if (hostConfig.MissingRequirements != J4JHostRequirements.AllMet)
             {
@@ -62,7 +60,9 @@ namespace J4JSoftware.CommandLine.Examples
             if (config == null)
                 throw new NullReferenceException("Undefined IConfiguration");
 
-            var help = new HelpDisplayColor( options );
+            var hostInfo = host.Services.GetRequiredService<J4JHostInfo>();
+
+            var help = new HelpDisplayColor(hostInfo.CommandLineTokens!, options);
             help.Display();
 
             var parsed = config.Get<Program>();
@@ -97,17 +97,6 @@ namespace J4JSoftware.CommandLine.Examples
             options.Bind<Program, string>(x => Program.TextValue, "t")!
                 .SetDefaultValue("a cool default")
                 .SetDescription("A string value");
-        }
-
-        private static void SetupDependencyInjection(HostBuilderContext hbc, ContainerBuilder builder)
-        {
-            builder.RegisterModule(new AutofacModule());
-            builder.RegisterTextToValueAssemblies();
-            builder.RegisterTokenAssemblies();
-            builder.RegisterMasterTextCollectionAssemblies();
-            builder.RegisterBindabilityValidatorAssemblies();
-            builder.RegisterCommandLineGeneratorAssemblies();
-            builder.RegisterDisplayHelpAssemblies(typeof(HelpDisplayColor));
         }
 
         // these next two methods serve to strip the project path off of source code
