@@ -17,17 +17,60 @@
 
 #endregion
 
-using J4JSoftware.Configuration.CommandLine.support;
+using System;
 using J4JSoftware.Logging;
+using Serilog.Core;
 
 namespace J4JSoftware.Configuration.CommandLine
 {
     public class Parser : IParser
     {
+        public static IParser GetWindowsDefault( IJ4JLogger? logger, params ICleanupTokens[] cleanupProcessors )
+        {
+            var options = new OptionCollection(
+                StringComparison.OrdinalIgnoreCase,
+                new BindabilityValidator( BindabilityValidator.GetBuiltInConverters( logger ), logger ),
+                logger );
+
+            var parsingTable = new ParsingTable( new OptionsGenerator(
+                    options,
+                    StringComparison.OrdinalIgnoreCase,
+                    logger ),
+                logger );
+
+            var tokenizer = new Tokenizer( new WindowsTokens( logger ),
+                logger,
+                cleanupProcessors
+            );
+
+            return new Parser( options, parsingTable, tokenizer, logger );
+        }
+
+        public static IParser GetLinuxDefault(IJ4JLogger? logger, params ICleanupTokens[] cleanupProcessors)
+        {
+            var options = new OptionCollection(
+                StringComparison.Ordinal,
+                new BindabilityValidator(BindabilityValidator.GetBuiltInConverters(logger), logger),
+                logger);
+
+            var parsingTable = new ParsingTable( new OptionsGenerator(
+                    options,
+                    StringComparison.Ordinal,
+                    logger ),
+                logger );
+
+            var tokenizer = new Tokenizer(new LinuxTokens(logger),
+                logger,
+                cleanupProcessors
+            );
+
+            return new Parser(options, parsingTable, tokenizer, logger);
+        }
+
         private readonly ParsingTable _parsingTable;
         private readonly IJ4JLogger? _logger;
 
-        internal Parser(
+        public Parser(
             IOptionCollection options,
             ParsingTable parsingTable,
             ITokenizer tokenizer,

@@ -43,21 +43,20 @@ namespace J4JSoftware.Configuration.CommandLine
 
         private readonly Dictionary<Type, string> _typePrefixes = new();
 
-        internal OptionCollection(
-            IMasterTextCollection mtCollection,
+        private readonly List<string> _optionKeys = new List<string>();
+
+        public OptionCollection(
+            StringComparison textComparison,
             IBindabilityValidator propValidator,
             IJ4JLogger? logger
         )
         {
-            _textComparison = mtCollection.TextComparison;
-            MasterTextCollection = mtCollection;
+            _textComparison = textComparison;
             _propValidator = propValidator;
 
             _logger = logger;
             _logger?.SetLoggedType( GetType() );
         }
-
-        public IMasterTextCollection MasterTextCollection { get; }
 
         public bool IsConfigured { get; private set; }
         public void FinishConfiguration()
@@ -118,7 +117,7 @@ namespace J4JSoftware.Configuration.CommandLine
                 return null;
             }
 
-            var retVal = new Option<TProp>( this, contextPath, MasterTextCollection, _propValidator );
+            var retVal = new Option<TProp>( this, contextPath, _propValidator );
 
             _options.Add( retVal );
 
@@ -150,7 +149,7 @@ namespace J4JSoftware.Configuration.CommandLine
                 return null;
             }
 
-            var retVal = ctor.Invoke( new object?[] { this, contextPath, MasterTextCollection, _propValidator } ) as IOption;
+            var retVal = ctor.Invoke( new object?[] { this, contextPath, _propValidator } ) as IOption;
 
             if( retVal == null )
             {
@@ -237,7 +236,6 @@ namespace J4JSoftware.Configuration.CommandLine
             var retVal = new TypeBoundOption<TContainer, TProp>(
                 this,
                 contextPath,
-                MasterTextCollection,
                 _propValidator);
 
             retVal.SetStyle( firstStyle!.Value );
@@ -254,9 +252,15 @@ namespace J4JSoftware.Configuration.CommandLine
 
         // determines whether or not a key is being used by an existing option, honoring whatever
         // case sensitivity is in use
-        public bool UsesCommandLineKey( string key )
+        public bool CommandLineKeyInUse( string key )
         {
-            return MasterTextCollection.Contains( key, TextUsageType.OptionKey );
+            foreach( var option in _options )
+            {
+                if( option.Keys.Any( x => x.Equals( key, _textComparison ) ) )
+                    return true;
+            }
+
+            return false;
         }
 
         public bool UsesContextPath( string contextPath )
@@ -302,7 +306,7 @@ namespace J4JSoftware.Configuration.CommandLine
         {
             foreach( var key in cmdLineKeys )
             {
-                if( !UsesCommandLineKey( key ) )
+                if( !CommandLineKeyInUse( key ) )
                     yield return key;
             }
         }
