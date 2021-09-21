@@ -78,11 +78,10 @@ namespace J4JSoftware.Binder.Tests
             params ICleanupTokens[] cleanupTokens )
         {
 
-            _parser = Factory.GetParser( 
-                osName, 
-                cleanupTokens );
+            _parser = osName.Equals("windows", StringComparison.OrdinalIgnoreCase)
+                ? Parser.GetWindowsDefault(Logger, cleanupTokens)
+                : Parser.GetLinuxDefault(Logger, cleanupTokens);
 
-            _parser.Should().NotBeNull();
             _parser!.Options.Should().NotBeNull();
         }
 

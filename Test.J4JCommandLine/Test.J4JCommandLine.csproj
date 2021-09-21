@@ -34,7 +34,6 @@
 	<ItemGroup>
 	  <ProjectReference Include="..\..\J4JLogging\J4JLogging\J4JLogging.csproj" />
 	  <ProjectReference Include="..\..\ProgrammingUtilities\DependencyInjection\DependencyInjection.csproj" />
-	  <ProjectReference Include="..\AutofacCommandLine\AutofacCommandLine.csproj" />
 	  <ProjectReference Include="..\J4JCommandLine\J4JCommandLine.csproj" />
 	</ItemGroup>
 

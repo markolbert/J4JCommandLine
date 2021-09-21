@@ -78,13 +78,10 @@ namespace J4JSoftware.Binder.Tests
             StringComparison? textComparison = null,
             params ICleanupTokens[] cleanupTokens )
         {
-            ParserFactory.Create(osName,
-                    out _parser, 
-                    cleanupTokens)
-                .Should()
-                .BeTrue();
+            _parser = osName.Equals("windows", StringComparison.OrdinalIgnoreCase)
+                ? Parser.GetWindowsDefault(Logger, cleanupTokens)
+                : Parser.GetLinuxDefault(Logger, cleanupTokens);
 
-            _parser.Should().NotBeNull();
             _parser!.Options.Should().NotBeNull();
         }
 

@@ -80,12 +80,13 @@ namespace J4JSoftware.Binder.Tests
 
         private void CreateConfigurationRootAndParser( TestConfig testConfig )
         {
-            var parser = Factory.GetParser( testConfig.OperatingSystem );
-            parser.Should().NotBeNull();
+            var parser = testConfig.OperatingSystem.Equals("windows", StringComparison.OrdinalIgnoreCase)
+                ? Parser.GetWindowsDefault(Logger)
+                : Parser.GetLinuxDefault(Logger);
 
             _configRoot = new ConfigurationBuilder()
                 .AddJ4JCommandLine(
-                    parser!,
+                    parser,
                     Logger,
                     out _options,
                     out _cmdLineSrc)

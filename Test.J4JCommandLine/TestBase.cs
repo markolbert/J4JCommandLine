@@ -21,8 +21,6 @@ namespace J4JSoftware.Binder.Tests
         {
             Container = Configure();
 
-            ParserFactory = Container.Resolve<IParserFactory>();
-
             Logger = Container.Resolve<IJ4JLogger>();
             Logger.SetLoggedType( GetType() );
         }
@@ -39,15 +37,6 @@ namespace J4JSoftware.Binder.Tests
 
         protected virtual void ConfigureContainer( ContainerBuilder builder )
         {
-            builder.RegisterModule( new AutofacModule() );
-
-            builder.RegisterTextToValueAssemblies();
-            builder.RegisterTokenAssemblies();
-            builder.RegisterMasterTextCollectionAssemblies();
-            builder.RegisterBindabilityValidatorAssemblies();
-            builder.RegisterCommandLineGeneratorAssemblies();
-            builder.RegisterDisplayHelpAssemblies();
-
             builder.Register(c =>
                 {
                     var loggerConfig = new J4JLoggerConfiguration( FilePathTrimmer );
@@ -83,8 +72,6 @@ namespace J4JSoftware.Binder.Tests
                     } );
             }
         }
-
-        protected IParserFactory ParserFactory { get; }
 
         protected IOption Bind<TTarget, TProp>(IOptionCollection options, Expression<Func<TTarget, TProp>> propSelector,
             TestConfig testConfig)

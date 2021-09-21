@@ -8,7 +8,6 @@ using System.Runtime.CompilerServices;
 using Autofac;
 using FluentAssertions;
 using J4JSoftware.Configuration.CommandLine;
-using J4JSoftware.Configuration.CommandLine.support;
 using J4JSoftware.Logging;
 using Serilog;
 
@@ -25,11 +24,8 @@ namespace J4JSoftware.Binder.Tests
 
             Logger = loggerConfig.CreateLogger();
             Logger.SetLoggedType( GetType() );
-
-            Factory = new J4JCommandLineFactory( logger: Logger );
         }
 
-        protected J4JCommandLineFactory Factory { get; }
         protected IJ4JLogger Logger { get; }
 
         protected IOption Bind<TTarget, TProp>(IOptionCollection options, Expression<Func<TTarget, TProp>> propSelector,
