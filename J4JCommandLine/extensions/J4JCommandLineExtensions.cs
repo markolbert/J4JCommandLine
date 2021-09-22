@@ -20,6 +20,7 @@
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Reflection.Metadata.Ecma335;
 using J4JSoftware.Logging;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -53,8 +54,6 @@ namespace J4JSoftware.Configuration.CommandLine
                 : new BindableTypeInfo( toCheck, BindableType.Unsupported );
         }
 
-        #region AddJ4JCommandLine: IServiceProvider-based
-
         public static IConfigurationBuilder AddJ4JCommandLine(
             this IConfigurationBuilder builder,
             IServiceProvider svcProvider,
@@ -78,31 +77,7 @@ namespace J4JSoftware.Configuration.CommandLine
 
         public static IConfigurationBuilder AddJ4JCommandLine(
             this IConfigurationBuilder builder,
-            IServiceProvider svcProvider,
-            out IOptionCollection? options,
-            params ICleanupTokens[] cleanupTokens
-        )
-        {
-            var source = new J4JCommandLineSource(
-                svcProvider.GetRequiredService<IParser>(),
-                svcProvider.GetRequiredService<IJ4JLogger>(),
-                cleanupTokens);
-
-            builder.Add(source);
-
-            options = source.Parser?.Options;
-
-            return builder;
-        }
-
-        #endregion
-
-        #region AddJ4JCommandLine: explicit factories
-
-        public static IConfigurationBuilder AddJ4JCommandLine(
-            this IConfigurationBuilder builder,
             IParser parser,
-            out IOptionCollection? options,
             out CommandLineSource? cmdLineSource,
             IJ4JLogger? logger = null,
             params ICleanupTokens[] cleanupTokens
@@ -116,31 +91,74 @@ namespace J4JSoftware.Configuration.CommandLine
             builder.Add(source);
 
             cmdLineSource = source.CommandLineSource;
-            options = source.Parser?.Options;
 
             return builder;
         }
 
-        public static IConfigurationBuilder AddJ4JCommandLine(
+        public static IConfigurationBuilder AddJ4JCommandLineForWindows(
             this IConfigurationBuilder builder,
-            IParser parser,
             out IOptionCollection? options,
+            out CommandLineSource? cmdLineSource,
+            IJ4JLogger? logger = null,
+            params ICleanupTokens[] cleanupTokens
+        )
+            => builder.AddJ4JCommandLineDefault( 
+                CommandLineOperatingSystems.Windows, 
+                out options, 
+                out cmdLineSource,
+                logger, cleanupTokens );
+
+        public static IConfigurationBuilder AddJ4JCommandLineForLinux(
+            this IConfigurationBuilder builder,
+            out IOptionCollection? options,
+            out CommandLineSource? cmdLineSource,
+            IJ4JLogger? logger = null,
+            params ICleanupTokens[] cleanupTokens
+        )
+            => builder.AddJ4JCommandLineDefault(
+                CommandLineOperatingSystems.Linux,
+                out options,
+                out cmdLineSource,
+                logger, cleanupTokens);
+
+        private static IConfigurationBuilder AddJ4JCommandLineDefault(
+            this IConfigurationBuilder builder,
+            CommandLineOperatingSystems opSys,
+            out IOptionCollection? options,
+            out CommandLineSource? cmdLineSource,
             IJ4JLogger? logger = null,
             params ICleanupTokens[] cleanupTokens
         )
         {
-            var source = new J4JCommandLineSource(
-                parser,
-                logger,
-                cleanupTokens);
+            var textComparison = opSys switch
+            {
+                CommandLineOperatingSystems.Windows => StringComparison.OrdinalIgnoreCase,
+                CommandLineOperatingSystems.Linux => StringComparison.Ordinal,
+                _ => throw new InvalidEnumArgumentException(
+                    $"Unsupported {nameof(CommandLineOperatingSystems)} value '{opSys}'" )
+            };
 
-            builder.Add(source);
+            var lexicalElements = opSys switch
+            {
+                CommandLineOperatingSystems.Windows => (ILexicalElements) new WindowsLexicalElements( logger ),
+                CommandLineOperatingSystems.Linux => (ILexicalElements) new LinuxLexicalElements( logger ),
+                _ => throw new InvalidEnumArgumentException(
+                    $"Unsupported {nameof(CommandLineOperatingSystems)} value '{opSys}'" )
+            };
 
-            options = source.Parser?.Options;
+            options = new OptionCollection(
+                textComparison,
+                new BindabilityValidator(logger),
+                logger);
 
-            return builder;
+            var optionsGenerator = new OptionsGenerator(options, textComparison, logger);
+            var parsingTable = new ParsingTable(optionsGenerator, logger);
+            var tokenizer = new Tokenizer( lexicalElements );
+
+            return builder.AddJ4JCommandLine(
+                new Parser(options, parsingTable, tokenizer, logger),
+                out cmdLineSource,
+                logger, cleanupTokens);
         }
-
-        #endregion
     }
 }
