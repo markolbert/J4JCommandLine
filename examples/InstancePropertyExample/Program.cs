@@ -20,9 +20,10 @@ namespace J4JSoftware.CommandLine.Examples
             var hostConfig = new J4JHostConfiguration()
                 .Publisher("J4JSoftware")
                 .ApplicationName("InstancePropertyExample")
-                .FilePathTrimmer(FilePathTrimmer)
-                .CommandLineOperatingSystem(CommandLineOperatingSystems.Windows)
-                .CommandLineOptionsInitializer(SetupOptions);
+                .FilePathTrimmer(FilePathTrimmer);
+
+            hostConfig.AddCommandLineProcessing( CommandLineOperatingSystems.Windows )
+                .OptionsInitializer( SetupOptions );
 
             if (hostConfig.MissingRequirements != J4JHostRequirements.AllMet)
             {
@@ -60,7 +61,7 @@ namespace J4JSoftware.CommandLine.Examples
 
             var hostInfo = host.Services.GetRequiredService<J4JHostInfo>();
 
-            var help = new HelpDisplayColor(hostInfo.CommandLineTokens!, options);
+            var help = new HelpDisplayColor(hostInfo.CommandLineLexicalElements!, options);
             help.Display();
 
             var parsed = config.Get<Configuration>();

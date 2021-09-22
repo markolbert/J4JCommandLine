@@ -24,9 +24,10 @@ namespace J4JSoftware.CommandLine.Examples
             var hostConfig = new J4JHostConfiguration()
                 .Publisher( "J4JSoftware" )
                 .ApplicationName( "AutoBindExample" )
-                .FilePathTrimmer( FilePathTrimmer )
-                .CommandLineOperatingSystem( CommandLineOperatingSystems.Windows )
-                .CommandLineOptionsInitializer( SetupOptions );
+                .FilePathTrimmer( FilePathTrimmer );
+
+            hostConfig.AddCommandLineProcessing( CommandLineOperatingSystems.Windows )
+                .OptionsInitializer( SetupOptions );
 
             if( hostConfig.MissingRequirements != J4JHostRequirements.AllMet )
             {
@@ -64,7 +65,7 @@ namespace J4JSoftware.CommandLine.Examples
             if( config == null )
                 throw new NullReferenceException( "Undefined IConfiguration" );
 
-            var help = new HelpDisplayColor( hostInfo.CommandLineTokens!, options );
+            var help = new HelpDisplayColor( hostInfo.CommandLineLexicalElements!, options );
             help.Display();
 
             var parsed = config.Get<Program>();
