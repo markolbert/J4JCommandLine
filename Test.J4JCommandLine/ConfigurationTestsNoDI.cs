@@ -84,10 +84,11 @@ namespace J4JSoftware.Binder.Tests
                 ? Parser.GetWindowsDefault(Logger)
                 : Parser.GetLinuxDefault(Logger);
 
+            _options = parser.Options;
+
             _configRoot = new ConfigurationBuilder()
                 .AddJ4JCommandLine(
                     parser,
-                    out _options,
                     out _cmdLineSrc,
                     Logger )
                 .Build();
