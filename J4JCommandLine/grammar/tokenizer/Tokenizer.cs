@@ -26,12 +26,12 @@ namespace J4JSoftware.Configuration.CommandLine
     public class Tokenizer : ITokenizer
     {
         private readonly ICleanupTokens[] _cleanupProcessors;
-        private readonly IAvailableTokens _tokens;
+        private readonly ILexicalElements _tokens;
         private readonly IJ4JLogger? _logger;
 
         public Tokenizer(
-            IAvailableTokens tokens,
-            IJ4JLogger? logger,
+            ILexicalElements tokens,
+            IJ4JLogger? logger = null,
             params ICleanupTokens[] cleanupProcessors
         )
         {
@@ -101,12 +101,12 @@ namespace J4JSoftware.Configuration.CommandLine
                 // if no first match was defined, there are no tokens remaining in the
                 // command line, so embed it all in a single, final token
                 if( firstMatch.token == null )
-                    firstMatch = ( new Token( TokenType.Text, cmdLine ), 0 );
+                    firstMatch = ( new Token( LexicalType.Text, cmdLine ), 0 );
 
                 // if the first match doesn't start at index 0 there's some text ahead
                 // of the first recognized token, so output it as such
                 if( firstMatch.startChar > 0 )
-                    retVal.Add( new Token( TokenType.Text, cmdLine[ ..firstMatch.startChar ] ) );
+                    retVal.Add( new Token( LexicalType.Text, cmdLine[ ..firstMatch.startChar ] ) );
 
                 retVal.Add( firstMatch.token );
 

@@ -17,16 +17,29 @@
 
 #endregion
 
-using System;
 using System.Collections.Generic;
 
 namespace J4JSoftware.Configuration.CommandLine
 {
-    public interface IAvailableTokens : IEnumerable<Token>
+    public class MergeSequentialSeparators : ICleanupTokens
     {
-        StringComparison TextComparison { get; }
-        int Count { get; }
+        public void Process( List<Token> tokens )
+        {
+            var toRemove = new List<int>();
 
-        bool Add( TokenType type, string text );
+            Token? prevToken = null;
+
+            for( var idx = 0; idx < tokens.Count; idx++ )
+            {
+                var token = tokens[ idx ];
+
+                if( token.Type == LexicalType.Separator && prevToken?.Type == token.Type )
+                    toRemove.Add( idx );
+
+                prevToken = token;
+            }
+
+            tokens.RemoveRange( toRemove );
+        }
     }
 }

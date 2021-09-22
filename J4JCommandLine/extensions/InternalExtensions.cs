@@ -43,7 +43,7 @@ namespace J4JSoftware.Configuration.CommandLine
 
         public static IEnumerable<TokenPair> EnumerateTokenPairs( this List<Token> tokens )
         {
-            var prevToken = new Token( TokenType.StartOfInput, string.Empty );
+            var prevToken = new Token( LexicalType.StartOfInput, string.Empty );
 
             foreach( var token in tokens )
             {
@@ -51,7 +51,7 @@ namespace J4JSoftware.Configuration.CommandLine
                 prevToken = token;
             }
 
-            yield return new TokenPair( new Token( TokenType.EndOfInput, string.Empty ), prevToken );
+            yield return new TokenPair( new Token( LexicalType.EndOfInput, string.Empty ), prevToken );
         }
     }
 }

@@ -17,25 +17,16 @@
 
 #endregion
 
+using System;
+using System.Collections.Generic;
+
 namespace J4JSoftware.Configuration.CommandLine
 {
-    public enum TokenType
+    public interface ILexicalElements : IEnumerable<Token>
     {
-        Separator,
-        ValuePrefix,
-        KeyPrefix,
-        Quoter,
+        StringComparison TextComparison { get; }
+        int Count { get; }
 
-        // Text cannot be created by user code. It only gets
-        // created by the tokenizer.
-        Text,
-
-        // EndOfInput cannot be created by user code. It only gets
-        // created by the tokenizer.
-        EndOfInput,
-
-        // StartOfInput cannot be created by user code. It only gets
-        // created by the tokenizer.
-        StartOfInput
+        bool Add( LexicalType type, string text );
     }
 }

@@ -23,6 +23,6 @@ namespace J4JSoftware.Configuration.CommandLine
     {
         bool IsValid { get; }
 
-        ParsingAction? this[ TokenTypePair typePair ] { get; set; }
+        ParsingAction? this[ LexicalPair typePair ] { get; set; }
     }
 }

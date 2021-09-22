@@ -81,7 +81,7 @@ namespace J4JSoftware.Configuration.CommandLine
                 // with the consolidated text token.
                 tokens.RemoveRange( toRemove );
 
-                tokens[ curPair.Start.Index ] = new Token( TokenType.Text, sb.ToString() );
+                tokens[ curPair.Start.Index ] = new Token( LexicalType.Text, sb.ToString() );
 
                 // resume the search for QuotedPairs at the next token
                 startIdx = curPair.Start.Index + 1;
@@ -95,7 +95,7 @@ namespace J4JSoftware.Configuration.CommandLine
                     Token = t,
                     Index = i
                 } )
-                .FirstOrDefault( t => t.Index >= startIdx && t.Token.Type == TokenType.Quoter );
+                .FirstOrDefault( t => t.Index >= startIdx && t.Token.Type == LexicalType.Quoter );
 
             if( firstQuoter == null )
                 return null;
@@ -110,7 +110,7 @@ namespace J4JSoftware.Configuration.CommandLine
                     } )
                     .FirstOrDefault( t =>
                         t.Index > firstQuoter.Index
-                        && t.Token.Type == TokenType.Quoter
+                        && t.Token.Type == LexicalType.Quoter
                         && t.Token.Text.Equals( firstQuoter.Token.Text, _textComparison ) )
             };
         }

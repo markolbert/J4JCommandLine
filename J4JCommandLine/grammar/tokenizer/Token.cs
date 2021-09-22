@@ -19,7 +19,7 @@
 
 namespace J4JSoftware.Configuration.CommandLine
 {
-    public record Token( TokenType Type, string Text )
+    public record Token( LexicalType Type, string Text )
     {
         public int Length => Text.Length;
 

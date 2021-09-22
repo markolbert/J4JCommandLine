@@ -29,7 +29,7 @@ namespace J4JSoftware.Configuration.J4JCommandLine
     public class HelpDisplayColor : HelpDisplay
     {
         public HelpDisplayColor(
-            IAvailableTokens tokens,
+            ILexicalElements tokens,
             IOptionCollection options
         )
             : base( tokens, options )

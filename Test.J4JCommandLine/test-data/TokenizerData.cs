@@ -25,7 +25,7 @@ namespace J4JSoftware.Binder.Tests
 {
     public class TokenizerData
     {
-        public TokenType Type { get; set; }
+        public LexicalType Type { get; set; }
         public string Text { get; set; }
     }
 }

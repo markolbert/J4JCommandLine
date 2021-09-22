@@ -62,8 +62,15 @@ namespace J4JSoftware.Configuration.CommandLine
         private readonly List<ITextToValue> _converters;
 
         public BindabilityValidator(
+            IJ4JLogger? logger = null
+        )
+            : this( GetBuiltInConverters( logger ), logger )
+        {
+        }
+
+        public BindabilityValidator(
             IEnumerable<ITextToValue> converters,
-            IJ4JLogger? logger )
+            IJ4JLogger? logger = null )
         {
             _converters = converters.ToList();
 

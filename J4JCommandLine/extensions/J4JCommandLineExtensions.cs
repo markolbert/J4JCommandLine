@@ -102,9 +102,9 @@ namespace J4JSoftware.Configuration.CommandLine
         public static IConfigurationBuilder AddJ4JCommandLine(
             this IConfigurationBuilder builder,
             IParser parser,
-            IJ4JLogger? logger,
             out IOptionCollection? options,
             out CommandLineSource? cmdLineSource,
+            IJ4JLogger? logger = null,
             params ICleanupTokens[] cleanupTokens
         )
         {
@@ -124,8 +124,8 @@ namespace J4JSoftware.Configuration.CommandLine
         public static IConfigurationBuilder AddJ4JCommandLine(
             this IConfigurationBuilder builder,
             IParser parser,
-            IJ4JLogger? logger,
             out IOptionCollection? options,
+            IJ4JLogger? logger = null,
             params ICleanupTokens[] cleanupTokens
         )
         {

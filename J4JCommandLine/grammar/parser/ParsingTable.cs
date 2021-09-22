@@ -28,7 +28,7 @@ namespace J4JSoftware.Configuration.CommandLine
 
     public class ParsingTable : IParsingTable
     {
-        private readonly Dictionary<TokenType, Dictionary<TokenType, ParsingAction?>> _table =
+        private readonly Dictionary<LexicalType, Dictionary<LexicalType, ParsingAction?>> _table =
             new();
 
         private readonly ParsingAction _endParsing;
@@ -44,16 +44,16 @@ namespace J4JSoftware.Configuration.CommandLine
             _logger = logger;
             _logger?.SetLoggedType( GetType() );
 
-            foreach( var row in Enum.GetValues<TokenType>() )
+            foreach( var row in Enum.GetValues<LexicalType>() )
             {
                 // Quoter never appears in the list of processed tokens because
                 // they are eliminated by the token cleanup routine
-                if( row == TokenType.Quoter )
+                if( row == LexicalType.Quoter )
                     continue;
 
-                _table.Add( row, new Dictionary<TokenType, ParsingAction?>() );
+                _table.Add( row, new Dictionary<LexicalType, ParsingAction?>() );
 
-                foreach( var col in Enum.GetValues<TokenType>() )
+                foreach( var col in Enum.GetValues<LexicalType>() )
                 {
                     // StartOfInput is only a row entry, not a column entry,
                     // because it can never appear as a "next" token
@@ -62,9 +62,9 @@ namespace J4JSoftware.Configuration.CommandLine
                     // EndOfInput we handle specially when the handler is requested
                     if( col switch
                     {
-                        TokenType.StartOfInput => true,
-                        TokenType.Quoter => true,
-                        TokenType.EndOfInput => true,
+                        LexicalType.StartOfInput => true,
+                        LexicalType.Quoter => true,
+                        LexicalType.EndOfInput => true,
                         _ => false
                     } )
                         continue;
@@ -73,30 +73,30 @@ namespace J4JSoftware.Configuration.CommandLine
                 }
             }
 
-            _table[ TokenType.StartOfInput][TokenType.KeyPrefix ] = generator.Create;
-            _table[ TokenType.StartOfInput][TokenType.ValuePrefix ] = generator.TerminateWithPrejuidice;
-            _table[ TokenType.StartOfInput][TokenType.Separator ] = generator.ConsumeToken;
-            _table[ TokenType.StartOfInput][TokenType.Text ] = generator.ProcessText;
+            _table[ LexicalType.StartOfInput][LexicalType.KeyPrefix ] = generator.Create;
+            _table[ LexicalType.StartOfInput][LexicalType.ValuePrefix ] = generator.TerminateWithPrejuidice;
+            _table[ LexicalType.StartOfInput][LexicalType.Separator ] = generator.ConsumeToken;
+            _table[ LexicalType.StartOfInput][LexicalType.Text ] = generator.ProcessText;
 
-            _table[ TokenType.KeyPrefix][TokenType.KeyPrefix ] = generator.TerminateWithPrejuidice;
-            _table[ TokenType.KeyPrefix][TokenType.ValuePrefix ] = generator.TerminateWithPrejuidice;
-            _table[ TokenType.KeyPrefix][TokenType.Separator ] = generator.TerminateWithPrejuidice;
-            _table[ TokenType.KeyPrefix][TokenType.Text ] = generator.ProcessText;
+            _table[ LexicalType.KeyPrefix][LexicalType.KeyPrefix ] = generator.TerminateWithPrejuidice;
+            _table[ LexicalType.KeyPrefix][LexicalType.ValuePrefix ] = generator.TerminateWithPrejuidice;
+            _table[ LexicalType.KeyPrefix][LexicalType.Separator ] = generator.TerminateWithPrejuidice;
+            _table[ LexicalType.KeyPrefix][LexicalType.Text ] = generator.ProcessText;
 
-            _table[ TokenType.ValuePrefix][TokenType.KeyPrefix ] = generator.TerminateWithPrejuidice;
-            _table[ TokenType.ValuePrefix][TokenType.ValuePrefix ] = generator.TerminateWithPrejuidice;
-            _table[ TokenType.ValuePrefix][TokenType.Separator ] = generator.ConsumeToken;
-            _table[ TokenType.ValuePrefix][TokenType.Text ] = generator.ProcessText;
+            _table[ LexicalType.ValuePrefix][LexicalType.KeyPrefix ] = generator.TerminateWithPrejuidice;
+            _table[ LexicalType.ValuePrefix][LexicalType.ValuePrefix ] = generator.TerminateWithPrejuidice;
+            _table[ LexicalType.ValuePrefix][LexicalType.Separator ] = generator.ConsumeToken;
+            _table[ LexicalType.ValuePrefix][LexicalType.Text ] = generator.ProcessText;
 
-            _table[ TokenType.Separator][TokenType.KeyPrefix ] = generator.Commit;
-            _table[ TokenType.Separator][TokenType.ValuePrefix ] = generator.ConsumeToken;
-            _table[ TokenType.Separator][TokenType.Separator ] = generator.ConsumeToken;
-            _table[ TokenType.Separator][TokenType.Text ] = generator.ProcessText;
+            _table[ LexicalType.Separator][LexicalType.KeyPrefix ] = generator.Commit;
+            _table[ LexicalType.Separator][LexicalType.ValuePrefix ] = generator.ConsumeToken;
+            _table[ LexicalType.Separator][LexicalType.Separator ] = generator.ConsumeToken;
+            _table[ LexicalType.Separator][LexicalType.Text ] = generator.ProcessText;
 
-            _table[ TokenType.Text][TokenType.KeyPrefix ] = generator.TerminateWithPrejuidice;
-            _table[ TokenType.Text][TokenType.ValuePrefix ] = generator.TerminateWithPrejuidice;
-            _table[ TokenType.Text][TokenType.Separator ] = generator.ConsumeToken;
-            _table[ TokenType.Text][TokenType.Text ] = generator.ProcessText;
+            _table[ LexicalType.Text][LexicalType.KeyPrefix ] = generator.TerminateWithPrejuidice;
+            _table[ LexicalType.Text][LexicalType.ValuePrefix ] = generator.TerminateWithPrejuidice;
+            _table[ LexicalType.Text][LexicalType.Separator ] = generator.ConsumeToken;
+            _table[ LexicalType.Text][LexicalType.Text ] = generator.ProcessText;
         }
 
         public bool IsValid => !_table
@@ -104,9 +104,9 @@ namespace J4JSoftware.Configuration.CommandLine
                 row.Value.Any( col =>
                     col.Value == null ) );
 
-        public ParsingAction? this[ TokenTypePair typePair ]
+        public ParsingAction? this[ LexicalPair typePair ]
         {
-            get => typePair.Current == TokenType.EndOfInput
+            get => typePair.Current == LexicalType.EndOfInput
                     ? _endParsing
                     : _table[ typePair.Previous ][ typePair.Current ];
             set => _table[ typePair.Previous ][ typePair.Current ] = value;

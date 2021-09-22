@@ -35,7 +35,7 @@ namespace J4JSoftware.Configuration.CommandLine
         public OptionsGenerator(
             IOptionCollection options,
             StringComparison textComparison,
-            IJ4JLogger? logger
+            IJ4JLogger? logger = null
         )
         {
             _options = options;
@@ -51,7 +51,7 @@ namespace J4JSoftware.Configuration.CommandLine
 
         public bool EndParsing( TokenPair tokenPair )
         {
-            if( tokenPair.Current.Type != TokenType.EndOfInput )
+            if( tokenPair.Current.Type != LexicalType.EndOfInput )
             {
                 LogTokenPair( tokenPair, 
                     $"{nameof( EndParsing )} called before end of command line text",
@@ -85,11 +85,11 @@ namespace J4JSoftware.Configuration.CommandLine
                 {
                     // if we're not yet building an entry but we received a KeyPrefix token we must be
                     // about to start building one
-                    case TokenType.Separator 
-                        when tokenPair.Previous != null && tokenPair.Previous.Type == TokenType.Separator:
+                    case LexicalType.Separator 
+                        when tokenPair.Previous != null && tokenPair.Previous.Type == LexicalType.Separator:
                         return true;
 
-                    case TokenType.KeyPrefix:
+                    case LexicalType.KeyPrefix:
                         return Create(tokenPair);
 
                     default:
@@ -191,7 +191,7 @@ namespace J4JSoftware.Configuration.CommandLine
                 return;
 
             if( tokenPair.Previous == null )
-                _logger.Write<string, TokenType, string>( level,
+                _logger.Write<string, LexicalType, string>( level,
                     "{0} *undefined* => {1} ('{2}')",
                     text,
                     tokenPair.Current.Type,

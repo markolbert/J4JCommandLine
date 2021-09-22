@@ -48,7 +48,7 @@ namespace J4JSoftware.Configuration.CommandLine
         public OptionCollection(
             StringComparison textComparison,
             IBindabilityValidator propValidator,
-            IJ4JLogger? logger
+            IJ4JLogger? logger = null
         )
         {
             _textComparison = textComparison;

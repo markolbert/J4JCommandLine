@@ -17,29 +17,25 @@
 
 #endregion
 
-using System.Collections.Generic;
-
 namespace J4JSoftware.Configuration.CommandLine
 {
-    public class MergeSequentialSeparators : ICleanupTokens
+    public enum LexicalType
     {
-        public void Process( List<Token> tokens )
-        {
-            var toRemove = new List<int>();
+        Separator,
+        ValuePrefix,
+        KeyPrefix,
+        Quoter,
 
-            Token? prevToken = null;
+        // Text cannot be created by user code. It only gets
+        // created by the tokenizer.
+        Text,
 
-            for( var idx = 0; idx < tokens.Count; idx++ )
-            {
-                var token = tokens[ idx ];
+        // EndOfInput cannot be created by user code. It only gets
+        // created by the tokenizer.
+        EndOfInput,
 
-                if( token.Type == TokenType.Separator && prevToken?.Type == token.Type )
-                    toRemove.Add( idx );
-
-                prevToken = token;
-            }
-
-            tokens.RemoveRange( toRemove );
-        }
+        // StartOfInput cannot be created by user code. It only gets
+        // created by the tokenizer.
+        StartOfInput
     }
 }

@@ -87,9 +87,9 @@ namespace J4JSoftware.Binder.Tests
             _configRoot = new ConfigurationBuilder()
                 .AddJ4JCommandLine(
                     parser,
-                    Logger,
                     out _options,
-                    out _cmdLineSrc)
+                    out _cmdLineSrc,
+                    Logger )
                 .Build();
 
             _options.Should().NotBeNull();

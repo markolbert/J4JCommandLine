@@ -22,16 +22,17 @@ using J4JSoftware.Logging;
 
 namespace J4JSoftware.Configuration.CommandLine
 {
-    public sealed class WindowsTokens : AvailableTokens
+    public sealed class LinuxLexicalElements : LexicalElements
     {
-        public WindowsTokens(
-            IJ4JLogger? logger
-        )
-            : base(StringComparison.OrdinalIgnoreCase, logger)
+        public LinuxLexicalElements(
+            IJ4JLogger? logger = null
+            )
+            : base( StringComparison.Ordinal, logger )
         {
-            Add(TokenType.Quoter, "\"");
-            Add(TokenType.Quoter, "'");
-            Add(TokenType.KeyPrefix, "/");
+            Add(LexicalType.Quoter, "\"");
+            Add(LexicalType.Quoter, "'");
+            Add(LexicalType.KeyPrefix, "-");
+            Add(LexicalType.KeyPrefix, "--");
         }
     }
 }

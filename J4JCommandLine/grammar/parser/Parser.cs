@@ -25,7 +25,7 @@ namespace J4JSoftware.Configuration.CommandLine
 {
     public class Parser : IParser
     {
-        public static IParser GetWindowsDefault( IJ4JLogger? logger, params ICleanupTokens[] cleanupProcessors )
+        public static IParser GetWindowsDefault( IJ4JLogger? logger = null, params ICleanupTokens[] cleanupProcessors )
         {
             var options = new OptionCollection(
                 StringComparison.OrdinalIgnoreCase,
@@ -38,7 +38,7 @@ namespace J4JSoftware.Configuration.CommandLine
                     logger ),
                 logger );
 
-            var tokenizer = new Tokenizer( new WindowsTokens( logger ),
+            var tokenizer = new Tokenizer( new WindowsLexicalElements( logger ),
                 logger,
                 cleanupProcessors
             );
@@ -46,7 +46,7 @@ namespace J4JSoftware.Configuration.CommandLine
             return new Parser( options, parsingTable, tokenizer, logger );
         }
 
-        public static IParser GetLinuxDefault(IJ4JLogger? logger, params ICleanupTokens[] cleanupProcessors)
+        public static IParser GetLinuxDefault(IJ4JLogger? logger = null, params ICleanupTokens[] cleanupProcessors)
         {
             var options = new OptionCollection(
                 StringComparison.Ordinal,
@@ -59,7 +59,7 @@ namespace J4JSoftware.Configuration.CommandLine
                     logger ),
                 logger );
 
-            var tokenizer = new Tokenizer(new LinuxTokens(logger),
+            var tokenizer = new Tokenizer(new LinuxLexicalElements(logger),
                 logger,
                 cleanupProcessors
             );
@@ -74,7 +74,7 @@ namespace J4JSoftware.Configuration.CommandLine
             IOptionCollection options,
             ParsingTable parsingTable,
             ITokenizer tokenizer,
-            IJ4JLogger? logger
+            IJ4JLogger? logger = null
         )
         {
             Options = options;
@@ -93,7 +93,7 @@ namespace J4JSoftware.Configuration.CommandLine
 
             foreach( var tokenPair in tokenList.EnumerateTokenPairs() )
             {
-                var parsingAction = _parsingTable[ tokenPair.TokenTypePair ];
+                var parsingAction = _parsingTable[ tokenPair.LexicalPair ];
 
                 if( parsingAction == null )
                 {

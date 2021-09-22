@@ -27,13 +27,13 @@ using J4JSoftware.Logging;
 
 namespace J4JSoftware.Configuration.CommandLine
 {
-    public class AvailableTokens : IAvailableTokens
+    public class LexicalElements : ILexicalElements
     {
-        private readonly Dictionary<TokenType, List<Token>> _available = new();
+        private readonly Dictionary<LexicalType, List<Token>> _available = new();
 
-        public AvailableTokens( 
+        public LexicalElements( 
             StringComparison textComparison,
-            IJ4JLogger? logger,
+            IJ4JLogger? logger = null,
             bool inclCommon = true
             )
         {
@@ -43,9 +43,9 @@ namespace J4JSoftware.Configuration.CommandLine
             if( !inclCommon ) 
                 return;
 
-            Add(TokenType.Separator, " ");
-            Add(TokenType.Separator, "\t");
-            Add(TokenType.ValuePrefix, "=");
+            Add(LexicalType.Separator, " ");
+            Add(LexicalType.Separator, "\t");
+            Add(LexicalType.ValuePrefix, "=");
         }
 
         protected IJ4JLogger? Logger { get; }
@@ -54,9 +54,9 @@ namespace J4JSoftware.Configuration.CommandLine
 
         public int Count => _available.Count;
 
-        public bool Add( TokenType type, string text )
+        public bool Add( LexicalType type, string text )
         {
-            if( type == TokenType.Text || type == TokenType.StartOfInput )
+            if( type == LexicalType.Text || type == LexicalType.StartOfInput )
             {
                 Logger?.Error( "Cannot include {0} tokens", type );
                 return false;

@@ -10,11 +10,11 @@
             Current = current;
             Previous = previous;
 
-            TokenTypePair = new TokenTypePair( Current.Type, previous.Type );
+            LexicalPair = new LexicalPair( Current.Type, previous.Type );
         }
 
         public Token Current { get; }
         public Token Previous { get; }
-        public TokenTypePair TokenTypePair { get; }
+        public LexicalPair LexicalPair { get; }
     }
 }

@@ -28,7 +28,7 @@ namespace J4JSoftware.Configuration.CommandLine
     public abstract class HelpDisplay : IHelpDisplay
     {
         protected HelpDisplay( 
-            IAvailableTokens tokens,
+            ILexicalElements tokens,
             IOptionCollection options 
             )
         {
@@ -36,7 +36,7 @@ namespace J4JSoftware.Configuration.CommandLine
             Options = options;
         }
 
-        protected IAvailableTokens Tokens { get; }
+        protected ILexicalElements Tokens { get; }
         protected IOptionCollection Options { get; }
 
         public abstract void Display();
@@ -45,7 +45,7 @@ namespace J4JSoftware.Configuration.CommandLine
         {
             var retVal = new List<string>();
 
-            foreach( var prefix in Tokens.Where(x=>x.Type == TokenType.KeyPrefix  ) )
+            foreach( var prefix in Tokens.Where(x=>x.Type == LexicalType.KeyPrefix  ) )
             {
                 foreach( var key in option.Keys )
                 {

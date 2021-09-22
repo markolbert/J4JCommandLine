@@ -10,6 +10,6 @@ namespace J4JSoftware.Configuration.CommandLine
     {
         Linux,
         Windows,
-        Undefined
+        Customized
     }
 }
