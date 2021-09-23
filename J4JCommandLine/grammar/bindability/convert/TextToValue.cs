@@ -24,6 +24,23 @@ using J4JSoftware.Logging;
 
 namespace J4JSoftware.Configuration.CommandLine
 {
+    public sealed class TextToValueComparer : IEqualityComparer<ITextToValue>
+    {
+        public bool Equals(ITextToValue? x, ITextToValue? y)
+        {
+            if (ReferenceEquals(x, y)) return true;
+            if (ReferenceEquals(x, null)) return false;
+            if (ReferenceEquals(y, null)) return false;
+            if (x.GetType() != y.GetType()) return false;
+            return x.TargetType.Equals(y.TargetType);
+        }
+
+        public int GetHashCode(ITextToValue obj)
+        {
+            return obj.TargetType.GetHashCode();
+        }
+    }
+
     public abstract class TextToValue<TBaseType> : ITextToValue
     {
         protected TextToValue( 
@@ -48,6 +65,52 @@ namespace J4JSoftware.Configuration.CommandLine
                    && toCheck.IsAssignableFrom( TargetType );
         }
 
+        // targetType must be one of:
+        // - TBaseType
+        // - TBaseType[]
+        // - List<TBaseType>
+        // anything else will cause a conversion failure
+        public bool Convert( Type targetType, IEnumerable<string> values, out object? result)
+        {
+            result = default;
+            var retVal = false;
+
+            var valueList = values.ToList();
+
+            var bindInfo = targetType.GetBindableInfo();
+
+            switch (bindInfo.BindableType)
+            {
+                case BindableType.Simple:
+                    if (valueList.Count > 1)
+                    {
+                        Logger?.Error("Cannot convert multiple text values to a single value of '{0}'",
+                            typeof(TBaseType));
+
+                        return false;
+                    }
+
+                    retVal = ConvertToSingleValue(valueList.Count == 0 ? null : valueList[0], out var singleResult);
+                    result = (object?)singleResult;
+
+                    break;
+
+                case BindableType.Array:
+                    retVal = ConvertToArray(valueList, out var arrayResult);
+                    result = (object?)arrayResult;
+
+                    break;
+
+                case BindableType.List:
+                    retVal = ConvertToArray(valueList, out var listResult);
+                    result = (object?)listResult;
+
+                    break;
+            }
+
+            return retVal;
+        }
+
         // TConvType must be one of:
         // - TBaseType
         // - TBaseType[]
@@ -56,48 +119,13 @@ namespace J4JSoftware.Configuration.CommandLine
         public bool Convert<TConvType>( IEnumerable<string> values, out TConvType? result )
         {
             result = default;
-            var retVal = false;
 
-            var valueList = values.ToList();
+            if( !Convert( typeof(TConvType), values, out var temp ) )
+                return false;
 
-            var bindInfo = typeof(TConvType).GetBindableInfo();
+            result = (TConvType?)temp;
 
-            switch( bindInfo.BindableType )
-            {
-                case BindableType.Simple:
-                    if( valueList.Count > 1 )
-                    {
-                        Logger?.Error( "Cannot convert multiple text values to a single value of '{0}'",
-                            typeof(TBaseType) );
-
-                        return false;
-                    }
-
-                    retVal = ConvertToSingleValue( valueList.Count == 0 ? null : valueList[ 0 ], out var singleResult );
-
-                    // TConvType and TBaseType must be the same here so this should work...hopefully :)
-                    result = (TConvType?) (object?) singleResult;
-
-                    break;
-
-                case BindableType.Array:
-                    retVal = ConvertToArray( valueList, out var arrayResult );
-
-                    // TConvType and TBaseType must be the same here so this should work...hopefully :)
-                    result = (TConvType?) (object?) arrayResult;
-
-                    break;
-
-                case BindableType.List:
-                    retVal = ConvertToArray( valueList, out var listResult );
-
-                    // TConvType and TBaseType must be the same here so this should work...hopefully :)
-                    result = (TConvType?) (object?) listResult;
-
-                    break;
-            }
-
-            return retVal;
+            return true;
         }
 
         private bool ConvertToSingleValue( string? text, out TBaseType? result )

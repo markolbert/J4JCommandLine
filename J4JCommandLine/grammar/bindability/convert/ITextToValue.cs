@@ -27,7 +27,7 @@ namespace J4JSoftware.Configuration.CommandLine
         Type TargetType { get; }
 
         bool CanConvert( Type toCheck );
-
+        bool Convert( Type targetType, IEnumerable<string> values, out object? result );
         bool Convert<T>( IEnumerable<string> values, out T? result );
     }
 }

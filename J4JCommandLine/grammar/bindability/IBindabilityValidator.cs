@@ -25,6 +25,9 @@ namespace J4JSoftware.Configuration.CommandLine
 {
     public interface IBindabilityValidator
     {
+        bool AddConverter( ITextToValue converter, bool replaceExisting = false );
+        bool AddConverters( IEnumerable<ITextToValue> converters, bool replaceExisting = false );
+
         bool CanConvert( Type toCheck );
         bool Convert( Type targetType, IEnumerable<string> textValues, out object? result );
 
