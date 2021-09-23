@@ -61,14 +61,14 @@ namespace J4JSoftware.Configuration.CommandLine
 
             if( _current == null )
             {
-                _options!.UnkeyedValues.Add( tokenPair.Previous.Text );
+                _options!.SpuriousValues.Add( tokenPair.Previous.Text );
                 return true;
             }
 
             return AssignToOption( tokenPair );
         }
 
-        public bool TerminateWithPrejuidice( TokenPair tokenPair )
+        public bool TerminateWithPrejudice( TokenPair tokenPair )
         {
             _current = null;
 
@@ -86,7 +86,7 @@ namespace J4JSoftware.Configuration.CommandLine
                     // if we're not yet building an entry but we received a KeyPrefix token we must be
                     // about to start building one
                     case LexicalType.Separator 
-                        when tokenPair.Previous != null && tokenPair.Previous.Type == LexicalType.Separator:
+                        when tokenPair.Previous.Type == LexicalType.Separator:
                         return true;
 
                     case LexicalType.KeyPrefix:
@@ -128,7 +128,7 @@ namespace J4JSoftware.Configuration.CommandLine
         public bool ProcessText( TokenPair tokenPair )
         {
             if ( _current == null )
-                _options!.UnkeyedValues.Add( tokenPair.Current.Text );
+                _options!.SpuriousValues.Add( tokenPair.Current.Text );
             else
             {
                 if( _current.Key == null )
@@ -151,10 +151,10 @@ namespace J4JSoftware.Configuration.CommandLine
 
             // switches never have user-specified values associated with them
             // so any values that >>appear<< to be associated with a switch
-            // are unkeyed values
+            // are spurious values
             _current.Option
                 .Container
-                .UnkeyedValues
+                .SpuriousValues
                 .AddRange( _current.Values );
 
             _current = null;
@@ -177,7 +177,7 @@ namespace J4JSoftware.Configuration.CommandLine
 
             _current.Option
                 .Container
-                .UnkeyedValues
+                .SpuriousValues
                 .AddRange( _current.Values.Skip( _current.Option.MaxValues ) );
 
             _current = null;
@@ -190,23 +190,22 @@ namespace J4JSoftware.Configuration.CommandLine
             if( _logger == null )
                 return;
 
-            if( tokenPair.Previous == null )
-                _logger.Write<string, LexicalType, string>( level,
-                    "{0} *undefined* => {1} ('{2}')",
-                    text,
-                    tokenPair.Current.Type,
-                    tokenPair.Current.Text );
-            else
-                _logger.Write( level,
-                        "{0} {1} ('{2}') => {3} ('{4}')",
-                        new object[]
-                        {
-                            text,
-                            tokenPair.Previous.Type,
-                            tokenPair.Previous.Text,
-                            tokenPair.Current.Type,
-                            tokenPair.Current.Text
-                        } );
+            _logger.Write<string, LexicalType, string>( level,
+                "{0} *undefined* => {1} ('{2}')",
+                text,
+                tokenPair.Current.Type,
+                tokenPair.Current.Text );
+            //else
+            //    _logger.Write( level,
+            //            "{0} {1} ('{2}') => {3} ('{4}')",
+            //            new object[]
+            //            {
+            //                text,
+            //                tokenPair.Previous.Type,
+            //                tokenPair.Previous.Text,
+            //                tokenPair.Current.Type,
+            //                tokenPair.Current.Text
+            //            } );
         }
     }
 }

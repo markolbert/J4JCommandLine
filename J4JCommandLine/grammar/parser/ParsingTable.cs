@@ -74,17 +74,17 @@ namespace J4JSoftware.Configuration.CommandLine
             }
 
             _table[ LexicalType.StartOfInput][LexicalType.KeyPrefix ] = generator.Create;
-            _table[ LexicalType.StartOfInput][LexicalType.ValuePrefix ] = generator.TerminateWithPrejuidice;
+            _table[ LexicalType.StartOfInput][LexicalType.ValuePrefix ] = generator.TerminateWithPrejudice;
             _table[ LexicalType.StartOfInput][LexicalType.Separator ] = generator.ConsumeToken;
             _table[ LexicalType.StartOfInput][LexicalType.Text ] = generator.ProcessText;
 
-            _table[ LexicalType.KeyPrefix][LexicalType.KeyPrefix ] = generator.TerminateWithPrejuidice;
-            _table[ LexicalType.KeyPrefix][LexicalType.ValuePrefix ] = generator.TerminateWithPrejuidice;
-            _table[ LexicalType.KeyPrefix][LexicalType.Separator ] = generator.TerminateWithPrejuidice;
+            _table[ LexicalType.KeyPrefix][LexicalType.KeyPrefix ] = generator.TerminateWithPrejudice;
+            _table[ LexicalType.KeyPrefix][LexicalType.ValuePrefix ] = generator.TerminateWithPrejudice;
+            _table[ LexicalType.KeyPrefix][LexicalType.Separator ] = generator.TerminateWithPrejudice;
             _table[ LexicalType.KeyPrefix][LexicalType.Text ] = generator.ProcessText;
 
-            _table[ LexicalType.ValuePrefix][LexicalType.KeyPrefix ] = generator.TerminateWithPrejuidice;
-            _table[ LexicalType.ValuePrefix][LexicalType.ValuePrefix ] = generator.TerminateWithPrejuidice;
+            _table[ LexicalType.ValuePrefix][LexicalType.KeyPrefix ] = generator.TerminateWithPrejudice;
+            _table[ LexicalType.ValuePrefix][LexicalType.ValuePrefix ] = generator.TerminateWithPrejudice;
             _table[ LexicalType.ValuePrefix][LexicalType.Separator ] = generator.ConsumeToken;
             _table[ LexicalType.ValuePrefix][LexicalType.Text ] = generator.ProcessText;
 
@@ -93,8 +93,8 @@ namespace J4JSoftware.Configuration.CommandLine
             _table[ LexicalType.Separator][LexicalType.Separator ] = generator.ConsumeToken;
             _table[ LexicalType.Separator][LexicalType.Text ] = generator.ProcessText;
 
-            _table[ LexicalType.Text][LexicalType.KeyPrefix ] = generator.TerminateWithPrejuidice;
-            _table[ LexicalType.Text][LexicalType.ValuePrefix ] = generator.TerminateWithPrejuidice;
+            _table[ LexicalType.Text][LexicalType.KeyPrefix ] = generator.TerminateWithPrejudice;
+            _table[ LexicalType.Text][LexicalType.ValuePrefix ] = generator.TerminateWithPrejudice;
             _table[ LexicalType.Text][LexicalType.Separator ] = generator.ConsumeToken;
             _table[ LexicalType.Text][LexicalType.Text ] = generator.ProcessText;
         }
