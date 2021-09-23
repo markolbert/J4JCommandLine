@@ -27,52 +27,38 @@ using Serilog;
 
 namespace J4JSoftware.Configuration.CommandLine
 {
-    public class BindabilityValidator : IBindabilityValidator
+    public partial class BindabilityValidator : IBindabilityValidator
     {
-        private enum GetterSetter
-        {
-            Getter,
-            Setter
-        }
-
-        public static List<ITextToValue> GetBuiltInConverters( IJ4JLogger? logger )
-        {
-            var retVal = new List<ITextToValue>();
-
-            foreach( var convMethod in typeof(Convert)
-                .GetMethods( BindingFlags.Static | BindingFlags.Public )
-                .Where( m =>
-                {
-                    var parameters = m.GetParameters();
-
-                    return parameters.Length == 1 && !typeof(string).IsAssignableFrom( parameters[ 0 ].ParameterType );
-                } ) )
-            {
-                var builtInType = typeof(BuiltInTextToValue<>).MakeGenericType( convMethod.ReturnType );
-
-                retVal.Add( (ITextToValue)Activator.CreateInstance(
-                        builtInType,
-                        new object?[] { convMethod, logger } )!
-                );
-            }
-
-            return retVal;
-        }
-
-        private readonly List<ITextToValue> _converters;
+        private readonly Dictionary<Type, ITextToValue> _converters = new();
+        private readonly List<BuiltInConverter>? _builtInTargets;
+        private readonly BuiltInConverters _builtInConv;
 
         public BindabilityValidator(
+            BuiltInConverters builtInConv = BuiltInConverters.AddDynamically,
             IJ4JLogger? logger = null
         )
-            : this( GetBuiltInConverters( logger ), logger )
+            : this( GetBuiltInConverters( logger ), builtInConv, logger )
         {
         }
 
         public BindabilityValidator(
-            IEnumerable<ITextToValue> converters,
+            IEnumerable<ITextToValue>? converters = null,
+            BuiltInConverters builtInConv = BuiltInConverters.AddDynamically,
             IJ4JLogger? logger = null )
         {
-            _converters = converters.ToList();
+            AddConverters( converters ?? Enumerable.Empty<ITextToValue>() );
+            _builtInConv = builtInConv;
+
+            switch( builtInConv )
+            {
+                case BuiltInConverters.AddAtInitialization:
+                    AddConverters( GetBuiltInConverters( logger ) );
+                    break;
+
+                case BuiltInConverters.AddDynamically:
+                    _builtInTargets = GetBuiltInTargetTypes();
+                    break;
+            }
 
             Logger = logger;
             Logger?.SetLoggedType( GetType() );
@@ -83,13 +69,45 @@ namespace J4JSoftware.Configuration.CommandLine
         protected string? PropertyPath { get; private set; }
         protected bool IsOuterMostLeaf { get; private set; }
 
+        public bool AddConverter( ITextToValue converter, bool replaceExisting = false )
+        {
+            if( _converters.ContainsKey( converter.TargetType ) )
+            {
+                if( !replaceExisting )
+                {
+                    Logger?.Error( "There is already a converter defined for {0}", converter.TargetType );
+                    return false;
+                }
+
+                _converters[ converter.TargetType ] = converter;
+
+                return true;
+            }
+
+            _converters.Add( converter.TargetType, converter );
+
+            return true;
+        }
+
+        public bool AddConverters( IEnumerable<ITextToValue> converters, bool replaceExisting = false )
+        {
+            var retVal = true;
+
+            foreach( var converter in converters )
+            {
+                retVal &= AddConverter( converter, replaceExisting );
+            }
+
+            return retVal;
+        }
+
         public bool CanConvert( Type toCheck )
         {
             // we can convert any type for which we have a converter, plus lists and arrays of those types
             if( toCheck.IsArray )
             {
                 var elementType = toCheck.GetElementType();
-                return elementType != null && can_convert_simple( elementType );
+                return elementType != null && CanConvertSimple( elementType );
             }
 
             if( toCheck.IsGenericType )
@@ -98,35 +116,68 @@ namespace J4JSoftware.Configuration.CommandLine
                 if( genArgs.Length != 1 )
                     return false;
 
-                if( !can_convert_simple( genArgs[ 0 ] ) )
+                if( !CanConvertSimple( genArgs[ 0 ] ) )
                     return false;
 
                 return ( typeof(List<>).MakeGenericType( genArgs[ 0 ] )
                     .IsAssignableFrom( toCheck ) );
             }
 
-            if( can_convert_simple( toCheck ) )
+            if( CanConvertSimple( toCheck ) )
                 return true;
 
             Logger?.Error( "No ITextToValue converter is defined for {0}", toCheck );
 
             return false;
+        }
 
-            bool can_convert_simple( Type simpleType )
+        private bool CanConvertSimple( Type simpleType )
+        {
+            if( simpleType.IsArray || simpleType.IsGenericType ) 
+                return false;
+
+            if( simpleType.IsEnum )
+                return true;
+
+            switch( _builtInConv )
             {
-                if( simpleType.IsArray || simpleType.IsGenericType )
-                    return false;
+                case BuiltInConverters.AddAtInitialization:
+                    return _converters.Any( x => x.Value.TargetType == simpleType );
 
-                return simpleType.IsEnum 
-                       || _converters.Any( x => x.CanConvert( simpleType ) );
+                case BuiltInConverters.AddDynamically:
+                    if( _converters.Any( x => x.Value.TargetType == simpleType ) )
+                        return true;
+
+                    break;
+
+                case BuiltInConverters.DoNotAdd:
+                    return false;
             }
+
+            // try to add a built-in converter dynamically
+            var builtInConverter = _builtInTargets!.FirstOrDefault( x => x.ReturnType == simpleType );
+            if( builtInConverter == null )
+                return false;
+
+            var builtInType = typeof(BuiltInTextToValue<>).MakeGenericType(builtInConverter.ReturnType);
+
+            _converters.Add( simpleType,
+                (ITextToValue)Activator.CreateInstance(
+                    builtInType,
+                    new object?[] { builtInConverter.MethodInfo, Logger }
+                )!
+            );
+
+            return true;
         }
 
         public bool Convert( Type targetType, IEnumerable<string> textValues, out object? result )
         {
             result = null;
 
-            var converter = _converters.FirstOrDefault( x => x.CanConvert( targetType ) );
+            var converter = _converters.Where( x => x.Value.CanConvert( targetType ) )
+                .Select( x => x.Value )
+                .FirstOrDefault();
             
             if( converter != null ) 
                 return converter.Convert( textValues, out result );
@@ -135,7 +186,7 @@ namespace J4JSoftware.Configuration.CommandLine
             {
                 var enumConverterType = typeof(TextToEnum<>).MakeGenericType( targetType );
                 converter = Activator.CreateInstance( enumConverterType, new object?[] { Logger } ) as ITextToValue;
-                _converters.Add( converter! );
+                _converters.Add( targetType, converter! );
 
                 return converter!.Convert( textValues, out result );
             }

@@ -25,11 +25,14 @@ namespace J4JSoftware.Configuration.CommandLine
 {
     public class Parser : IParser
     {
-        public static IParser GetWindowsDefault( IJ4JLogger? logger = null, params ICleanupTokens[] cleanupProcessors )
+        public static IParser GetWindowsDefault( 
+            BindabilityValidator.BuiltInConverters builtInConverters = BindabilityValidator.BuiltInConverters.AddDynamically,
+            IJ4JLogger? logger = null, 
+            params ICleanupTokens[] cleanupProcessors )
         {
             var options = new OptionCollection(
                 StringComparison.OrdinalIgnoreCase,
-                new BindabilityValidator( BindabilityValidator.GetBuiltInConverters( logger ), logger ),
+                new BindabilityValidator( builtInConverters, logger ),
                 logger );
 
             var parsingTable = new ParsingTable( new OptionsGenerator(
@@ -46,12 +49,15 @@ namespace J4JSoftware.Configuration.CommandLine
             return new Parser( options, parsingTable, tokenizer, logger );
         }
 
-        public static IParser GetLinuxDefault(IJ4JLogger? logger = null, params ICleanupTokens[] cleanupProcessors)
+        public static IParser GetLinuxDefault(
+            BindabilityValidator.BuiltInConverters builtInConverters = BindabilityValidator.BuiltInConverters.AddDynamically,
+            IJ4JLogger? logger = null, 
+            params ICleanupTokens[] cleanupProcessors)
         {
             var options = new OptionCollection(
                 StringComparison.Ordinal,
-                new BindabilityValidator(BindabilityValidator.GetBuiltInConverters(logger), logger),
-                logger);
+                new BindabilityValidator( builtInConverters, logger ),
+                logger );
 
             var parsingTable = new ParsingTable( new OptionsGenerator(
                     options,

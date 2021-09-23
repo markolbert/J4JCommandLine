@@ -99,6 +99,7 @@ namespace J4JSoftware.Configuration.CommandLine
             this IConfigurationBuilder builder,
             out IOptionCollection? options,
             out CommandLineSource? cmdLineSource,
+            BindabilityValidator.BuiltInConverters builtInConverters = BindabilityValidator.BuiltInConverters.AddDynamically,
             IJ4JLogger? logger = null,
             params ICleanupTokens[] cleanupTokens
         )
@@ -106,12 +107,15 @@ namespace J4JSoftware.Configuration.CommandLine
                 CommandLineOperatingSystems.Windows, 
                 out options, 
                 out cmdLineSource,
-                logger, cleanupTokens );
+                builtInConverters,
+                logger, 
+                cleanupTokens );
 
         public static IConfigurationBuilder AddJ4JCommandLineForLinux(
             this IConfigurationBuilder builder,
             out IOptionCollection? options,
             out CommandLineSource? cmdLineSource,
+            BindabilityValidator.BuiltInConverters builtInConverters = BindabilityValidator.BuiltInConverters.AddDynamically,
             IJ4JLogger? logger = null,
             params ICleanupTokens[] cleanupTokens
         )
@@ -119,13 +123,16 @@ namespace J4JSoftware.Configuration.CommandLine
                 CommandLineOperatingSystems.Linux,
                 out options,
                 out cmdLineSource,
-                logger, cleanupTokens);
+                builtInConverters,
+                logger, 
+                cleanupTokens);
 
         private static IConfigurationBuilder AddJ4JCommandLineDefault(
             this IConfigurationBuilder builder,
             CommandLineOperatingSystems opSys,
             out IOptionCollection? options,
             out CommandLineSource? cmdLineSource,
+            BindabilityValidator.BuiltInConverters builtInConverters,
             IJ4JLogger? logger = null,
             params ICleanupTokens[] cleanupTokens
         )
@@ -148,8 +155,8 @@ namespace J4JSoftware.Configuration.CommandLine
 
             options = new OptionCollection(
                 textComparison,
-                new BindabilityValidator(logger),
-                logger);
+                new BindabilityValidator( builtInConverters, logger ),
+                logger );
 
             var optionsGenerator = new OptionsGenerator(options, textComparison, logger);
             var parsingTable = new ParsingTable(optionsGenerator, logger);
