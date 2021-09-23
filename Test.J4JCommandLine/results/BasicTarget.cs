@@ -30,5 +30,6 @@ namespace J4JSoftware.Binder.Tests
         public List<string> ACollection { get; set; }
         public TestEnum AnEnumValue { get; set; }
         public TestFlagEnum AFlagEnumValue { get; set; }
+        public List<TestEnum> AnEnumList { get; set; }
     }
 }

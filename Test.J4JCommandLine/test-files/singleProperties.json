@@ -367,5 +367,19 @@
         "Style": "Collection"
       }
     ]
+  },
+  {
+    "CommandLine": "-x EnumValue1 EnumValue2",
+    "OperatingSystem": "Linux",
+    "UnkeyedValues": 0,
+    "UnknownKeys": 0,
+    "OptionConfigurations": [
+      {
+        "ContextPath": "AnEnumList",
+        "PropertyType": "ListOfEnums",
+        "CommandLineKey": "x",
+        "Style": "Collection"
+      }
+    ]
   }
 ]

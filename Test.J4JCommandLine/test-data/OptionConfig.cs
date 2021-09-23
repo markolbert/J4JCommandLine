@@ -32,7 +32,8 @@ namespace J4JSoftware.Binder.Tests
         Int,
         TestEnum,
         TestFlagEnum,
-        ListOfStrings
+        ListOfStrings,
+        ListOfEnums
     }
 
     public class OptionConfig
@@ -58,6 +59,7 @@ namespace J4JSoftware.Binder.Tests
                 PropertyTypes.ListOfStrings => typeof(List<string>),
                 PropertyTypes.TestEnum => typeof(TestEnum),
                 PropertyTypes.TestFlagEnum => typeof(TestFlagEnum),
+                PropertyTypes.ListOfEnums => typeof(List<TestEnum>),
                 _ => typeof(string)
             };
         }
