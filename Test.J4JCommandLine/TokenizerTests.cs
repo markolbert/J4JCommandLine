@@ -79,8 +79,8 @@ namespace J4JSoftware.Binder.Tests
             params ICleanupTokens[] cleanupTokens )
         {
             _parser = osName.Equals("windows", StringComparison.OrdinalIgnoreCase)
-                ? Parser.GetWindowsDefault(Logger, cleanupTokens)
-                : Parser.GetLinuxDefault(Logger, cleanupTokens);
+                ? Parser.GetWindowsDefault(logger: Logger, cleanupProcessors: cleanupTokens)
+                : Parser.GetLinuxDefault(logger: Logger, cleanupProcessors: cleanupTokens);
 
             _parser!.Options.Should().NotBeNull();
         }
@@ -94,7 +94,7 @@ namespace J4JSoftware.Binder.Tests
                 .BeTrue();
 
             _parser.Options.UnknownKeys.Count.Should().Be(testConfig.UnknownKeys);
-            _parser.Options.UnkeyedValues.Count.Should().Be(testConfig.UnkeyedValues);
+            _parser.Options.SpuriousValues.Count.Should().Be(testConfig.UnkeyedValues);
 
             foreach (var optConfig in testConfig.OptionConfigurations)
             {

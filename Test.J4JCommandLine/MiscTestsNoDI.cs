@@ -31,7 +31,7 @@ namespace J4JSoftware.Binder.Tests
         [ InlineData( "-x \"abc\"", "abc" ) ]
         public void LinuxStringHandling( string cmdLine, params string[] result )
         {
-            var parser = Parser.GetLinuxDefault( Logger );
+            var parser = Parser.GetLinuxDefault( logger: Logger );
 
             var option = parser!.Options.Bind<MiscTarget, string?>( x => x.AStringValue, "x" );
             option.Should().NotBeNull();
@@ -41,7 +41,7 @@ namespace J4JSoftware.Binder.Tests
             parser.Parse( cmdLine ).Should().BeTrue();
 
             parser.Options.UnknownKeys.Should().BeEmpty();
-            parser.Options.UnkeyedValues.Should().BeEmpty();
+            parser.Options.SpuriousValues.Should().BeEmpty();
 
             option!.Values.Count.Should().Be( result.Length );
 

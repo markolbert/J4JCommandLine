@@ -81,8 +81,8 @@ namespace J4JSoftware.Binder.Tests
         private void CreateConfigurationRootAndParser( TestConfig testConfig )
         {
             var parser = testConfig.OperatingSystem.Equals( "windows", StringComparison.OrdinalIgnoreCase )
-                ? Parser.GetWindowsDefault( Logger )
-                : Parser.GetLinuxDefault( Logger );
+                ? Parser.GetWindowsDefault( logger: Logger )
+                : Parser.GetLinuxDefault(logger: Logger);
 
             _options = parser.Options;
 
