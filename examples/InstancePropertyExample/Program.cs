@@ -79,9 +79,9 @@ namespace J4JSoftware.CommandLine.Examples
             Console.WriteLine($"IntValue is {parsed.IntValue}");
             Console.WriteLine($"TextValue is {parsed.TextValue}");
 
-            Console.WriteLine(options.UnkeyedValues.Count == 0
+            Console.WriteLine(options.SpuriousValues.Count == 0
                 ? "No unkeyed parameters"
-                : $"Unkeyed parameters: {string.Join(", ", options.UnkeyedValues)}");
+                : $"Unkeyed parameters: {string.Join(", ", options.SpuriousValues)}");
         }
 
         private static void SetupOptions(IOptionCollection options)

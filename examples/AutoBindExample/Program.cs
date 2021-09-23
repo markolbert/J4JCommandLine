@@ -83,9 +83,9 @@ namespace J4JSoftware.CommandLine.Examples
             Console.WriteLine( $"IntValue is {IntValue}" );
             Console.WriteLine( $"TextValue is {TextValue}" );
 
-            Console.WriteLine( options.UnkeyedValues.Count == 0
+            Console.WriteLine( options.SpuriousValues.Count == 0
                 ? "No unkeyed parameters"
-                : $"Unkeyed parameters: {string.Join( ", ", options.UnkeyedValues )}" );
+                : $"Unkeyed parameters: {string.Join( ", ", options.SpuriousValues )}" );
         }
 
         public static int IntValue { get; set; }

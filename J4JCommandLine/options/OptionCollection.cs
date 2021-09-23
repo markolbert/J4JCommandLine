@@ -73,7 +73,14 @@ namespace J4JSoftware.Configuration.CommandLine
             _options.ForEach( x => x.ClearValues() );
         }
 
-        public List<string> UnkeyedValues { get; } = new();
+        // values associated with an option but in excess of the maximum number
+        // of allowed values (which can be zero for things like switches which
+        // do not accept or require values)
+        public List<string> SpuriousValues { get; } = new();
+
+        // things that parsed as valid keys but which do not match any key
+        // configured in the collection (probably a sign of a misconfiguration
+        // of IOptionCollection)
         public List<CommandLineArgument> UnknownKeys { get; } = new();
 
         public void SetTypePrefix<TTarget>( string prefix )

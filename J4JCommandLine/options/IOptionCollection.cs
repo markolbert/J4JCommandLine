@@ -34,7 +34,7 @@ namespace J4JSoftware.Configuration.CommandLine
         int Count { get; }
         bool TargetsMultipleTypes { get; }
 
-        List<string> UnkeyedValues { get; }
+        List<string> SpuriousValues { get; }
         List<CommandLineArgument> UnknownKeys { get; }
         IOption? this[ string key ] { get; }
         void ClearValues();
