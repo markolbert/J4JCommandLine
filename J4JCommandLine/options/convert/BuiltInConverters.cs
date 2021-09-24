@@ -17,9 +17,12 @@
 
 #endregion
 
-using System;
-
 namespace J4JSoftware.Configuration.CommandLine
 {
-    public record BindableTypeInfo( Type TargetType, BindableType BindableType );
+    public enum BuiltInConverters
+    {
+        DoNotAdd,
+        AddAtInitialization,
+        AddDynamically
+    }
 }
