@@ -25,25 +25,37 @@ namespace J4JSoftware.Configuration.CommandLine
         where TContainer : class, new()
     {
         internal TypeBoundOption(
-            IOptionCollection container,
+            OptionCollection container,
             string typeRelativeContextPath,
-            IBindabilityValidator propValidator
+            IBindabilityValidator propValidator,
+            ITextConverters converters
         )
-            : base( container, typeRelativeContextPath, propValidator )
+            : base( container, typeRelativeContextPath, propValidator, converters )
         {
         }
 
         public Type ContainerType => typeof(TContainer);
 
-        public override string? ContextPath
-        {
-            get
-            {
-                if( base.ContextPath == null )
-                    return null;
+        //public override string? ContextPath
+        //{
+        //    get
+        //    {
+        //        if( base.ContextPath == null )
+        //            return null;
 
-                return $"{Container.GetTypePrefix<TContainer>()}{base.ContextPath}";
-            }
-        }
+        //        return $"{GetTypePrefix<TContainer>()}{base.ContextPath}";
+        //    }
+        //}
+
+        //private string GetTypePrefix<TTarget>()
+        //    where TTarget : class, new()
+        //{
+        //    var type = typeof(TTarget);
+
+        //    if (Container.TypePrefixes.ContainsKey(type))
+        //        return $"{Container.TypePrefixes[type]}:";
+
+        //    return Container.TargetsMultipleTypes ? $"{type.Name}:" : string.Empty;
+        //}
     }
 }

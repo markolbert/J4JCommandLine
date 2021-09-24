@@ -22,6 +22,10 @@
 	</PropertyGroup>
 
 	<ItemGroup>
+	  <Compile Remove="options\bindability\BindabilityValidator.static.cs" />
+	</ItemGroup>
+
+	<ItemGroup>
 		<PackageReference Include="Microsoft.Extensions.Configuration" Version="5.0.0" />
 	</ItemGroup>
 

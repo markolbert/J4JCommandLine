@@ -29,29 +29,29 @@ namespace J4JSoftware.Configuration.CommandLine
 {
     public static class J4JCommandLineExtensions
     {
-        public static BindableTypeInfo GetBindableInfo( this Type toCheck )
+        internal static BindingInfo GetBindableInfo( this Type toCheck )
         {
             if( toCheck.IsArray )
             {
                 var elementType = toCheck.GetElementType();
 
                 return elementType == null
-                    ? new BindableTypeInfo( toCheck, BindableType.Unsupported )
-                    : new BindableTypeInfo( elementType, BindableType.Array );
+                    ? new BindingInfo( toCheck, BindableType.Unsupported )
+                    : new BindingInfo( elementType, BindableType.Array );
             }
 
             // if it's not an array and not a generic it's a "simple" type
             if( !toCheck.IsGenericType )
-                return new BindableTypeInfo( toCheck, BindableType.Simple );
+                return new BindingInfo( toCheck, BindableType.Simple );
 
             if( toCheck.GenericTypeArguments.Length != 1 )
-                return new BindableTypeInfo( toCheck, BindableType.Unsupported );
+                return new BindingInfo( toCheck, BindableType.Unsupported );
 
             var genType = toCheck.GetGenericArguments()[ 0 ];
 
             return typeof(List<>).MakeGenericType( genType ).IsAssignableFrom( toCheck )
-                ? new BindableTypeInfo( genType, BindableType.List )
-                : new BindableTypeInfo( toCheck, BindableType.Unsupported );
+                ? new BindingInfo( genType, BindableType.List )
+                : new BindingInfo( toCheck, BindableType.Unsupported );
         }
 
         public static IConfigurationBuilder AddJ4JCommandLine(
@@ -99,7 +99,7 @@ namespace J4JSoftware.Configuration.CommandLine
             this IConfigurationBuilder builder,
             out IOptionCollection? options,
             out CommandLineSource? cmdLineSource,
-            BindabilityValidator.BuiltInConverters builtInConverters = BindabilityValidator.BuiltInConverters.AddDynamically,
+            ITextConverters? converters = null,
             IJ4JLogger? logger = null,
             params ICleanupTokens[] cleanupTokens
         )
@@ -107,7 +107,7 @@ namespace J4JSoftware.Configuration.CommandLine
                 CommandLineOperatingSystems.Windows, 
                 out options, 
                 out cmdLineSource,
-                builtInConverters,
+                converters ?? new TextConverters(logger:logger),
                 logger, 
                 cleanupTokens );
 
@@ -115,7 +115,7 @@ namespace J4JSoftware.Configuration.CommandLine
             this IConfigurationBuilder builder,
             out IOptionCollection? options,
             out CommandLineSource? cmdLineSource,
-            BindabilityValidator.BuiltInConverters builtInConverters = BindabilityValidator.BuiltInConverters.AddDynamically,
+            ITextConverters? converters = null,
             IJ4JLogger? logger = null,
             params ICleanupTokens[] cleanupTokens
         )
@@ -123,7 +123,7 @@ namespace J4JSoftware.Configuration.CommandLine
                 CommandLineOperatingSystems.Linux,
                 out options,
                 out cmdLineSource,
-                builtInConverters,
+                converters ?? new TextConverters(logger: logger),
                 logger, 
                 cleanupTokens);
 
@@ -132,11 +132,13 @@ namespace J4JSoftware.Configuration.CommandLine
             CommandLineOperatingSystems opSys,
             out IOptionCollection? options,
             out CommandLineSource? cmdLineSource,
-            BindabilityValidator.BuiltInConverters builtInConverters,
+            ITextConverters? converters = null,
             IJ4JLogger? logger = null,
             params ICleanupTokens[] cleanupTokens
         )
         {
+            converters ??= new TextConverters();
+
             var textComparison = opSys switch
             {
                 CommandLineOperatingSystems.Windows => StringComparison.OrdinalIgnoreCase,
@@ -155,7 +157,8 @@ namespace J4JSoftware.Configuration.CommandLine
 
             options = new OptionCollection(
                 textComparison,
-                new BindabilityValidator( builtInConverters, logger ),
+                new BindabilityValidator( converters, logger ),
+                converters,
                 logger );
 
             var optionsGenerator = new OptionsGenerator(options, textComparison, logger);

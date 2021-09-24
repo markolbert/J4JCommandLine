@@ -35,24 +35,25 @@ namespace J4JSoftware.Configuration.CommandLine
 
         private readonly StringComparison _textComparison;
         private readonly IBindabilityValidator _propValidator;
+        private readonly ITextConverters _converters;
 
         private readonly TypeBoundOptionComparer _comparer = new();
         
         private readonly IJ4JLogger? _logger;
         private readonly List<IOption> _options = new();
 
-        private readonly Dictionary<Type, string> _typePrefixes = new();
-
         private readonly List<string> _optionKeys = new List<string>();
 
         public OptionCollection(
             StringComparison textComparison,
             IBindabilityValidator propValidator,
+            ITextConverters converters,
             IJ4JLogger? logger = null
         )
         {
             _textComparison = textComparison;
             _propValidator = propValidator;
+            _converters = converters;
 
             _logger = logger;
             _logger?.SetLoggedType( GetType() );
@@ -83,94 +84,96 @@ namespace J4JSoftware.Configuration.CommandLine
         // of IOptionCollection)
         public List<CommandLineArgument> UnknownKeys { get; } = new();
 
-        public void SetTypePrefix<TTarget>( string prefix )
-            where TTarget : class, new()
-        {
-            var type = typeof(TTarget);
+        //internal Dictionary<Type, string> TypePrefixes { get; } = new();
 
-            if( _typePrefixes.ContainsKey( type ) )
-                _typePrefixes.Remove( type );
+        //public void SetTypePrefix<TTarget>( string prefix )
+        //    where TTarget : class, new()
+        //{
+        //    var type = typeof(TTarget);
 
-            _typePrefixes.Add( type, prefix );
-        }
+        //    if( TypePrefixes.ContainsKey( type ) )
+        //        TypePrefixes.Remove( type );
 
-        public string GetTypePrefix<TTarget>()
-            where TTarget : class, new()
-        {
-            var type = typeof(TTarget);
+        //    TypePrefixes.Add( type, prefix );
+        //}
 
-            if( _typePrefixes.ContainsKey( type ) )
-                return $"{_typePrefixes[ type ]}:";
+        //public string GetTypePrefix<TTarget>()
+        //    where TTarget : class, new()
+        //{
+        //    var type = typeof(TTarget);
 
-            return TargetsMultipleTypes ? $"{type.Name}:" : string.Empty;
-        }
+        //    if( TypePrefixes.ContainsKey( type ) )
+        //        return $"{TypePrefixes[ type ]}:";
 
-        public bool TargetsMultipleTypes => _options.Cast<ITypeBoundOption>().Distinct( _comparer ).Count() > 1;
+        //    return TargetsMultipleTypes ? $"{type.Name}:" : string.Empty;
+        //}
 
-        public Option<TProp>? Add<TProp>( string contextPath )
-        {
-            var propType = typeof(TProp);
+        //internal bool TargetsMultipleTypes => _options.Cast<ITypeBoundOption>().Distinct( _comparer ).Count() > 1;
 
-            if( !_propValidator.IsPropertyBindable( propType ) )
-            {
-                _logger?.Error( "Cannot bind to type '{0}'", propType );
-                return null;
-            }
+        //public Option<TProp>? Add<TProp>( string contextPath )
+        //{
+        //    var propType = typeof(TProp);
 
-            if( this.Any( x => x.ContextPath!.Equals( contextPath, _textComparison ) ) )
-            {
-                _logger?.Error<string>( "An option with the same ContextPath ('{0}') is already in the collection",
-                    contextPath );
-                return null;
-            }
+        //    if( !_propValidator.IsPropertyBindable( propType ) )
+        //    {
+        //        _logger?.Error( "Cannot bind to type '{0}'", propType );
+        //        return null;
+        //    }
 
-            var retVal = new Option<TProp>( this, contextPath, _propValidator );
+        //    if( this.Any( x => x.ContextPath!.Equals( contextPath, _textComparison ) ) )
+        //    {
+        //        _logger?.Error<string>( "An option with the same ContextPath ('{0}') is already in the collection",
+        //            contextPath );
+        //        return null;
+        //    }
 
-            _options.Add( retVal );
+        //    var retVal = new Option<TProp>( this, contextPath, _propValidator );
 
-            return retVal;
-        }
+        //    _options.Add( retVal );
 
-        public IOption? Add( Type propType, string contextPath )
-        {
-            if( !_propValidator.IsPropertyBindable( propType ) )
-            {
-                _logger?.Error( "Cannot bind to type '{0}'", propType );
-                return null;
-            }
+        //    return retVal;
+        //}
 
-            if( this.Any( x => x.ContextPath!.Equals( contextPath, _textComparison ) ) )
-            {
-                _logger?.Error<string>( "An option with the same ContextPath ('{0}') is already in the collection",
-                    contextPath );
-                return null;
-            }
+        //public IOption? Add( Type propType, string contextPath )
+        //{
+        //    if( !_propValidator.IsPropertyBindable( propType ) )
+        //    {
+        //        _logger?.Error( "Cannot bind to type '{0}'", propType );
+        //        return null;
+        //    }
 
-            var genType = typeof(Option<>).MakeGenericType( propType );
-            var ctor = genType.GetConstructors( BindingFlags.Instance | BindingFlags.NonPublic )
-                .FirstOrDefault();
+        //    if( this.Any( x => x.ContextPath!.Equals( contextPath, _textComparison ) ) )
+        //    {
+        //        _logger?.Error<string>( "An option with the same ContextPath ('{0}') is already in the collection",
+        //            contextPath );
+        //        return null;
+        //    }
 
-            if( ctor == null )
-            {
-                _logger?.Error( "Couldn't find constructor for {0}", genType );
-                return null;
-            }
+        //    var genType = typeof(Option<>).MakeGenericType( propType );
+        //    var ctor = genType.GetConstructors( BindingFlags.Instance | BindingFlags.NonPublic )
+        //        .FirstOrDefault();
 
-            var retVal = ctor.Invoke( new object?[] { this, contextPath, _propValidator } ) as IOption;
+        //    if( ctor == null )
+        //    {
+        //        _logger?.Error( "Couldn't find constructor for {0}", genType );
+        //        return null;
+        //    }
 
-            if( retVal == null )
-            {
-                _logger?.Error( "Failed to create instance of {0}", genType );
-                return null;
-            }
+        //    var retVal = ctor.Invoke( new object?[] { this, contextPath, _propValidator } ) as IOption;
 
-            _options.Add( retVal );
+        //    if( retVal == null )
+        //    {
+        //        _logger?.Error( "Failed to create instance of {0}", genType );
+        //        return null;
+        //    }
 
-            return retVal;
-        }
+        //    _options.Add( retVal );
 
-        public Option<TProp>? Bind<TContainer, TProp>(
-            Expression<Func<TContainer, TProp>> propertySelector,
+        //    return retVal;
+        //}
+
+        public Option<TTarget>? Bind<TContainer, TTarget>(
+            Expression<Func<TContainer, TTarget>> propertySelector,
             params string[] cmdLineKeys )
             where TContainer : class, new()
         {
@@ -192,7 +195,6 @@ namespace J4JSoftware.Configuration.CommandLine
                         // the first PropertyInfo, which is the outermost 'leaf', must
                         // have a public parameterless constructor and a property setter
                         if( !_propValidator.IsPropertyBindable( propElements ) )
-                            //if( !ValidatePropertyInfo( propInfo, firstStyle == null ) )
                             return null;
 
                         firstStyle ??= GetOptionStyle( propInfo );
@@ -240,10 +242,11 @@ namespace J4JSoftware.Configuration.CommandLine
                 return null;
             }
 
-            var retVal = new TypeBoundOption<TContainer, TProp>(
+            var retVal = new TypeBoundOption<TContainer, TTarget>(
                 this,
                 contextPath,
-                _propValidator);
+                _propValidator,
+                _converters );
 
             retVal.SetStyle( firstStyle!.Value );
 
@@ -270,11 +273,11 @@ namespace J4JSoftware.Configuration.CommandLine
             return false;
         }
 
-        public bool UsesContextPath( string contextPath )
-        {
-            return _options.Any( x =>
-                x.ContextPath?.Equals( contextPath, _textComparison) ?? false );
-        }
+        //public bool UsesContextPath( string contextPath )
+        //{
+        //    return _options.Any( x =>
+        //        x.ContextPath?.Equals( contextPath, _textComparison) ?? false );
+        //}
 
         public IOption? this[ string key ]
         {

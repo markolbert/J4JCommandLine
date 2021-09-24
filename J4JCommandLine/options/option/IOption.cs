@@ -26,7 +26,7 @@ namespace J4JSoftware.Configuration.CommandLine
     public interface IOption
     {
         bool IsInitialized { get; }
-        IOptionCollection Container { get; }
+        OptionCollection Container { get; }
 
         string? ContextPath { get; }
 

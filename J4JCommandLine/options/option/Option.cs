@@ -27,21 +27,24 @@ namespace J4JSoftware.Configuration.CommandLine
     {
         private readonly List<string> _cmdLineKeys = new();
         private readonly IBindabilityValidator _propValidator;
+        private readonly ITextConverters _converters;
         private readonly List<string> _values = new();
 
         internal Option(
-            IOptionCollection container,
+            OptionCollection container,
             string contextPath,
-            IBindabilityValidator propValidator
+            IBindabilityValidator propValidator,
+            ITextConverters converters
         )
         {
             Container = container;
             ContextPath = contextPath;
             _propValidator = propValidator;
+            _converters = converters;
         }
 
         public bool IsInitialized => !string.IsNullOrEmpty( ContextPath ) && _cmdLineKeys.Count > 0;
-        public IOptionCollection Container { get; }
+        public OptionCollection Container { get; }
 
         public virtual string? ContextPath { get; }
 
@@ -129,7 +132,7 @@ namespace J4JSoftware.Configuration.CommandLine
                 return false;
 
             if( Style != OptionStyle.Switch )
-                return _propValidator.Convert( typeof(T), _values, out result );
+                return _converters.Convert( typeof(T), _values, out result );
 
             result = !string.IsNullOrEmpty( CommandLineKeyProvided );
             

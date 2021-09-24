@@ -32,21 +32,21 @@ namespace J4JSoftware.Configuration.CommandLine
 
         ReadOnlyCollection<IOption> Options { get; }
         int Count { get; }
-        bool TargetsMultipleTypes { get; }
+        //bool TargetsMultipleTypes { get; }
 
         List<string> SpuriousValues { get; }
         List<CommandLineArgument> UnknownKeys { get; }
         IOption? this[ string key ] { get; }
         void ClearValues();
 
-        void SetTypePrefix<TTarget>( string prefix )
-            where TTarget : class, new();
+        //void SetTypePrefix<TTarget>( string prefix )
+        //    where TTarget : class, new();
 
-        string GetTypePrefix<TTarget>()
-            where TTarget : class, new();
+        //string GetTypePrefix<TTarget>()
+        //    where TTarget : class, new();
 
-        Option<TProp>? Add<TProp>( string contextPath );
-        IOption? Add( Type propType, string contextPath );
+        //Option<TProp>? Add<TProp>( string contextPath );
+        //IOption? Add( Type propType, string contextPath );
 
         Option<TProp>? Bind<TTarget, TProp>(
             Expression<Func<TTarget, TProp>> propertySelector,
@@ -54,7 +54,7 @@ namespace J4JSoftware.Configuration.CommandLine
             where TTarget : class, new();
 
         bool CommandLineKeyInUse( string key );
-        bool UsesContextPath( string contextPath );
+        //bool UsesContextPath( string contextPath );
 
         bool KeysSpecified( params string[] keys );
         //void HelpDisplay( IHelpDisplay? displayHelp );
