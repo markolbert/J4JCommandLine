@@ -27,174 +27,30 @@ using Serilog;
 
 namespace J4JSoftware.Configuration.CommandLine
 {
-    public partial class BindabilityValidator : IBindabilityValidator
+    public class BindabilityValidator : IBindabilityValidator
     {
-        private readonly Dictionary<Type, ITextToValue> _converters = new();
-        private readonly List<BuiltInConverter>? _builtInTargets;
-        private readonly BuiltInConverters _builtInConv;
-
-        public BindabilityValidator(
-            BuiltInConverters builtInConv = BuiltInConverters.AddDynamically,
-            IJ4JLogger? logger = null
-        )
-            : this( GetBuiltInConverters( logger ), builtInConv, logger )
+        private enum GetterSetter
         {
+            Getter,
+            Setter
         }
 
+        private readonly ITextConverters _converters;
+        private readonly IJ4JLogger? _logger;
+
         public BindabilityValidator(
-            IEnumerable<ITextToValue>? converters = null,
-            BuiltInConverters builtInConv = BuiltInConverters.AddDynamically,
+            ITextConverters converters,
             IJ4JLogger? logger = null )
         {
-            AddConverters( converters ?? Enumerable.Empty<ITextToValue>() );
-            _builtInConv = builtInConv;
+            _converters = converters;
 
-            switch( builtInConv )
-            {
-                case BuiltInConverters.AddAtInitialization:
-                    AddConverters( GetBuiltInConverters( logger ) );
-                    break;
-
-                case BuiltInConverters.AddDynamically:
-                    _builtInTargets = GetBuiltInTargetTypes();
-                    break;
-            }
-
-            Logger = logger;
-            Logger?.SetLoggedType( GetType() );
+            _logger = logger;
+            _logger?.SetLoggedType( GetType() );
         }
 
-        protected IJ4JLogger? Logger { get; }
         protected bool IsBindable { get; private set; }
         protected string? PropertyPath { get; private set; }
         protected bool IsOuterMostLeaf { get; private set; }
-
-        public bool AddConverter( ITextToValue converter, bool replaceExisting = false )
-        {
-            if( _converters.ContainsKey( converter.TargetType ) )
-            {
-                if( !replaceExisting )
-                {
-                    Logger?.Error( "There is already a converter defined for {0}", converter.TargetType );
-                    return false;
-                }
-
-                _converters[ converter.TargetType ] = converter;
-
-                return true;
-            }
-
-            _converters.Add( converter.TargetType, converter );
-
-            return true;
-        }
-
-        public bool AddConverters( IEnumerable<ITextToValue> converters, bool replaceExisting = false )
-        {
-            var retVal = true;
-
-            foreach( var converter in converters )
-            {
-                retVal &= AddConverter( converter, replaceExisting );
-            }
-
-            return retVal;
-        }
-
-        public bool CanConvert( Type toCheck )
-        {
-            // we can convert any type for which we have a converter, plus lists and arrays of those types
-            if( toCheck.IsArray )
-            {
-                var elementType = toCheck.GetElementType();
-                return elementType != null && CanConvertSimple( elementType );
-            }
-
-            if( toCheck.IsGenericType )
-            {
-                var genArgs = toCheck.GetGenericArguments();
-                if( genArgs.Length != 1 )
-                    return false;
-
-                if( !CanConvertSimple( genArgs[ 0 ] ) )
-                    return false;
-
-                return ( typeof(List<>).MakeGenericType( genArgs[ 0 ] )
-                    .IsAssignableFrom( toCheck ) );
-            }
-
-            if( CanConvertSimple( toCheck ) )
-                return true;
-
-            Logger?.Error( "No ITextToValue converter is defined for {0}", toCheck );
-
-            return false;
-        }
-
-        private bool CanConvertSimple( Type simpleType )
-        {
-            if( simpleType.IsArray || simpleType.IsGenericType ) 
-                return false;
-
-            if( simpleType.IsEnum )
-                return true;
-
-            switch( _builtInConv )
-            {
-                case BuiltInConverters.AddAtInitialization:
-                    return _converters.Any( x => x.Value.TargetType == simpleType );
-
-                case BuiltInConverters.AddDynamically:
-                    if( _converters.Any( x => x.Value.TargetType == simpleType ) )
-                        return true;
-
-                    break;
-
-                case BuiltInConverters.DoNotAdd:
-                    return false;
-            }
-
-            // try to add a built-in converter dynamically
-            var builtInConverter = _builtInTargets!.FirstOrDefault( x => x.ReturnType == simpleType );
-            if( builtInConverter == null )
-                return false;
-
-            var builtInType = typeof(BuiltInTextToValue<>).MakeGenericType(builtInConverter.ReturnType);
-
-            _converters.Add( simpleType,
-                (ITextToValue)Activator.CreateInstance(
-                    builtInType,
-                    new object?[] { builtInConverter.MethodInfo, Logger }
-                )!
-            );
-
-            return true;
-        }
-
-        public bool Convert( Type targetType, IEnumerable<string> textValues, out object? result )
-        {
-            result = null;
-
-            var converter = _converters.Where( x => x.Value.CanConvert( targetType ) )
-                .Select( x => x.Value )
-                .FirstOrDefault();
-            
-            if( converter != null ) 
-                return converter.Convert( textValues, out result );
-
-            if( targetType.IsEnum )
-            {
-                var enumConverterType = typeof(TextToEnum<>).MakeGenericType( targetType );
-                converter = Activator.CreateInstance( enumConverterType, new object?[] { Logger } ) as ITextToValue;
-                _converters.Add( targetType, converter! );
-
-                return converter!.Convert( textValues, out result );
-            }
-            
-            Logger?.Error( "Cannot convert text to '{0}'", targetType );
-            
-            return false;
-        }
 
         public virtual bool IsPropertyBindable( Stack<PropertyInfo> propertyStack )
         {
@@ -231,22 +87,12 @@ namespace J4JSoftware.Configuration.CommandLine
             return IsBindable;
         }
 
-        public bool IsPropertyBindable( Type toCheck )
-        {
-            PropertyPath = toCheck.Name;
-            IsOuterMostLeaf = true;
-
-            IsBindable = CheckBasicBindability(toCheck);
-
-            return IsBindable;
-        }
-
         private bool CheckBasicBindability( Type toCheck )
         {
             if( toCheck.GetBindableInfo().BindableType != BindableType.Unsupported )
                 return true;
 
-            Logger?.Error( "{0} is neither a simple type, nor an array/list of simple types", toCheck );
+            _logger?.Error( "{0} is neither a simple type, nor an array/list of simple types", toCheck );
 
             return false;
         }
@@ -266,11 +112,11 @@ namespace J4JSoftware.Configuration.CommandLine
                     if( toCheck.GetParameters().Length == reqdParams )
                         return true;
 
-                    Logger?.Error<string>( "Property '{0}' is indexed", propInfo.Name );
+                    _logger?.Error<string>( "Property '{0}' is indexed", propInfo.Name );
                     return false;
                 }
 
-                Logger?.Error<GetterSetter, string>( "The {0} for property '{1}' is not public",
+                _logger?.Error<GetterSetter, string>( "The {0} for property '{1}' is not public",
                     getterSetter,
                     propInfo.Name );
 
@@ -278,7 +124,7 @@ namespace J4JSoftware.Configuration.CommandLine
             }
 
 
-            Logger?.Error<string, GetterSetter>( "Property '{0}' does not have a {1} method",
+            _logger?.Error<string, GetterSetter>( "Property '{0}' does not have a {1} method",
                 propInfo.Name,
                 getterSetter );
 
@@ -301,10 +147,10 @@ namespace J4JSoftware.Configuration.CommandLine
                     return false;
             }
 
-            if( !IsOuterMostLeaf || CanConvert( toCheck ) ) 
+            if( !IsOuterMostLeaf || _converters.CanConvert( toCheck ) ) 
                 return true;
 
-            Logger?.Error( "No converter for text values exists for the property type '{0}'", toCheck );
+            _logger?.Error( "No converter for text values exists for the property type '{0}'", toCheck );
         
             return false;
         }
@@ -316,7 +162,7 @@ namespace J4JSoftware.Configuration.CommandLine
 
             if( toCheck.GenericTypeArguments.Length != 1 )
             {
-                Logger?.Error( "Generic type '{0}' has more than one generic Type argument", toCheck );
+                _logger?.Error( "Generic type '{0}' has more than one generic Type argument", toCheck );
                 return false;
             }
 
@@ -328,7 +174,7 @@ namespace J4JSoftware.Configuration.CommandLine
             if( typeof(List<>).MakeGenericType( genType ).IsAssignableFrom( toCheck ) )
                 return true;
 
-            Logger?.Error( "Generic type '{0}' is not a List<> type", genType );
+            _logger?.Error( "Generic type '{0}' is not a List<> type", genType );
 
             return false;
         }
@@ -345,7 +191,7 @@ namespace J4JSoftware.Configuration.CommandLine
                 if( elementType != null && CheckNonGenericType( elementType ) )
                     return true;
 
-                Logger?.Error( "Array element Type '{0}' is undefined or not a valid non-generic type" );
+                _logger?.Error( "Array element Type '{0}' is undefined or not a valid non-generic type" );
 
                 return false;
             }
@@ -357,7 +203,7 @@ namespace J4JSoftware.Configuration.CommandLine
                 || toCheck.GetConstructors().Any( c => !c.GetParameters().Any() ) )
                 return true;
 
-            Logger?.Error(
+            _logger?.Error(
                 "'{0}' is neither a ValueType nor a string type and does not have a public parameterless constructor",
                 toCheck );
 
@@ -374,7 +220,7 @@ namespace J4JSoftware.Configuration.CommandLine
             if( toCheck.GetConstructors().Any( c => c.GetParameters().Length == 0 ) )
                 return true;
 
-            Logger?.Error("Type '{0}' does not have any public parameterless constructors", toCheck);
+            _logger?.Error("Type '{0}' does not have any public parameterless constructors", toCheck);
 
             return false;
         }

@@ -34,12 +34,6 @@ namespace J4JSoftware.Configuration.CommandLine
             AddDynamically
         }
 
-        private enum GetterSetter
-        {
-            Getter,
-            Setter
-        }
-
         private record BuiltInConverter( Type ReturnType, MethodInfo MethodInfo );
 
         private static List<ITextToValue> GetBuiltInConverters( IJ4JLogger? logger )

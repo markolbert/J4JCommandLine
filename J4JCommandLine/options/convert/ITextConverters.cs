@@ -19,12 +19,15 @@
 
 using System;
 using System.Collections.Generic;
-using System.Reflection;
 
 namespace J4JSoftware.Configuration.CommandLine
 {
-    public interface IBindabilityValidator
+    public interface ITextConverters : IReadOnlyDictionary<Type, ITextToValue>
     {
-        bool IsPropertyBindable( Stack<PropertyInfo> propertyStack );
+        bool AddConverter( ITextToValue converter, bool replaceExisting = false );
+        bool AddConverters( IEnumerable<ITextToValue> converters, bool replaceExisting = false );
+
+        bool CanConvert(Type toCheck);
+        bool Convert(Type targetType, IEnumerable<string> textValues, out object? result);
     }
 }
