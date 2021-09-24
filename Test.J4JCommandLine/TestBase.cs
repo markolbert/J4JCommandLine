@@ -97,27 +97,27 @@ namespace J4JSoftware.Binder.Tests
             return option;
         }
 
-        protected void CreateOptionsFromContextKeys(IOptionCollection options, IEnumerable<OptionConfig> optConfigs)
-        {
-            foreach (var optConfig in optConfigs)
-            {
-                CreateOptionFromContextKey(options, optConfig);
-            }
-        }
+        //protected void CreateOptionsFromContextKeys(IOptionCollection options, IEnumerable<OptionConfig> optConfigs)
+        //{
+        //    foreach (var optConfig in optConfigs)
+        //    {
+        //        CreateOptionFromContextKey(options, optConfig);
+        //    }
+        //}
 
-        private void CreateOptionFromContextKey(IOptionCollection options, OptionConfig optConfig)
-        {
-            var option = options.Add(optConfig.GetPropertyType(), optConfig.ContextPath);
-            option.Should().NotBeNull();
+        //private void CreateOptionFromContextKey(IOptionCollection options, OptionConfig optConfig)
+        //{
+        //    var option = options.Add(optConfig.GetPropertyType(), optConfig.ContextPath);
+        //    option.Should().NotBeNull();
 
-            option!.AddCommandLineKey(optConfig.CommandLineKey)
-                .SetStyle(optConfig.Style);
+        //    option!.AddCommandLineKey(optConfig.CommandLineKey)
+        //        .SetStyle(optConfig.Style);
 
-            if (optConfig.Required) option.IsRequired();
-            else option.IsOptional();
+        //    if (optConfig.Required) option.IsRequired();
+        //    else option.IsOptional();
 
-            optConfig.Option = option;
-        }
+        //    optConfig.Option = option;
+        //}
 
         // these next two methods serve to strip the project path off of source code
         // file paths

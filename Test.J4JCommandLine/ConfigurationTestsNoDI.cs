@@ -14,33 +14,33 @@ namespace J4JSoftware.Binder.Tests
         private IConfigurationRoot? _configRoot;
         private CommandLineSource? _cmdLineSrc;
 
-        [ Theory ]
-        [ MemberData( nameof( TestDataSource.GetParserData ), MemberType = typeof( TestDataSource ) ) ]
-        public void Simple( TestConfig testConfig )
-        {
-            CreateConfigurationRootAndParser( testConfig );
+        //[ Theory ]
+        //[ MemberData( nameof( TestDataSource.GetParserData ), MemberType = typeof( TestDataSource ) ) ]
+        //public void Simple( TestConfig testConfig )
+        //{
+        //    CreateConfigurationRootAndParser( testConfig );
 
-            CreateOptionsFromContextKeys(_options!, testConfig.OptionConfigurations);
-            _options!.FinishConfiguration();
+        //    CreateOptionsFromContextKeys(_options!, testConfig.OptionConfigurations);
+        //    _options!.FinishConfiguration();
 
-            _options.Count.Should().Be(testConfig.OptionConfigurations.Count);
+        //    _options.Count.Should().Be(testConfig.OptionConfigurations.Count);
 
-            ValidateConfiguration<BasicTarget>( testConfig );
-        }
+        //    ValidateConfiguration<BasicTarget>( testConfig );
+        //}
 
-        [Theory]
-        [MemberData(nameof(TestDataSource.GetSinglePropertyData), MemberType = typeof(TestDataSource))]
-        public void SingleProperties(TestConfig testConfig)
-        {
-            CreateConfigurationRootAndParser(testConfig);
+        //[Theory]
+        //[MemberData(nameof(TestDataSource.GetSinglePropertyData), MemberType = typeof(TestDataSource))]
+        //public void SingleProperties(TestConfig testConfig)
+        //{
+        //    CreateConfigurationRootAndParser(testConfig);
 
-            CreateOptionsFromContextKeys(_options!, testConfig.OptionConfigurations);
-            _options!.FinishConfiguration();
+        //    CreateOptionsFromContextKeys(_options!, testConfig.OptionConfigurations);
+        //    _options!.FinishConfiguration();
 
-            _options.Count.Should().Be(testConfig.OptionConfigurations.Count);
+        //    _options.Count.Should().Be(testConfig.OptionConfigurations.Count);
 
-            ValidateConfiguration<BasicTarget>(testConfig);
-        }
+        //    ValidateConfiguration<BasicTarget>(testConfig);
+        //}
 
         [Theory]
         [MemberData(nameof(TestDataSource.GetEmbeddedPropertyData), MemberType = typeof(TestDataSource))]

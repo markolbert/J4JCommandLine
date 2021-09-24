@@ -32,17 +32,17 @@ namespace J4JSoftware.Binder.Tests
             }
         }
 
-        [Theory]
-        [MemberData(nameof(TestDataSource.GetSinglePropertyData), MemberType = typeof(TestDataSource))]
-        public void SingleProperties(TestConfig testConfig)
-        {
-            Initialize(testConfig.OperatingSystem);
+        //[Theory]
+        //[MemberData(nameof(TestDataSource.GetSinglePropertyData), MemberType = typeof(TestDataSource))]
+        //public void SingleProperties(TestConfig testConfig)
+        //{
+        //    Initialize(testConfig.OperatingSystem);
 
-            CreateOptionsFromContextKeys(_parser!.Options, testConfig.OptionConfigurations);
-            _parser.Options.FinishConfiguration();
+        //    CreateOptionsFromContextKeys(_parser!.Options, testConfig.OptionConfigurations);
+        //    _parser.Options.FinishConfiguration();
 
-            ValidateTokenizing(testConfig);
-        }
+        //    ValidateTokenizing(testConfig);
+        //}
 
         [Theory]
         [MemberData(nameof(TestDataSource.GetEmbeddedPropertyData), MemberType = typeof(TestDataSource))]
