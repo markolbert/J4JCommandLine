@@ -29,6 +29,31 @@ namespace J4JSoftware.Configuration.CommandLine
 {
     public static class J4JCommandLineExtensions
     {
+        internal static BindableType GetBindingType(this Type toCheck)
+        {
+            if (toCheck.IsArray)
+            {
+                var elementType = toCheck.GetElementType();
+
+                return elementType == null
+                    ? BindableType.Unsupported
+                    : BindableType.Array;
+            }
+
+            // if it's not an array and not a generic it's a "simple" type
+            if (!toCheck.IsGenericType)
+                return BindableType.Simple;
+
+            if (toCheck.GenericTypeArguments.Length != 1)
+                return BindableType.Unsupported;
+
+            var genType = toCheck.GetGenericArguments()[0];
+
+            return typeof(List<>).MakeGenericType(genType).IsAssignableFrom(toCheck)
+                ? BindableType.List
+                : BindableType.Unsupported;
+        }
+
         internal static BindingInfo GetBindableInfo( this Type toCheck )
         {
             if( toCheck.IsArray )

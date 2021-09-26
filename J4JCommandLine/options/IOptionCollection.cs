@@ -49,7 +49,7 @@ namespace J4JSoftware.Configuration.CommandLine
         //IOption? Add( Type propType, string contextPath );
 
         Option<TProp>? Bind<TTarget, TProp>(
-            Expression<Func<TTarget, TProp>> propertySelector,
+            Expression<Func<TTarget, TProp>> selector,
             params string[] cmdLineKeys )
             where TTarget : class, new();
 

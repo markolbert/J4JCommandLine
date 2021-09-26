@@ -173,7 +173,7 @@ namespace J4JSoftware.Configuration.CommandLine
         //}
 
         public Option<TTarget>? Bind<TContainer, TTarget>(
-            Expression<Func<TContainer, TTarget>> propertySelector,
+            Expression<Func<TContainer, TTarget>> selector,
             params string[] cmdLineKeys )
             where TContainer : class, new()
         {
@@ -181,7 +181,7 @@ namespace J4JSoftware.Configuration.CommandLine
             // the path to the property of interest
             var propElements = new Stack<PropertyInfo>();
 
-            var curExpr = propertySelector.Body;
+            var curExpr = selector.Body;
             OptionStyle? firstStyle = null;
 
             while( curExpr != null )

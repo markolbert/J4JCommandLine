@@ -18,44 +18,150 @@
 #endregion
 
 using System;
+using System.Linq.Expressions;
 using System.Reflection;
 
 namespace J4JSoftware.Configuration.CommandLine
 {
-    public enum BindingTarget
+    internal interface IBindableTest
     {
-        Field,
-        Property
+        bool IsBindable( BindingInfo bindingInfo );
     }
 
-    internal abstract record BindingInfo
+    internal class AllSupportedTest : IBindableTest
     {
-        protected BindingInfo(
-            BindableType bindableType,
-            BindingTarget target
+        public bool IsBindable( BindingInfo bindingInfo )
+        {
+            var curBI = bindingInfo.Root;
+
+            while( curBI != null )
+            {
+                if( curBI.BindableType == BindableType.Unsupported )
+                    return false;
+
+                curBI = curBI.Child;
+            }
+
+            return true;
+        }
+    }
+
+    internal class AccessibleGettersTest : IBindableTest
+    {
+        public bool IsBindable( BindingInfo bindingInfo )
+        {
+            var curBI = bindingInfo.Root;
+
+            if( curBI.Target == BindingTarget.Field )
+                return true;
+
+            while( curBI != null )
+            {
+                curBI = curBI.Child;
+            }
+
+            return true;
+        }
+    }
+
+    internal class BindingInfo
+    {
+        public static BindingInfo Create<TContainer, TTarget>(
+            Expression<Func<TContainer, TTarget>> selector
         )
         {
-            BindableType = bindableType;
-            Target = target;
+            var curExpr = selector.Body;
+            BindingInfo? retVal = null;
+
+            while( curExpr != null )
+            {
+                switch( curExpr )
+                {
+                    case MemberExpression memExpr:
+                        retVal = memExpr.Member switch
+                        {
+                            PropertyInfo propInfo => CreateProperty( propInfo, retVal ),
+                            FieldInfo fieldInfo => CreateField( fieldInfo ),
+                            _ => CreateUnsupported()
+                        };
+
+                        // walk up expression tree
+                        curExpr = memExpr.Expression;
+
+                        break;
+
+                    case UnaryExpression unaryExpr:
+                        if( unaryExpr.Operand is MemberExpression unaryMemExpr )
+                            retVal = CreateProperty( (PropertyInfo)unaryMemExpr.Member, retVal );
+
+                        // we're done; UnaryExpressions aren't part of an expression tree
+                        curExpr = null;
+
+                        break;
+
+                    case ParameterExpression:
+                        // this is the root/anchor of the expression tree.
+                        // we're done
+                        curExpr = null;
+
+                        break;
+                }
+            }
+
+            return retVal!;
         }
 
-        public abstract Type TargetType { get; }
-        public abstract string Name { get; }
-        public BindableType BindableType { get; }
-        public BindingTarget Target { get; }
-    }
+        private static BindingInfo CreateProperty( PropertyInfo propInfo, BindingInfo? child )
+        {
+            var retVal = new BindingInfo
+            {
+                BindableType = propInfo.PropertyType.GetBindingType(),
+                Name = propInfo.Name,
+                Target = BindingTarget.Property,
+                TargetType = propInfo.PropertyType,
+                Child = child
+            };
 
-    internal record BoundPropertyInfo( BindableType BindableType, PropertyInfo PropertyInfo )
-        : BindingInfo( BindableType, BindingTarget.Property )
-    {
-        public override Type TargetType => PropertyInfo.PropertyType;
-        public override string Name => PropertyInfo.Name;
-    }
+            if( child != null )
+                child.Parent = retVal;
 
-    internal record BoundFieldInfo( BindableType BindableType, FieldInfo FieldInfo )
-        : BindingInfo( BindableType, BindingTarget.Field )
-    {
-        public override Type TargetType => FieldInfo.FieldType;
-        public override string Name => FieldInfo.Name;
+            return retVal;
+        }
+
+        private static BindingInfo CreateField( FieldInfo fieldInfo ) =>
+            new BindingInfo
+            {
+                BindableType = fieldInfo.FieldType.GetBindingType(),
+                Name = fieldInfo.Name,
+                Target = BindingTarget.Field,
+                TargetType = fieldInfo.FieldType
+            };
+
+        private static BindingInfo CreateUnsupported() =>
+            new BindingInfo
+            {
+                BindableType = BindableType.Unsupported,
+                Name = string.Empty,
+                Target = BindingTarget.Unsupported,
+                TargetType = typeof( object )
+            };
+
+        private BindingInfo()
+        {
+        }
+
+        public Type TargetType { get; private set; }
+        public string Name { get; private set; }
+        public BindableType BindableType { get; private set; }
+        public BindingTarget Target { get; private set; }
+
+        public BindingInfo? Parent { get; private set; }
+        public BindingInfo? Child { get; private set; }
+
+        public bool IsOutermostLeaf => Target == BindingTarget.Field
+                                       || ( Parent != null && Child == null );
+
+        public BindingInfo Root => Parent == null ? this : Parent.Root;
+        public BindingInfo OutermostLeaf => Child == null ? this : Child.OutermostLeaf;
     }
 }
