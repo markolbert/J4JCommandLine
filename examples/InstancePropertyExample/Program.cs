@@ -61,7 +61,7 @@ namespace J4JSoftware.CommandLine.Examples
 
             var hostInfo = host.Services.GetRequiredService<J4JHostInfo>();
 
-            var help = new HelpDisplayColor(hostInfo.CommandLineLexicalElements!, options);
+            var help = new ColorHelpDisplay(hostInfo.CommandLineLexicalElements!, options);
             help.Display();
 
             var parsed = config.Get<Configuration>();

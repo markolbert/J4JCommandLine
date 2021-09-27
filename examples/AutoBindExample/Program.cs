@@ -65,7 +65,7 @@ namespace J4JSoftware.CommandLine.Examples
             if( config == null )
                 throw new NullReferenceException( "Undefined IConfiguration" );
 
-            var help = new HelpDisplayColor( hostInfo.CommandLineLexicalElements!, options );
+            var help = new ColorHelpDisplay( hostInfo.CommandLineLexicalElements!, options );
             help.Display();
 
             var parsed = config.Get<Program>();
