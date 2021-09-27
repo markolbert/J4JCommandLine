@@ -29,15 +29,15 @@ namespace J4JSoftware.Configuration.CommandLine
     {
         protected HelpDisplay( 
             ILexicalElements tokens,
-            IOptionCollection options 
+            OptionCollection collection 
             )
         {
             Tokens = tokens;
-            Options = options;
+            Collection = collection;
         }
 
         protected ILexicalElements Tokens { get; }
-        protected IOptionCollection Options { get; }
+        protected OptionCollection Collection { get; }
 
         public abstract void Display();
 

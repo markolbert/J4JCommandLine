@@ -25,11 +25,11 @@ namespace J4JSoftware.Configuration.CommandLine
 {
     public class CommandLineArgument
     {
-        private readonly IOptionCollection _options;
+        private readonly OptionCollection _options;
         private readonly StringComparison _textComparison;
 
         internal CommandLineArgument( 
-            IOptionCollection options,
+            OptionCollection options,
             StringComparison textComparison
             )
         {
@@ -40,7 +40,7 @@ namespace J4JSoftware.Configuration.CommandLine
         public string? Key { get; set; }
         public List<string> Values { get; } = new();
 
-        public IOption? Option => _options.FirstOrDefault( x =>
+        internal IOptionInternal? Option => _options.OptionsInternal.FirstOrDefault( x =>
             x.Keys.Any( k => k.Equals( Key, _textComparison ) ) );
     }
 }

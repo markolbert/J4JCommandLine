@@ -30,9 +30,9 @@ namespace J4JSoftware.Configuration.J4JCommandLine
     {
         public ColorHelpDisplay(
             ILexicalElements tokens,
-            IOptionCollection options
+            OptionCollection collection
         )
-            : base( tokens, options )
+            : base( tokens, collection )
         {
         }
 
@@ -53,7 +53,7 @@ namespace J4JSoftware.Configuration.J4JCommandLine
                 NewCell( "Required", HeadingColor ),
                 NewCell( "Description", HeadingColor ) );
 
-            grid.Children.Add( Options.Select( x =>
+            grid.Children.Add( Collection.Options.Select( x =>
             {
                 var retVal = new List<object>
                 {

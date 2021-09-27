@@ -61,7 +61,7 @@ namespace J4JSoftware.Configuration.CommandLine
             if( Parser == null )
                 return null;
 
-            Parser.Options.Configured += Options_Configured;
+            Parser.Collection.Configured += Options_Configured;
 
             var retVal = new CommandLineSource( Parser.Tokenizer.TextComparison );
             retVal.Changed += OnCommandLineSourceChanged;

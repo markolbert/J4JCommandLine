@@ -75,13 +75,13 @@ namespace J4JSoftware.Configuration.CommandLine
         private readonly IJ4JLogger? _logger;
 
         public Parser(
-            IOptionCollection options,
+            OptionCollection options,
             ParsingTable parsingTable,
             ITokenizer tokenizer,
             IJ4JLogger? logger = null
         )
         {
-            Options = options;
+            Collection = options;
             _parsingTable = parsingTable;
             Tokenizer = tokenizer;
 
@@ -89,7 +89,7 @@ namespace J4JSoftware.Configuration.CommandLine
         }
 
         public ITokenizer Tokenizer { get; }
-        public IOptionCollection Options { get; }
+        public OptionCollection Collection { get; }
 
         public bool Parse( string cmdLine )
         {

@@ -74,7 +74,7 @@ namespace J4JSoftware.Configuration.CommandLine
         public static IConfigurationBuilder AddJ4JCommandLine(
             this IConfigurationBuilder builder,
             IServiceProvider svcProvider,
-            out IOptionCollection? options,
+            out OptionCollection? options,
             out CommandLineSource? cmdLineSource,
             params ICleanupTokens[] cleanupTokens
         )
@@ -87,7 +87,7 @@ namespace J4JSoftware.Configuration.CommandLine
             builder.Add(source);
 
             cmdLineSource = source.CommandLineSource;
-            options = source.Parser?.Options;
+            options = source.Parser?.Collection;
 
             return builder;
         }
@@ -114,7 +114,7 @@ namespace J4JSoftware.Configuration.CommandLine
 
         public static IConfigurationBuilder AddJ4JCommandLineForWindows(
             this IConfigurationBuilder builder,
-            out IOptionCollection? options,
+            out OptionCollection? options,
             out CommandLineSource? cmdLineSource,
             ITextConverters? converters = null,
             IJ4JLogger? logger = null,
@@ -130,7 +130,7 @@ namespace J4JSoftware.Configuration.CommandLine
 
         public static IConfigurationBuilder AddJ4JCommandLineForLinux(
             this IConfigurationBuilder builder,
-            out IOptionCollection? options,
+            out OptionCollection? options,
             out CommandLineSource? cmdLineSource,
             ITextConverters? converters = null,
             IJ4JLogger? logger = null,
@@ -147,7 +147,7 @@ namespace J4JSoftware.Configuration.CommandLine
         private static IConfigurationBuilder AddJ4JCommandLineDefault(
             this IConfigurationBuilder builder,
             CommandLineOperatingSystems opSys,
-            out IOptionCollection? options,
+            out OptionCollection? options,
             out CommandLineSource? cmdLineSource,
             ITextConverters? converters = null,
             IJ4JLogger? logger = null,

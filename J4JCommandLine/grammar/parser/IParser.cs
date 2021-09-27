@@ -21,7 +21,7 @@ namespace J4JSoftware.Configuration.CommandLine
 {
     public interface IParser
     {
-        IOptionCollection Options { get; }
+        OptionCollection Collection { get; }
         ITokenizer Tokenizer { get; }
 
         bool Parse( string cmdLine );

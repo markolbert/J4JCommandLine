@@ -44,16 +44,16 @@ namespace J4JSoftware.Configuration.CommandLine
         public override void Load()
         {
             if( Source.Parser == null 
-                || !Source.Parser.Options.IsConfigured
+                || !Source.Parser.Collection.IsConfigured
                 || Source.CommandLineSource == null )
                 return;
 
-            Source.Parser.Options.ClearValues();
+            Source.Parser.Collection.ClearValues();
 
             if( !Source.Parser.Parse( Source.CommandLineSource.CommandLine ) )
                 return;
 
-            foreach( var option in Source.Parser.Options )
+            foreach( var option in Source.Parser.Collection.OptionsInternal )
             {
                 switch( option.Style )
                 {

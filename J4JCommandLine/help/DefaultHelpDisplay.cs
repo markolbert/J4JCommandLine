@@ -26,9 +26,9 @@ namespace J4JSoftware.Configuration.CommandLine
     {
         public DefaultHelpDisplay(
             ILexicalElements tokens,
-            IOptionCollection options
+            OptionCollection collection
         )
-            : base( tokens, options )
+            : base( tokens, collection )
         {
         }
 
@@ -36,7 +36,7 @@ namespace J4JSoftware.Configuration.CommandLine
         {
             Console.WriteLine( "Command line help\n" );
 
-            foreach( var option in Options )
+            foreach( var option in Collection.OptionsInternal )
             {
                 Console.WriteLine( $"Keys: {string.Join( ", ", GetKeys( option ) )}" );
                 Console.WriteLine( $"Description:  {option.Description}" );
