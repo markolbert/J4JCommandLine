@@ -64,13 +64,10 @@ This example can be simplified further by using my [dependency injection library
 - [Goal and Concept](docs/goal-concept.md)
 - [Command Line Styles](docs/cmdlinestyle.md)
 - [Binding](docs/binding.md)
-- Examples
-  - [Binding to static properties](docs/example-static.md)
-  - [Binding to a configuration object](docs/example-instance.md)
 - [Logging and Errors](docs/logging.md)
 - [Outputting Help](docs/help.md)
 - [Notes on the Tokenizer and Parser](docs/parser.md)
 
 ## Inspiration and Dedication
 
-This library is dedicated to Jon Sequitur, one of the leads on Microsoft's own command line parser, for his patient explanations of how that other parser is designed and his suggestions for potential changes to it which eventually led to me writing J4JCommandLine.
+This library is dedicated to Jon Sequitur, one of the leads on Microsoft's own command line parser, for his patient explanations of how that other parser is designed and his suggestions for potential changes to it which eventually led to me writing `J4JCommandLine`.

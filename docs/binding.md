@@ -31,9 +31,11 @@ For this to work the target properties must be publicly read/writable and the "i
 
 You specify optional constraints on an option via the following extension-style methods.
 
+### Adding Option Keys
+
 ```csharp
-IOption AddCommandLineKey( string cmdLineKey );
-IOption AddCommandLineKeys( IEnumerable<string> cmdLineKeys );
+public Option<TContainer, TProp> AddCom0mandLineKey( string cmdLineKey ){...}
+public Option<TContainer, TProp> AddCommandLineKeys( IEnumerable<string> cmdLineKeys ) {...}
 ```
 
 Adds one or more keys by which the option can be set on the command line (a key is the 'x' part of '/x').
@@ -42,12 +44,16 @@ Keys must be unique across the option collection. Case sensitivity depends on th
 
 Specifying a key already in use will result in it being ignored. Keys do not need to be single characters.
 
+### Making an Option Required or Optional
+
 ```csharp
 IOption IsRequired();
 IOption IsOptional();
 ```
 
 These extension methods make an option either required or optional. The default is optional.
+
+### Providing a Description
 
 ```csharp
 IOption SetDescription( string description );
