@@ -26,7 +26,8 @@ namespace J4JSoftware.Configuration.CommandLine
     public interface IOption
     {
         bool IsInitialized { get; }
-        OptionCollection Container { get; }
+        OptionCollection Options { get; }
+        Type ContainingType { get; }
 
         string? ContextPath { get; }
 
@@ -60,11 +61,7 @@ namespace J4JSoftware.Configuration.CommandLine
     public interface IOption<T> : IOption
     {
         T? DefaultValue { get; }
-        IOption<T> SetDefaultValue( T? value );
-    }
 
-    public interface ITypeBoundOption : IOption
-    {
-        Type ContainerType { get; }
+        IOption<T> SetDefaultValue( T? value );
     }
 }

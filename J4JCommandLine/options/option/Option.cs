@@ -17,34 +17,33 @@
 
 #endregion
 
+using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 
 namespace J4JSoftware.Configuration.CommandLine
 {
-    public class Option<T> : IOption<T>
+    public class Option<TContainer, TProp> : IOption<TProp>
     {
         private readonly List<string> _cmdLineKeys = new();
-        private readonly IBindabilityValidator _propValidator;
-        private readonly ITextConverters _converters;
+        private readonly ITextToValue _converter;
         private readonly List<string> _values = new();
 
         internal Option(
             OptionCollection container,
             string contextPath,
-            IBindabilityValidator propValidator,
-            ITextConverters converters
+            ITextToValue converter
         )
         {
-            Container = container;
+            Options = container;
             ContextPath = contextPath;
-            _propValidator = propValidator;
-            _converters = converters;
+            _converter = converter;
         }
 
         public bool IsInitialized => !string.IsNullOrEmpty( ContextPath ) && _cmdLineKeys.Count > 0;
-        public OptionCollection Container { get; }
+        public OptionCollection Options { get; }
+        public Type ContainingType => typeof(TContainer);
 
         public virtual string? ContextPath { get; }
 
@@ -52,7 +51,7 @@ namespace J4JSoftware.Configuration.CommandLine
 
         public IOption AddCommandLineKey( string cmdLineKey )
         {
-            if( !Container.CommandLineKeyInUse( cmdLineKey ) )
+            if( !Options.CommandLineKeyInUse( cmdLineKey ) )
                 _cmdLineKeys.Add( cmdLineKey );
 
             return this;
@@ -126,13 +125,13 @@ namespace J4JSoftware.Configuration.CommandLine
 
         public bool GetValue( out object? result )
         {
-            result = default(T);
+            result = default(TProp);
             
             if( !ValuesSatisfied )
                 return false;
 
             if( Style != OptionStyle.Switch )
-                return _converters.Convert( typeof(T), _values, out result );
+                return _converter.Convert( typeof(TProp), _values, out result );
 
             result = !string.IsNullOrEmpty( CommandLineKeyProvided );
             
@@ -161,9 +160,9 @@ namespace J4JSoftware.Configuration.CommandLine
             return this;
         }
 
-        public T? DefaultValue { get; private set; }
+        public TProp? DefaultValue { get; private set; }
 
-        public IOption<T> SetDefaultValue( T? value )
+        public IOption<TProp> SetDefaultValue( TProp? value )
         {
             DefaultValue = value;
             return this;

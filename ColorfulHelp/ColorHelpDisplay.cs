@@ -26,9 +26,9 @@ using J4JSoftware.Logging;
 
 namespace J4JSoftware.Configuration.J4JCommandLine
 {
-    public class HelpDisplayColor : HelpDisplay
+    public class ColorHelpDisplay : HelpDisplay
     {
-        public HelpDisplayColor(
+        public ColorHelpDisplay(
             ILexicalElements tokens,
             IOptionCollection options
         )

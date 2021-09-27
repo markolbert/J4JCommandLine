@@ -75,13 +75,9 @@ namespace J4JSoftware.Configuration.CommandLine
 
         public Type TargetType => typeof(TBaseType);
 
-        public bool CanConvert( Type toCheck )
-        {
-            var bindableInfo = toCheck.GetBindableInfo();
-
-            return bindableInfo.BindableType != BindableType.Unsupported
-                   && toCheck.IsAssignableFrom( TargetType );
-        }
+        public bool CanConvert( Type toCheck ) =>
+            toCheck.GetTypeNature() != TypeNature.Unsupported
+            && toCheck.IsAssignableFrom( TargetType );
 
         // targetType must be one of:
         // - TBaseType
@@ -95,11 +91,9 @@ namespace J4JSoftware.Configuration.CommandLine
 
             var valueList = values.ToList();
 
-            var bindInfo = targetType.GetBindableInfo();
-
-            switch (bindInfo.BindableType)
+            switch (targetType.GetTypeNature())
             {
-                case BindableType.Simple:
+                case TypeNature.Simple:
                     if (valueList.Count > 1)
                     {
                         Logger?.Error("Cannot convert multiple text values to a single value of '{0}'",
@@ -113,13 +107,13 @@ namespace J4JSoftware.Configuration.CommandLine
 
                     break;
 
-                case BindableType.Array:
+                case TypeNature.Array:
                     retVal = ConvertToArray(valueList, out var arrayResult);
                     result = (object?)arrayResult;
 
                     break;
 
-                case BindableType.List:
+                case TypeNature.List:
                     retVal = ConvertToArray(valueList, out var listResult);
                     result = (object?)listResult;
 

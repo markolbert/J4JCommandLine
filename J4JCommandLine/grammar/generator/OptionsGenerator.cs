@@ -153,7 +153,7 @@ namespace J4JSoftware.Configuration.CommandLine
             // so any values that >>appear<< to be associated with a switch
             // are spurious values
             _current.Option
-                .Container
+                .Options
                 .SpuriousValues
                 .AddRange( _current.Values );
 
@@ -176,7 +176,7 @@ namespace J4JSoftware.Configuration.CommandLine
                 .AddValues( _current.Values.Take( _current.Option.MaxValues ) );
 
             _current.Option
-                .Container
+                .Options
                 .SpuriousValues
                 .AddRange( _current.Values.Skip( _current.Option.MaxValues ) );
 
