@@ -49,7 +49,7 @@ namespace J4JSoftware.Configuration.CommandLine
             {
                 foreach( var key in option.Keys )
                 {
-                    retVal.Add( $"{prefix}{key}" );
+                    retVal.Add( $"{prefix.Text}{key}" );
                 }
             }
 
