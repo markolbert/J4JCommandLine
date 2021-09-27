@@ -32,11 +32,7 @@ namespace J4JSoftware.Configuration.CommandLine
         {
             converters ??= new TextConverters( logger: logger );
 
-            var options = new OptionCollection(
-                StringComparison.OrdinalIgnoreCase,
-                new BindabilityValidator( converters, logger ),
-                converters,
-                logger );
+            var options = new OptionCollection( StringComparison.OrdinalIgnoreCase, converters, logger );
 
             var parsingTable = new ParsingTable( new OptionsGenerator(
                     options,
@@ -59,11 +55,7 @@ namespace J4JSoftware.Configuration.CommandLine
         {
             converters ??= new TextConverters(logger: logger);
 
-            var options = new OptionCollection(
-                StringComparison.Ordinal,
-                new BindabilityValidator(converters, logger),
-                converters,
-                logger);
+            var options = new OptionCollection( StringComparison.Ordinal, converters, logger);
 
             var parsingTable = new ParsingTable( new OptionsGenerator(
                     options,

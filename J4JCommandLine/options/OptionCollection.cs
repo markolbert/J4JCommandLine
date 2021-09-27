@@ -34,29 +34,32 @@ namespace J4JSoftware.Configuration.CommandLine
         public event EventHandler? Configured;
 
         private readonly StringComparison _textComparison;
-        private readonly IBindabilityValidator _propValidator;
         private readonly ITextConverters _converters;
-
-        private readonly TypeBoundOptionComparer _comparer = new();
-        
-        private readonly IJ4JLogger? _logger;
         private readonly List<IOption> _options = new();
-
         private readonly List<string> _optionKeys = new List<string>();
+        private readonly List<Func<BindingInfo, bool>> _bindingTests;
+        private readonly IJ4JLogger? _logger;
 
         public OptionCollection(
             StringComparison textComparison,
-            IBindabilityValidator propValidator,
             ITextConverters converters,
             IJ4JLogger? logger = null
         )
         {
             _textComparison = textComparison;
-            _propValidator = propValidator;
             _converters = converters;
 
             _logger = logger;
             _logger?.SetLoggedType( GetType() );
+
+            _bindingTests = new List<Func<BindingInfo, bool>>
+            {
+                BindingSupported,
+                CanConvert,
+                HasParameterlessConstructor,
+                HasAccessibleGetter,
+                HasAccessibleSetter
+            };
         }
 
         public bool IsConfigured { get; private set; }
@@ -84,171 +87,44 @@ namespace J4JSoftware.Configuration.CommandLine
         // of IOptionCollection)
         public List<CommandLineArgument> UnknownKeys { get; } = new();
 
-        //internal Dictionary<Type, string> TypePrefixes { get; } = new();
-
-        //public void SetTypePrefix<TTarget>( string prefix )
-        //    where TTarget : class, new()
-        //{
-        //    var type = typeof(TTarget);
-
-        //    if( TypePrefixes.ContainsKey( type ) )
-        //        TypePrefixes.Remove( type );
-
-        //    TypePrefixes.Add( type, prefix );
-        //}
-
-        //public string GetTypePrefix<TTarget>()
-        //    where TTarget : class, new()
-        //{
-        //    var type = typeof(TTarget);
-
-        //    if( TypePrefixes.ContainsKey( type ) )
-        //        return $"{TypePrefixes[ type ]}:";
-
-        //    return TargetsMultipleTypes ? $"{type.Name}:" : string.Empty;
-        //}
-
-        //internal bool TargetsMultipleTypes => _options.Cast<ITypeBoundOption>().Distinct( _comparer ).Count() > 1;
-
-        //public Option<TProp>? Add<TProp>( string contextPath )
-        //{
-        //    var propType = typeof(TProp);
-
-        //    if( !_propValidator.IsPropertyBindable( propType ) )
-        //    {
-        //        _logger?.Error( "Cannot bind to type '{0}'", propType );
-        //        return null;
-        //    }
-
-        //    if( this.Any( x => x.ContextPath!.Equals( contextPath, _textComparison ) ) )
-        //    {
-        //        _logger?.Error<string>( "An option with the same ContextPath ('{0}') is already in the collection",
-        //            contextPath );
-        //        return null;
-        //    }
-
-        //    var retVal = new Option<TProp>( this, contextPath, _propValidator );
-
-        //    _options.Add( retVal );
-
-        //    return retVal;
-        //}
-
-        //public IOption? Add( Type propType, string contextPath )
-        //{
-        //    if( !_propValidator.IsPropertyBindable( propType ) )
-        //    {
-        //        _logger?.Error( "Cannot bind to type '{0}'", propType );
-        //        return null;
-        //    }
-
-        //    if( this.Any( x => x.ContextPath!.Equals( contextPath, _textComparison ) ) )
-        //    {
-        //        _logger?.Error<string>( "An option with the same ContextPath ('{0}') is already in the collection",
-        //            contextPath );
-        //        return null;
-        //    }
-
-        //    var genType = typeof(Option<>).MakeGenericType( propType );
-        //    var ctor = genType.GetConstructors( BindingFlags.Instance | BindingFlags.NonPublic )
-        //        .FirstOrDefault();
-
-        //    if( ctor == null )
-        //    {
-        //        _logger?.Error( "Couldn't find constructor for {0}", genType );
-        //        return null;
-        //    }
-
-        //    var retVal = ctor.Invoke( new object?[] { this, contextPath, _propValidator } ) as IOption;
-
-        //    if( retVal == null )
-        //    {
-        //        _logger?.Error( "Failed to create instance of {0}", genType );
-        //        return null;
-        //    }
-
-        //    _options.Add( retVal );
-
-        //    return retVal;
-        //}
-
-        public Option<TTarget>? Bind<TContainer, TTarget>(
+        public Option<TContainer, TTarget>? Bind<TContainer, TTarget>(
             Expression<Func<TContainer, TTarget>> selector,
             params string[] cmdLineKeys )
             where TContainer : class, new()
         {
-            // walk the expression tree to extract the PropertyInfo objects defining
-            // the path to the property of interest
-            var propElements = new Stack<PropertyInfo>();
-
-            var curExpr = selector.Body;
-            OptionStyle? firstStyle = null;
-
-            while( curExpr != null )
-                switch( curExpr )
-                {
-                    case MemberExpression memExpr:
-                        var propInfo = (PropertyInfo) memExpr.Member;
-
-                        propElements.Push( propInfo );
-
-                        // the first PropertyInfo, which is the outermost 'leaf', must
-                        // have a public parameterless constructor and a property setter
-                        if( !_propValidator.IsPropertyBindable( propElements ) )
-                            return null;
-
-                        firstStyle ??= GetOptionStyle( propInfo );
-
-                        // walk up expression tree
-                        curExpr = memExpr.Expression;
-
-                        break;
-
-                    case UnaryExpression unaryExpr:
-                        if( unaryExpr.Operand is MemberExpression unaryMemExpr )
-                        {
-                            var propInfo2 = (PropertyInfo) unaryMemExpr.Member;
-
-                            propElements.Push( propInfo2 );
-
-                            // the first PropertyInfo, which is the outermost 'leaf', must
-                            // have a public parameterless constructor and a property setter
-                            if( !_propValidator.IsPropertyBindable( propElements ) )
-                                //if (!ValidatePropertyInfo(propInfo2, firstStyle == null))
-                                return null;
-
-                            firstStyle ??= GetOptionStyle( propInfo2 );
-                        }
-
-                        // we're done; UnaryExpressions aren't part of an expression tree
-                        curExpr = null;
-
-                        break;
-
-                    case ParameterExpression:
-                        // this is the root/anchor of the expression tree.
-                        // we're done
-                        curExpr = null;
-
-                        break;
-                }
-
-            var contextPath = GetContextPath( propElements.ToList() );
-
-            if( this.Any( x => x.ContextPath!.Equals( contextPath, _textComparison) ) )
+            var bindingInfo = BindingInfo.Create( selector );
+            if( !bindingInfo.IsProperty )
             {
-                _logger?.Error<string>( "An option with the same ContextPath ('{0}') is already in the collection",
-                    contextPath );
+                _logger?.Error<string>( "Binding target {0} is not a property", bindingInfo.FullName );
                 return null;
             }
 
-            var retVal = new TypeBoundOption<TContainer, TTarget>(
-                this,
-                contextPath,
-                _propValidator,
-                _converters );
+            var curBindingInfo = bindingInfo.Root;
 
-            retVal.SetStyle( firstStyle!.Value );
+            while( curBindingInfo != null )
+            {
+                foreach (var test in _bindingTests)
+                {
+                    if( test( bindingInfo ) )
+                        continue;
+
+                    _logger?.Error( "{0} failed {1}", curBindingInfo.FullName, test );
+                    return null;
+                }
+
+                curBindingInfo = curBindingInfo.Child;
+            }
+
+            if( this.Any( x => x.ContextPath!.Equals( bindingInfo.FullName, _textComparison) ) )
+            {
+                _logger?.Error<string>( "An option with the same ContextPath ('{0}') is already in the collection",
+                    bindingInfo.FullName);
+                return null;
+            }
+
+            var retVal = new Option<TContainer, TTarget>( this, bindingInfo.FullName, bindingInfo.Converter! );
+
+            retVal.SetStyle( bindingInfo.OutermostLeaf.OptionStyle );
 
             foreach( var key in ValidateCommandLineKeys( cmdLineKeys ) )
             {
@@ -259,6 +135,29 @@ namespace J4JSoftware.Configuration.CommandLine
 
             return retVal;
         }
+
+        private bool BindingSupported( BindingInfo toTest ) => toTest.TypeNature != TypeNature.Unsupported;
+        private bool HasAccessibleGetter( BindingInfo toTest ) => toTest.MeetsGetRequirements;
+        private bool HasAccessibleSetter( BindingInfo toTest )=> !toTest.IsOutermostLeaf || toTest.MeetsSetRequirements;
+
+        private bool CanConvert(BindingInfo toTest)
+        {
+            if (!toTest.IsOutermostLeaf)
+                return true;
+
+            if (toTest.ConversionType == null)
+                return false;
+
+            toTest.Converter = _converters
+                .FirstOrDefault(x => x.Value.CanConvert(toTest.ConversionType)).Value;
+
+            return toTest.Converter != null;
+        }
+
+        private bool HasParameterlessConstructor(BindingInfo toTest) =>
+            toTest.Parent == null
+            || (toTest.Parent.ConversionType != null
+                && toTest.Parent.ConversionType.GetConstructors().Any(x => x.GetParameters().Length == 0));
 
         // determines whether or not a key is being used by an existing option, honoring whatever
         // case sensitivity is in use
@@ -272,12 +171,6 @@ namespace J4JSoftware.Configuration.CommandLine
 
             return false;
         }
-
-        //public bool UsesContextPath( string contextPath )
-        //{
-        //    return _options.Any( x =>
-        //        x.ContextPath?.Equals( contextPath, _textComparison) ?? false );
-        //}
 
         public IOption? this[ string key ]
         {
@@ -319,42 +212,6 @@ namespace J4JSoftware.Configuration.CommandLine
                 if( !CommandLineKeyInUse( key ) )
                     yield return key;
             }
-        }
-
-        private static string GetContextPath( List<PropertyInfo> propElements )
-        {
-            return propElements.Aggregate(
-                new StringBuilder(),
-                ( sb, pi ) =>
-                {
-                    if( sb.Length > 0 )
-                        sb.Append( ':' );
-
-                    sb.Append( pi.Name );
-
-                    return sb;
-                },
-                sb => sb.ToString()
-            );
-        }
-
-        private OptionStyle GetOptionStyle( PropertyInfo propInfo )
-        {
-            if( propInfo.PropertyType.IsEnum )
-                return propInfo.PropertyType.GetCustomAttribute<FlagsAttribute>() != null
-                    ? OptionStyle.ConcatenatedSingleValue
-                    : OptionStyle.SingleValued;
-
-            // we assume any generic type is a collection-style option because
-            // the only generic types we support are List<>s
-            if( propInfo.PropertyType.IsGenericType )
-                return OptionStyle.Collection;
-
-            return propInfo.PropertyType.IsArray
-                ? OptionStyle.Collection
-                : typeof(bool).IsAssignableFrom( propInfo.PropertyType )
-                    ? OptionStyle.Switch
-                    : OptionStyle.SingleValued;
         }
     }
 }
