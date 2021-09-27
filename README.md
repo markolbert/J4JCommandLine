@@ -56,11 +56,12 @@ public static int IntValue { get; set; }
 public static string TextValue { get; set; }
 ```
 
-This example can be simplified further by using my [dependency injection library](https://github.com/markolbert/ProgrammingUtilities).
+This example can be simplified further by using my [dependency injection library](https://github.com/markolbert/ProgrammingUtilities). There is also a `TryBind<...>()` method which you can use as an alternative to `Bind<...>()`.
 
 ## Table of Contents
 
 - [Changes](docs/changes.md)
+- [What It Does and Doesn't Do](docs/doesdonts.md)
 - [Goal and Concept](docs/goal-concept.md)
 - [Command Line Styles](docs/cmdlinestyle.md)
 - [Binding](docs/binding.md)
