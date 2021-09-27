@@ -29,54 +29,46 @@ namespace J4JSoftware.Configuration.CommandLine
 {
     public static class J4JCommandLineExtensions
     {
-        internal static BindableType GetBindingType(this Type toCheck)
+        internal static TypeNature GetTypeNature(this Type toCheck)
         {
             if (toCheck.IsArray)
             {
                 var elementType = toCheck.GetElementType();
 
                 return elementType == null
-                    ? BindableType.Unsupported
-                    : BindableType.Array;
+                    ? TypeNature.Unsupported
+                    : TypeNature.Array;
             }
 
             // if it's not an array and not a generic it's a "simple" type
             if (!toCheck.IsGenericType)
-                return BindableType.Simple;
+                return TypeNature.Simple;
 
             if (toCheck.GenericTypeArguments.Length != 1)
-                return BindableType.Unsupported;
+                return TypeNature.Unsupported;
 
             var genType = toCheck.GetGenericArguments()[0];
 
             return typeof(List<>).MakeGenericType(genType).IsAssignableFrom(toCheck)
-                ? BindableType.List
-                : BindableType.Unsupported;
+                ? TypeNature.List
+                : TypeNature.Unsupported;
         }
 
-        internal static BindingInfo GetBindableInfo( this Type toCheck )
+        internal static Type? GetTargetType( this Type toCheck )
         {
             if( toCheck.IsArray )
-            {
-                var elementType = toCheck.GetElementType();
-
-                return elementType == null
-                    ? new BindingInfo( toCheck, BindableType.Unsupported )
-                    : new BindingInfo( elementType, BindableType.Array );
-            }
+                return toCheck.GetElementType();
 
             // if it's not an array and not a generic it's a "simple" type
             if( !toCheck.IsGenericType )
-                return new BindingInfo( toCheck, BindableType.Simple );
+                return toCheck;
 
             if( toCheck.GenericTypeArguments.Length != 1 )
-                return new BindingInfo( toCheck, BindableType.Unsupported );
+                return null;
 
             var genType = toCheck.GetGenericArguments()[ 0 ];
 
-            return typeof(List<>).MakeGenericType( genType ).IsAssignableFrom( toCheck )
-                ? new BindingInfo( genType, BindableType.List )
-                : new BindingInfo( toCheck, BindableType.Unsupported );
+            return typeof(List<>).MakeGenericType( genType ).IsAssignableFrom( toCheck ) ? genType : null;
         }
 
         public static IConfigurationBuilder AddJ4JCommandLine(
@@ -180,11 +172,7 @@ namespace J4JSoftware.Configuration.CommandLine
                     $"Unsupported {nameof(CommandLineOperatingSystems)} value '{opSys}'" )
             };
 
-            options = new OptionCollection(
-                textComparison,
-                new BindabilityValidator( converters, logger ),
-                converters,
-                logger );
+            options = new OptionCollection( textComparison, converters, logger );
 
             var optionsGenerator = new OptionsGenerator(options, textComparison, logger);
             var parsingTable = new ParsingTable(optionsGenerator, logger);

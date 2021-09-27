@@ -17,14 +17,13 @@
 
 #endregion
 
-using System;
-using System.Collections.Generic;
-using System.Reflection;
-
 namespace J4JSoftware.Configuration.CommandLine
 {
-    public interface IBindabilityValidator
+    public enum TypeNature
     {
-        bool IsPropertyBindable( Stack<PropertyInfo> propertyStack );
+        Simple,
+        Array,
+        List,
+        Unsupported
     }
 }
