@@ -1,0 +1,23 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+	  <OutputType>Exe</OutputType>
+	  <TargetFramework>net5.0</TargetFramework>
+	  <Nullable>enable</Nullable>
+	  <RootNamespace>J4JSoftware.CommandLine.Examples</RootNamespace>
+	  <Version>0.1.0.0</Version>
+	  <Authors>Mark A. Olbert</Authors>
+	  <Company>Jump for Joy Software</Company>
+	  <Product>J4JSoftware Command Line Processor</Product>
+	  <Description>no IHost example for J4JCommandLine</Description>
+	  <Copyright>© Mark A. Olbert all rights reserved</Copyright>
+	  <Configurations>Debug;Release;NugetRelease</Configurations>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\..\J4JLogging\J4JLogging\J4JLogging.csproj" />
+    <ProjectReference Include="..\..\ColorfulHelp\ColorfulHelp.csproj" />
+    <ProjectReference Include="..\..\J4JCommandLine\J4JCommandLine.csproj" />
+  </ItemGroup>
+
+</Project>

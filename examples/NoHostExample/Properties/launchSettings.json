@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "NoHostExample": {
+      "commandName": "Project",
+      "commandLineArgs": "/i 50 /t \"some text\""
+    }
+  }
+}
