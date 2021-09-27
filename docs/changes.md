@@ -41,6 +41,8 @@ options.FinishConfiguration();
 var target1 = configRoot.Get<Target>();
 ```
 
+**The `FinishConfiguration()` call is very important.** If you don't include it the parsing will fail.
+
 ## v1.1
 
 You can now display help on the console:

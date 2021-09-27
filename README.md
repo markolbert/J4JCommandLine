@@ -12,37 +12,51 @@ The libraries are licensed under the GNU GPL-v3 or later. For more details see t
 
 ## TL;DR
 
-This example relies on my [dependency injection library](https://github.com/markolbert/ProgrammingUtilities).
-
 ```csharp
 static void Main(string[] args)
 {
-    var hostConfig = new J4JHostConfiguration()
-        .Publisher("J4JSoftware")
-        .ApplicationName("StaticPropertyExample")
-        .CommandLineOperatingSystem(CommandLineOperatingSystems.Windows)
-        .CommandLineOptionsInitializer(SetupOptions);
+    var config = new ConfigurationBuilder()
+        .AddJ4JCommandLineForWindows( out var options, out _ )
+        .Build();
 
-    var hostBuilder = hostConfig.CreateHostBuilder();
-    var host = hostBuilder.Build();
+    options!.Bind<Program, int>(x => Program.IntValue, "i")!
+        .SetDefaultValue(75)
+        .SetDescription("An integer value");
+
+    options.Bind<Program, string>(x => Program.TextValue, "t")!
+        .SetDefaultValue("a cool default")
+        .SetDescription("A string value");
+
+    options.FinishConfiguration();
+
+    var help = new ColorHelpDisplay(new WindowsLexicalElements(), options);
+    help.Display();
 
     var parsed = config.Get<Program>();
+
+    if (parsed == null)
+    {
+        Console.WriteLine("Parsing failed");
+
+        Environment.ExitCode = -1;
+        return;
+    }
+
+    Console.WriteLine("Parsing succeeded");
+
+    Console.WriteLine($"IntValue is {IntValue}");
+    Console.WriteLine($"TextValue is {TextValue}");
+
+    Console.WriteLine(options.SpuriousValues.Count == 0
+        ? "No unkeyed parameters"
+        : $"Unkeyed parameters: {string.Join(", ", options.SpuriousValues)}");
 }
 
 public static int IntValue { get; set; }
 public static string TextValue { get; set; }
-
-private static void SetupOptions( IOptionCollection options )
-{
-    options.Bind<Program, int>( x => Program.IntValue, "i" )!
-        .SetDefaultValue( 75 )
-        .SetDescription( "An integer value" );
-
-    options.Bind<Program, string>( x => Program.TextValue, "t" )!
-        .SetDefaultValue( "a cool default" )
-        .SetDescription( "A string value" );
-}
 ```
+
+This example can be simplified further by using my [dependency injection library](https://github.com/markolbert/ProgrammingUtilities).
 
 ## Table of Contents
 
