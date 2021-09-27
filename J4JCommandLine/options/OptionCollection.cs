@@ -31,6 +31,12 @@ namespace J4JSoftware.Configuration.CommandLine
 {
     public partial class OptionCollection : IOptionCollection
     {
+        public static OptionCollection GetWindowsDefault( IJ4JLogger? logger = null )
+            => new OptionCollection( StringComparison.OrdinalIgnoreCase, new TextConverters( logger: logger ), logger );
+
+        public static OptionCollection GetLinuxDefault( IJ4JLogger? logger = null )
+            => new OptionCollection(StringComparison.Ordinal, new TextConverters(logger: logger), logger);
+
         public event EventHandler? Configured;
 
         private readonly StringComparison _textComparison;

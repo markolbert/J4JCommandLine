@@ -28,6 +28,12 @@ namespace J4JSoftware.Configuration.CommandLine
 
     public class ParsingTable : IParsingTable
     {
+        public static ParsingTable GetWindowsDefault( IJ4JLogger? logger = null ) =>
+            new ParsingTable( OptionsGenerator.GetWindowsDefault( logger ), logger );
+
+        public static ParsingTable GetLinuxDefault(IJ4JLogger? logger = null) =>
+            new ParsingTable(OptionsGenerator.GetLinuxDefault(logger), logger);
+
         private readonly Dictionary<LexicalType, Dictionary<LexicalType, ParsingAction?>> _table =
             new();
 

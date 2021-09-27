@@ -19,6 +19,7 @@
 
 using System;
 using System.Linq;
+using System.Reflection.Metadata.Ecma335;
 using J4JSoftware.Logging;
 using Serilog.Events;
 
@@ -26,10 +27,22 @@ namespace J4JSoftware.Configuration.CommandLine
 {
     public class OptionsGenerator : IOptionsGenerator
     {
+        public static OptionsGenerator GetWindowsDefault( IJ4JLogger? logger = null ) =>
+            new OptionsGenerator( 
+                OptionCollection.GetWindowsDefault( logger ), 
+                StringComparison.OrdinalIgnoreCase,
+                logger );
+
+        public static OptionsGenerator GetLinuxDefault(IJ4JLogger? logger = null) =>
+            new OptionsGenerator(
+                OptionCollection.GetWindowsDefault(logger),
+                StringComparison.Ordinal,
+                logger);
+
+        private readonly IOptionCollection? _options;
+        private readonly StringComparison _textComparison;
         private readonly IJ4JLogger? _logger;
 
-        private IOptionCollection? _options;
-        private StringComparison _textComparison;
         private CommandLineArgument? _current;
 
         public OptionsGenerator(

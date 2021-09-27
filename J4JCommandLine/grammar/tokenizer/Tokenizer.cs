@@ -25,6 +25,16 @@ namespace J4JSoftware.Configuration.CommandLine
 {
     public class Tokenizer : ITokenizer
     {
+        public static Tokenizer GetWindowsDefault( 
+            IJ4JLogger? logger = null,
+            params ICleanupTokens[] cleanupProcessors ) =>
+            new Tokenizer( new WindowsLexicalElements( logger ), logger, cleanupProcessors );
+
+        public static Tokenizer GetLinuxDefault(
+            IJ4JLogger? logger = null,
+            params ICleanupTokens[] cleanupProcessors) =>
+            new Tokenizer(new LinuxLexicalElements(logger), logger, cleanupProcessors);
+
         private readonly ICleanupTokens[] _cleanupProcessors;
         private readonly ILexicalElements _tokens;
         private readonly IJ4JLogger? _logger;
