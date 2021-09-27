@@ -28,7 +28,7 @@ namespace J4JSoftware.Binder.Tests
 
         protected IJ4JLogger Logger { get; }
 
-        protected IOption Bind<TTarget, TProp>(IOptionCollection options, Expression<Func<TTarget, TProp>> propSelector,
+        protected IOption Bind<TTarget, TProp>(OptionCollection options, Expression<Func<TTarget, TProp>> propSelector,
             TestConfig testConfig)
             where TTarget : class, new()
         {

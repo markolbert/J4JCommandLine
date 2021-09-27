@@ -53,9 +53,9 @@ namespace J4JSoftware.CommandLine.Examples
                 return;
             }
 
-            var options = host.Services.GetRequiredService<IOptionCollection>();
+            var options = host.Services.GetRequiredService<OptionCollection>();
             if (options == null)
-                throw new NullReferenceException("Undefined IOptionCollection");
+                throw new NullReferenceException("Undefined OptionCollection");
 
             var config = host.Services.GetRequiredService<IConfiguration>();
             if (config == null)
@@ -89,7 +89,7 @@ namespace J4JSoftware.CommandLine.Examples
         public static int IntValue { get; set; }
         public static string TextValue { get; set; }
 
-        private static void SetupOptions(IOptionCollection options)
+        private static void SetupOptions(OptionCollection options)
         {
             options.Bind<Program, int>(x => Program.IntValue, "i")!
                 .SetDefaultValue(75)

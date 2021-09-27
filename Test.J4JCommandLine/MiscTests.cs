@@ -33,13 +33,13 @@ namespace J4JSoftware.Binder.Tests
         {
             var parser = Parser.GetLinuxDefault(logger: Logger);
 
-            var option = parser!.Options.Bind<MiscTarget, string?>( x => x.AStringValue, "x" );
+            var option = parser!.Collection.Bind<MiscTarget, string?>( x => x.AStringValue, "x" );
             option.Should().NotBeNull();
 
             parser.Parse( cmdLine ).Should().BeTrue();
 
-            parser.Options.UnknownKeys.Should().BeEmpty();
-            parser.Options.SpuriousValues.Should().BeEmpty();
+            parser.Collection.UnknownKeys.Should().BeEmpty();
+            parser.Collection.SpuriousValues.Should().BeEmpty();
 
             option!.Values.Count.Should().Be( result.Length );
 

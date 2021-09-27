@@ -32,29 +32,17 @@ namespace J4JSoftware.Binder.Tests
             }
         }
 
-        //[Theory]
-        //[MemberData(nameof(TestDataSource.GetSinglePropertyData), MemberType = typeof(TestDataSource))]
-        //public void SingleProperties(TestConfig testConfig)
-        //{
-        //    Initialize(testConfig.OperatingSystem);
-
-        //    CreateOptionsFromContextKeys(_parser!.Options, testConfig.OptionConfigurations);
-        //    _parser.Options.FinishConfiguration();
-
-        //    ValidateTokenizing(testConfig);
-        //}
-
         [Theory]
         [MemberData(nameof(TestDataSource.GetEmbeddedPropertyData), MemberType = typeof(TestDataSource))]
         public void Embedded(TestConfig testConfig)
         {
             Initialize(testConfig.OperatingSystem);
 
-            Bind<EmbeddedTarget, bool>(_parser!.Options!, x => x.Target1.ASwitch, testConfig);
-            Bind<EmbeddedTarget, string>(_parser!.Options!, x => x.Target1.ASingleValue, testConfig);
-            Bind<EmbeddedTarget, TestEnum>(_parser!.Options!, x => x.Target1.AnEnumValue, testConfig);
-            Bind<EmbeddedTarget, TestFlagEnum>(_parser!.Options!, x => x.Target1.AFlagEnumValue, testConfig);
-            Bind<EmbeddedTarget, List<string>>(_parser!.Options!, x => x.Target1.ACollection, testConfig);
+            Bind<EmbeddedTarget, bool>(_parser!.Collection!, x => x.Target1.ASwitch, testConfig);
+            Bind<EmbeddedTarget, string>(_parser!.Collection!, x => x.Target1.ASingleValue, testConfig);
+            Bind<EmbeddedTarget, TestEnum>(_parser!.Collection!, x => x.Target1.AnEnumValue, testConfig);
+            Bind<EmbeddedTarget, TestFlagEnum>(_parser!.Collection!, x => x.Target1.AFlagEnumValue, testConfig);
+            Bind<EmbeddedTarget, List<string>>(_parser!.Collection!, x => x.Target1.ACollection, testConfig);
 
             ValidateTokenizing(testConfig);
         }
@@ -65,11 +53,11 @@ namespace J4JSoftware.Binder.Tests
         {
             Initialize(testConfig.OperatingSystem);
 
-            Bind<EmbeddedTargetNoSetter, bool>(_parser!.Options!, x => x.Target1.ASwitch, testConfig);
-            Bind<EmbeddedTargetNoSetter, string>(_parser!.Options!, x => x.Target1.ASingleValue, testConfig);
-            Bind<EmbeddedTargetNoSetter, TestEnum>(_parser!.Options!, x => x.Target1.AnEnumValue, testConfig);
-            Bind<EmbeddedTargetNoSetter, TestFlagEnum>(_parser!.Options!, x => x.Target1.AFlagEnumValue, testConfig);
-            Bind<EmbeddedTargetNoSetter, List<string>>(_parser!.Options!, x => x.Target1.ACollection, testConfig);
+            Bind<EmbeddedTargetNoSetter, bool>(_parser!.Collection!, x => x.Target1.ASwitch, testConfig);
+            Bind<EmbeddedTargetNoSetter, string>(_parser!.Collection!, x => x.Target1.ASingleValue, testConfig);
+            Bind<EmbeddedTargetNoSetter, TestEnum>(_parser!.Collection!, x => x.Target1.AnEnumValue, testConfig);
+            Bind<EmbeddedTargetNoSetter, TestFlagEnum>(_parser!.Collection!, x => x.Target1.AFlagEnumValue, testConfig);
+            Bind<EmbeddedTargetNoSetter, List<string>>(_parser!.Collection!, x => x.Target1.ACollection, testConfig);
 
             ValidateTokenizing(testConfig);
         }
@@ -82,7 +70,7 @@ namespace J4JSoftware.Binder.Tests
                 ? Parser.GetWindowsDefault(logger: Logger, cleanupProcessors: cleanupTokens)
                 : Parser.GetLinuxDefault(logger: Logger, cleanupProcessors: cleanupTokens);
 
-            _parser!.Options.Should().NotBeNull();
+            _parser!.Collection.Should().NotBeNull();
         }
 
         private void ValidateTokenizing(TestConfig testConfig)
@@ -93,8 +81,8 @@ namespace J4JSoftware.Binder.Tests
                 .Should()
                 .BeTrue();
 
-            _parser.Options.UnknownKeys.Count.Should().Be(testConfig.UnknownKeys);
-            _parser.Options.SpuriousValues.Count.Should().Be(testConfig.UnkeyedValues);
+            _parser.Collection.UnknownKeys.Count.Should().Be(testConfig.UnknownKeys);
+            _parser.Collection.SpuriousValues.Count.Should().Be(testConfig.UnkeyedValues);
 
             foreach (var optConfig in testConfig.OptionConfigurations)
             {

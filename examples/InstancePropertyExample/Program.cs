@@ -51,7 +51,7 @@ namespace J4JSoftware.CommandLine.Examples
                 return;
             }
 
-            var options = host.Services.GetRequiredService<IOptionCollection>();
+            var options = host.Services.GetRequiredService<OptionCollection>();
             if (options == null)
                 throw new NullReferenceException("Undefined IOptionCollection");
 
@@ -84,7 +84,7 @@ namespace J4JSoftware.CommandLine.Examples
                 : $"Unkeyed parameters: {string.Join(", ", options.SpuriousValues)}");
         }
 
-        private static void SetupOptions(IOptionCollection options)
+        private static void SetupOptions(OptionCollection options)
         {
             options.Bind<Configuration, int>(x => x.IntValue, "i")!
                 .SetDefaultValue(75)

@@ -10,37 +10,9 @@ namespace J4JSoftware.Binder.Tests
 {
     public class ConfigurationTestsNoDI : TestBaseNoDI
     {
-        private IOptionCollection? _options;
+        private OptionCollection? _options;
         private IConfigurationRoot? _configRoot;
         private CommandLineSource? _cmdLineSrc;
-
-        //[ Theory ]
-        //[ MemberData( nameof( TestDataSource.GetParserData ), MemberType = typeof( TestDataSource ) ) ]
-        //public void Simple( TestConfig testConfig )
-        //{
-        //    CreateConfigurationRootAndParser( testConfig );
-
-        //    CreateOptionsFromContextKeys(_options!, testConfig.OptionConfigurations);
-        //    _options!.FinishConfiguration();
-
-        //    _options.Count.Should().Be(testConfig.OptionConfigurations.Count);
-
-        //    ValidateConfiguration<BasicTarget>( testConfig );
-        //}
-
-        //[Theory]
-        //[MemberData(nameof(TestDataSource.GetSinglePropertyData), MemberType = typeof(TestDataSource))]
-        //public void SingleProperties(TestConfig testConfig)
-        //{
-        //    CreateConfigurationRootAndParser(testConfig);
-
-        //    CreateOptionsFromContextKeys(_options!, testConfig.OptionConfigurations);
-        //    _options!.FinishConfiguration();
-
-        //    _options.Count.Should().Be(testConfig.OptionConfigurations.Count);
-
-        //    ValidateConfiguration<BasicTarget>(testConfig);
-        //}
 
         [Theory]
         [MemberData(nameof(TestDataSource.GetEmbeddedPropertyData), MemberType = typeof(TestDataSource))]
@@ -84,7 +56,7 @@ namespace J4JSoftware.Binder.Tests
                 ? Parser.GetWindowsDefault( logger: Logger )
                 : Parser.GetLinuxDefault( logger: Logger );
 
-            _options = parser.Options;
+            _options = parser.Collection;
 
             _configRoot = new ConfigurationBuilder()
                 .AddJ4JCommandLine(
