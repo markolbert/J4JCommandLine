@@ -94,6 +94,17 @@ namespace J4JSoftware.Configuration.CommandLine
         // of IOptionCollection)
         public List<CommandLineArgument> UnknownKeys { get; } = new();
 
+        public bool TryBind<TContainer, TTarget>(
+            Expression<Func<TContainer, TTarget>> selector,
+            out Option<TContainer, TTarget>? option,
+            params string[] cmdLineKeys )
+            where TContainer : class, new()
+        {
+            option = Bind( selector, cmdLineKeys );
+
+            return option != null;
+        }
+
         public Option<TContainer, TTarget>? Bind<TContainer, TTarget>(
             Expression<Func<TContainer, TTarget>> selector,
             params string[] cmdLineKeys )
