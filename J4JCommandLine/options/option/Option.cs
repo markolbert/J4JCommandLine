@@ -24,7 +24,7 @@ using System.ComponentModel;
 
 namespace J4JSoftware.Configuration.CommandLine
 {
-    public class Option<TContainer, TProp> : IOption<TProp>
+    public class Option<TContainer, TProp> : IOption, IOptionInternal
     {
         private readonly List<string> _cmdLineKeys = new();
         private readonly ITextToValue _converter;
@@ -36,28 +36,28 @@ namespace J4JSoftware.Configuration.CommandLine
             ITextToValue converter
         )
         {
-            Options = container;
+            Collection = container;
             ContextPath = contextPath;
             _converter = converter;
         }
 
         public bool IsInitialized => !string.IsNullOrEmpty( ContextPath ) && _cmdLineKeys.Count > 0;
-        public OptionCollection Options { get; }
+        public OptionCollection Collection { get; }
         public Type ContainingType => typeof(TContainer);
 
-        public virtual string? ContextPath { get; }
+        public string? ContextPath { get; }
 
         public ReadOnlyCollection<string> Keys => _cmdLineKeys.AsReadOnly();
 
-        public IOption AddCommandLineKey( string cmdLineKey )
+        public Option<TContainer, TProp> AddCommandLineKey( string cmdLineKey )
         {
-            if( !Options.CommandLineKeyInUse( cmdLineKey ) )
+            if( !Collection.CommandLineKeyInUse( cmdLineKey ) )
                 _cmdLineKeys.Add( cmdLineKey );
 
             return this;
         }
 
-        public IOption AddCommandLineKeys( IEnumerable<string> cmdLineKeys )
+        public Option<TContainer, TProp> AddCommandLineKeys( IEnumerable<string> cmdLineKeys )
         {
             foreach( var cmdLineKey in cmdLineKeys ) AddCommandLineKey( cmdLineKey );
 
@@ -76,17 +76,17 @@ namespace J4JSoftware.Configuration.CommandLine
 
         public ReadOnlyCollection<string> Values => _values.AsReadOnly();
 
-        public void ClearValues()
+        void IOptionInternal.ClearValues()
         {
             _values.Clear();
         }
 
-        public void AddValue( string value )
+        void IOptionInternal.AddValue( string value )
         {
             _values.Add( value );
         }
 
-        public void AddValues( IEnumerable<string> values )
+        void IOptionInternal.AddValues( IEnumerable<string> values )
         {
             _values.AddRange( values );
         }
@@ -123,7 +123,7 @@ namespace J4JSoftware.Configuration.CommandLine
             }
         }
 
-        public bool GetValue( out object? result )
+        internal bool GetValue( out object? result )
         {
             result = default(TProp);
             
@@ -140,13 +140,13 @@ namespace J4JSoftware.Configuration.CommandLine
 
         public bool Required { get; private set; }
 
-        public IOption IsRequired()
+        public Option<TContainer, TProp> IsRequired()
         {
             Required = true;
             return this;
         }
 
-        public IOption IsOptional()
+        public Option<TContainer, TProp> IsOptional()
         {
             Required = false;
             return this;
@@ -154,7 +154,7 @@ namespace J4JSoftware.Configuration.CommandLine
 
         public string? Description { get; private set; }
 
-        public IOption SetDescription( string description )
+        public Option<TContainer, TProp> SetDescription( string description )
         {
             Description = description;
             return this;
@@ -162,15 +162,12 @@ namespace J4JSoftware.Configuration.CommandLine
 
         public TProp? DefaultValue { get; private set; }
 
-        public IOption<TProp> SetDefaultValue( TProp? value )
+        public Option<TContainer, TProp> SetDefaultValue( TProp? value )
         {
             DefaultValue = value;
             return this;
         }
 
-        string? IOption.GetDefaultValue()
-        {
-            return DefaultValue?.ToString();
-        }
+        string? IOption.GetDefaultValue() => DefaultValue?.ToString();
     }
 }

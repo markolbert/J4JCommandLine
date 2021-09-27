@@ -29,7 +29,7 @@ using J4JSoftware.Logging;
 
 namespace J4JSoftware.Configuration.CommandLine
 {
-    public partial class OptionCollection : IOptionCollection
+    public partial class OptionCollection
     {
         public static OptionCollection GetWindowsDefault( IJ4JLogger? logger = null )
             => new OptionCollection( StringComparison.OrdinalIgnoreCase, new TextConverters( logger: logger ), logger );
@@ -41,7 +41,6 @@ namespace J4JSoftware.Configuration.CommandLine
 
         private readonly StringComparison _textComparison;
         private readonly ITextConverters _converters;
-        private readonly List<IOption> _options = new();
         private readonly List<string> _optionKeys = new List<string>();
         private readonly List<Func<BindingInfo, bool>> _bindingTests;
         private readonly IJ4JLogger? _logger;
@@ -68,6 +67,8 @@ namespace J4JSoftware.Configuration.CommandLine
             };
         }
 
+        internal List<IOptionInternal> OptionsInternal { get; } = new();
+
         public bool IsConfigured { get; private set; }
         public void FinishConfiguration()
         {
@@ -75,12 +76,12 @@ namespace J4JSoftware.Configuration.CommandLine
             Configured?.Invoke( this, EventArgs.Empty );
         }
 
-        public ReadOnlyCollection<IOption> Options => _options.AsReadOnly();
-        public int Count => _options.Count;
+        public ReadOnlyCollection<IOption> Options => OptionsInternal.Cast<IOption>().ToList().AsReadOnly();
+        public int Count => OptionsInternal.Count;
 
         public void ClearValues()
         {
-            _options.ForEach( x => x.ClearValues() );
+            OptionsInternal.ForEach( x => x.ClearValues() );
         }
 
         // values associated with an option but in excess of the maximum number
@@ -121,7 +122,7 @@ namespace J4JSoftware.Configuration.CommandLine
                 curBindingInfo = curBindingInfo.Child;
             }
 
-            if( this.Any( x => x.ContextPath!.Equals( bindingInfo.FullName, _textComparison) ) )
+            if( OptionsInternal.Any( x => x.ContextPath!.Equals( bindingInfo.FullName, _textComparison) ) )
             {
                 _logger?.Error<string>( "An option with the same ContextPath ('{0}') is already in the collection",
                     bindingInfo.FullName);
@@ -137,7 +138,7 @@ namespace J4JSoftware.Configuration.CommandLine
                 retVal.AddCommandLineKey( key );
             }
 
-            _options.Add( retVal );
+            OptionsInternal.Add( retVal );
 
             return retVal;
         }
@@ -169,7 +170,7 @@ namespace J4JSoftware.Configuration.CommandLine
         // case sensitivity is in use
         public bool CommandLineKeyInUse( string key )
         {
-            foreach( var option in _options )
+            foreach( var option in OptionsInternal )
             {
                 if( option.Keys.Any( x => x.Equals( key, _textComparison ) ) )
                     return true;
@@ -182,7 +183,7 @@ namespace J4JSoftware.Configuration.CommandLine
         {
             get
             {
-                return _options.FirstOrDefault( opt =>
+                return OptionsInternal.FirstOrDefault( opt =>
                     opt.IsInitialized
                     && opt.Keys.Any( k => string.Equals( k, key, _textComparison) )
                 );
@@ -194,21 +195,8 @@ namespace J4JSoftware.Configuration.CommandLine
             if( keys.Length == 0 )
                 return false;
 
-            return keys.Any( k => _options.Any( x =>
+            return keys.Any( k => OptionsInternal.Any( x =>
                 x.CommandLineKeyProvided?.Equals( k, _textComparison) ?? false ) );
-        }
-
-        public IEnumerator<IOption> GetEnumerator()
-        {
-            foreach( var option in _options )
-            {
-                yield return option;
-            }
-        }
-
-        IEnumerator IEnumerable.GetEnumerator()
-        {
-            return GetEnumerator();
         }
 
         private IEnumerable<string> ValidateCommandLineKeys( string[] cmdLineKeys )

@@ -26,7 +26,7 @@ namespace J4JSoftware.Configuration.CommandLine
     public interface IOption
     {
         bool IsInitialized { get; }
-        OptionCollection Options { get; }
+        OptionCollection Collection { get; }
         Type ContainingType { get; }
 
         string? ContextPath { get; }
@@ -36,32 +36,23 @@ namespace J4JSoftware.Configuration.CommandLine
 
         OptionStyle Style { get; }
 
-        ReadOnlyCollection<string> Values { get; }
         int MaxValues { get; }
         int NumValuesAllocated { get; }
+        ReadOnlyCollection<string> Values { get; }
         bool ValuesSatisfied { get; }
-        bool GetValue( out object? result );
 
         bool Required { get; }
 
         string? Description { get; }
-        IOption AddCommandLineKey( string cmdLineKey );
-        IOption AddCommandLineKeys( IEnumerable<string> cmdLineKeys );
         IOption SetStyle( OptionStyle style );
-        void AddValue( string value );
-        void AddValues( IEnumerable<string> values );
-        void ClearValues();
-        IOption IsRequired();
-        IOption IsOptional();
-        IOption SetDescription( string description );
 
         string? GetDefaultValue();
     }
 
-    public interface IOption<T> : IOption
+    internal interface IOptionInternal : IOption
     {
-        T? DefaultValue { get; }
-
-        IOption<T> SetDefaultValue( T? value );
+        void AddValue(string value);
+        void AddValues(IEnumerable<string> values);
+        void ClearValues();
     }
 }
