@@ -40,6 +40,7 @@ namespace J4JSoftware.Configuration.CommandLine
         int NumValuesAllocated { get; }
         ReadOnlyCollection<string> Values { get; }
         bool ValuesSatisfied { get; }
+        bool GetValue( out object? result );
 
         bool Required { get; }
 

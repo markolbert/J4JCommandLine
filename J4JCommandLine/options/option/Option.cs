@@ -123,7 +123,7 @@ namespace J4JSoftware.Configuration.CommandLine
             }
         }
 
-        internal bool GetValue( out object? result )
+        public bool GetValue( out object? result )
         {
             result = default(TProp);
             
