@@ -10,15 +10,16 @@
 		<Product>J4JSoftware Command Line Processor</Product>
 		<Description>command line processing for the Net5 IConfiguration system</Description>
 		<Copyright>© Mark A. Olbert all rights reserved</Copyright>
-		<PackageDescription>initial release of reworked library</PackageDescription>
 		<RepositoryUrl>https://github.com/markolbert/J4JCommandLine</RepositoryUrl>
-		<PackageLicenseExpression>GPL-3.0-or-later</PackageLicenseExpression>
-		<GeneratePackageOnBuild>true</GeneratePackageOnBuild>
 		<RepositoryType>git</RepositoryType>
+		<Version>4.0.1.0</Version>
+		<AssemblyVersion>4.0.1.0</AssemblyVersion>
+		<GeneratePackageOnBuild>true</GeneratePackageOnBuild>
 		<PackageIcon>Diego nuspec.png</PackageIcon>
-		<Version>4.0.0.0</Version>
-		<AssemblyVersion>4.0.0.0</AssemblyVersion>
-		<PackageReleaseNotes>license changed</PackageReleaseNotes>
+		<PackageLicenseExpression>GPL-3.0-or-later</PackageLicenseExpression>
+		<PackageDescription>command line processing for the Net5 IConfiguration system</PackageDescription>
+		<PackageReleaseNotes>added nuget readme</PackageReleaseNotes>
+		<PackageReadmeFile>nuget.md</PackageReadmeFile>
 	</PropertyGroup>
 
 	<ItemGroup>
@@ -30,11 +31,12 @@
 		<ProjectReference Include="..\..\J4JLogging\J4JLogging\J4JLogging.csproj" />
 	</ItemGroup>
 
-  <ItemGroup>
-    <None Include="..\..\Media\JumpForJoy\Diego nuspec.png">
-      <Pack>True</Pack>
-      <PackagePath></PackagePath>
-    </None>
-  </ItemGroup>
+	<ItemGroup>
+		<None Include="..\..\Media\JumpForJoy\Diego nuspec.png">
+			<Pack>True</Pack>
+			<PackagePath></PackagePath>
+		</None>
+		<None Include="../docs/nuget.md" Pack="true" PackagePath="/" />
+	</ItemGroup>
 
 </Project>
