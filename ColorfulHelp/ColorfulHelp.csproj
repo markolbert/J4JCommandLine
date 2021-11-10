@@ -1,7 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
 	<PropertyGroup>
-		<TargetFramework>net5.0</TargetFramework>
+		<TargetFramework>net6.0</TargetFramework>
 		<AssemblyName>J4JSoftware.Configuration.J4JCommandLine.ColorfulHelp</AssemblyName>
 		<RootNamespace>J4JSoftware.Configuration.J4JCommandLine</RootNamespace>
 		<Nullable>enable</Nullable>
