@@ -28,16 +28,14 @@ namespace J4JSoftware.Configuration.CommandLine
     public class OptionsGenerator : IOptionsGenerator
     {
         public static OptionsGenerator GetWindowsDefault( IJ4JLogger? logger = null ) =>
-            new OptionsGenerator( 
-                OptionCollection.GetWindowsDefault( logger ), 
-                StringComparison.OrdinalIgnoreCase,
-                logger );
+            new OptionsGenerator( OptionCollection.GetWindowsDefault( logger ),
+                                 StringComparison.OrdinalIgnoreCase,
+                                 logger );
 
-        public static OptionsGenerator GetLinuxDefault(IJ4JLogger? logger = null) =>
-            new OptionsGenerator(
-                OptionCollection.GetWindowsDefault(logger),
-                StringComparison.Ordinal,
-                logger);
+        public static OptionsGenerator GetLinuxDefault( IJ4JLogger? logger = null ) =>
+            new OptionsGenerator( OptionCollection.GetWindowsDefault( logger ),
+                                 StringComparison.Ordinal,
+                                 logger );
 
         private readonly OptionCollection? _options;
         private readonly StringComparison _textComparison;
@@ -45,11 +43,9 @@ namespace J4JSoftware.Configuration.CommandLine
 
         private CommandLineArgument? _current;
 
-        public OptionsGenerator(
-            OptionCollection options,
-            StringComparison textComparison,
-            IJ4JLogger? logger = null
-        )
+        public OptionsGenerator( OptionCollection options,
+                                 StringComparison textComparison,
+                                 IJ4JLogger? logger = null )
         {
             _options = options;
             _textComparison = textComparison;
@@ -66,9 +62,9 @@ namespace J4JSoftware.Configuration.CommandLine
         {
             if( tokenPair.Current.Type != LexicalType.EndOfInput )
             {
-                LogTokenPair( tokenPair, 
-                    $"{nameof( EndParsing )} called before end of command line text",
-                    LogEventLevel.Error );
+                LogTokenPair( tokenPair,
+                             $"{nameof( EndParsing )} called before end of command line text",
+                             LogEventLevel.Error );
                 return false;
             }
 
@@ -85,7 +81,7 @@ namespace J4JSoftware.Configuration.CommandLine
         {
             _current = null;
 
-            LogTokenPair(tokenPair, "terminated with prejudice", LogEventLevel.Error);
+            LogTokenPair( tokenPair, "terminated with prejudice", LogEventLevel.Error );
 
             return false;
         }
@@ -98,20 +94,20 @@ namespace J4JSoftware.Configuration.CommandLine
                 {
                     // if we're not yet building an entry but we received a KeyPrefix token we must be
                     // about to start building one
-                    case LexicalType.Separator 
+                    case LexicalType.Separator
                         when tokenPair.Previous.Type == LexicalType.Separator:
                         return true;
 
                     case LexicalType.KeyPrefix:
-                        return Create(tokenPair);
+                        return Create( tokenPair );
 
                     default:
-                        LogTokenPair(tokenPair, "invalid token sequence", LogEventLevel.Error);
+                        LogTokenPair( tokenPair, "invalid token sequence", LogEventLevel.Error );
                         return false;
                 }
             }
 
-            return AssignToOption(tokenPair) && Create( tokenPair );
+            return AssignToOption( tokenPair ) && Create( tokenPair );
         }
 
         private bool AssignToOption( TokenPair tokenPair )
@@ -125,8 +121,8 @@ namespace J4JSoftware.Configuration.CommandLine
             // the "switch" branch should never run -- but just to be safe...
             if ( _current.Option != null )
                 return _current.Option.Style == OptionStyle.Switch
-                    ? CommitSwitch()
-                    : CommitNonSwitch();
+                           ? CommitSwitch()
+                           : CommitNonSwitch();
 
             _options!.UnknownKeys.Add( _current );
 
@@ -156,7 +152,7 @@ namespace J4JSoftware.Configuration.CommandLine
         {
             if( _current?.Option?.Style != OptionStyle.Switch )
             {
-                _logger?.Error("Trying to commit a value to a switch value to a non-switch option");
+                _logger?.Error( "Trying to commit a value to a switch value to a non-switch option" );
                 return false;
             }
 
@@ -166,9 +162,9 @@ namespace J4JSoftware.Configuration.CommandLine
             // so any values that >>appear<< to be associated with a switch
             // are spurious values
             _current.Option
-                .Collection
-                .SpuriousValues
-                .AddRange( _current.Values );
+                    .Collection
+                    .SpuriousValues
+                    .AddRange( _current.Values );
 
             _current = null;
 
@@ -179,19 +175,19 @@ namespace J4JSoftware.Configuration.CommandLine
         {
             if( _current?.Option == null || _current.Option.Style == OptionStyle.Switch )
             {
-                _logger?.Error("Trying to commit a non-switch value to a switch option");
+                _logger?.Error( "Trying to commit a non-switch value to a switch option" );
                 return false;
             }
 
             _current.Option.CommandLineKeyProvided = _current.Key;
 
             _current.Option
-                .AddValues( _current.Values.Take( _current.Option.MaxValues ) );
+                    .AddValues( _current.Values.Take( _current.Option.MaxValues ) );
 
             _current.Option
-                .Collection
-                .SpuriousValues
-                .AddRange( _current.Values.Skip( _current.Option.MaxValues ) );
+                    .Collection
+                    .SpuriousValues
+                    .AddRange( _current.Values.Skip( _current.Option.MaxValues ) );
 
             _current = null;
 
@@ -204,10 +200,11 @@ namespace J4JSoftware.Configuration.CommandLine
                 return;
 
             _logger.Write<string, LexicalType, string>( level,
-                "{0} *undefined* => {1} ('{2}')",
-                text,
-                tokenPair.Current.Type,
-                tokenPair.Current.Text );
+                                                       "{0} *undefined* => {1} ('{2}')",
+                                                       text,
+                                                       tokenPair.Current.Type,
+                                                       tokenPair.Current.Text );
+
             //else
             //    _logger.Write( level,
             //            "{0} {1} ('{2}') => {3} ('{4}')",

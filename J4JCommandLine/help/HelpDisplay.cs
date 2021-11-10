@@ -27,10 +27,8 @@ namespace J4JSoftware.Configuration.CommandLine
 {
     public abstract class HelpDisplay : IHelpDisplay
     {
-        protected HelpDisplay( 
-            ILexicalElements tokens,
-            OptionCollection collection 
-            )
+        protected HelpDisplay( ILexicalElements tokens,
+                               OptionCollection collection )
         {
             Tokens = tokens;
             Collection = collection;
@@ -45,7 +43,7 @@ namespace J4JSoftware.Configuration.CommandLine
         {
             var retVal = new List<string>();
 
-            foreach( var prefix in Tokens.Where(x=>x.Type == LexicalType.KeyPrefix  ) )
+            foreach( var prefix in Tokens.Where( x => x.Type == LexicalType.KeyPrefix  ) )
             {
                 foreach( var key in option.Keys )
                 {
@@ -80,7 +78,7 @@ namespace J4JSoftware.Configuration.CommandLine
                     return "any value specified will be ignored";
             }
 
-            throw new InvalidEnumArgumentException( $"Unsupported {typeof(OptionStyle)} '{option.Style}'" );
+            throw new InvalidEnumArgumentException( $"Unsupported {typeof( OptionStyle )} '{option.Style}'" );
         }
     }
 }

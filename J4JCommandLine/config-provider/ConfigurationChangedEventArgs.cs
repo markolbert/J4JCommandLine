@@ -22,6 +22,6 @@ namespace J4JSoftware.Configuration.CommandLine
     public class ConfigurationChangedEventArgs
     {
         public string? NewCommandLine { get; set; }
-        public bool OptionsConfigurationChanged {get;set;}
+        public bool OptionsConfigurationChanged { get; set; }
     }
 }

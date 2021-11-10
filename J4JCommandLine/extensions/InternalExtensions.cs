@@ -29,7 +29,7 @@ namespace J4JSoftware.Configuration.CommandLine
         public static void RemoveRange<T>( this List<T> list, IEnumerable<int> toRemove )
         {
             foreach( var idx in toRemove.Where( x => x < list.Count && x >= 0 )
-                .OrderByDescending( x => x ) )
+                                        .OrderByDescending( x => x ) )
                 list.RemoveAt( idx );
         }
 
@@ -48,6 +48,7 @@ namespace J4JSoftware.Configuration.CommandLine
             foreach( var token in tokens )
             {
                 yield return new TokenPair( token, prevToken );
+
                 prevToken = token;
             }
 

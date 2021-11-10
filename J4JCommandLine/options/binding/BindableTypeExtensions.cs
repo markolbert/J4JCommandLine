@@ -39,8 +39,8 @@ namespace J4JSoftware.Configuration.CommandLine
 
             var typeArgs = toCheck.GetGenericArguments();
 
-            return typeArgs.Length == 1 
-                   && typeof(List<>).MakeGenericType( typeArgs[ 0 ] ).IsAssignableFrom( toCheck );
+            return typeArgs.Length == 1
+                   && typeof( List<> ).MakeGenericType( typeArgs[ 0 ] ).IsAssignableFrom( toCheck );
         }
 
         internal static Type? GetBindableCollectionElement( this Type toCheck )

@@ -24,10 +24,8 @@ namespace J4JSoftware.Configuration.CommandLine
 {
     public class DefaultHelpDisplay : HelpDisplay
     {
-        public DefaultHelpDisplay(
-            ILexicalElements tokens,
-            OptionCollection collection
-        )
+        public DefaultHelpDisplay( ILexicalElements tokens,
+                                   OptionCollection collection )
             : base( tokens, collection )
         {
         }

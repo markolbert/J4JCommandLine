@@ -30,11 +30,9 @@ namespace J4JSoftware.Configuration.CommandLine
         private readonly ITextToValue _converter;
         private readonly List<string> _values = new();
 
-        internal Option(
-            OptionCollection container,
-            string contextPath,
-            ITextToValue converter
-        )
+        internal Option( OptionCollection container,
+                         string contextPath,
+                         ITextToValue converter )
         {
             Collection = container;
             ContextPath = contextPath;
@@ -43,7 +41,7 @@ namespace J4JSoftware.Configuration.CommandLine
 
         public bool IsInitialized => !string.IsNullOrEmpty( ContextPath ) && _cmdLineKeys.Count > 0;
         public OptionCollection Collection { get; }
-        public Type ContainingType => typeof(TContainer);
+        public Type ContainingType => typeof( TContainer );
 
         public string? ContextPath { get; }
 
@@ -113,28 +111,28 @@ namespace J4JSoftware.Configuration.CommandLine
                 var numValuesAlloc = _values.Count;
 
                 return Style switch
-                {
-                    OptionStyle.Switch => numValuesAlloc == 0,
-                    OptionStyle.SingleValued => numValuesAlloc == 1,
-                    OptionStyle.Collection => numValuesAlloc > 0,
-                    OptionStyle.ConcatenatedSingleValue => numValuesAlloc > 0,
-                    _ => throw new InvalidEnumArgumentException( $"Unsupported OptionStyle '{Style}'" )
-                };
+                       {
+                           OptionStyle.Switch => numValuesAlloc == 0,
+                           OptionStyle.SingleValued => numValuesAlloc == 1,
+                           OptionStyle.Collection => numValuesAlloc > 0,
+                           OptionStyle.ConcatenatedSingleValue => numValuesAlloc > 0,
+                           _ => throw new InvalidEnumArgumentException( $"Unsupported OptionStyle '{Style}'" )
+                       };
             }
         }
 
         public bool GetValue( out object? result )
         {
-            result = default(TProp);
-            
+            result = default( TProp );
+
             if( !ValuesSatisfied )
                 return false;
 
             if( Style != OptionStyle.Switch )
-                return _converter.Convert( typeof(TProp), _values, out result );
+                return _converter.Convert( typeof( TProp ), _values, out result );
 
             result = !string.IsNullOrEmpty( CommandLineKeyProvided );
-            
+
             return true;
         }
 

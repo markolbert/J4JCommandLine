@@ -31,21 +31,19 @@ namespace J4JSoftware.Configuration.CommandLine
     {
         private readonly Dictionary<LexicalType, List<Token>> _available = new();
 
-        public LexicalElements( 
-            StringComparison textComparison,
-            IJ4JLogger? logger = null,
-            bool inclCommon = true
-            )
+        public LexicalElements( StringComparison textComparison,
+                                IJ4JLogger? logger = null,
+                                bool inclCommon = true )
         {
             TextComparison = textComparison;
             Logger = logger;
 
-            if( !inclCommon ) 
+            if( !inclCommon )
                 return;
 
-            Add(LexicalType.Separator, " ");
-            Add(LexicalType.Separator, "\t");
-            Add(LexicalType.ValuePrefix, "=");
+            Add( LexicalType.Separator, " " );
+            Add( LexicalType.Separator, "\t" );
+            Add( LexicalType.ValuePrefix, "=" );
         }
 
         protected IJ4JLogger? Logger { get; }
@@ -63,7 +61,7 @@ namespace J4JSoftware.Configuration.CommandLine
             }
 
             if( _available.SelectMany( kvp => kvp.Value )
-                .Any( t => t.Text.Equals( text, TextComparison ) ) )
+                          .Any( t => t.Text.Equals( text, TextComparison ) ) )
             {
                 Logger?.Error( "Duplicate token text '{0}' ({1})", text, type );
                 return false;
@@ -80,9 +78,9 @@ namespace J4JSoftware.Configuration.CommandLine
 
         public IEnumerator<Token> GetEnumerator()
         {
-            foreach (var kvp in _available)
+            foreach ( var kvp in _available )
             {
-                foreach (var token in kvp.Value)
+                foreach ( var token in kvp.Value )
                 {
                     yield return token;
                 }

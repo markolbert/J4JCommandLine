@@ -24,14 +24,12 @@ namespace J4JSoftware.Configuration.CommandLine
 {
     public sealed class WindowsLexicalElements : LexicalElements
     {
-        public WindowsLexicalElements(
-            IJ4JLogger? logger = null
-        )
-            : base(StringComparison.OrdinalIgnoreCase, logger)
+        public WindowsLexicalElements( IJ4JLogger? logger = null )
+            : base( StringComparison.OrdinalIgnoreCase, logger )
         {
-            Add(LexicalType.Quoter, "\"");
-            Add(LexicalType.Quoter, "'");
-            Add(LexicalType.KeyPrefix, "/");
+            Add( LexicalType.Quoter, "\"" );
+            Add( LexicalType.Quoter, "'" );
+            Add( LexicalType.KeyPrefix, "/" );
         }
     }
 }

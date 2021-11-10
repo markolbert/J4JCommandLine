@@ -31,11 +31,11 @@ namespace J4JSoftware.Configuration.CommandLine
 {
     public partial class OptionCollection
     {
-        public static OptionCollection GetWindowsDefault( IJ4JLogger? logger = null )
-            => new OptionCollection( StringComparison.OrdinalIgnoreCase, new TextConverters( logger: logger ), logger );
+        public static OptionCollection GetWindowsDefault( IJ4JLogger? logger = null ) =>
+            new OptionCollection( StringComparison.OrdinalIgnoreCase, new TextConverters( logger: logger ), logger );
 
-        public static OptionCollection GetLinuxDefault( IJ4JLogger? logger = null )
-            => new OptionCollection(StringComparison.Ordinal, new TextConverters(logger: logger), logger);
+        public static OptionCollection GetLinuxDefault( IJ4JLogger? logger = null ) =>
+            new OptionCollection( StringComparison.Ordinal, new TextConverters( logger: logger ), logger );
 
         public event EventHandler? Configured;
 
@@ -45,11 +45,9 @@ namespace J4JSoftware.Configuration.CommandLine
         private readonly List<Func<BindingInfo, bool>> _bindingTests;
         private readonly IJ4JLogger? _logger;
 
-        public OptionCollection(
-            StringComparison textComparison,
-            ITextConverters converters,
-            IJ4JLogger? logger = null
-        )
+        public OptionCollection( StringComparison textComparison,
+                                 ITextConverters converters,
+                                 IJ4JLogger? logger = null )
         {
             _textComparison = textComparison;
             _converters = converters;
@@ -58,18 +56,19 @@ namespace J4JSoftware.Configuration.CommandLine
             _logger?.SetLoggedType( GetType() );
 
             _bindingTests = new List<Func<BindingInfo, bool>>
-            {
-                BindingSupported,
-                CanConvert,
-                HasParameterlessConstructor,
-                HasAccessibleGetter,
-                HasAccessibleSetter
-            };
+                            {
+                                BindingSupported,
+                                CanConvert,
+                                HasParameterlessConstructor,
+                                HasAccessibleGetter,
+                                HasAccessibleSetter
+                            };
         }
 
         internal List<IOptionInternal> OptionsInternal { get; } = new();
 
         public bool IsConfigured { get; private set; }
+
         public void FinishConfiguration()
         {
             IsConfigured = true;
@@ -94,10 +93,9 @@ namespace J4JSoftware.Configuration.CommandLine
         // of IOptionCollection)
         public List<CommandLineArgument> UnknownKeys { get; } = new();
 
-        public bool TryBind<TContainer, TTarget>(
-            Expression<Func<TContainer, TTarget>> selector,
-            out Option<TContainer, TTarget>? option,
-            params string[] cmdLineKeys )
+        public bool TryBind<TContainer, TTarget>( Expression<Func<TContainer, TTarget>> selector,
+                                                  out Option<TContainer, TTarget>? option,
+                                                  params string[] cmdLineKeys )
             where TContainer : class, new()
         {
             option = Bind( selector, cmdLineKeys );
@@ -105,9 +103,8 @@ namespace J4JSoftware.Configuration.CommandLine
             return option != null;
         }
 
-        public Option<TContainer, TTarget>? Bind<TContainer, TTarget>(
-            Expression<Func<TContainer, TTarget>> selector,
-            params string[] cmdLineKeys )
+        public Option<TContainer, TTarget>? Bind<TContainer, TTarget>( Expression<Func<TContainer, TTarget>> selector,
+                                                                       params string[] cmdLineKeys )
             where TContainer : class, new()
         {
             var bindingInfo = BindingInfo.Create( selector );
@@ -121,7 +118,7 @@ namespace J4JSoftware.Configuration.CommandLine
 
             while( curBindingInfo != null )
             {
-                foreach (var test in _bindingTests)
+                foreach ( var test in _bindingTests )
                 {
                     if( test( bindingInfo ) )
                         continue;
@@ -133,10 +130,10 @@ namespace J4JSoftware.Configuration.CommandLine
                 curBindingInfo = curBindingInfo.Child;
             }
 
-            if( OptionsInternal.Any( x => x.ContextPath!.Equals( bindingInfo.FullName, _textComparison) ) )
+            if( OptionsInternal.Any( x => x.ContextPath!.Equals( bindingInfo.FullName, _textComparison ) ) )
             {
                 _logger?.Error<string>( "An option with the same ContextPath ('{0}') is already in the collection",
-                    bindingInfo.FullName);
+                                       bindingInfo.FullName );
                 return null;
             }
 
@@ -156,26 +153,29 @@ namespace J4JSoftware.Configuration.CommandLine
 
         private bool BindingSupported( BindingInfo toTest ) => toTest.TypeNature != TypeNature.Unsupported;
         private bool HasAccessibleGetter( BindingInfo toTest ) => toTest.MeetsGetRequirements;
-        private bool HasAccessibleSetter( BindingInfo toTest )=> !toTest.IsOutermostLeaf || toTest.MeetsSetRequirements;
 
-        private bool CanConvert(BindingInfo toTest)
+        private bool HasAccessibleSetter( BindingInfo toTest ) =>
+            !toTest.IsOutermostLeaf || toTest.MeetsSetRequirements;
+
+        private bool CanConvert( BindingInfo toTest )
         {
-            if (!toTest.IsOutermostLeaf)
+            if ( !toTest.IsOutermostLeaf )
                 return true;
 
-            if (toTest.ConversionType == null)
+            if ( toTest.ConversionType == null )
                 return false;
 
             toTest.Converter = _converters
-                .FirstOrDefault(x => x.Value.CanConvert(toTest.ConversionType)).Value;
+                               .FirstOrDefault( x => x.Value.CanConvert( toTest.ConversionType ) )
+                               .Value;
 
             return toTest.Converter != null;
         }
 
-        private bool HasParameterlessConstructor(BindingInfo toTest) =>
+        private bool HasParameterlessConstructor( BindingInfo toTest ) =>
             toTest.Parent == null
-            || (toTest.Parent.ConversionType != null
-                && toTest.Parent.ConversionType.GetConstructors().Any(x => x.GetParameters().Length == 0));
+            || ( toTest.Parent.ConversionType != null
+                 && toTest.Parent.ConversionType.GetConstructors().Any( x => x.GetParameters().Length == 0 ) );
 
         // determines whether or not a key is being used by an existing option, honoring whatever
         // case sensitivity is in use
@@ -195,9 +195,10 @@ namespace J4JSoftware.Configuration.CommandLine
             get
             {
                 return OptionsInternal.FirstOrDefault( opt =>
-                    opt.IsInitialized
-                    && opt.Keys.Any( k => string.Equals( k, key, _textComparison) )
-                );
+                                                           opt.IsInitialized
+                                                           && opt.Keys.Any( k => string.Equals( k,
+                                                                             key,
+                                                                             _textComparison ) ) );
             }
         }
 
@@ -207,7 +208,8 @@ namespace J4JSoftware.Configuration.CommandLine
                 return false;
 
             return keys.Any( k => OptionsInternal.Any( x =>
-                x.CommandLineKeyProvided?.Equals( k, _textComparison) ?? false ) );
+                                                           x.CommandLineKeyProvided?.Equals( k, _textComparison )
+                                                           ?? false ) );
         }
 
         private IEnumerable<string> ValidateCommandLineKeys( string[] cmdLineKeys )

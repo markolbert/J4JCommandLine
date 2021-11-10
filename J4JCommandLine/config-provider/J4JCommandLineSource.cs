@@ -29,11 +29,9 @@ namespace J4JSoftware.Configuration.CommandLine
 
         private readonly IJ4JLogger? _logger;
 
-        public J4JCommandLineSource(
-            IParser parser,
-            IJ4JLogger? logger,
-            params ICleanupTokens[] cleanupTokens
-        )
+        public J4JCommandLineSource( IParser parser,
+                                     IJ4JLogger? logger,
+                                     params ICleanupTokens[] cleanupTokens )
         {
             Parser = parser;
 
@@ -43,10 +41,8 @@ namespace J4JSoftware.Configuration.CommandLine
             CommandLineSource = Initialize();
         }
 
-        public J4JCommandLineSource(
-            IParser parser,
-            IJ4JLogger? logger
-        )
+        public J4JCommandLineSource( IParser parser,
+                                     IJ4JLogger? logger )
         {
             Parser = parser;
 
@@ -69,11 +65,11 @@ namespace J4JSoftware.Configuration.CommandLine
             return retVal;
         }
 
-        private void Options_Configured(object? sender, EventArgs e) =>
-            SourceChanged?.Invoke(this, EventArgs.Empty);
+        private void Options_Configured( object? sender, EventArgs e ) =>
+            SourceChanged?.Invoke( this, EventArgs.Empty );
 
         private void OnCommandLineSourceChanged( object? sender, ConfigurationChangedEventArgs e ) =>
-            SourceChanged?.Invoke(this, EventArgs.Empty);
+            SourceChanged?.Invoke( this, EventArgs.Empty );
 
         public CommandLineSource? CommandLineSource { get; }
         public IParser? Parser { get; }

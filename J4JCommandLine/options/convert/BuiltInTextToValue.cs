@@ -27,10 +27,8 @@ namespace J4JSoftware.Configuration.CommandLine
     {
         private readonly MethodInfo _convMethod;
 
-        public BuiltInTextToValue(
-            MethodInfo convMethod,
-            IJ4JLogger? logger
-        )
+        public BuiltInTextToValue( MethodInfo convMethod,
+                                   IJ4JLogger? logger )
             : base( logger )
         {
             _convMethod = convMethod;
@@ -42,12 +40,12 @@ namespace J4JSoftware.Configuration.CommandLine
 
             try
             {
-                result = (TBaseType?) _convMethod.Invoke(null, new object?[] { text });
+                result = (TBaseType?) _convMethod.Invoke( null, new object?[] { text } );
                 return true;
             }
             catch
             {
-                Logger?.Error( "Could not convert '{0}' to a {1}", text, typeof(TBaseType?) );
+                Logger?.Error( "Could not convert '{0}' to a {1}", text, typeof( TBaseType? ) );
                 return false;
             }
         }

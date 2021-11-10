@@ -32,10 +32,8 @@ namespace J4JSoftware.Configuration.CommandLine
         {
         }
 
-        private BindingInfo(
-            PropertyInfo propInfo,
-            BindingInfo? child
-        )
+        private BindingInfo( PropertyInfo propInfo,
+                             BindingInfo? child )
         {
             TypeNature = propInfo.PropertyType.GetTypeNature();
             OptionStyle = GetOptionStyle( propInfo.PropertyType );
@@ -81,12 +79,13 @@ namespace J4JSoftware.Configuration.CommandLine
                 return OptionStyle.Collection;
             }
 
-            return typeof(bool).IsAssignableFrom( propertyType ) ? OptionStyle.Switch : OptionStyle.SingleValued;
+            return typeof( bool ).IsAssignableFrom( propertyType ) ? OptionStyle.Switch : OptionStyle.SingleValued;
         }
 
         public Type? ConversionType { get; private set; }
         public ITextToValue? Converter { get; internal set; }
         public string Name { get; private set; } = string.Empty;
+
         public string FullName
         {
             get

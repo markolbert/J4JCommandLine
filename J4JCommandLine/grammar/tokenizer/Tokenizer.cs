@@ -25,25 +25,21 @@ namespace J4JSoftware.Configuration.CommandLine
 {
     public class Tokenizer : ITokenizer
     {
-        public static Tokenizer GetWindowsDefault( 
-            IJ4JLogger? logger = null,
-            params ICleanupTokens[] cleanupProcessors ) =>
+        public static Tokenizer GetWindowsDefault( IJ4JLogger? logger = null,
+                                                   params ICleanupTokens[] cleanupProcessors ) =>
             new Tokenizer( new WindowsLexicalElements( logger ), logger, cleanupProcessors );
 
-        public static Tokenizer GetLinuxDefault(
-            IJ4JLogger? logger = null,
-            params ICleanupTokens[] cleanupProcessors) =>
-            new Tokenizer(new LinuxLexicalElements(logger), logger, cleanupProcessors);
+        public static Tokenizer GetLinuxDefault( IJ4JLogger? logger = null,
+                                                 params ICleanupTokens[] cleanupProcessors ) =>
+            new Tokenizer( new LinuxLexicalElements( logger ), logger, cleanupProcessors );
 
         private readonly ICleanupTokens[] _cleanupProcessors;
         private readonly ILexicalElements _tokens;
         private readonly IJ4JLogger? _logger;
 
-        public Tokenizer(
-            ILexicalElements tokens,
-            IJ4JLogger? logger = null,
-            params ICleanupTokens[] cleanupProcessors
-        )
+        public Tokenizer( ILexicalElements tokens,
+                          IJ4JLogger? logger = null,
+                          params ICleanupTokens[] cleanupProcessors )
         {
             TextComparison = tokens.TextComparison;
             _tokens = tokens;
@@ -55,10 +51,10 @@ namespace J4JSoftware.Configuration.CommandLine
                 _cleanupProcessors = cleanupProcessors;
             else
                 _cleanupProcessors = new ICleanupTokens[]
-                {
-                    new ConsolidateQuotedText( TextComparison, _logger ),
-                    new MergeSequentialSeparators()
-                };
+                                     {
+                                         new ConsolidateQuotedText( TextComparison, _logger ),
+                                         new MergeSequentialSeparators()
+                                     };
         }
 
         public StringComparison TextComparison { get; }

@@ -2,10 +2,8 @@
 {
     public record TokenPair
     {
-        public TokenPair(
-            Token current,
-            Token previous
-        )
+        public TokenPair( Token current,
+                          Token previous )
         {
             Current = current;
             Previous = previous;

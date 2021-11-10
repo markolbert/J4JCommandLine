@@ -24,15 +24,13 @@ namespace J4JSoftware.Configuration.CommandLine
 {
     public sealed class LinuxLexicalElements : LexicalElements
     {
-        public LinuxLexicalElements(
-            IJ4JLogger? logger = null
-            )
+        public LinuxLexicalElements( IJ4JLogger? logger = null )
             : base( StringComparison.Ordinal, logger )
         {
-            Add(LexicalType.Quoter, "\"");
-            Add(LexicalType.Quoter, "'");
-            Add(LexicalType.KeyPrefix, "-");
-            Add(LexicalType.KeyPrefix, "--");
+            Add( LexicalType.Quoter, "\"" );
+            Add( LexicalType.Quoter, "'" );
+            Add( LexicalType.KeyPrefix, "-" );
+            Add( LexicalType.KeyPrefix, "--" );
         }
     }
 }

@@ -16,41 +16,42 @@ namespace J4JSoftware.Configuration.CommandLine
         private readonly List<BuiltInConverter>? _builtInTargets;
         private readonly IJ4JLogger? _logger;
 
-        private record BuiltInConverter(Type ReturnType, MethodInfo MethodInfo);
+        private record BuiltInConverter( Type ReturnType, MethodInfo MethodInfo );
 
-        private static List<ITextToValue> GetBuiltInConverters(IJ4JLogger? logger)
+        private static List<ITextToValue> GetBuiltInConverters( IJ4JLogger? logger )
         {
             var retVal = new List<ITextToValue>();
 
-            foreach (var builtInConverter in GetBuiltInTargetTypes())
+            foreach ( var builtInConverter in GetBuiltInTargetTypes() )
             {
-                var builtInType = typeof(BuiltInTextToValue<>).MakeGenericType(builtInConverter.ReturnType);
+                var builtInType = typeof( BuiltInTextToValue<> ).MakeGenericType( builtInConverter.ReturnType );
 
-                retVal.Add((ITextToValue)Activator.CreateInstance(
-                        builtInType,
-                        new object?[] { builtInConverter.MethodInfo, logger })!
-                );
+                retVal.Add( (ITextToValue) Activator.CreateInstance( builtInType,
+                                                                    new object?[]
+                                                                    {
+                                                                        builtInConverter.MethodInfo, logger
+                                                                    } )! );
             }
 
             return retVal;
         }
 
         private static List<BuiltInConverter> GetBuiltInTargetTypes() =>
-            typeof(Convert)
-                .GetMethods(BindingFlags.Static | BindingFlags.Public)
-                .Where(m =>
-                {
-                    var parameters = m.GetParameters();
+            typeof( Convert )
+                .GetMethods( BindingFlags.Static | BindingFlags.Public )
+                .Where( m =>
+                        {
+                            var parameters = m.GetParameters();
 
-                    return parameters.Length == 1 && !typeof(string).IsAssignableFrom(parameters[0].ParameterType);
-                })
-                .Select(x => new BuiltInConverter(x.ReturnType, x))
+                            return parameters.Length == 1
+                                   && !typeof( string ).IsAssignableFrom( parameters[ 0 ].ParameterType );
+                        } )
+                .Select( x => new BuiltInConverter( x.ReturnType, x ) )
                 .ToList();
 
-        public TextConverters(
-            BuiltInConverters builtInConv = BuiltInConverters.AddDynamically,
-            IJ4JLogger? logger = null,
-            params ITextToValue[] converters)
+        public TextConverters( BuiltInConverters builtInConv = BuiltInConverters.AddDynamically,
+                               IJ4JLogger? logger = null,
+                               params ITextToValue[] converters )
         {
             _logger = logger;
             _logger?.SetLoggedType( GetType() );
@@ -58,10 +59,10 @@ namespace J4JSoftware.Configuration.CommandLine
             AddConverters( converters );
             _builtInConv = builtInConv;
 
-            switch (builtInConv)
+            switch ( builtInConv )
             {
                 case BuiltInConverters.AddAtInitialization:
-                    AddConverters(GetBuiltInConverters(logger));
+                    AddConverters( GetBuiltInConverters( logger ) );
                     break;
 
                 case BuiltInConverters.AddDynamically:
@@ -74,35 +75,35 @@ namespace J4JSoftware.Configuration.CommandLine
         public IEnumerable<ITextToValue> Values => _converters.Values;
         public int Count => _converters.Count;
 
-        public bool ContainsKey(Type key) => _converters.ContainsKey(key);
+        public bool ContainsKey( Type key ) => _converters.ContainsKey( key );
 
-        public bool AddConverter(ITextToValue converter, bool replaceExisting = false)
+        public bool AddConverter( ITextToValue converter, bool replaceExisting = false )
         {
-            if (_converters.ContainsKey(converter.TargetType))
+            if ( _converters.ContainsKey( converter.TargetType ) )
             {
-                if (!replaceExisting)
+                if ( !replaceExisting )
                 {
-                    _logger?.Error("There is already a converter defined for {0}", converter.TargetType);
+                    _logger?.Error( "There is already a converter defined for {0}", converter.TargetType );
                     return false;
                 }
 
-                _converters[converter.TargetType] = converter;
+                _converters[ converter.TargetType ] = converter;
 
                 return true;
             }
 
-            _converters.Add(converter.TargetType, converter);
+            _converters.Add( converter.TargetType, converter );
 
             return true;
         }
 
-        public bool AddConverters(IEnumerable<ITextToValue> converters, bool replaceExisting = false)
+        public bool AddConverters( IEnumerable<ITextToValue> converters, bool replaceExisting = false )
         {
             var retVal = true;
 
-            foreach (var converter in converters)
+            foreach ( var converter in converters )
             {
-                retVal &= AddConverter(converter, replaceExisting);
+                retVal &= AddConverter( converter, replaceExisting );
             }
 
             return retVal;
@@ -126,8 +127,8 @@ namespace J4JSoftware.Configuration.CommandLine
                 if( !CanConvertSimple( genArgs[ 0 ] ) )
                     return false;
 
-                return ( typeof(List<>).MakeGenericType( genArgs[ 0 ] )
-                    .IsAssignableFrom( toCheck ) );
+                return ( typeof( List<> ).MakeGenericType( genArgs[ 0 ] )
+                                         .IsAssignableFrom( toCheck ) );
             }
 
             if( CanConvertSimple( toCheck ) )
@@ -138,21 +139,21 @@ namespace J4JSoftware.Configuration.CommandLine
             return false;
         }
 
-        private bool CanConvertSimple(Type simpleType)
+        private bool CanConvertSimple( Type simpleType )
         {
-            if (simpleType.IsArray || simpleType.IsGenericType)
+            if ( simpleType.IsArray || simpleType.IsGenericType )
                 return false;
 
-            if (simpleType.IsEnum)
+            if ( simpleType.IsEnum )
                 return true;
 
-            switch (_builtInConv)
+            switch ( _builtInConv )
             {
                 case BuiltInConverters.AddAtInitialization:
-                    return _converters.Any(x => x.Value.TargetType == simpleType);
+                    return _converters.Any( x => x.Value.TargetType == simpleType );
 
                 case BuiltInConverters.AddDynamically:
-                    if (_converters.Any(x => x.Value.TargetType == simpleType))
+                    if ( _converters.Any( x => x.Value.TargetType == simpleType ) )
                         return true;
 
                     break;
@@ -162,67 +163,67 @@ namespace J4JSoftware.Configuration.CommandLine
             }
 
             // try to add a built-in converter dynamically
-            var builtInConverter = _builtInTargets!.FirstOrDefault(x => x.ReturnType == simpleType);
-            if (builtInConverter == null)
+            var builtInConverter = _builtInTargets!.FirstOrDefault( x => x.ReturnType == simpleType );
+            if ( builtInConverter == null )
                 return false;
 
-            var builtInType = typeof(BuiltInTextToValue<>).MakeGenericType(builtInConverter.ReturnType);
+            var builtInType = typeof( BuiltInTextToValue<> ).MakeGenericType( builtInConverter.ReturnType );
 
-            _converters.Add(simpleType,
-                (ITextToValue)Activator.CreateInstance(
-                    builtInType,
-                    new object?[] { builtInConverter.MethodInfo, _logger }
-                )!
-            );
+            _converters.Add( simpleType,
+                            (ITextToValue) Activator.CreateInstance( builtInType,
+                                                                    new object?[]
+                                                                    {
+                                                                        builtInConverter.MethodInfo, _logger
+                                                                    } )! );
 
             return true;
         }
 
-        public bool Convert(Type targetType, IEnumerable<string> textValues, out object? result)
+        public bool Convert( Type targetType, IEnumerable<string> textValues, out object? result )
         {
             result = null;
 
-            var converter = _converters.Where(x => x.Value.CanConvert(targetType))
-                .Select(x => x.Value)
-                .FirstOrDefault();
+            var converter = _converters.Where( x => x.Value.CanConvert( targetType ) )
+                                       .Select( x => x.Value )
+                                       .FirstOrDefault();
 
-            if (converter != null)
-                return converter.Convert(textValues, out result);
+            if ( converter != null )
+                return converter.Convert( textValues, out result );
 
-            if (targetType.IsEnum)
+            if ( targetType.IsEnum )
             {
-                var enumConverterType = typeof(TextToEnum<>).MakeGenericType(targetType);
-                converter = Activator.CreateInstance(enumConverterType, new object?[] { _logger }) as ITextToValue;
-                _converters.Add(targetType, converter!);
+                var enumConverterType = typeof( TextToEnum<> ).MakeGenericType( targetType );
+                converter = Activator.CreateInstance( enumConverterType, new object?[] { _logger } ) as ITextToValue;
+                _converters.Add( targetType, converter! );
 
-                return converter!.Convert(textValues, out result);
+                return converter!.Convert( textValues, out result );
             }
 
-            _logger?.Error("Cannot convert text to '{0}'", targetType);
+            _logger?.Error( "Cannot convert text to '{0}'", targetType );
 
             return false;
         }
 
-        public bool TryGetValue(Type key, out ITextToValue value)
+        public bool TryGetValue( Type key, out ITextToValue value )
         {
             value = new UndefinedTextToValue();
 
-            if (!_converters.ContainsKey(key))
+            if ( !_converters.ContainsKey( key ) )
                 return false;
 
-            value = _converters[key];
+            value = _converters[ key ];
 
             return true;
         }
 
-        public ITextToValue this[Type key]
+        public ITextToValue this[ Type key ]
         {
             get
             {
-                if (_converters.ContainsKey(key))
-                    throw new KeyNotFoundException($"Converter collection does not contain an entry for {key}");
+                if ( _converters.ContainsKey( key ) )
+                    throw new KeyNotFoundException( $"Converter collection does not contain an entry for {key}" );
 
-                return _converters[key];
+                return _converters[ key ];
             }
         }
 

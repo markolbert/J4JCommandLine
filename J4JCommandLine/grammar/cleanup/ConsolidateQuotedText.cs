@@ -32,9 +32,8 @@ namespace J4JSoftware.Configuration.CommandLine
         private readonly IJ4JLogger? _logger;
         private readonly StringComparison _textComparison;
 
-        public ConsolidateQuotedText(
-            StringComparison textComparison,
-            IJ4JLogger? logger )
+        public ConsolidateQuotedText( StringComparison textComparison,
+                                      IJ4JLogger? logger )
         {
             _textComparison = textComparison;
             _logger = logger;
@@ -54,7 +53,7 @@ namespace J4JSoftware.Configuration.CommandLine
                 if( curPair.End == null )
                 {
                     _logger?.Error( "Unclosed quoter encountered, command line truncated at token #{0}",
-                        curPair.Start.Index );
+                                   curPair.Start.Index );
 
                     tokens.RemoveFrom( curPair.Start.Index );
 
@@ -90,29 +89,22 @@ namespace J4JSoftware.Configuration.CommandLine
 
         private QuoterPair? GetQuoterPair( List<Token> tokens, int startIdx = 0 )
         {
-            var firstQuoter = tokens.Select( ( t, i ) => new QuoterLocation
-                {
-                    Token = t,
-                    Index = i
-                } )
-                .FirstOrDefault( t => t.Index >= startIdx && t.Token.Type == LexicalType.Quoter );
+            var firstQuoter = tokens.Select( ( t, i ) => new QuoterLocation { Token = t, Index = i } )
+                                    .FirstOrDefault( t => t.Index >= startIdx && t.Token.Type == LexicalType.Quoter );
 
             if( firstQuoter == null )
                 return null;
 
             return new QuoterPair
-            {
-                Start = firstQuoter,
-                End = tokens.Select( ( t, i ) => new QuoterLocation
-                    {
-                        Token = t,
-                        Index = i
-                    } )
-                    .FirstOrDefault( t =>
-                        t.Index > firstQuoter.Index
-                        && t.Token.Type == LexicalType.Quoter
-                        && t.Token.Text.Equals( firstQuoter.Token.Text, _textComparison ) )
-            };
+                   {
+                       Start = firstQuoter,
+                       End = tokens.Select( ( t, i ) => new QuoterLocation { Token = t, Index = i } )
+                                   .FirstOrDefault( t =>
+                                                        t.Index > firstQuoter.Index
+                                                        && t.Token.Type == LexicalType.Quoter
+                                                        && t.Token.Text.Equals( firstQuoter.Token.Text,
+                                                                               _textComparison ) )
+                   };
         }
 
         private class QuoterLocation

@@ -25,9 +25,7 @@ namespace J4JSoftware.Configuration.CommandLine
 {
     internal partial class BindingInfo
     {
-        public static BindingInfo Create<TContainer, TTarget>(
-            Expression<Func<TContainer, TTarget>> selector
-        )
+        public static BindingInfo Create<TContainer, TTarget>( Expression<Func<TContainer, TTarget>> selector )
         {
             var curExpr = selector.Body;
             BindingInfo? retVal = null;
@@ -38,10 +36,10 @@ namespace J4JSoftware.Configuration.CommandLine
                 {
                     case MemberExpression memExpr:
                         retVal = memExpr.Member switch
-                        {
-                            PropertyInfo propInfo => new BindingInfo( propInfo, retVal ),
-                            _ => new BindingInfo()
-                        };
+                                 {
+                                     PropertyInfo propInfo => new BindingInfo( propInfo, retVal ),
+                                     _                     => new BindingInfo()
+                                 };
 
                         // walk up expression tree
                         curExpr = memExpr.Expression;
@@ -50,7 +48,7 @@ namespace J4JSoftware.Configuration.CommandLine
 
                     case UnaryExpression unaryExpr:
                         if( unaryExpr.Operand is MemberExpression unaryMemExpr )
-                            retVal = new BindingInfo( (PropertyInfo)unaryMemExpr.Member, retVal );
+                            retVal = new BindingInfo( (PropertyInfo) unaryMemExpr.Member, retVal );
 
                         // we're done; UnaryExpressions aren't part of an expression tree
                         curExpr = null;

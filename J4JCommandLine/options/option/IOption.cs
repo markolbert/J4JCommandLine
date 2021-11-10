@@ -52,8 +52,8 @@ namespace J4JSoftware.Configuration.CommandLine
 
     internal interface IOptionInternal : IOption
     {
-        void AddValue(string value);
-        void AddValues(IEnumerable<string> values);
+        void AddValue( string value );
+        void AddValues( IEnumerable<string> values );
         void ClearValues();
     }
 }
