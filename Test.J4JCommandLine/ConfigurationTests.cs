@@ -14,22 +14,22 @@ namespace J4JSoftware.Binder.Tests
         private IConfigurationRoot? _configRoot;
         private CommandLineSource? _cmdLineSrc;
 
-        [Theory]
-        [MemberData(nameof(TestDataSource.GetEmbeddedPropertyData), MemberType = typeof(TestDataSource))]
-        public void EmbeddedConfiguration(TestConfig testConfig)
+        [ Theory ]
+        [ MemberData( nameof( TestDataSource.GetEmbeddedPropertyData ), MemberType = typeof( TestDataSource ) ) ]
+        public void EmbeddedConfiguration( TestConfig testConfig )
         {
-            CreateConfigurationRootAndParser(testConfig);
+            CreateConfigurationRootAndParser( testConfig );
 
-            Bind<EmbeddedTarget, bool>(_options!, x => x.Target1.ASwitch, testConfig);
-            Bind<EmbeddedTarget, string>(_options!, x => x.Target1.ASingleValue, testConfig);
-            Bind<EmbeddedTarget, TestEnum>(_options!, x => x.Target1.AnEnumValue, testConfig);
-            Bind<EmbeddedTarget, TestFlagEnum>(_options!, x => x.Target1.AFlagEnumValue, testConfig);
-            Bind<EmbeddedTarget, List<string>>(_options!, x => x.Target1.ACollection, testConfig);
+            Bind<EmbeddedTarget, bool>( _options!, x => x.Target1.ASwitch, testConfig );
+            Bind<EmbeddedTarget, string>( _options!, x => x.Target1.ASingleValue, testConfig );
+            Bind<EmbeddedTarget, TestEnum>( _options!, x => x.Target1.AnEnumValue, testConfig );
+            Bind<EmbeddedTarget, TestFlagEnum>( _options!, x => x.Target1.AFlagEnumValue, testConfig );
+            Bind<EmbeddedTarget, List<string>>( _options!, x => x.Target1.ACollection, testConfig );
 
             _options!.FinishConfiguration();
-            _options.Count.Should().Be(5);
+            _options.Count.Should().Be( 5 );
 
-            ValidateConfiguration<EmbeddedTarget>(testConfig);
+            ValidateConfiguration<EmbeddedTarget>( testConfig );
         }
 
         [ Theory ]
@@ -53,29 +53,28 @@ namespace J4JSoftware.Binder.Tests
         private void CreateConfigurationRootAndParser( TestConfig testConfig )
         {
             var parser = testConfig.OperatingSystem.Equals( "windows", StringComparison.OrdinalIgnoreCase )
-                ? Parser.GetWindowsDefault( logger: Logger )
-                : Parser.GetLinuxDefault(logger: Logger);
+                             ? Parser.GetWindowsDefault( logger: Logger )
+                             : Parser.GetLinuxDefault( logger: Logger );
 
             _options = parser.Collection;
 
             _configRoot = new ConfigurationBuilder()
-                .AddJ4JCommandLine(
-                    parser,
-                    out _cmdLineSrc, 
-                    Logger )
-                .Build();
+                          .AddJ4JCommandLine( parser,
+                                             out _cmdLineSrc,
+                                             Logger )
+                          .Build();
 
             _options.Should().NotBeNull();
         }
 
         private void ValidateConfiguration<TParsed>( TestConfig testConfig )
-            where TParsed: class, new()
+            where TParsed : class, new()
         {
             //_parser.Should().NotBeNull();
             //_parser!.Parse(testConfig.CommandLine).Should().BeTrue();
 
             _cmdLineSrc.Should().NotBeNull();
-            _cmdLineSrc!.SetCommandLine(testConfig.CommandLine);
+            _cmdLineSrc!.SetCommandLine( testConfig.CommandLine );
 
             if ( testConfig!.OptionConfigurations.Any( x => x.ConversionWillFail ) )
             {
@@ -112,8 +111,8 @@ namespace J4JSoftware.Binder.Tests
                     else
                     {
                         var correctValue = resultType!.IsEnum
-                            ? Enum.Parse( resultType, optConfig.CorrectText )
-                            : Convert.ChangeType( optConfig.CorrectText, resultType! );
+                                               ? Enum.Parse( resultType, optConfig.CorrectText )
+                                               : Convert.ChangeType( optConfig.CorrectText, resultType! );
 
                         result.Should().Be( correctValue );
                     }
@@ -121,12 +120,11 @@ namespace J4JSoftware.Binder.Tests
             }
         }
 
-        private bool GetPropertyValue<TParsed>(
-            TParsed parsed,
-            string contextKey,
-            out object? result,
-            out Type? resultType )
-            where TParsed: class, new()
+        private bool GetPropertyValue<TParsed>( TParsed parsed,
+                                                string contextKey,
+                                                out object? result,
+                                                out Type? resultType )
+            where TParsed : class, new()
         {
             result = null;
             resultType = null;

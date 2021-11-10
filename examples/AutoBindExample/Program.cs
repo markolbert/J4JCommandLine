@@ -22,12 +22,12 @@ namespace J4JSoftware.CommandLine.Examples
         static void Main( string[] args )
         {
             var hostConfig = new J4JHostConfiguration()
-                .Publisher( "J4JSoftware" )
-                .ApplicationName( "AutoBindExample" )
-                .FilePathTrimmer( FilePathTrimmer );
+                             .Publisher( "J4JSoftware" )
+                             .ApplicationName( "AutoBindExample" )
+                             .FilePathTrimmer( FilePathTrimmer );
 
             hostConfig.AddCommandLineProcessing( CommandLineOperatingSystems.Windows )
-                .OptionsInitializer( SetupOptions );
+                      .OptionsInitializer( SetupOptions );
 
             if( hostConfig.MissingRequirements != J4JHostRequirements.AllMet )
             {
@@ -84,8 +84,8 @@ namespace J4JSoftware.CommandLine.Examples
             Console.WriteLine( $"TextValue is {TextValue}" );
 
             Console.WriteLine( options.SpuriousValues.Count == 0
-                ? "No unkeyed parameters"
-                : $"Unkeyed parameters: {string.Join( ", ", options.SpuriousValues )}" );
+                                   ? "No unkeyed parameters"
+                                   : $"Unkeyed parameters: {string.Join( ", ", options.SpuriousValues )}" );
         }
 
         public static int IntValue { get; set; }
@@ -93,36 +93,36 @@ namespace J4JSoftware.CommandLine.Examples
 
         private static void SetupOptions( OptionCollection options )
         {
-            options.Bind<Program, int>(x => Program.IntValue, "i")!
-                .SetDefaultValue(75)
-                .SetDescription("An integer value");
+            options.Bind<Program, int>( x => Program.IntValue, "i" )!
+                   .SetDefaultValue( 75 )
+                   .SetDescription( "An integer value" );
 
-            options.Bind<Program, string>(x => Program.TextValue, "t")!
-                .SetDefaultValue("a cool default")
-                .SetDescription("A string value");
+            options.Bind<Program, string>( x => Program.TextValue, "t" )!
+                   .SetDefaultValue( "a cool default" )
+                   .SetDescription( "A string value" );
         }
 
         // these next two methods serve to strip the project path off of source code
         // file paths
-        private static string FilePathTrimmer(
-            Type? loggedType,
-            string callerName,
-            int lineNum,
-            string srcFilePath)
+        private static string FilePathTrimmer( Type? loggedType,
+                                               string callerName,
+                                               int lineNum,
+                                               string srcFilePath )
         {
-            return CallingContextEnricher.DefaultFilePathTrimmer(loggedType,
-                callerName,
-                lineNum,
-                CallingContextEnricher.RemoveProjectPath(srcFilePath, GetProjectPath()));
+            return CallingContextEnricher.DefaultFilePathTrimmer( loggedType,
+                                                                 callerName,
+                                                                 lineNum,
+                                                                 CallingContextEnricher.RemoveProjectPath( srcFilePath,
+                                                                  GetProjectPath() ) );
         }
 
-        private static string GetProjectPath([CallerFilePath] string filePath = "")
+        private static string GetProjectPath( [ CallerFilePath ] string filePath = "" )
         {
-            var dirInfo = new DirectoryInfo(Path.GetDirectoryName(filePath)!);
+            var dirInfo = new DirectoryInfo( Path.GetDirectoryName( filePath )! );
 
-            while (dirInfo.Parent != null)
+            while ( dirInfo.Parent != null )
             {
-                if (dirInfo.EnumerateFiles("*.csproj").Any())
+                if ( dirInfo.EnumerateFiles( "*.csproj" ).Any() )
                     break;
 
                 dirInfo = dirInfo.Parent;

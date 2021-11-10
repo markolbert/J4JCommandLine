@@ -28,10 +28,8 @@ namespace J4JSoftware.Configuration.J4JCommandLine
 {
     public class ColorHelpDisplay : HelpDisplay
     {
-        public ColorHelpDisplay(
-            ILexicalElements tokens,
-            OptionCollection collection
-        )
+        public ColorHelpDisplay( ILexicalElements tokens,
+                                 OptionCollection collection )
             : base( tokens, collection )
         {
         }
@@ -50,36 +48,44 @@ namespace J4JSoftware.Configuration.J4JCommandLine
             grid.Columns.Add( GridLength.Auto, GridLength.Auto, GridLength.Auto );
 
             grid.Children.Add( NewCell( "Key(s)", HeadingColor ),
-                NewCell( "Required", HeadingColor ),
-                NewCell( "Description", HeadingColor ) );
+                              NewCell( "Required", HeadingColor ),
+                              NewCell( "Description", HeadingColor ) );
 
             grid.Children.Add( Collection.Options.Select( x =>
-            {
-                var retVal = new List<object>
-                {
-                    NewCell( string.Join( ", ", GetKeys( x ) ), EmphasisColor, border: Borders.NoBottom ),
-                    NewCell( x.Required ? "Y" : "N", EmphasisColor ),
-                    NewCell( x.Description, TextColor )
-                };
-                
-                var styleDefCell = NewCell( colSpan: 2,
-                    align: Align.Left,
-                    padding: new Thickness( 2, 0, 2, 0 ) );
+                                                          {
+                                                              var retVal = new List<object>
+                                                                           {
+                                                                               NewCell( string.Join( ", ",
+                                                                                 GetKeys( x ) ),
+                                                                                EmphasisColor,
+                                                                                border: Borders.NoBottom ),
+                                                                               NewCell( x.Required ? "Y" : "N",
+                                                                                EmphasisColor ),
+                                                                               NewCell( x.Description, TextColor )
+                                                                           };
 
-                styleDefCell.Children.Add( new Span( GetStyleText( x ) ) { Color = TextColor } );
+                                                              var styleDefCell = NewCell( colSpan: 2,
+                                                               align: Align.Left,
+                                                               padding: new Thickness( 2, 0, 2, 0 ) );
 
-                var defValue = x.GetDefaultValue();
+                                                              styleDefCell.Children.Add( new Span( GetStyleText( x ) )
+                                                                  {
+                                                                      Color = TextColor
+                                                                  } );
 
-                if( !string.IsNullOrEmpty( defValue ) )
-                    styleDefCell.Children.Add( "\n",
-                        new Span( "default: " ) { Color = HeadingColor },
-                        new Span( defValue ) { Color = EmphasisColor } );
+                                                              var defValue = x.GetDefaultValue();
 
-                retVal.Add( NewCell( border: Borders.Bottom | Borders.Left ) );
-                retVal.Add( styleDefCell );
+                                                              if( !string.IsNullOrEmpty( defValue ) )
+                                                                  styleDefCell.Children.Add( "\n",
+                                                                   new Span( "default: " ) { Color = HeadingColor },
+                                                                   new Span( defValue ) { Color = EmphasisColor } );
 
-                return retVal.ToArray();
-            } ) );
+                                                              retVal.Add( NewCell( border: Borders.Bottom
+                                                                             | Borders.Left ) );
+                                                              retVal.Add( styleDefCell );
+
+                                                              return retVal.ToArray();
+                                                          } ) );
 
             var doc = new Document();
 
@@ -89,26 +95,25 @@ namespace J4JSoftware.Configuration.J4JCommandLine
             ConsoleRenderer.RenderDocument( doc );
         }
 
-        private Cell NewCell(
-            string? content = null,
-            ConsoleColor? color = null,
-            Align? align = null,
-            int colSpan = 1,
-            Thickness? padding = null,
-            Borders border = Borders.All )
+        private Cell NewCell( string? content = null,
+                              ConsoleColor? color = null,
+                              Align? align = null,
+                              int colSpan = 1,
+                              Thickness? padding = null,
+                              Borders border = Borders.All )
         {
             color ??= ConsoleColor.White;
             align ??= Align.Center;
             padding ??= CellPadding;
 
             return new Cell( content )
-            {
-                Align = align.Value,
-                Color = color,
-                Padding = padding.Value,
-                ColumnSpan = colSpan,
-                Stroke = GetStroke( border )
-            };
+                   {
+                       Align = align.Value,
+                       Color = color,
+                       Padding = padding.Value,
+                       ColumnSpan = colSpan,
+                       Stroke = GetStroke( border )
+                   };
         }
 
         private LineThickness NoRightBorder()

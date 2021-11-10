@@ -20,7 +20,7 @@ namespace J4JSoftware.Binder.Tests
             var loggerConfig = new J4JLoggerConfiguration( FilePathTrimmer );
 
             loggerConfig.SerilogConfiguration
-                .WriteTo.Debug(outputTemplate: loggerConfig.GetOutputTemplate(true));
+                        .WriteTo.Debug( outputTemplate: loggerConfig.GetOutputTemplate( true ) );
 
             Logger = loggerConfig.CreateLogger();
             Logger.SetLoggedType( GetType() );
@@ -28,23 +28,25 @@ namespace J4JSoftware.Binder.Tests
 
         protected IJ4JLogger Logger { get; }
 
-        protected IOption Bind<TTarget, TProp>(OptionCollection options, Expression<Func<TTarget, TProp>> propSelector,
-            TestConfig testConfig)
+        protected IOption Bind<TTarget, TProp>( OptionCollection options,
+                                                Expression<Func<TTarget, TProp>> propSelector,
+                                                TestConfig testConfig )
             where TTarget : class, new()
         {
-            var option = options.Bind(propSelector);
+            var option = options.Bind( propSelector );
             option.Should().NotBeNull();
 
             var optConfig = testConfig.OptionConfigurations
-                .FirstOrDefault(x =>
-                    option!.ContextPath!.Equals(x.ContextPath, StringComparison.OrdinalIgnoreCase));
+                                      .FirstOrDefault( x =>
+                                                           option!.ContextPath!.Equals( x.ContextPath,
+                                                            StringComparison.OrdinalIgnoreCase ) );
 
             optConfig.Should().NotBeNull();
 
-            option!.AddCommandLineKey(optConfig!.CommandLineKey)
-                .SetStyle(optConfig.Style);
+            option!.AddCommandLineKey( optConfig!.CommandLineKey )
+                   .SetStyle( optConfig.Style );
 
-            if (optConfig.Required) option.IsRequired();
+            if ( optConfig.Required ) option.IsRequired();
             else option.IsOptional();
 
             optConfig.Option = option;
@@ -76,25 +78,25 @@ namespace J4JSoftware.Binder.Tests
 
         // these next two methods serve to strip the project path off of source code
         // file paths
-        private static string FilePathTrimmer(
-            Type? loggedType,
-            string callerName,
-            int lineNum,
-            string srcFilePath)
+        private static string FilePathTrimmer( Type? loggedType,
+                                               string callerName,
+                                               int lineNum,
+                                               string srcFilePath )
         {
-            return CallingContextEnricher.DefaultFilePathTrimmer(loggedType,
-                callerName,
-                lineNum,
-                CallingContextEnricher.RemoveProjectPath(srcFilePath, GetProjectPath()));
+            return CallingContextEnricher.DefaultFilePathTrimmer( loggedType,
+                                                                 callerName,
+                                                                 lineNum,
+                                                                 CallingContextEnricher.RemoveProjectPath( srcFilePath,
+                                                                  GetProjectPath() ) );
         }
 
-        private static string GetProjectPath([CallerFilePath] string filePath = "")
+        private static string GetProjectPath( [ CallerFilePath ] string filePath = "" )
         {
-            var dirInfo = new DirectoryInfo(Path.GetDirectoryName(filePath)!);
+            var dirInfo = new DirectoryInfo( Path.GetDirectoryName( filePath )! );
 
-            while (dirInfo.Parent != null)
+            while ( dirInfo.Parent != null )
             {
-                if (dirInfo.EnumerateFiles("*.csproj").Any())
+                if ( dirInfo.EnumerateFiles( "*.csproj" ).Any() )
                     break;
 
                 dirInfo = dirInfo.Parent;

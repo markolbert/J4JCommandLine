@@ -31,7 +31,7 @@ namespace J4JSoftware.Binder.Tests
         [ InlineData( "-x \"abc\"", "abc" ) ]
         public void LinuxStringHandling( string cmdLine, params string[] result )
         {
-            var parser = Parser.GetLinuxDefault(logger: Logger);
+            var parser = Parser.GetLinuxDefault( logger: Logger );
 
             var option = parser!.Collection.Bind<MiscTarget, string?>( x => x.AStringValue, "x" );
             option.Should().NotBeNull();

@@ -65,12 +65,11 @@ namespace J4JSoftware.Binder.Tests
         {
             var text = File.ReadAllText( Path.Combine( Environment.CurrentDirectory, "test-files", jsonFile ) );
 
-            return JsonSerializer.Deserialize<List<T>>(
-                text,
-                new JsonSerializerOptions
-                {
-                    Converters = { new JsonStringEnumConverter() }
-                } )!;
+            return JsonSerializer.Deserialize<List<T>>( text,
+                                                       new JsonSerializerOptions
+                                                       {
+                                                           Converters = { new JsonStringEnumConverter() }
+                                                       } )!;
         }
     }
 }

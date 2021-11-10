@@ -53,15 +53,15 @@ namespace J4JSoftware.Binder.Tests
         public Type GetPropertyType()
         {
             return PropertyType switch
-            {
-                PropertyTypes.Boolean => typeof(bool),
-                PropertyTypes.Int => typeof(int),
-                PropertyTypes.ListOfStrings => typeof(List<string>),
-                PropertyTypes.TestEnum => typeof(TestEnum),
-                PropertyTypes.TestFlagEnum => typeof(TestFlagEnum),
-                PropertyTypes.ListOfEnums => typeof(List<TestEnum>),
-                _ => typeof(string)
-            };
+                   {
+                       PropertyTypes.Boolean       => typeof( bool ),
+                       PropertyTypes.Int           => typeof( int ),
+                       PropertyTypes.ListOfStrings => typeof( List<string> ),
+                       PropertyTypes.TestEnum      => typeof( TestEnum ),
+                       PropertyTypes.TestFlagEnum  => typeof( TestFlagEnum ),
+                       PropertyTypes.ListOfEnums   => typeof( List<TestEnum> ),
+                       _                           => typeof( string )
+                   };
         }
     }
 }
