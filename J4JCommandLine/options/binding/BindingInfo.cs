@@ -18,11 +18,8 @@
 #endregion
 
 using System;
-using System.Linq.Expressions;
 using System.Reflection;
-using System.Security.Principal;
 using System.Text;
-using J4JSoftware.Logging;
 
 namespace J4JSoftware.Configuration.CommandLine
 {

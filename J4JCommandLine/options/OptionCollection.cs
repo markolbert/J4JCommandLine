@@ -18,13 +18,10 @@
 #endregion
 
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Linq.Expressions;
-using System.Reflection;
-using System.Text;
 using J4JSoftware.Logging;
 
 namespace J4JSoftware.Configuration.CommandLine

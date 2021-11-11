@@ -19,7 +19,6 @@
 
 using System;
 using System.Collections.Generic;
-using System.Threading;
 
 namespace J4JSoftware.Configuration.CommandLine
 {

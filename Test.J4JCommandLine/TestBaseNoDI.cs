@@ -1,11 +1,8 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Linq.Expressions;
-using System.Reflection;
 using System.Runtime.CompilerServices;
-using Autofac;
 using FluentAssertions;
 using J4JSoftware.Configuration.CommandLine;
 using J4JSoftware.Logging;

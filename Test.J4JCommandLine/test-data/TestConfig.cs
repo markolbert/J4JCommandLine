@@ -18,7 +18,6 @@
 #endregion
 
 using System.Collections.Generic;
-using J4JSoftware.Configuration.CommandLine;
 
 #pragma warning disable 8618
 

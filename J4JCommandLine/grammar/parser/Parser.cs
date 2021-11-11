@@ -19,7 +19,6 @@
 
 using System;
 using J4JSoftware.Logging;
-using Serilog.Core;
 
 namespace J4JSoftware.Configuration.CommandLine
 {

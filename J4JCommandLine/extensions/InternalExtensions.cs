@@ -19,8 +19,6 @@
 
 using System.Collections.Generic;
 using System.Linq;
-using J4JSoftware.Logging;
-using Serilog.Events;
 
 namespace J4JSoftware.Configuration.CommandLine
 {

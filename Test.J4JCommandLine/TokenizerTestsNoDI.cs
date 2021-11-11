@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using FluentAssertions;
 using J4JSoftware.Configuration.CommandLine;
-using Serilog;
 using Xunit;
 
 namespace J4JSoftware.Binder.Tests
