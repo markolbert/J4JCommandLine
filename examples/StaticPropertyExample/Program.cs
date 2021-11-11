@@ -35,16 +35,7 @@ namespace J4JSoftware.CommandLine.Examples
                 return;
             }
 
-            var hostBuilder = hostConfig.CreateHostBuilder();
-            if ( hostBuilder == null )
-            {
-                Console.WriteLine( $"Could not create IHostBuilder ({hostConfig.BuildStatus})" );
-                Environment.ExitCode = 1;
-
-                return;
-            }
-
-            var host = hostBuilder.Build();
+            var host = hostConfig.Build();
             if ( host == null )
             {
                 Console.WriteLine( "Could not create IHost" );
@@ -53,17 +44,11 @@ namespace J4JSoftware.CommandLine.Examples
                 return;
             }
 
-            var options = host.Services.GetRequiredService<OptionCollection>();
-            if ( options == null )
-                throw new NullReferenceException( "Undefined OptionCollection" );
-
             var config = host.Services.GetRequiredService<IConfiguration>();
             if ( config == null )
                 throw new NullReferenceException( "Undefined IConfiguration" );
 
-            var hostInfo = host.Services.GetRequiredService<J4JHostInfo>();
-
-            var help = new ColorHelpDisplay( hostInfo.CommandLineLexicalElements!, options );
+            var help = new ColorHelpDisplay( host.CommandLineLexicalElements!, host.Options! );
             help.Display();
 
             var parsed = config.Get<Program>();
@@ -81,9 +66,9 @@ namespace J4JSoftware.CommandLine.Examples
             Console.WriteLine( $"IntValue is {IntValue}" );
             Console.WriteLine( $"TextValue is {TextValue}" );
 
-            Console.WriteLine( options.SpuriousValues.Count == 0
+            Console.WriteLine( host.Options!.SpuriousValues.Count == 0
                                    ? "No unkeyed parameters"
-                                   : $"Unkeyed parameters: {string.Join( ", ", options.SpuriousValues )}" );
+                                   : $"Unkeyed parameters: {string.Join( ", ", host.Options.SpuriousValues )}" );
         }
 
         public static int IntValue { get; set; }

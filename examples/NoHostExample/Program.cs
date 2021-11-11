@@ -47,6 +47,6 @@ namespace NoDIExample
         }
 
         public static int IntValue { get; set; }
-        public static string TextValue { get; set; }
+        public static string TextValue { get; set; } = string.Empty;
     }
 }
