@@ -1,6 +1,14 @@
 # Changes
 
-## v2.0
+|Version|Summary of Changes|
+|-------|------------------|
+|4.1|updated to Net 6|
+|4.0|substantial rewrite (see discussion below)|
+|1.1|added ability to display help in the console (details below)|
+|1.0|rewritten to align better with the `IConfiguration` system (comments below)|
+|0.5|initial release|
+
+## v4.0 Changes
 
 Using the library in a number of projects made me realize it was too hard to configure. That was mostly the result of it trying to do too much of the configuration automagically (e.g., scanning a list of provided assemblies to locate alternative interface implementationss and then picking the "best" one). 
 
