@@ -8,7 +8,7 @@
 		<Authors>Mark A. Olbert</Authors>
 		<Company>Jump for Joy Software</Company>
 		<Product>J4JSoftware Command Line Processor</Product>
-		<Description>command line processing for the Net5 IConfiguration system</Description>
+		<Description>command line processing for the Net IConfiguration system</Description>
 		<Copyright>© Mark A. Olbert all rights reserved</Copyright>
 		<RepositoryUrl>https://github.com/markolbert/J4JCommandLine</RepositoryUrl>
 		<RepositoryType>git</RepositoryType>
