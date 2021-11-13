@@ -19,7 +19,7 @@
 		<PackageLicenseExpression>GPL-3.0-or-later</PackageLicenseExpression>
 		<PackageDescription>command line processing for the Net5 IConfiguration system</PackageDescription>
 		<PackageReleaseNotes>updated to net 6</PackageReleaseNotes>
-		<PackageReadmeFile>nuget.md</PackageReadmeFile>
+		<PackageReadmeFile>nuget-cmdline.md</PackageReadmeFile>
 	</PropertyGroup>
 
 	<ItemGroup>
