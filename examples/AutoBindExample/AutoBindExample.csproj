@@ -11,7 +11,7 @@
 		<Product>J4JSoftware Command Line Processor</Product>
 		<Description>auto binding example for J4JCommandLine</Description>
 		<Copyright>© Mark A. Olbert all rights reserved</Copyright>
-		<Configurations>Debug;Release;NugetRelease</Configurations>
+		<Configurations>Debug;Release</Configurations>
 	</PropertyGroup>
 
 	<ItemGroup>
