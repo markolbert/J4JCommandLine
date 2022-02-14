@@ -27,7 +27,7 @@ namespace J4JSoftware.CommandLine.Examples
             hostConfig.AddCommandLineProcessing( CommandLineOperatingSystems.Windows )
                       .OptionsInitializer( SetupOptions );
 
-            if ( hostConfig.MissingRequirements != J4JHostRequirements.AllMet )
+            if( hostConfig.MissingRequirements != J4JHostRequirements.AllMet )
             {
                 Console.WriteLine( $"Missing J4JHostConfiguration items: {hostConfig.MissingRequirements}" );
                 Environment.ExitCode = 1;
@@ -36,7 +36,7 @@ namespace J4JSoftware.CommandLine.Examples
             }
 
             var host = hostConfig.Build();
-            if ( host == null )
+            if( host == null )
             {
                 Console.WriteLine( "Could not create IHost" );
                 Environment.ExitCode = 1;
@@ -45,7 +45,7 @@ namespace J4JSoftware.CommandLine.Examples
             }
 
             var config = host.Services.GetRequiredService<IConfiguration>();
-            if ( config == null )
+            if( config == null )
                 throw new NullReferenceException( "Undefined IConfiguration" );
 
             var help = new ColorHelpDisplay( host.CommandLineLexicalElements!, host.Options! );
@@ -53,7 +53,7 @@ namespace J4JSoftware.CommandLine.Examples
 
             var parsed = config.Get<Program>();
 
-            if ( parsed == null )
+            if( parsed == null )
             {
                 Console.WriteLine( "Parsing failed" );
 
@@ -65,6 +65,7 @@ namespace J4JSoftware.CommandLine.Examples
 
             Console.WriteLine( $"IntValue is {IntValue}" );
             Console.WriteLine( $"TextValue is {TextValue}" );
+            Console.WriteLine( $"SwitchValue is {SwitchValue}" );
 
             Console.WriteLine( host.Options!.SpuriousValues.Count == 0
                                    ? "No unkeyed parameters"
@@ -73,6 +74,7 @@ namespace J4JSoftware.CommandLine.Examples
 
         public static int IntValue { get; set; }
         public static string TextValue { get; set; }
+        public static bool SwitchValue { get; set; }
 
         private static void SetupOptions( OptionCollection options )
         {
@@ -83,6 +85,10 @@ namespace J4JSoftware.CommandLine.Examples
             options.Bind<Program, string>( x => Program.TextValue, "t" )!
                    .SetDefaultValue( "a cool default" )
                    .SetDescription( "A string value" );
+
+            options.Bind<Program, bool>(x => Program.SwitchValue, "s")!
+                   .SetDefaultValue(false)
+                   .SetDescription("A switch");
         }
 
         // these next two methods serve to strip the project path off of source code
