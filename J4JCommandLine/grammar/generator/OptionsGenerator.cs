@@ -18,6 +18,7 @@
 #endregion
 
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using J4JSoftware.Logging;
 using Serilog.Events;
@@ -178,6 +179,13 @@ namespace J4JSoftware.Configuration.CommandLine
                 return false;
             }
 
+            // check for invalid Enum values because they'll blow up J4JCommandLineProvider (because
+            // the actual value conversion takes place deep inside the IConfiguration subsystem, which
+            // doesn't check for invalid values, or fail gracefully; it just throws an exception
+            if( _current.Option.PropertyType.IsEnum
+                && !ValidEnumValue( _current.Values.Take( _current.Option.MaxValues ), _current.Option.PropertyType ) )
+                return false;
+
             _current.Option.CommandLineKeyProvided = _current.Key;
 
             _current.Option
@@ -189,6 +197,25 @@ namespace J4JSoftware.Configuration.CommandLine
                     .AddRange( _current.Values.Skip( _current.Option.MaxValues ) );
 
             _current = null;
+
+            return true;
+        }
+
+        private bool ValidEnumValue( IEnumerable<string> values, Type propertyType )
+        {
+            if( !propertyType.IsEnum )
+                return true;
+
+            var validValues = Enum.GetNames( propertyType );
+
+            foreach( var value in values )
+            {
+                if( validValues.Any( x => x.Equals( value, _textComparison ) ) )
+                    continue;
+
+                _logger?.Error<string, string>( "Invalid {0} option value '{1}'", propertyType.Name, value );
+                return false;
+            }
 
             return true;
         }

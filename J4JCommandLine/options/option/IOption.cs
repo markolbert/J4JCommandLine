@@ -28,6 +28,7 @@ namespace J4JSoftware.Configuration.CommandLine
         bool IsInitialized { get; }
         OptionCollection Collection { get; }
         Type ContainingType { get; }
+        Type PropertyType { get; }
 
         string? ContextPath { get; }
 

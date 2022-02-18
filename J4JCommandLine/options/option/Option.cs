@@ -42,6 +42,7 @@ namespace J4JSoftware.Configuration.CommandLine
         public bool IsInitialized => !string.IsNullOrEmpty( ContextPath ) && _cmdLineKeys.Count > 0;
         public OptionCollection Collection { get; }
         public Type ContainingType => typeof( TContainer );
+        public Type PropertyType => typeof( TProp );
 
         public string? ContextPath { get; }
 
