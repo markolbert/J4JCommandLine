@@ -12,13 +12,13 @@
 		<Copyright>© Mark A. Olbert all rights reserved</Copyright>
 		<RepositoryUrl>https://github.com/markolbert/J4JCommandLine</RepositoryUrl>
 		<RepositoryType>git</RepositoryType>
-		<Version>4.1.0.0</Version>
-		<AssemblyVersion>4.1.0.0</AssemblyVersion>
+		<Version>4.1.1.0</Version>
+		<AssemblyVersion>4.1.1.0</AssemblyVersion>
 		<GeneratePackageOnBuild>true</GeneratePackageOnBuild>
 		<PackageIcon>Diego nuspec.png</PackageIcon>
 		<PackageLicenseExpression>GPL-3.0-or-later</PackageLicenseExpression>
 		<PackageDescription>command line processing for the Net5 IConfiguration system</PackageDescription>
-		<PackageReleaseNotes>updated to net 6</PackageReleaseNotes>
+		<PackageReleaseNotes>fixed problem with parsing invalid enums</PackageReleaseNotes>
 		<PackageReadmeFile>nuget-cmdline.md</PackageReadmeFile>
 	</PropertyGroup>
 

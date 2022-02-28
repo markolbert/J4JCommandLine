@@ -2,6 +2,7 @@
 
 |Version|Summary of Changes|
 |-------|------------------|
+|4.1.1|fixed problem with parsing invalid enum values|
 |4.1|updated to Net 6|
 |4.0|substantial rewrite (see discussion below)|
 |1.1|added ability to display help in the console (details below)|
