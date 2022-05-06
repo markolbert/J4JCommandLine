@@ -19,7 +19,7 @@ namespace J4JSoftware.CommandLine.Examples
     {
         static void Main( string[] args )
         {
-            var hostConfig = new J4JHostConfiguration()
+            var hostConfig = new J4JHostConfiguration(AppEnvironment.Console)
                              .Publisher( "J4JSoftware" )
                              .ApplicationName( "StaticPropertyExample" )
                              .FilePathTrimmer( FilePathTrimmer );
