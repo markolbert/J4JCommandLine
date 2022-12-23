@@ -27,6 +27,8 @@ public interface ITextConverters : IReadOnlyDictionary<Type, ITextToValue>
     bool AddConverter( ITextToValue converter, bool replaceExisting = false );
     bool AddConverters( IEnumerable<ITextToValue> converters, bool replaceExisting = false );
 
+    ITextToValue? GetConverter( Type simpleType );
+
     bool CanConvert( Type toCheck );
     bool Convert( Type targetType, IEnumerable<string> textValues, out object? result );
 }
