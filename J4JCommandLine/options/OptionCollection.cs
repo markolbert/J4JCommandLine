@@ -111,6 +111,8 @@ public partial class OptionCollection
             return null;
         }
 
+        bindingInfo.Converter = _converters[typeof(TTarget)];
+
         var curBindingInfo = bindingInfo.Root;
 
         while( curBindingInfo != null )
