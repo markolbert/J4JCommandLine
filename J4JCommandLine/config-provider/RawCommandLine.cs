@@ -20,7 +20,7 @@
 using System;
 using System.Runtime.InteropServices;
 
-namespace J4JSoftware.Configuration.CommandLine;
+namespace J4JSoftware.Configuration.CommandLine.Deprecate;
 
 public class RawCommandLine
 {
