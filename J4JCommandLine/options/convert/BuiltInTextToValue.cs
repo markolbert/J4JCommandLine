@@ -20,33 +20,32 @@
 using System.Reflection;
 using J4JSoftware.Logging;
 
-namespace J4JSoftware.Configuration.CommandLine
+namespace J4JSoftware.Configuration.CommandLine;
+
+public class BuiltInTextToValue<TBaseType> : TextToValue<TBaseType>, ITextToValue
 {
-    public class BuiltInTextToValue<TBaseType> : TextToValue<TBaseType>, ITextToValue
+    private readonly MethodInfo _convMethod;
+
+    public BuiltInTextToValue( MethodInfo convMethod,
+        IJ4JLogger? logger )
+        : base( logger )
     {
-        private readonly MethodInfo _convMethod;
+        _convMethod = convMethod;
+    }
 
-        public BuiltInTextToValue( MethodInfo convMethod,
-                                   IJ4JLogger? logger )
-            : base( logger )
+    protected override bool ConvertTextToValue( string text, out TBaseType? result )
+    {
+        result = default;
+
+        try
         {
-            _convMethod = convMethod;
+            result = (TBaseType?) _convMethod.Invoke( null, new object?[] { text } );
+            return true;
         }
-
-        protected override bool ConvertTextToValue( string text, out TBaseType? result )
+        catch
         {
-            result = default;
-
-            try
-            {
-                result = (TBaseType?) _convMethod.Invoke( null, new object?[] { text } );
-                return true;
-            }
-            catch
-            {
-                Logger?.Error( "Could not convert '{0}' to a {1}", text, typeof( TBaseType? ) );
-                return false;
-            }
+            Logger?.Error( "Could not convert '{0}' to a {1}", text, typeof( TBaseType? ) );
+            return false;
         }
     }
 }

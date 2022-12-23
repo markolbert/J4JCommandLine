@@ -21,40 +21,39 @@ using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 
-namespace J4JSoftware.Configuration.CommandLine
+namespace J4JSoftware.Configuration.CommandLine;
+
+public interface IOption
 {
-    public interface IOption
-    {
-        bool IsInitialized { get; }
-        OptionCollection Collection { get; }
-        Type ContainingType { get; }
-        Type PropertyType { get; }
+    bool IsInitialized { get; }
+    OptionCollection Collection { get; }
+    Type ContainingType { get; }
+    Type PropertyType { get; }
 
-        string? ContextPath { get; }
+    string? ContextPath { get; }
 
-        ReadOnlyCollection<string> Keys { get; }
-        string? CommandLineKeyProvided { get; set; }
+    ReadOnlyCollection<string> Keys { get; }
+    string? CommandLineKeyProvided { get; set; }
 
-        OptionStyle Style { get; }
+    OptionStyle Style { get; }
 
-        int MaxValues { get; }
-        int NumValuesAllocated { get; }
-        ReadOnlyCollection<string> Values { get; }
-        bool ValuesSatisfied { get; }
-        bool GetValue( out object? result );
+    int MaxValues { get; }
+    int NumValuesAllocated { get; }
+    ReadOnlyCollection<string> Values { get; }
+    bool ValuesSatisfied { get; }
+    bool GetValue( out object? result );
 
-        bool Required { get; }
+    bool Required { get; }
 
-        string? Description { get; }
-        IOption SetStyle( OptionStyle style );
+    string? Description { get; }
+    IOption SetStyle( OptionStyle style );
 
-        string? GetDefaultValue();
-    }
+    string? GetDefaultValue();
+}
 
-    internal interface IOptionInternal : IOption
-    {
-        void AddValue( string value );
-        void AddValues( IEnumerable<string> values );
-        void ClearValues();
-    }
+internal interface IOptionInternal : IOption
+{
+    void AddValue( string value );
+    void AddValues( IEnumerable<string> values );
+    void ClearValues();
 }

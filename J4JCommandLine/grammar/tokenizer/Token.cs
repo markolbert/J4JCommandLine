@@ -17,12 +17,11 @@
 
 #endregion
 
-namespace J4JSoftware.Configuration.CommandLine
-{
-    public record Token( LexicalType Type, string Text )
-    {
-        public int Length => Text.Length;
+namespace J4JSoftware.Configuration.CommandLine;
 
-        public Token Copy() => new( this );
-    }
+public record Token( LexicalType Type, string Text )
+{
+    public int Length => Text.Length;
+
+    public Token Copy() => new( this );
 }

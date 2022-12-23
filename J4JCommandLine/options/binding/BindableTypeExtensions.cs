@@ -21,33 +21,32 @@ using System;
 using System.Collections.Generic;
 using System.Reflection;
 
-namespace J4JSoftware.Configuration.CommandLine
+namespace J4JSoftware.Configuration.CommandLine;
+
+internal static class BindableTypeExtensions
 {
-    internal static class BindableTypeExtensions
+    internal static bool IsFlaggedEnum( this Type toCheck ) =>
+        toCheck.IsEnum && toCheck.GetCustomAttribute<FlagsAttribute>() != null;
+
+    internal static bool IsBindableCollection( this Type toCheck )
     {
-        internal static bool IsFlaggedEnum( this Type toCheck ) =>
-            toCheck.IsEnum && toCheck.GetCustomAttribute<FlagsAttribute>() != null;
+        if( toCheck.IsArray )
+            return true;
 
-        internal static bool IsBindableCollection( this Type toCheck )
-        {
-            if( toCheck.IsArray )
-                return true;
+        if( !toCheck.IsGenericType )
+            return false;
 
-            if( !toCheck.IsGenericType )
-                return false;
+        var typeArgs = toCheck.GetGenericArguments();
 
-            var typeArgs = toCheck.GetGenericArguments();
+        return typeArgs.Length == 1
+         && typeof( List<> ).MakeGenericType( typeArgs[ 0 ] ).IsAssignableFrom( toCheck );
+    }
 
-            return typeArgs.Length == 1
-                   && typeof( List<> ).MakeGenericType( typeArgs[ 0 ] ).IsAssignableFrom( toCheck );
-        }
+    internal static Type? GetBindableCollectionElement( this Type toCheck )
+    {
+        if( !toCheck.IsBindableCollection() )
+            return null;
 
-        internal static Type? GetBindableCollectionElement( this Type toCheck )
-        {
-            if( !toCheck.IsBindableCollection() )
-                return null;
-
-            return toCheck.IsArray ? toCheck.GetElementType() : toCheck.GetGenericArguments()[ 0 ];
-        }
+        return toCheck.IsArray ? toCheck.GetElementType() : toCheck.GetGenericArguments()[ 0 ];
     }
 }

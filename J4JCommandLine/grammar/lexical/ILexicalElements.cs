@@ -20,13 +20,12 @@
 using System;
 using System.Collections.Generic;
 
-namespace J4JSoftware.Configuration.CommandLine
-{
-    public interface ILexicalElements : IEnumerable<Token>
-    {
-        StringComparison TextComparison { get; }
-        int Count { get; }
+namespace J4JSoftware.Configuration.CommandLine;
 
-        bool Add( LexicalType type, string text );
-    }
+public interface ILexicalElements : IEnumerable<Token>
+{
+    StringComparison TextComparison { get; }
+    int Count { get; }
+
+    bool Add( LexicalType type, string text );
 }

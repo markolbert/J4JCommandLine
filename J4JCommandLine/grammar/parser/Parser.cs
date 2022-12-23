@@ -20,90 +20,89 @@
 using System;
 using J4JSoftware.Logging;
 
-namespace J4JSoftware.Configuration.CommandLine
+namespace J4JSoftware.Configuration.CommandLine;
+
+public class Parser : IParser
 {
-    public class Parser : IParser
+    public static IParser GetWindowsDefault( ITextConverters? converters = null,
+        IJ4JLogger? logger = null,
+        params ICleanupTokens[] cleanupProcessors )
     {
-        public static IParser GetWindowsDefault( ITextConverters? converters = null,
-                                                 IJ4JLogger? logger = null,
-                                                 params ICleanupTokens[] cleanupProcessors )
+        converters ??= new TextConverters( logger: logger );
+
+        var options = new OptionCollection( StringComparison.OrdinalIgnoreCase, converters, logger );
+
+        var parsingTable = new ParsingTable( new OptionsGenerator( options,
+                                                                   StringComparison.OrdinalIgnoreCase,
+                                                                   logger ),
+                                             logger );
+
+        var tokenizer = new Tokenizer( new WindowsLexicalElements( logger ),
+                                       logger,
+                                       cleanupProcessors );
+
+        return new Parser( options, parsingTable, tokenizer, logger );
+    }
+
+    public static IParser GetLinuxDefault( ITextConverters? converters = null,
+        IJ4JLogger? logger = null,
+        params ICleanupTokens[] cleanupProcessors )
+    {
+        converters ??= new TextConverters( logger: logger );
+
+        var options = new OptionCollection( StringComparison.Ordinal, converters, logger );
+
+        var parsingTable = new ParsingTable( new OptionsGenerator( options,
+                                                                   StringComparison.Ordinal,
+                                                                   logger ),
+                                             logger );
+
+        var tokenizer = new Tokenizer( new LinuxLexicalElements( logger ),
+                                       logger,
+                                       cleanupProcessors );
+
+        return new Parser( options, parsingTable, tokenizer, logger );
+    }
+
+    private readonly ParsingTable _parsingTable;
+    private readonly IJ4JLogger? _logger;
+
+    public Parser( OptionCollection options,
+        ParsingTable parsingTable,
+        ITokenizer tokenizer,
+        IJ4JLogger? logger = null )
+    {
+        Collection = options;
+        _parsingTable = parsingTable;
+        Tokenizer = tokenizer;
+
+        _logger = logger;
+    }
+
+    public ITokenizer Tokenizer { get; }
+    public OptionCollection Collection { get; }
+
+    public bool Parse( string cmdLine )
+    {
+        var tokenList = Tokenizer!.Tokenize( cmdLine );
+
+        foreach( var tokenPair in tokenList.EnumerateTokenPairs() )
         {
-            converters ??= new TextConverters( logger: logger );
+            var parsingAction = _parsingTable[ tokenPair.LexicalPair ];
 
-            var options = new OptionCollection( StringComparison.OrdinalIgnoreCase, converters, logger );
-
-            var parsingTable = new ParsingTable( new OptionsGenerator( options,
-                                                                      StringComparison.OrdinalIgnoreCase,
-                                                                      logger ),
-                                                logger );
-
-            var tokenizer = new Tokenizer( new WindowsLexicalElements( logger ),
-                                          logger,
-                                          cleanupProcessors );
-
-            return new Parser( options, parsingTable, tokenizer, logger );
-        }
-
-        public static IParser GetLinuxDefault( ITextConverters? converters = null,
-                                               IJ4JLogger? logger = null,
-                                               params ICleanupTokens[] cleanupProcessors )
-        {
-            converters ??= new TextConverters( logger: logger );
-
-            var options = new OptionCollection( StringComparison.Ordinal, converters, logger );
-
-            var parsingTable = new ParsingTable( new OptionsGenerator( options,
-                                                                      StringComparison.Ordinal,
-                                                                      logger ),
-                                                logger );
-
-            var tokenizer = new Tokenizer( new LinuxLexicalElements( logger ),
-                                          logger,
-                                          cleanupProcessors );
-
-            return new Parser( options, parsingTable, tokenizer, logger );
-        }
-
-        private readonly ParsingTable _parsingTable;
-        private readonly IJ4JLogger? _logger;
-
-        public Parser( OptionCollection options,
-                       ParsingTable parsingTable,
-                       ITokenizer tokenizer,
-                       IJ4JLogger? logger = null )
-        {
-            Collection = options;
-            _parsingTable = parsingTable;
-            Tokenizer = tokenizer;
-
-            _logger = logger;
-        }
-
-        public ITokenizer Tokenizer { get; }
-        public OptionCollection Collection { get; }
-
-        public bool Parse( string cmdLine )
-        {
-            var tokenList = Tokenizer!.Tokenize( cmdLine );
-
-            foreach( var tokenPair in tokenList.EnumerateTokenPairs() )
+            if( parsingAction == null )
             {
-                var parsingAction = _parsingTable[ tokenPair.LexicalPair ];
+                _logger?.Error( "Undefined parsing action for token sequence '{0} => {1}'",
+                                tokenPair.Previous.Type,
+                                tokenPair.Current.Type );
 
-                if( parsingAction == null )
-                {
-                    _logger?.Error( "Undefined parsing action for token sequence '{0} => {1}'",
-                                   tokenPair.Previous.Type,
-                                   tokenPair.Current.Type );
-
-                    return false;
-                }
-
-                if( !parsingAction( tokenPair ) )
-                    return false;
+                return false;
             }
 
-            return true;
+            if( !parsingAction( tokenPair ) )
+                return false;
         }
+
+        return true;
     }
 }

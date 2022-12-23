@@ -20,42 +20,41 @@
 using System;
 using System.Collections.Generic;
 
-namespace J4JSoftware.Configuration.CommandLine
+namespace J4JSoftware.Configuration.CommandLine;
+
+public class CommandLineSource
 {
-    public class CommandLineSource
+    public event EventHandler<ConfigurationChangedEventArgs>? Changed;
+
+    public CommandLineSource( StringComparison textComparison )
     {
-        public event EventHandler<ConfigurationChangedEventArgs>? Changed;
+        // we don't want the name of the executable so we need to remove it
+        // it's the first argument in what gets returned by Environment.GetCommandLineArgs()
+        var temp = Environment.GetCommandLineArgs();
 
-        public CommandLineSource( StringComparison textComparison )
-        {
-            // we don't want the name of the executable so we need to remove it
-            // it's the first argument in what gets returned by Environment.GetCommandLineArgs()
-            var temp = Environment.GetCommandLineArgs();
-
-            var cmdLine = Environment.CommandLine;
-            CommandLine = cmdLine.IndexOf( temp[ 0 ], textComparison ) == 0
-                              ? cmdLine.Replace( temp[ 0 ], string.Empty )
-                              : cmdLine;
-        }
-
-        public void OptionsConfigurationChanged() => OnChanged();
-
-        public string CommandLine { get; private set; }
-
-        public void SetCommandLine( string newCmdLine )
-        {
-            CommandLine = newCmdLine;
-            OnChanged( newCmdLine );
-        }
-
-        public void SetCommandLine( string[] args ) => SetCommandLine( string.Join( " ", args ) );
-        public void SetCommandLine( IEnumerable<string> args ) => SetCommandLine( string.Join( " ", args ) );
-
-        private void OnChanged( string newCommandLine ) =>
-            Changed?.Invoke( this,
-                            new ConfigurationChangedEventArgs { NewCommandLine = newCommandLine } );
-
-        private void OnChanged() =>
-            Changed?.Invoke( this, new ConfigurationChangedEventArgs { OptionsConfigurationChanged = true } );
+        var cmdLine = Environment.CommandLine;
+        CommandLine = cmdLine.IndexOf( temp[ 0 ], textComparison ) == 0
+            ? cmdLine.Replace( temp[ 0 ], string.Empty )
+            : cmdLine;
     }
+
+    public void OptionsConfigurationChanged() => OnChanged();
+
+    public string CommandLine { get; private set; }
+
+    public void SetCommandLine( string newCmdLine )
+    {
+        CommandLine = newCmdLine;
+        OnChanged( newCmdLine );
+    }
+
+    public void SetCommandLine( string[] args ) => SetCommandLine( string.Join( " ", args ) );
+    public void SetCommandLine( IEnumerable<string> args ) => SetCommandLine( string.Join( " ", args ) );
+
+    private void OnChanged( string newCommandLine ) =>
+        Changed?.Invoke( this,
+                         new ConfigurationChangedEventArgs { NewCommandLine = newCommandLine } );
+
+    private void OnChanged() =>
+        Changed?.Invoke( this, new ConfigurationChangedEventArgs { OptionsConfigurationChanged = true } );
 }

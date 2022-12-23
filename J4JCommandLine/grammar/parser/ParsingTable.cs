@@ -22,100 +22,99 @@ using System.Collections.Generic;
 using System.Linq;
 using J4JSoftware.Logging;
 
-namespace J4JSoftware.Configuration.CommandLine
+namespace J4JSoftware.Configuration.CommandLine;
+
+public delegate bool ParsingAction( TokenPair tokenPair );
+
+public class ParsingTable : IParsingTable
 {
-    public delegate bool ParsingAction( TokenPair tokenPair );
+    public static ParsingTable GetWindowsDefault( IJ4JLogger? logger = null ) =>
+        new ParsingTable( OptionsGenerator.GetWindowsDefault( logger ), logger );
 
-    public class ParsingTable : IParsingTable
+    public static ParsingTable GetLinuxDefault( IJ4JLogger? logger = null ) =>
+        new ParsingTable( OptionsGenerator.GetLinuxDefault( logger ), logger );
+
+    private readonly Dictionary<LexicalType, Dictionary<LexicalType, ParsingAction?>> _table =
+        new();
+
+    private readonly ParsingAction _endParsing;
+    private readonly IJ4JLogger? _logger;
+
+    public ParsingTable( IOptionsGenerator generator,
+        IJ4JLogger? logger = null )
     {
-        public static ParsingTable GetWindowsDefault( IJ4JLogger? logger = null ) =>
-            new ParsingTable( OptionsGenerator.GetWindowsDefault( logger ), logger );
+        _endParsing = generator.EndParsing;
 
-        public static ParsingTable GetLinuxDefault( IJ4JLogger? logger = null ) =>
-            new ParsingTable( OptionsGenerator.GetLinuxDefault( logger ), logger );
+        _logger = logger;
+        _logger?.SetLoggedType( GetType() );
 
-        private readonly Dictionary<LexicalType, Dictionary<LexicalType, ParsingAction?>> _table =
-            new();
-
-        private readonly ParsingAction _endParsing;
-        private readonly IJ4JLogger? _logger;
-
-        public ParsingTable( IOptionsGenerator generator,
-                             IJ4JLogger? logger = null )
+        foreach( var row in Enum.GetValues<LexicalType>() )
         {
-            _endParsing = generator.EndParsing;
+            // Quoter never appears in the list of processed tokens because
+            // they are eliminated by the token cleanup routine
+            if( row == LexicalType.Quoter )
+                continue;
 
-            _logger = logger;
-            _logger?.SetLoggedType( GetType() );
+            _table.Add( row, new Dictionary<LexicalType, ParsingAction?>() );
 
-            foreach( var row in Enum.GetValues<LexicalType>() )
+            foreach( var col in Enum.GetValues<LexicalType>() )
             {
+                // StartOfInput is only a row entry, not a column entry,
+                // because it can never appear as a "next" token
                 // Quoter never appears in the list of processed tokens because
                 // they are eliminated by the token cleanup routine
-                if( row == LexicalType.Quoter )
+                // EndOfInput we handle specially when the handler is requested
+                if( col switch
+                   {
+                       LexicalType.StartOfInput => true,
+                       LexicalType.Quoter       => true,
+                       LexicalType.EndOfInput   => true,
+                       _                        => false
+                   } )
                     continue;
 
-                _table.Add( row, new Dictionary<LexicalType, ParsingAction?>() );
-
-                foreach( var col in Enum.GetValues<LexicalType>() )
-                {
-                    // StartOfInput is only a row entry, not a column entry,
-                    // because it can never appear as a "next" token
-                    // Quoter never appears in the list of processed tokens because
-                    // they are eliminated by the token cleanup routine
-                    // EndOfInput we handle specially when the handler is requested
-                    if( col switch
-                        {
-                            LexicalType.StartOfInput => true,
-                            LexicalType.Quoter       => true,
-                            LexicalType.EndOfInput   => true,
-                            _                        => false
-                        } )
-                        continue;
-
-                    _table[ row ].Add( col, null );
-                }
+                _table[ row ].Add( col, null );
             }
-
-            _table[ LexicalType.StartOfInput ][ LexicalType.KeyPrefix ] = generator.Create;
-            _table[ LexicalType.StartOfInput ][ LexicalType.ValuePrefix ] = generator.TerminateWithPrejudice;
-            _table[ LexicalType.StartOfInput ][ LexicalType.Separator ] = generator.ConsumeToken;
-            _table[ LexicalType.StartOfInput ][ LexicalType.Text ] = generator.ProcessText;
-
-            _table[ LexicalType.KeyPrefix ][ LexicalType.KeyPrefix ] = generator.TerminateWithPrejudice;
-            _table[ LexicalType.KeyPrefix ][ LexicalType.ValuePrefix ] = generator.TerminateWithPrejudice;
-            _table[ LexicalType.KeyPrefix ][ LexicalType.Separator ] = generator.TerminateWithPrejudice;
-            _table[ LexicalType.KeyPrefix ][ LexicalType.Text ] = generator.ProcessText;
-
-            _table[ LexicalType.ValuePrefix ][ LexicalType.KeyPrefix ] = generator.TerminateWithPrejudice;
-            _table[ LexicalType.ValuePrefix ][ LexicalType.ValuePrefix ] = generator.TerminateWithPrejudice;
-            _table[ LexicalType.ValuePrefix ][ LexicalType.Separator ] = generator.ConsumeToken;
-            _table[ LexicalType.ValuePrefix ][ LexicalType.Text ] = generator.ProcessText;
-
-            _table[ LexicalType.Separator ][ LexicalType.KeyPrefix ] = generator.Commit;
-            _table[ LexicalType.Separator ][ LexicalType.ValuePrefix ] = generator.ConsumeToken;
-            _table[ LexicalType.Separator ][ LexicalType.Separator ] = generator.ConsumeToken;
-            _table[ LexicalType.Separator ][ LexicalType.Text ] = generator.ProcessText;
-
-            _table[ LexicalType.Text ][ LexicalType.KeyPrefix ] = generator.TerminateWithPrejudice;
-            _table[ LexicalType.Text ][ LexicalType.ValuePrefix ] = generator.TerminateWithPrejudice;
-            _table[ LexicalType.Text ][ LexicalType.Separator ] = generator.ConsumeToken;
-            _table[ LexicalType.Text ][ LexicalType.Text ] = generator.ProcessText;
         }
 
-        public bool IsValid =>
-            !_table
-                .Any( row =>
-                          row.Value.Any( col =>
-                                             col.Value == null ) );
+        _table[ LexicalType.StartOfInput ][ LexicalType.KeyPrefix ] = generator.Create;
+        _table[ LexicalType.StartOfInput ][ LexicalType.ValuePrefix ] = generator.TerminateWithPrejudice;
+        _table[ LexicalType.StartOfInput ][ LexicalType.Separator ] = generator.ConsumeToken;
+        _table[ LexicalType.StartOfInput ][ LexicalType.Text ] = generator.ProcessText;
 
-        public ParsingAction? this[ LexicalPair typePair ]
-        {
-            get =>
-                typePair.Current == LexicalType.EndOfInput
-                    ? _endParsing
-                    : _table[ typePair.Previous ][ typePair.Current ];
-            set => _table[ typePair.Previous ][ typePair.Current ] = value;
-        }
+        _table[ LexicalType.KeyPrefix ][ LexicalType.KeyPrefix ] = generator.TerminateWithPrejudice;
+        _table[ LexicalType.KeyPrefix ][ LexicalType.ValuePrefix ] = generator.TerminateWithPrejudice;
+        _table[ LexicalType.KeyPrefix ][ LexicalType.Separator ] = generator.TerminateWithPrejudice;
+        _table[ LexicalType.KeyPrefix ][ LexicalType.Text ] = generator.ProcessText;
+
+        _table[ LexicalType.ValuePrefix ][ LexicalType.KeyPrefix ] = generator.TerminateWithPrejudice;
+        _table[ LexicalType.ValuePrefix ][ LexicalType.ValuePrefix ] = generator.TerminateWithPrejudice;
+        _table[ LexicalType.ValuePrefix ][ LexicalType.Separator ] = generator.ConsumeToken;
+        _table[ LexicalType.ValuePrefix ][ LexicalType.Text ] = generator.ProcessText;
+
+        _table[ LexicalType.Separator ][ LexicalType.KeyPrefix ] = generator.Commit;
+        _table[ LexicalType.Separator ][ LexicalType.ValuePrefix ] = generator.ConsumeToken;
+        _table[ LexicalType.Separator ][ LexicalType.Separator ] = generator.ConsumeToken;
+        _table[ LexicalType.Separator ][ LexicalType.Text ] = generator.ProcessText;
+
+        _table[ LexicalType.Text ][ LexicalType.KeyPrefix ] = generator.TerminateWithPrejudice;
+        _table[ LexicalType.Text ][ LexicalType.ValuePrefix ] = generator.TerminateWithPrejudice;
+        _table[ LexicalType.Text ][ LexicalType.Separator ] = generator.ConsumeToken;
+        _table[ LexicalType.Text ][ LexicalType.Text ] = generator.ProcessText;
+    }
+
+    public bool IsValid =>
+        !_table
+           .Any( row =>
+                     row.Value.Any( col =>
+                                        col.Value == null ) );
+
+    public ParsingAction? this[ LexicalPair typePair ]
+    {
+        get =>
+            typePair.Current == LexicalType.EndOfInput
+                ? _endParsing
+                : _table[ typePair.Previous ][ typePair.Current ];
+        set => _table[ typePair.Previous ][ typePair.Current ] = value;
     }
 }

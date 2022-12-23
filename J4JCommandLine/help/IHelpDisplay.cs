@@ -17,10 +17,9 @@
 
 #endregion
 
-namespace J4JSoftware.Configuration.CommandLine
+namespace J4JSoftware.Configuration.CommandLine;
+
+public interface IHelpDisplay
 {
-    public interface IHelpDisplay
-    {
-        void Display();
-    }
+    void Display();
 }

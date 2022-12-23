@@ -22,62 +22,61 @@ using System.ComponentModel;
 using System.Linq;
 using System.Text;
 
-namespace J4JSoftware.Configuration.CommandLine
+namespace J4JSoftware.Configuration.CommandLine;
+
+public abstract class HelpDisplay : IHelpDisplay
 {
-    public abstract class HelpDisplay : IHelpDisplay
+    protected HelpDisplay( ILexicalElements tokens,
+        OptionCollection collection )
     {
-        protected HelpDisplay( ILexicalElements tokens,
-                               OptionCollection collection )
+        Tokens = tokens;
+        Collection = collection;
+    }
+
+    protected ILexicalElements Tokens { get; }
+    protected OptionCollection Collection { get; }
+
+    public abstract void Display();
+
+    protected List<string> GetKeys( IOption option )
+    {
+        var retVal = new List<string>();
+
+        foreach( var prefix in Tokens.Where( x => x.Type == LexicalType.KeyPrefix  ) )
         {
-            Tokens = tokens;
-            Collection = collection;
-        }
-
-        protected ILexicalElements Tokens { get; }
-        protected OptionCollection Collection { get; }
-
-        public abstract void Display();
-
-        protected List<string> GetKeys( IOption option )
-        {
-            var retVal = new List<string>();
-
-            foreach( var prefix in Tokens.Where( x => x.Type == LexicalType.KeyPrefix  ) )
+            foreach( var key in option.Keys )
             {
-                foreach( var key in option.Keys )
-                {
-                    retVal.Add( $"{prefix.Text}{key}" );
-                }
+                retVal.Add( $"{prefix.Text}{key}" );
             }
-
-            return retVal;
         }
 
-        protected string GetStyleText( IOption option )
+        return retVal;
+    }
+
+    protected string GetStyleText( IOption option )
+    {
+        var reqdText = option.Required ? "must" : "can";
+
+        switch( option.Style )
         {
-            var reqdText = option.Required ? "must" : "can";
+            case OptionStyle.Collection:
+                var sb = new StringBuilder();
 
-            switch( option.Style )
-            {
-                case OptionStyle.Collection:
-                    var sb = new StringBuilder();
+                sb.Append( option.MaxValues == int.MaxValue ? $"one to {option.MaxValues:n0}" : "one or more" );
+                sb.Append( $" values {reqdText} be specified" );
 
-                    sb.Append( option.MaxValues == int.MaxValue ? $"one to {option.MaxValues:n0}" : "one or more" );
-                    sb.Append( $" values {reqdText} be specified" );
+                return sb.ToString();
 
-                    return sb.ToString();
+            case OptionStyle.ConcatenatedSingleValue:
+                return $"one or more related values (e.g., flagged enums) {reqdText} be specified";
 
-                case OptionStyle.ConcatenatedSingleValue:
-                    return $"one or more related values (e.g., flagged enums) {reqdText} be specified";
+            case OptionStyle.SingleValued:
+                return $"a single value {reqdText} be specified";
 
-                case OptionStyle.SingleValued:
-                    return $"a single value {reqdText} be specified";
-
-                case OptionStyle.Switch:
-                    return "any value specified will be ignored";
-            }
-
-            throw new InvalidEnumArgumentException( $"Unsupported {typeof( OptionStyle )} '{option.Style}'" );
+            case OptionStyle.Switch:
+                return "any value specified will be ignored";
         }
+
+        throw new InvalidEnumArgumentException( $"Unsupported {typeof( OptionStyle )} '{option.Style}'" );
     }
 }

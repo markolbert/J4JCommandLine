@@ -27,15 +27,15 @@
 	</ItemGroup>
 
 	<ItemGroup>
-	  <ProjectReference Include="..\J4JCommandLine\J4JCommandLine.csproj" />
-	</ItemGroup>
-
-	<ItemGroup>
 		<None Include="..\..\Media\JumpForJoy\Diego nuspec.png">
 			<Pack>True</Pack>
 			<PackagePath></PackagePath>
 		</None>
 		<None Include="../docs/nuget/nuget-colorful.md" Pack="true" PackagePath="/" />
+	</ItemGroup>
+
+	<ItemGroup>
+	  <ProjectReference Include="..\J4JCommandLine\J4JCommandLine.csproj" />
 	</ItemGroup>
 
 </Project>

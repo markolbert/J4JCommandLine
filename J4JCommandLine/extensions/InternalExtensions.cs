@@ -20,37 +20,36 @@
 using System.Collections.Generic;
 using System.Linq;
 
-namespace J4JSoftware.Configuration.CommandLine
+namespace J4JSoftware.Configuration.CommandLine;
+
+internal static class InternalExtensions
 {
-    internal static class InternalExtensions
+    public static void RemoveRange<T>( this List<T> list, IEnumerable<int> toRemove )
     {
-        public static void RemoveRange<T>( this List<T> list, IEnumerable<int> toRemove )
+        foreach( var idx in toRemove.Where( x => x < list.Count && x >= 0 )
+                                    .OrderByDescending( x => x ) )
+            list.RemoveAt( idx );
+    }
+
+    public static void RemoveFrom<T>( this List<T> list, int startIdx )
+    {
+        if( startIdx < 0 || startIdx >= list.Count )
+            return;
+
+        list.RemoveRange( Enumerable.Range( startIdx, list.Count - 1 ) );
+    }
+
+    public static IEnumerable<TokenPair> EnumerateTokenPairs( this List<Token> tokens )
+    {
+        var prevToken = new Token( LexicalType.StartOfInput, string.Empty );
+
+        foreach( var token in tokens )
         {
-            foreach( var idx in toRemove.Where( x => x < list.Count && x >= 0 )
-                                        .OrderByDescending( x => x ) )
-                list.RemoveAt( idx );
+            yield return new TokenPair( token, prevToken );
+
+            prevToken = token;
         }
 
-        public static void RemoveFrom<T>( this List<T> list, int startIdx )
-        {
-            if( startIdx < 0 || startIdx >= list.Count )
-                return;
-
-            list.RemoveRange( Enumerable.Range( startIdx, list.Count - 1 ) );
-        }
-
-        public static IEnumerable<TokenPair> EnumerateTokenPairs( this List<Token> tokens )
-        {
-            var prevToken = new Token( LexicalType.StartOfInput, string.Empty );
-
-            foreach( var token in tokens )
-            {
-                yield return new TokenPair( token, prevToken );
-
-                prevToken = token;
-            }
-
-            yield return new TokenPair( new Token( LexicalType.EndOfInput, string.Empty ), prevToken );
-        }
+        yield return new TokenPair( new Token( LexicalType.EndOfInput, string.Empty ), prevToken );
     }
 }

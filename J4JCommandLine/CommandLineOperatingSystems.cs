@@ -1,9 +1,8 @@
-﻿namespace J4JSoftware.Configuration.CommandLine
+﻿namespace J4JSoftware.Configuration.CommandLine;
+
+public enum CommandLineOperatingSystems
 {
-    public enum CommandLineOperatingSystems
-    {
-        Linux,
-        Windows,
-        Customized
-    }
+    Linux,
+    Windows,
+    Customized
 }

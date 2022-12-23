@@ -17,12 +17,11 @@
 
 #endregion
 
-namespace J4JSoftware.Configuration.CommandLine
-{
-    public interface IParsingTable
-    {
-        bool IsValid { get; }
+namespace J4JSoftware.Configuration.CommandLine;
 
-        ParsingAction? this[ LexicalPair typePair ] { get; set; }
-    }
+public interface IParsingTable
+{
+    bool IsValid { get; }
+
+    ParsingAction? this[ LexicalPair typePair ] { get; set; }
 }

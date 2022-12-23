@@ -23,71 +23,70 @@ using System.Collections.Generic;
 using System.Linq;
 using J4JSoftware.Logging;
 
-namespace J4JSoftware.Configuration.CommandLine
+namespace J4JSoftware.Configuration.CommandLine;
+
+public class LexicalElements : ILexicalElements
 {
-    public class LexicalElements : ILexicalElements
+    private readonly Dictionary<LexicalType, List<Token>> _available = new();
+
+    public LexicalElements( StringComparison textComparison,
+        IJ4JLogger? logger = null,
+        bool inclCommon = true )
     {
-        private readonly Dictionary<LexicalType, List<Token>> _available = new();
+        TextComparison = textComparison;
+        Logger = logger;
 
-        public LexicalElements( StringComparison textComparison,
-                                IJ4JLogger? logger = null,
-                                bool inclCommon = true )
+        if( !inclCommon )
+            return;
+
+        Add( LexicalType.Separator, " " );
+        Add( LexicalType.Separator, "\t" );
+        Add( LexicalType.ValuePrefix, "=" );
+    }
+
+    protected IJ4JLogger? Logger { get; }
+
+    public StringComparison TextComparison { get; }
+
+    public int Count => _available.Count;
+
+    public bool Add( LexicalType type, string text )
+    {
+        if( type == LexicalType.Text || type == LexicalType.StartOfInput )
         {
-            TextComparison = textComparison;
-            Logger = logger;
-
-            if( !inclCommon )
-                return;
-
-            Add( LexicalType.Separator, " " );
-            Add( LexicalType.Separator, "\t" );
-            Add( LexicalType.ValuePrefix, "=" );
+            Logger?.Error( "Cannot include {0} tokens", type );
+            return false;
         }
 
-        protected IJ4JLogger? Logger { get; }
-
-        public StringComparison TextComparison { get; }
-
-        public int Count => _available.Count;
-
-        public bool Add( LexicalType type, string text )
+        if( _available.SelectMany( kvp => kvp.Value )
+                      .Any( t => t.Text.Equals( text, TextComparison ) ) )
         {
-            if( type == LexicalType.Text || type == LexicalType.StartOfInput )
-            {
-                Logger?.Error( "Cannot include {0} tokens", type );
-                return false;
-            }
-
-            if( _available.SelectMany( kvp => kvp.Value )
-                          .Any( t => t.Text.Equals( text, TextComparison ) ) )
-            {
-                Logger?.Error( "Duplicate token text '{0}' ({1})", text, type );
-                return false;
-            }
-
-            var newToken = new Token( type, text );
-
-            if( _available.ContainsKey( type ) )
-                _available[ type ].Add( newToken );
-            else _available.Add( type, new List<Token> { newToken } );
-
-            return true;
+            Logger?.Error( "Duplicate token text '{0}' ({1})", text, type );
+            return false;
         }
 
-        public IEnumerator<Token> GetEnumerator()
+        var newToken = new Token( type, text );
+
+        if( _available.ContainsKey( type ) )
+            _available[ type ].Add( newToken );
+        else _available.Add( type, new List<Token> { newToken } );
+
+        return true;
+    }
+
+    public IEnumerator<Token> GetEnumerator()
+    {
+        foreach ( var kvp in _available )
         {
-            foreach ( var kvp in _available )
+            foreach ( var token in kvp.Value )
             {
-                foreach ( var token in kvp.Value )
-                {
-                    yield return token;
-                }
+                yield return token;
             }
         }
+    }
 
-        IEnumerator IEnumerable.GetEnumerator()
-        {
-            return GetEnumerator();
-        }
+    IEnumerator IEnumerable.GetEnumerator()
+    {
+        return GetEnumerator();
     }
 }

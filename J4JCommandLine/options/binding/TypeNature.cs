@@ -17,13 +17,12 @@
 
 #endregion
 
-namespace J4JSoftware.Configuration.CommandLine
+namespace J4JSoftware.Configuration.CommandLine;
+
+public enum TypeNature
 {
-    public enum TypeNature
-    {
-        Simple,
-        Array,
-        List,
-        Unsupported
-    }
+    Simple,
+    Array,
+    List,
+    Unsupported
 }

@@ -17,12 +17,11 @@
 
 #endregion
 
-namespace J4JSoftware.Configuration.CommandLine
+namespace J4JSoftware.Configuration.CommandLine;
+
+public enum BuiltInConverters
 {
-    public enum BuiltInConverters
-    {
-        DoNotAdd,
-        AddAtInitialization,
-        AddDynamically
-    }
+    DoNotAdd,
+    AddAtInitialization,
+    AddDynamically
 }

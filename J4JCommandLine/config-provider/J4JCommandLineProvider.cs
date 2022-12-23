@@ -21,71 +21,70 @@ using System;
 using System.ComponentModel;
 using Microsoft.Extensions.Configuration;
 
-namespace J4JSoftware.Configuration.CommandLine
+namespace J4JSoftware.Configuration.CommandLine;
+
+public class J4JCommandLineProvider : ConfigurationProvider
 {
-    public class J4JCommandLineProvider : ConfigurationProvider
+    public J4JCommandLineProvider( J4JCommandLineSource source )
     {
-        public J4JCommandLineProvider( J4JCommandLineSource source )
+        Source = source;
+
+        // watch for changes, to the command line text 
+        // and the OptionsCollection
+        Source.SourceChanged += OnSourceChanged;
+    }
+
+    private void OnSourceChanged( object? sender, EventArgs e )
+    {
+        Load();
+    }
+
+    public J4JCommandLineSource Source { get; }
+
+    public override void Load()
+    {
+        if( Source.Parser == null
+        || !Source.Parser.Collection.IsConfigured
+        || Source.CommandLineSource == null )
+            return;
+
+        Source.Parser.Collection.ClearValues();
+
+        if( !Source.Parser.Parse( Source.CommandLineSource.CommandLine ) )
+            return;
+
+        foreach( var option in Source.Parser.Collection.OptionsInternal )
         {
-            Source = source;
-
-            // watch for changes, to the command line text 
-            // and the OptionsCollection
-            Source.SourceChanged += OnSourceChanged;
-        }
-
-        private void OnSourceChanged( object? sender, EventArgs e )
-        {
-            Load();
-        }
-
-        public J4JCommandLineSource Source { get; }
-
-        public override void Load()
-        {
-            if( Source.Parser == null
-                || !Source.Parser.Collection.IsConfigured
-                || Source.CommandLineSource == null )
-                return;
-
-            Source.Parser.Collection.ClearValues();
-
-            if( !Source.Parser.Parse( Source.CommandLineSource.CommandLine ) )
-                return;
-
-            foreach( var option in Source.Parser.Collection.OptionsInternal )
+            switch( option.Style )
             {
-                switch( option.Style )
-                {
-                    case OptionStyle.Switch:
-                        Set( option.ContextPath,
-                            string.IsNullOrEmpty( option.CommandLineKeyProvided )
-                                ? "false"
-                                : "true" );
-                        break;
+                case OptionStyle.Switch:
+                    Set( option.ContextPath,
+                         string.IsNullOrEmpty( option.CommandLineKeyProvided )
+                             ? "false"
+                             : "true" );
+                    break;
 
-                    case OptionStyle.SingleValued:
-                        if( option.NumValuesAllocated != 0 )
-                            Set( option.ContextPath, option.Values[ 0 ] );
-                        break;
+                case OptionStyle.SingleValued:
+                    if( option.NumValuesAllocated != 0 )
+                        Set( option.ContextPath, option.Values[ 0 ] );
+                    break;
 
-                    case OptionStyle.ConcatenatedSingleValue:
-                        // concatenated single value properties (e.g., flag enums) are
-                        // single valued from a target point of view (i.e., they're not
-                        // collections), but they contain multiple string values from
-                        // allocating the command line
-                        if( option.NumValuesAllocated > 0 )
-                            Set( option.ContextPath, string.Join( ", ", option.Values ) );
-                        break;
+                case OptionStyle.ConcatenatedSingleValue:
+                    // concatenated single value properties (e.g., flag enums) are
+                    // single valued from a target point of view (i.e., they're not
+                    // collections), but they contain multiple string values from
+                    // allocating the command line
+                    if( option.NumValuesAllocated > 0 )
+                        Set( option.ContextPath, string.Join( ", ", option.Values ) );
+                    break;
 
-                    case OptionStyle.Collection:
-                        for( var idx = 0; idx < option.NumValuesAllocated; idx++ )
-                            Set( $"{option.ContextPath}:{idx}", option.Values[ idx ] );
-                        break;
+                case OptionStyle.Collection:
+                    for( var idx = 0; idx < option.NumValuesAllocated; idx++ )
+                        Set( $"{option.ContextPath}:{idx}", option.Values[ idx ] );
+                    break;
 
-                    default:
-                        throw new InvalidEnumArgumentException( $"Unsupported OptionStyle '{option.Style}'" );
-                }
+                default:
+                    throw new InvalidEnumArgumentException( $"Unsupported OptionStyle '{option.Style}'" );
             }
         }
     }

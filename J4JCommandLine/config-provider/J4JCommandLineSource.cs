@@ -21,62 +21,61 @@ using System;
 using J4JSoftware.Logging;
 using Microsoft.Extensions.Configuration;
 
-namespace J4JSoftware.Configuration.CommandLine
+namespace J4JSoftware.Configuration.CommandLine;
+
+public class J4JCommandLineSource : IConfigurationSource
 {
-    public class J4JCommandLineSource : IConfigurationSource
+    public event EventHandler? SourceChanged;
+
+    private readonly IJ4JLogger? _logger;
+
+    public J4JCommandLineSource( IParser parser,
+        IJ4JLogger? logger,
+        params ICleanupTokens[] cleanupTokens )
     {
-        public event EventHandler? SourceChanged;
+        Parser = parser;
 
-        private readonly IJ4JLogger? _logger;
+        _logger = logger;
+        _logger?.SetLoggedType( GetType() );
 
-        public J4JCommandLineSource( IParser parser,
-                                     IJ4JLogger? logger,
-                                     params ICleanupTokens[] cleanupTokens )
-        {
-            Parser = parser;
+        CommandLineSource = Initialize();
+    }
 
-            _logger = logger;
-            _logger?.SetLoggedType( GetType() );
+    public J4JCommandLineSource( IParser parser,
+        IJ4JLogger? logger )
+    {
+        Parser = parser;
 
-            CommandLineSource = Initialize();
-        }
+        _logger = logger;
+        _logger?.SetLoggedType( GetType() );
 
-        public J4JCommandLineSource( IParser parser,
-                                     IJ4JLogger? logger )
-        {
-            Parser = parser;
+        CommandLineSource = Initialize();
+    }
 
-            _logger = logger;
-            _logger?.SetLoggedType( GetType() );
+    private CommandLineSource? Initialize()
+    {
+        if( Parser == null )
+            return null;
 
-            CommandLineSource = Initialize();
-        }
+        Parser.Collection.Configured += Options_Configured;
 
-        private CommandLineSource? Initialize()
-        {
-            if( Parser == null )
-                return null;
+        var retVal = new CommandLineSource( Parser.Tokenizer.TextComparison );
+        retVal.Changed += OnCommandLineSourceChanged;
 
-            Parser.Collection.Configured += Options_Configured;
+        return retVal;
+    }
 
-            var retVal = new CommandLineSource( Parser.Tokenizer.TextComparison );
-            retVal.Changed += OnCommandLineSourceChanged;
+    private void Options_Configured( object? sender, EventArgs e ) =>
+        SourceChanged?.Invoke( this, EventArgs.Empty );
 
-            return retVal;
-        }
+    private void OnCommandLineSourceChanged( object? sender, ConfigurationChangedEventArgs e ) =>
+        SourceChanged?.Invoke( this, EventArgs.Empty );
 
-        private void Options_Configured( object? sender, EventArgs e ) =>
-            SourceChanged?.Invoke( this, EventArgs.Empty );
+    public CommandLineSource? CommandLineSource { get; }
+    public IParser? Parser { get; }
 
-        private void OnCommandLineSourceChanged( object? sender, ConfigurationChangedEventArgs e ) =>
-            SourceChanged?.Invoke( this, EventArgs.Empty );
-
-        public CommandLineSource? CommandLineSource { get; }
-        public IParser? Parser { get; }
-
-        public IConfigurationProvider Build( IConfigurationBuilder builder )
-        {
-            return new J4JCommandLineProvider( this );
-        }
+    public IConfigurationProvider Build( IConfigurationBuilder builder )
+    {
+        return new J4JCommandLineProvider( this );
     }
 }

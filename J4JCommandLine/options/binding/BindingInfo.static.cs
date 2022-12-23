@@ -21,50 +21,49 @@ using System;
 using System.Linq.Expressions;
 using System.Reflection;
 
-namespace J4JSoftware.Configuration.CommandLine
+namespace J4JSoftware.Configuration.CommandLine;
+
+internal partial class BindingInfo
 {
-    internal partial class BindingInfo
+    public static BindingInfo Create<TContainer, TTarget>( Expression<Func<TContainer, TTarget>> selector )
     {
-        public static BindingInfo Create<TContainer, TTarget>( Expression<Func<TContainer, TTarget>> selector )
+        var curExpr = selector.Body;
+        BindingInfo? retVal = null;
+
+        while( curExpr != null )
         {
-            var curExpr = selector.Body;
-            BindingInfo? retVal = null;
-
-            while( curExpr != null )
+            switch( curExpr )
             {
-                switch( curExpr )
-                {
-                    case MemberExpression memExpr:
-                        retVal = memExpr.Member switch
-                                 {
-                                     PropertyInfo propInfo => new BindingInfo( propInfo, retVal ),
-                                     _                     => new BindingInfo()
-                                 };
+                case MemberExpression memExpr:
+                    retVal = memExpr.Member switch
+                    {
+                        PropertyInfo propInfo => new BindingInfo( propInfo, retVal ),
+                        _                     => new BindingInfo()
+                    };
 
-                        // walk up expression tree
-                        curExpr = memExpr.Expression;
+                    // walk up expression tree
+                    curExpr = memExpr.Expression;
 
-                        break;
+                    break;
 
-                    case UnaryExpression unaryExpr:
-                        if( unaryExpr.Operand is MemberExpression unaryMemExpr )
-                            retVal = new BindingInfo( (PropertyInfo) unaryMemExpr.Member, retVal );
+                case UnaryExpression unaryExpr:
+                    if( unaryExpr.Operand is MemberExpression unaryMemExpr )
+                        retVal = new BindingInfo( (PropertyInfo) unaryMemExpr.Member, retVal );
 
-                        // we're done; UnaryExpressions aren't part of an expression tree
-                        curExpr = null;
+                    // we're done; UnaryExpressions aren't part of an expression tree
+                    curExpr = null;
 
-                        break;
+                    break;
 
-                    case ParameterExpression:
-                        // this is the root/anchor of the expression tree.
-                        // we're done
-                        curExpr = null;
+                case ParameterExpression:
+                    // this is the root/anchor of the expression tree.
+                    // we're done
+                    curExpr = null;
 
-                        break;
-                }
+                    break;
             }
-
-            return retVal!;
         }
+
+        return retVal!;
     }
 }

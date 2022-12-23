@@ -20,14 +20,13 @@
 using System;
 using System.Collections.Generic;
 
-namespace J4JSoftware.Configuration.CommandLine
-{
-    public interface ITextConverters : IReadOnlyDictionary<Type, ITextToValue>
-    {
-        bool AddConverter( ITextToValue converter, bool replaceExisting = false );
-        bool AddConverters( IEnumerable<ITextToValue> converters, bool replaceExisting = false );
+namespace J4JSoftware.Configuration.CommandLine;
 
-        bool CanConvert( Type toCheck );
-        bool Convert( Type targetType, IEnumerable<string> textValues, out object? result );
-    }
+public interface ITextConverters : IReadOnlyDictionary<Type, ITextToValue>
+{
+    bool AddConverter( ITextToValue converter, bool replaceExisting = false );
+    bool AddConverters( IEnumerable<ITextToValue> converters, bool replaceExisting = false );
+
+    bool CanConvert( Type toCheck );
+    bool Convert( Type targetType, IEnumerable<string> textValues, out object? result );
 }

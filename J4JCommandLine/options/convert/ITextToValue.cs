@@ -20,14 +20,13 @@
 using System;
 using System.Collections.Generic;
 
-namespace J4JSoftware.Configuration.CommandLine
-{
-    public interface ITextToValue
-    {
-        Type TargetType { get; }
+namespace J4JSoftware.Configuration.CommandLine;
 
-        bool CanConvert( Type toCheck );
-        bool Convert( Type targetType, IEnumerable<string> values, out object? result );
-        bool Convert<T>( IEnumerable<string> values, out T? result );
-    }
+public interface ITextToValue
+{
+    Type TargetType { get; }
+
+    bool CanConvert( Type toCheck );
+    bool Convert( Type targetType, IEnumerable<string> values, out object? result );
+    bool Convert<T>( IEnumerable<string> values, out T? result );
 }

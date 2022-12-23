@@ -19,36 +19,35 @@
 
 using System;
 
-namespace J4JSoftware.Configuration.CommandLine
+namespace J4JSoftware.Configuration.CommandLine;
+
+public class DefaultHelpDisplay : HelpDisplay
 {
-    public class DefaultHelpDisplay : HelpDisplay
+    public DefaultHelpDisplay( ILexicalElements tokens,
+        OptionCollection collection )
+        : base( tokens, collection )
     {
-        public DefaultHelpDisplay( ILexicalElements tokens,
-                                   OptionCollection collection )
-            : base( tokens, collection )
+    }
+
+    public override void Display()
+    {
+        Console.WriteLine( "Command line help\n" );
+
+        foreach( var option in Collection.OptionsInternal )
         {
-        }
+            Console.WriteLine( $"Keys: {string.Join( ", ", GetKeys( option ) )}" );
+            Console.WriteLine( $"Description:  {option.Description}" );
+            Console.WriteLine( $"Style:  {GetStyleText( option )}" );
 
-        public override void Display()
-        {
-            Console.WriteLine( "Command line help\n" );
+            var defaultValue = option.GetDefaultValue();
+            if( !string.IsNullOrEmpty( defaultValue ) )
+                Console.WriteLine( $"Default Value:  {defaultValue}" );
 
-            foreach( var option in Collection.OptionsInternal )
-            {
-                Console.WriteLine( $"Keys: {string.Join( ", ", GetKeys( option ) )}" );
-                Console.WriteLine( $"Description:  {option.Description}" );
-                Console.WriteLine( $"Style:  {GetStyleText( option )}" );
+            if( option.Required )
+                Console.WriteLine( "Required" );
 
-                var defaultValue = option.GetDefaultValue();
-                if( !string.IsNullOrEmpty( defaultValue ) )
-                    Console.WriteLine( $"Default Value:  {defaultValue}" );
-
-                if( option.Required )
-                    Console.WriteLine( "Required" );
-
-                Console.WriteLine();
-                Console.WriteLine();
-            }
+            Console.WriteLine();
+            Console.WriteLine();
         }
     }
 }

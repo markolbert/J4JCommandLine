@@ -17,13 +17,12 @@
 
 #endregion
 
-namespace J4JSoftware.Configuration.CommandLine
-{
-    public interface IParser
-    {
-        OptionCollection Collection { get; }
-        ITokenizer Tokenizer { get; }
+namespace J4JSoftware.Configuration.CommandLine;
 
-        bool Parse( string cmdLine );
-    }
+public interface IParser
+{
+    OptionCollection Collection { get; }
+    ITokenizer Tokenizer { get; }
+
+    bool Parse( string cmdLine );
 }

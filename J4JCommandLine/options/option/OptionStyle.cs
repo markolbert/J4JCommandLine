@@ -17,18 +17,17 @@
 
 #endregion
 
-namespace J4JSoftware.Configuration.CommandLine
+namespace J4JSoftware.Configuration.CommandLine;
+
+public enum OptionStyle
 {
-    public enum OptionStyle
-    {
-        Undefined,
-        Switch,
-        SingleValued,
+    Undefined,
+    Switch,
+    SingleValued,
 
-        // for non-collection properties which expect multiple values
-        // to be parsed (e.g., flag enums)
-        ConcatenatedSingleValue,
+    // for non-collection properties which expect multiple values
+    // to be parsed (e.g., flag enums)
+    ConcatenatedSingleValue,
 
-        Collection
-    }
+    Collection
 }

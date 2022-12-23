@@ -20,11 +20,10 @@
 using System;
 using System.Collections.Generic;
 
-namespace J4JSoftware.Configuration.CommandLine
+namespace J4JSoftware.Configuration.CommandLine;
+
+public interface ITokenizer
 {
-    public interface ITokenizer
-    {
-        StringComparison TextComparison { get; }
-        List<Token> Tokenize( string cmdLine );
-    }
+    StringComparison TextComparison { get; }
+    List<Token> Tokenize( string cmdLine );
 }

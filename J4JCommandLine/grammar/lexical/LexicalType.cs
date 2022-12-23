@@ -17,25 +17,24 @@
 
 #endregion
 
-namespace J4JSoftware.Configuration.CommandLine
+namespace J4JSoftware.Configuration.CommandLine;
+
+public enum LexicalType
 {
-    public enum LexicalType
-    {
-        Separator,
-        ValuePrefix,
-        KeyPrefix,
-        Quoter,
+    Separator,
+    ValuePrefix,
+    KeyPrefix,
+    Quoter,
 
-        // Text cannot be created by user code. It only gets
-        // created by the tokenizer.
-        Text,
+    // Text cannot be created by user code. It only gets
+    // created by the tokenizer.
+    Text,
 
-        // EndOfInput cannot be created by user code. It only gets
-        // created by the tokenizer.
-        EndOfInput,
+    // EndOfInput cannot be created by user code. It only gets
+    // created by the tokenizer.
+    EndOfInput,
 
-        // StartOfInput cannot be created by user code. It only gets
-        // created by the tokenizer.
-        StartOfInput
-    }
+    // StartOfInput cannot be created by user code. It only gets
+    // created by the tokenizer.
+    StartOfInput
 }

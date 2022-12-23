@@ -21,25 +21,24 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace J4JSoftware.Configuration.CommandLine
+namespace J4JSoftware.Configuration.CommandLine;
+
+public class CommandLineArgument
 {
-    public class CommandLineArgument
+    private readonly OptionCollection _options;
+    private readonly StringComparison _textComparison;
+
+    internal CommandLineArgument( OptionCollection options,
+        StringComparison textComparison )
     {
-        private readonly OptionCollection _options;
-        private readonly StringComparison _textComparison;
-
-        internal CommandLineArgument( OptionCollection options,
-                                      StringComparison textComparison )
-        {
-            _options = options;
-            _textComparison = textComparison;
-        }
-
-        public string? Key { get; set; }
-        public List<string> Values { get; } = new();
-
-        internal IOptionInternal? Option =>
-            _options.OptionsInternal.FirstOrDefault( x =>
-                                                         x.Keys.Any( k => k.Equals( Key, _textComparison ) ) );
+        _options = options;
+        _textComparison = textComparison;
     }
+
+    public string? Key { get; set; }
+    public List<string> Values { get; } = new();
+
+    internal IOptionInternal? Option =>
+        _options.OptionsInternal.FirstOrDefault( x =>
+                                                     x.Keys.Any( k => k.Equals( Key, _textComparison ) ) );
 }

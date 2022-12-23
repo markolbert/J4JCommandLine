@@ -17,11 +17,10 @@
 
 #endregion
 
-namespace J4JSoftware.Configuration.CommandLine
+namespace J4JSoftware.Configuration.CommandLine;
+
+public class ConfigurationChangedEventArgs
 {
-    public class ConfigurationChangedEventArgs
-    {
-        public string? NewCommandLine { get; set; }
-        public bool OptionsConfigurationChanged { get; set; }
-    }
+    public string? NewCommandLine { get; set; }
+    public bool OptionsConfigurationChanged { get; set; }
 }

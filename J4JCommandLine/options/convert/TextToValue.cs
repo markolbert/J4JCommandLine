@@ -22,177 +22,176 @@ using System.Collections.Generic;
 using System.Linq;
 using J4JSoftware.Logging;
 
-namespace J4JSoftware.Configuration.CommandLine
+namespace J4JSoftware.Configuration.CommandLine;
+
+public sealed class TextToValueComparer : IEqualityComparer<ITextToValue>
 {
-    public sealed class TextToValueComparer : IEqualityComparer<ITextToValue>
+    public bool Equals( ITextToValue? x, ITextToValue? y )
     {
-        public bool Equals( ITextToValue? x, ITextToValue? y )
-        {
-            if ( ReferenceEquals( x, y ) ) return true;
-            if ( ReferenceEquals( x, null ) ) return false;
-            if ( ReferenceEquals( y, null ) ) return false;
-            if ( x.GetType() != y.GetType() ) return false;
+        if ( ReferenceEquals( x, y ) ) return true;
+        if ( ReferenceEquals( x, null ) ) return false;
+        if ( ReferenceEquals( y, null ) ) return false;
+        if ( x.GetType() != y.GetType() ) return false;
 
-            return x.TargetType.Equals( y.TargetType );
-        }
-
-        public int GetHashCode( ITextToValue obj )
-        {
-            return obj.TargetType.GetHashCode();
-        }
+        return x.TargetType.Equals( y.TargetType );
     }
 
-    public class UndefinedTextToValue : ITextToValue
+    public int GetHashCode( ITextToValue obj )
     {
-        public Type TargetType => typeof( object );
-        public bool CanConvert( Type toCheck ) => false;
+        return obj.TargetType.GetHashCode();
+    }
+}
 
-        public bool Convert( Type targetType, IEnumerable<string> values, out object? result )
-        {
-            result = null;
-            return false;
-        }
+public class UndefinedTextToValue : ITextToValue
+{
+    public Type TargetType => typeof( object );
+    public bool CanConvert( Type toCheck ) => false;
 
-        public bool Convert<T>( IEnumerable<string> values, out T? result )
-        {
-            result = default;
-            return false;
-        }
+    public bool Convert( Type targetType, IEnumerable<string> values, out object? result )
+    {
+        result = null;
+        return false;
     }
 
-    public abstract class TextToValue<TBaseType> : ITextToValue
+    public bool Convert<T>( IEnumerable<string> values, out T? result )
     {
-        protected TextToValue( IJ4JLogger? logger )
+        result = default;
+        return false;
+    }
+}
+
+public abstract class TextToValue<TBaseType> : ITextToValue
+{
+    protected TextToValue( IJ4JLogger? logger )
+    {
+        Logger = logger;
+        Logger?.SetLoggedType( GetType() );
+    }
+
+    protected abstract bool ConvertTextToValue( string text, out TBaseType? result );
+
+    protected IJ4JLogger? Logger { get; }
+
+    public Type TargetType => typeof( TBaseType );
+
+    public bool CanConvert( Type toCheck ) =>
+        toCheck.GetTypeNature() != TypeNature.Unsupported
+     && toCheck.IsAssignableFrom( TargetType );
+
+    // targetType must be one of:
+    // - TBaseType
+    // - TBaseType[]
+    // - List<TBaseType>
+    // anything else will cause a conversion failure
+    public bool Convert( Type targetType, IEnumerable<string> values, out object? result )
+    {
+        result = default;
+        var retVal = false;
+
+        var valueList = values.ToList();
+
+        switch ( targetType.GetTypeNature() )
         {
-            Logger = logger;
-            Logger?.SetLoggedType( GetType() );
+            case TypeNature.Simple:
+                if ( valueList.Count > 1 )
+                {
+                    Logger?.Error( "Cannot convert multiple text values to a single value of '{0}'",
+                                   typeof( TBaseType ) );
+
+                    return false;
+                }
+
+                retVal = ConvertToSingleValue( valueList.Count == 0 ? null : valueList[ 0 ], out var singleResult );
+                result = (object?) singleResult;
+
+                break;
+
+            case TypeNature.Array:
+                retVal = ConvertToArray( valueList, out var arrayResult );
+                result = (object?) arrayResult;
+
+                break;
+
+            case TypeNature.List:
+                retVal = ConvertToArray( valueList, out var listResult );
+                result = (object?) listResult;
+
+                break;
         }
 
-        protected abstract bool ConvertTextToValue( string text, out TBaseType? result );
+        return retVal;
+    }
 
-        protected IJ4JLogger? Logger { get; }
+    // TConvType must be one of:
+    // - TBaseType
+    // - TBaseType[]
+    // - List<TBaseType>
+    // anything else will cause a conversion failure
+    public bool Convert<TConvType>( IEnumerable<string> values, out TConvType? result )
+    {
+        result = default;
 
-        public Type TargetType => typeof( TBaseType );
+        if( !Convert( typeof( TConvType ), values, out var temp ) )
+            return false;
 
-        public bool CanConvert( Type toCheck ) =>
-            toCheck.GetTypeNature() != TypeNature.Unsupported
-            && toCheck.IsAssignableFrom( TargetType );
+        result = (TConvType?) temp;
 
-        // targetType must be one of:
-        // - TBaseType
-        // - TBaseType[]
-        // - List<TBaseType>
-        // anything else will cause a conversion failure
-        public bool Convert( Type targetType, IEnumerable<string> values, out object? result )
+        return true;
+    }
+
+    private bool ConvertToSingleValue( string? text, out TBaseType? result )
+    {
+        result = default;
+
+        // null or empty strings return the default value for TBaseType,
+        // whatever that may be
+        if( string.IsNullOrEmpty( text ) )
+            return true;
+
+        return ConvertTextToValue( text, out result );
+    }
+
+    private bool ConvertToArray( List<string> values, out TBaseType?[]? result )
+    {
+        result = null;
+
+        var retVal = new List<TBaseType?>();
+
+        foreach( var value in values )
         {
-            result = default;
-            var retVal = false;
-
-            var valueList = values.ToList();
-
-            switch ( targetType.GetTypeNature() )
+            if( ConvertToSingleValue( value, out var temp ) )
+                retVal.Add( temp );
+            else
             {
-                case TypeNature.Simple:
-                    if ( valueList.Count > 1 )
-                    {
-                        Logger?.Error( "Cannot convert multiple text values to a single value of '{0}'",
-                                      typeof( TBaseType ) );
-
-                        return false;
-                    }
-
-                    retVal = ConvertToSingleValue( valueList.Count == 0 ? null : valueList[ 0 ], out var singleResult );
-                    result = (object?) singleResult;
-
-                    break;
-
-                case TypeNature.Array:
-                    retVal = ConvertToArray( valueList, out var arrayResult );
-                    result = (object?) arrayResult;
-
-                    break;
-
-                case TypeNature.List:
-                    retVal = ConvertToArray( valueList, out var listResult );
-                    result = (object?) listResult;
-
-                    break;
-            }
-
-            return retVal;
-        }
-
-        // TConvType must be one of:
-        // - TBaseType
-        // - TBaseType[]
-        // - List<TBaseType>
-        // anything else will cause a conversion failure
-        public bool Convert<TConvType>( IEnumerable<string> values, out TConvType? result )
-        {
-            result = default;
-
-            if( !Convert( typeof( TConvType ), values, out var temp ) )
+                Logger?.Error( "Could not convert '{0}' to an instance of {1}", value, typeof( TBaseType ) );
                 return false;
-
-            result = (TConvType?) temp;
-
-            return true;
-        }
-
-        private bool ConvertToSingleValue( string? text, out TBaseType? result )
-        {
-            result = default;
-
-            // null or empty strings return the default value for TBaseType,
-            // whatever that may be
-            if( string.IsNullOrEmpty( text ) )
-                return true;
-
-            return ConvertTextToValue( text, out result );
-        }
-
-        private bool ConvertToArray( List<string> values, out TBaseType?[]? result )
-        {
-            result = null;
-
-            var retVal = new List<TBaseType?>();
-
-            foreach( var value in values )
-            {
-                if( ConvertToSingleValue( value, out var temp ) )
-                    retVal.Add( temp );
-                else
-                {
-                    Logger?.Error( "Could not convert '{0}' to an instance of {1}", value, typeof( TBaseType ) );
-                    return false;
-                }
             }
-
-            result = retVal.ToArray();
-
-            return true;
         }
 
-        private bool ConvertToList( List<string> values, out List<TBaseType?>? result )
+        result = retVal.ToArray();
+
+        return true;
+    }
+
+    private bool ConvertToList( List<string> values, out List<TBaseType?>? result )
+    {
+        result = null;
+
+        var retVal = new List<TBaseType?>();
+
+        foreach( var value in values )
         {
-            result = null;
-
-            var retVal = new List<TBaseType?>();
-
-            foreach( var value in values )
+            if ( ConvertToSingleValue( value, out var temp ) )
+                retVal.Add( temp );
+            else
             {
-                if ( ConvertToSingleValue( value, out var temp ) )
-                    retVal.Add( temp );
-                else
-                {
-                    Logger?.Error( "Could not convert '{0}' to an instance of {1}", value, typeof( TBaseType ) );
-                    return false;
-                }
+                Logger?.Error( "Could not convert '{0}' to an instance of {1}", value, typeof( TBaseType ) );
+                return false;
             }
-
-            result = retVal;
-
-            return true;
         }
+
+        result = retVal;
+
+        return true;
     }
 }

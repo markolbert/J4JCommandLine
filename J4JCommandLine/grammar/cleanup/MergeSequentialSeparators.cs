@@ -19,27 +19,26 @@
 
 using System.Collections.Generic;
 
-namespace J4JSoftware.Configuration.CommandLine
+namespace J4JSoftware.Configuration.CommandLine;
+
+public class MergeSequentialSeparators : ICleanupTokens
 {
-    public class MergeSequentialSeparators : ICleanupTokens
+    public void Process( List<Token> tokens )
     {
-        public void Process( List<Token> tokens )
+        var toRemove = new List<int>();
+
+        Token? prevToken = null;
+
+        for( var idx = 0; idx < tokens.Count; idx++ )
         {
-            var toRemove = new List<int>();
+            var token = tokens[ idx ];
 
-            Token? prevToken = null;
+            if( token.Type == LexicalType.Separator && prevToken?.Type == token.Type )
+                toRemove.Add( idx );
 
-            for( var idx = 0; idx < tokens.Count; idx++ )
-            {
-                var token = tokens[ idx ];
-
-                if( token.Type == LexicalType.Separator && prevToken?.Type == token.Type )
-                    toRemove.Add( idx );
-
-                prevToken = token;
-            }
-
-            tokens.RemoveRange( toRemove );
+            prevToken = token;
         }
+
+        tokens.RemoveRange( toRemove );
     }
 }
