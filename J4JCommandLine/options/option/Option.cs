@@ -122,7 +122,6 @@ public class Option<TContainer, TProp> : IOption, IOptionInternal
         }
     }
 
-    ///TODO: unclear why treating strings differently is required -- they should use a default converter
     public bool GetValue( out object? result )
     {
         result = default( TProp );
@@ -131,15 +130,7 @@ public class Option<TContainer, TProp> : IOption, IOptionInternal
             return false;
 
         if( Style != OptionStyle.Switch )
-        {
-            // this looks odd/problematic
-            if( typeof( TProp ) != typeof( string ) )
-                return _converter.Convert( typeof( TProp ), _values, out result );
-
-            result = _values;
-            return true;
-
-        }
+            return _converter != null && _converter.Convert( typeof( TProp ), _values, out result );
 
         result = !string.IsNullOrEmpty( CommandLineKeyProvided );
 
