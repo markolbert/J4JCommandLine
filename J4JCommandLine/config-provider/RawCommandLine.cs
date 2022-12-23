@@ -20,35 +20,34 @@
 using System;
 using System.Runtime.InteropServices;
 
-namespace J4JSoftware.Configuration.CommandLine.Deprecated
+namespace J4JSoftware.Configuration.CommandLine;
+
+public class RawCommandLine
 {
-    public class RawCommandLine
+    private readonly bool _useKernel32;
+
+    public RawCommandLine()
     {
-        private readonly bool _useKernel32;
-
-        public RawCommandLine()
+        _useKernel32 = Environment.OSVersion.Platform switch
         {
-            _useKernel32 = Environment.OSVersion.Platform switch
-                           {
-                               PlatformID.Win32NT      => true,
-                               PlatformID.Win32S       => true,
-                               PlatformID.Win32Windows => true,
-                               PlatformID.WinCE        => true,
-                               _                       => false
-                           };
-        }
+            PlatformID.Win32NT      => true,
+            PlatformID.Win32S       => true,
+            PlatformID.Win32Windows => true,
+            PlatformID.WinCE        => true,
+            _                       => false
+        };
+    }
 
-        [ DllImport( "kernel32.dll", CharSet = CharSet.Auto ) ]
-        private static extern IntPtr GetCommandLine();
+    [ DllImport( "kernel32.dll", CharSet = CharSet.Auto ) ]
+    private static extern IntPtr GetCommandLine();
 
-        public string GetRawCommandLine()
-        {
-            if( !_useKernel32 )
-                return Environment.CommandLine;
+    public string GetRawCommandLine()
+    {
+        if( !_useKernel32 )
+            return Environment.CommandLine;
 
-            var ptr = GetCommandLine();
+        var ptr = GetCommandLine();
 
-            return Marshal.PtrToStringAuto( ptr )!;
-        }
+        return Marshal.PtrToStringAuto( ptr )!;
     }
 }
