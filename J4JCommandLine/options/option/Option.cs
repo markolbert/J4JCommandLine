@@ -22,151 +22,159 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 
-namespace J4JSoftware.Configuration.CommandLine
+namespace J4JSoftware.Configuration.CommandLine;
+
+public class Option<TContainer, TProp> : IOption, IOptionInternal
 {
-    public class Option<TContainer, TProp> : IOption, IOptionInternal
+    private readonly List<string> _cmdLineKeys = new();
+    private readonly ITextToValue _converter;
+    private readonly List<string> _values = new();
+
+    internal Option( OptionCollection container,
+        string contextPath,
+        ITextToValue converter )
     {
-        private readonly List<string> _cmdLineKeys = new();
-        private readonly ITextToValue _converter;
-        private readonly List<string> _values = new();
+        Collection = container;
+        ContextPath = contextPath;
+        _converter = converter;
+    }
 
-        internal Option( OptionCollection container,
-                         string contextPath,
-                         ITextToValue converter )
+    public bool IsInitialized => !string.IsNullOrEmpty( ContextPath ) && _cmdLineKeys.Count > 0;
+    public OptionCollection Collection { get; }
+    public Type ContainingType => typeof( TContainer );
+    public Type PropertyType => typeof( TProp );
+
+    public string? ContextPath { get; }
+
+    public ReadOnlyCollection<string> Keys => _cmdLineKeys.AsReadOnly();
+
+    public Option<TContainer, TProp> AddCommandLineKey( string cmdLineKey )
+    {
+        if( !Collection.CommandLineKeyInUse( cmdLineKey ) )
+            _cmdLineKeys.Add( cmdLineKey );
+
+        return this;
+    }
+
+    public Option<TContainer, TProp> AddCommandLineKeys( IEnumerable<string> cmdLineKeys )
+    {
+        foreach( var cmdLineKey in cmdLineKeys ) AddCommandLineKey( cmdLineKey );
+
+        return this;
+    }
+
+    public string? CommandLineKeyProvided { get; set; }
+
+    public OptionStyle Style { get; private set; } = OptionStyle.Undefined;
+
+    public IOption SetStyle( OptionStyle style )
+    {
+        Style = style;
+        return this;
+    }
+
+    public ReadOnlyCollection<string> Values => _values.AsReadOnly();
+
+    void IOptionInternal.ClearValues()
+    {
+        _values.Clear();
+    }
+
+    void IOptionInternal.AddValue( string value )
+    {
+        _values.Add( value );
+    }
+
+    void IOptionInternal.AddValues( IEnumerable<string> values )
+    {
+        _values.AddRange( values );
+    }
+
+    public int MaxValues =>
+        Style switch
         {
-            Collection = container;
-            ContextPath = contextPath;
-            _converter = converter;
-        }
+            OptionStyle.Collection => int.MaxValue,
+            OptionStyle.SingleValued => 1,
+            OptionStyle.ConcatenatedSingleValue => int.MaxValue,
+            OptionStyle.Switch => 0,
+            _ => throw new InvalidEnumArgumentException( $"Unsupported OptionStyle '{Style}'" )
+        };
 
-        public bool IsInitialized => !string.IsNullOrEmpty( ContextPath ) && _cmdLineKeys.Count > 0;
-        public OptionCollection Collection { get; }
-        public Type ContainingType => typeof( TContainer );
-        public Type PropertyType => typeof( TProp );
+    public int NumValuesAllocated => _values.Count;
 
-        public string? ContextPath { get; }
-
-        public ReadOnlyCollection<string> Keys => _cmdLineKeys.AsReadOnly();
-
-        public Option<TContainer, TProp> AddCommandLineKey( string cmdLineKey )
+    public bool ValuesSatisfied
+    {
+        get
         {
-            if( !Collection.CommandLineKeyInUse( cmdLineKey ) )
-                _cmdLineKeys.Add( cmdLineKey );
-
-            return this;
-        }
-
-        public Option<TContainer, TProp> AddCommandLineKeys( IEnumerable<string> cmdLineKeys )
-        {
-            foreach( var cmdLineKey in cmdLineKeys ) AddCommandLineKey( cmdLineKey );
-
-            return this;
-        }
-
-        public string? CommandLineKeyProvided { get; set; }
-
-        public OptionStyle Style { get; private set; } = OptionStyle.Undefined;
-
-        public IOption SetStyle( OptionStyle style )
-        {
-            Style = style;
-            return this;
-        }
-
-        public ReadOnlyCollection<string> Values => _values.AsReadOnly();
-
-        void IOptionInternal.ClearValues()
-        {
-            _values.Clear();
-        }
-
-        void IOptionInternal.AddValue( string value )
-        {
-            _values.Add( value );
-        }
-
-        void IOptionInternal.AddValues( IEnumerable<string> values )
-        {
-            _values.AddRange( values );
-        }
-
-        public int MaxValues =>
-            Style switch
-            {
-                OptionStyle.Collection => int.MaxValue,
-                OptionStyle.SingleValued => 1,
-                OptionStyle.ConcatenatedSingleValue => int.MaxValue,
-                OptionStyle.Switch => 0,
-                _ => throw new InvalidEnumArgumentException( $"Unsupported OptionStyle '{Style}'" )
-            };
-
-        public int NumValuesAllocated => _values.Count;
-
-        public bool ValuesSatisfied
-        {
-            get
-            {
-                if( string.IsNullOrEmpty( CommandLineKeyProvided ) )
-                    return false;
-
-                var numValuesAlloc = _values.Count;
-
-                return Style switch
-                       {
-                           OptionStyle.Switch => numValuesAlloc == 0,
-                           OptionStyle.SingleValued => numValuesAlloc == 1,
-                           OptionStyle.Collection => numValuesAlloc > 0,
-                           OptionStyle.ConcatenatedSingleValue => numValuesAlloc > 0,
-                           _ => throw new InvalidEnumArgumentException( $"Unsupported OptionStyle '{Style}'" )
-                       };
-            }
-        }
-
-        public bool GetValue( out object? result )
-        {
-            result = default( TProp );
-
-            if( !ValuesSatisfied )
+            if( string.IsNullOrEmpty( CommandLineKeyProvided ) )
                 return false;
 
-            if( Style != OptionStyle.Switch )
+            var numValuesAlloc = _values.Count;
+
+            return Style switch
+            {
+                OptionStyle.Switch => numValuesAlloc == 0,
+                OptionStyle.SingleValued => numValuesAlloc == 1,
+                OptionStyle.Collection => numValuesAlloc > 0,
+                OptionStyle.ConcatenatedSingleValue => numValuesAlloc > 0,
+                _ => throw new InvalidEnumArgumentException( $"Unsupported OptionStyle '{Style}'" )
+            };
+        }
+    }
+
+    ///TODO: unclear why treating strings differently is required -- they should use a default converter
+    public bool GetValue( out object? result )
+    {
+        result = default( TProp );
+
+        if( !ValuesSatisfied )
+            return false;
+
+        if( Style != OptionStyle.Switch )
+        {
+            // this looks odd/problematic
+            if( typeof( TProp ) != typeof( string ) )
                 return _converter.Convert( typeof( TProp ), _values, out result );
 
-            result = !string.IsNullOrEmpty( CommandLineKeyProvided );
-
+            result = _values;
             return true;
+
         }
 
-        public bool Required { get; private set; }
+        result = !string.IsNullOrEmpty( CommandLineKeyProvided );
 
-        public Option<TContainer, TProp> IsRequired()
-        {
-            Required = true;
-            return this;
-        }
-
-        public Option<TContainer, TProp> IsOptional()
-        {
-            Required = false;
-            return this;
-        }
-
-        public string? Description { get; private set; }
-
-        public Option<TContainer, TProp> SetDescription( string description )
-        {
-            Description = description;
-            return this;
-        }
-
-        public TProp? DefaultValue { get; private set; }
-
-        public Option<TContainer, TProp> SetDefaultValue( TProp? value )
-        {
-            DefaultValue = value;
-            return this;
-        }
-
-        string? IOption.GetDefaultValue() => DefaultValue?.ToString();
+        return true;
     }
+
+    public bool Required { get; private set; }
+
+    public Option<TContainer, TProp> IsRequired()
+    {
+        Required = true;
+        return this;
+    }
+
+    public Option<TContainer, TProp> IsOptional()
+    {
+        Required = false;
+        return this;
+    }
+
+    public string? Description { get; private set; }
+
+    public Option<TContainer, TProp> SetDescription( string description )
+    {
+        Description = description;
+        return this;
+    }
+
+    public TProp? DefaultValue { get; private set; }
+
+    public Option<TContainer, TProp> SetDefaultValue( TProp? value )
+    {
+        DefaultValue = value;
+        return this;
+    }
+
+    string? IOption.GetDefaultValue() => DefaultValue?.ToString();
 }
