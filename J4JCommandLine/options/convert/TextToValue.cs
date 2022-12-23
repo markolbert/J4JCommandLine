@@ -24,42 +24,6 @@ using J4JSoftware.Logging;
 
 namespace J4JSoftware.Configuration.CommandLine;
 
-public sealed class TextToValueComparer : IEqualityComparer<ITextToValue>
-{
-    public bool Equals( ITextToValue? x, ITextToValue? y )
-    {
-        if ( ReferenceEquals( x, y ) ) return true;
-        if ( ReferenceEquals( x, null ) ) return false;
-        if ( ReferenceEquals( y, null ) ) return false;
-        if ( x.GetType() != y.GetType() ) return false;
-
-        return x.TargetType.Equals( y.TargetType );
-    }
-
-    public int GetHashCode( ITextToValue obj )
-    {
-        return obj.TargetType.GetHashCode();
-    }
-}
-
-public class UndefinedTextToValue : ITextToValue
-{
-    public Type TargetType => typeof( object );
-    public bool CanConvert( Type toCheck ) => false;
-
-    public bool Convert( Type targetType, IEnumerable<string> values, out object? result )
-    {
-        result = null;
-        return false;
-    }
-
-    public bool Convert<T>( IEnumerable<string> values, out T? result )
-    {
-        result = default;
-        return false;
-    }
-}
-
 public abstract class TextToValue<TBaseType> : ITextToValue
 {
     protected TextToValue( IJ4JLogger? logger )
