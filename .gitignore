@@ -5,6 +5,7 @@
 
 no-git/
 nuget.config
+launchSettings.json
 
 # User-specific files
 *.rsuser
