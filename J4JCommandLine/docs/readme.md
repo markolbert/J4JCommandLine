@@ -1,14 +1,14 @@
 # J4JCommandLine
 
-A Net5 library which adds parsing command line arguments to the `IConfiguration` system. Command line arguments can be bound to instance or static properties of classes, including nested classes. 
+A Net library which adds parsing command line arguments to the `IConfiguration` system. Command line arguments can be bound to instance or static properties of classes, including nested classes.
 
 There are some restrictions on the nature of the target classes, mostly having to do with them having public parameterless constructors. This is the same constraint as exists for the `IConfiguration` system.
 
-The libraries are licensed under the GNU GPL-v3 or later. For more details see the license file.
+[![Nuget](https://img.shields.io/nuget/v/J4JSoftware.Configuration.CommandLine?style=flat-square)](https://www.nuget.org/packages/J4JSoftware.Configuration.CommandLine/)
 
-**There are breaking changes in the latest release. Please review the documentation.**
+The libraries are licensed under the GNU GPL-v3 or later. For more details see the [license file](../../LICENSE.md).
 
-For more information consult the [github documentation](https://github.com/markolbert/J4JCommandLine).
+See the [change log](changes.md) for a history of significant changes.
 
 ## TL;DR
 
@@ -57,3 +57,14 @@ public static string TextValue { get; set; }
 ```
 
 This example can be simplified further by using my [dependency injection library](https://github.com/markolbert/ProgrammingUtilities). There is also a `TryBind<...>()` method which you can use as an alternative to `Bind<...>()`.
+
+## Table of Contents
+
+- [Changes](changes.md)
+- [What It Does and Doesn't Do](doesdonts.md)
+- [Goal and Concept](goal-concept.md)
+- [Command Line Styles](cmdlinestyle.md)
+- [Binding](binding.md)
+- [Logging and Errors](logging.md)
+- [Outputting Help](help.md)
+- [Notes on the Tokenizer and Parser](parser.md)

@@ -9,30 +9,12 @@ options.DisplayHelp();
 ```
 
 Calling `DisplayHelp()` without any arguments causes help information to be displayed using the default help formatter. This produces a very simple -- and not remotely typical -- display:
+
 ![simple help](assets/simple-help.png)
+
 The simplicity results from me not wanting to invest the time developing code which could format help information in a more typical fashion. As a result I doubt anyone will rely on the default formatter.
 
-## Colorful Help
-
-Instead, you should write your own formatter, or include the add-on assembly `ColorfulHelp` and use it's `ColorHelpDisplay` formatter:
-
-```csharp
-options.DisplayHelp( new ColorHelpDisplay() );
-```
-
-That gets you a display which looks like this:
-![fancy help](assets/fancy-help.png)
-
-`DisplayColorHelp` offers a few properties you can use to tweak the display:
-
-| Property | What It Does |
-|----------|--------------|
-|CellPadding|Sets the padding within each cell of the table. The default is two spaces horizontally and no spaces vertically.|
-|HeadingColor|Sets the color of the column headers. The default is *green*.|
-|TitleColor|Sets the color for the help title. The default is *yellow*.|
-|EmphasisColor|Sets the color used for emphasizing text such as keys. The default is *cyan*.|
-|TextColor|Sets the color used for basic text. The default is *white*.|
-|GridColor|Sets the color for the table grid. The default is *gray*.|
+There is an extension library available which provides nicely-formatted colorful help. For more information on using it [check out its documentation](../../ColorfulHelp/docs/readme.md).
 
 ## Implementing Your Own Help Formatter
 

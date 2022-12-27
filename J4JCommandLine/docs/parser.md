@@ -1,7 +1,6 @@
 # Notes on the Tokenizer and Parser
 
-There are a lot of ways to write any kind of parser. Some simply embed the syntax and semantic rules in the program logic as a bunch of if/then/else and switch statements. Some are more like "real" parsers, tokenizing the input and
-then applying grammatical rules to parse the tokens.
+There are a lot of ways to write any kind of parser. Some simply embed the syntax and semantic rules in the program logic as a bunch of if/then/else and switch statements. Some are more like "real" parsers, tokenizing the input and then applying grammatical rules to parse the tokens.
 
 I'd never written any of the latter kind. But in researching some aspects of command line parsing I stumbled across **LL(1) grammars**... and a comment to the effect no one in their right mind would write one just to parse a command line because it'd be overkill.
 
@@ -14,7 +13,7 @@ But by piecing together a bunch of stuff, I think this is how an LL(1) parser wo
 
 "LL(1)" means the parser scans tokens from **L**eft to right, and only looks **1** token ahead (the second "L" is about following/constructing "left hand" routes in a tree data structure; I'm not sure about that because I didn't use a tree-based approach).
 
-My parser isn't, technically, an LL(1) parser because it does some pre-processing of the tokens it generates before parsing them. The main such step being to merge all tokens between a starting "quoter" token and an ending "quoter" token into a single test token. 
+My parser isn't, technically, an LL(1) parser because it does some pre-processing of the tokens it generates before parsing them. The main such step being to merge all tokens between a starting "quoter" token and an ending "quoter" token into a single test token.
 
 Command lines like this:
 
