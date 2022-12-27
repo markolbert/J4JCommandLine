@@ -27,28 +27,6 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NoHostExample", "examples\N
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TypeUtilities", "..\ProgrammingUtilities\TypeUtilities\TypeUtilities.csproj", "{D554E71D-4238-4C31-8A9D-DEE0A795D6D5}"
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "docs", "docs", "{8B1371B6-076C-4D19-ABEA-9BC4067D6DEF}"
-	ProjectSection(SolutionItems) = preProject
-		docs\binding.md = docs\binding.md
-		docs\changes.md = docs\changes.md
-		docs\cmdlinestyle.md = docs\cmdlinestyle.md
-		docs\doesdonts.md = docs\doesdonts.md
-		docs\goal-concept.md = docs\goal-concept.md
-		docs\help.md = docs\help.md
-		LICENSE.md = LICENSE.md
-		docs\logging.md = docs\logging.md
-		docs\nuget-colorful.md = docs\nuget-colorful.md
-		docs\nuget.md = docs\nuget.md
-		docs\parser.md = docs\parser.md
-		README.md = README.md
-	EndProjectSection
-EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "assets", "assets", "{0E8CA64F-0B73-428C-A87C-2466A5B09A22}"
-	ProjectSection(SolutionItems) = preProject
-		docs\assets\fancy-help.png = docs\assets\fancy-help.png
-		docs\assets\simple-help.png = docs\assets\simple-help.png
-	EndProjectSection
-EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -107,7 +85,6 @@ Global
 		{7985FAD5-17DC-40AD-90A9-40A7CC903743} = {4D3E643D-3FEB-4571-AD1F-8B84313411A2}
 		{1BA9A459-4ABF-49F6-B910-D264241BC3D1} = {4D3E643D-3FEB-4571-AD1F-8B84313411A2}
 		{D554E71D-4238-4C31-8A9D-DEE0A795D6D5} = {49668F40-3271-4A21-A860-8C6496E00124}
-		{0E8CA64F-0B73-428C-A87C-2466A5B09A22} = {8B1371B6-076C-4D19-ABEA-9BC4067D6DEF}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {F40695CC-CF6A-4293-81A1-04D389611E2D}
