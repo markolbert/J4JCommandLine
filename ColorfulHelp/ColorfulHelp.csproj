@@ -24,6 +24,7 @@
 
 	<ItemGroup>
 	  <PackageReference Include="Alba.CsConsoleFormat-NoXaml" Version="1.0.0" />
+	  <PackageReference Include="J4JSoftware.Configuration.CommandLine" Version="4.2.0" />
 	</ItemGroup>
 
 	<ItemGroup>
