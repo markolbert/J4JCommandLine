@@ -37,7 +37,7 @@
 			<PackagePath></PackagePath>
 		</None>
 		<None Include="docs/readme.md" Pack="true" PackagePath="/readme.md" />
-		<None Include="../LICENSE.md" />
+		<None Include="../LICENSE.md"/>
 	</ItemGroup>
 
 </Project>
