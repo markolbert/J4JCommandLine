@@ -18,32 +18,32 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using J4JSoftware.Logging;
+using Serilog;
 using Serilog.Events;
 
 namespace J4JSoftware.Configuration.CommandLine;
 
 public class OptionsGenerator : IOptionsGenerator
 {
-    public static OptionsGenerator GetWindowsDefault( IJ4JLogger? logger = null ) =>
+    public static OptionsGenerator GetWindowsDefault( ILogger? logger = null ) =>
         new OptionsGenerator( OptionCollection.GetWindowsDefault( logger ),
                               StringComparison.OrdinalIgnoreCase,
                               logger );
 
-    public static OptionsGenerator GetLinuxDefault( IJ4JLogger? logger = null ) =>
+    public static OptionsGenerator GetLinuxDefault( ILogger? logger = null ) =>
         new OptionsGenerator( OptionCollection.GetWindowsDefault( logger ),
                               StringComparison.Ordinal,
                               logger );
 
     private readonly OptionCollection? _options;
     private readonly StringComparison _textComparison;
-    private readonly IJ4JLogger? _logger;
+    private readonly ILogger? _logger;
 
     private CommandLineArgument? _current;
 
     public OptionsGenerator( OptionCollection options,
         StringComparison textComparison,
-        IJ4JLogger? logger = null )
+        ILogger? logger = null )
     {
         _options = options;
         _textComparison = textComparison;
@@ -211,7 +211,7 @@ public class OptionsGenerator : IOptionsGenerator
             if( validValues.Any( x => x.Equals( value, _textComparison ) ) )
                 continue;
 
-            _logger?.Error<string, string>( "Invalid {0} option value '{1}'", propertyType.Name, value );
+            _logger?.Error( "Invalid {0} option value '{1}'", propertyType.Name, value );
             return false;
         }
 
@@ -223,11 +223,10 @@ public class OptionsGenerator : IOptionsGenerator
         if( _logger == null )
             return;
 
-        _logger.Write<string, LexicalType, string>( level,
-                                                    "{0} *undefined* => {1} ('{2}')",
-                                                    text,
-                                                    tokenPair.Current.Type,
-                                                    tokenPair.Current.Text );
+        _logger.Write(level, "{0} *undefined* => {1} ('{2}')",
+            text,
+            tokenPair.Current.Type,
+            tokenPair.Current.Text);
 
         //else
         //    _logger.Write( level,

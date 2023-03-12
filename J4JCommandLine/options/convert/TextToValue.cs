@@ -18,21 +18,21 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using J4JSoftware.Logging;
+using Serilog;
 
 namespace J4JSoftware.Configuration.CommandLine;
 
 public abstract class TextToValue<TBaseType> : ITextToValue
 {
-    protected TextToValue( IJ4JLogger? logger )
+    protected TextToValue( ILogger? logger )
     {
         Logger = logger;
-        Logger?.SetLoggedType( GetType() );
+        Logger?.ForContext<TextToValue<TBaseType>>();
     }
 
     protected abstract bool ConvertTextToValue( string text, out TBaseType? result );
 
-    protected IJ4JLogger? Logger { get; }
+    protected ILogger? Logger { get; }
 
     public Type TargetType => typeof( TBaseType );
 
@@ -64,19 +64,19 @@ public abstract class TextToValue<TBaseType> : ITextToValue
                 }
 
                 retVal = ConvertToSingleValue( valueList.Count == 0 ? null : valueList[ 0 ], out var singleResult );
-                result = (object?) singleResult;
+                result = singleResult;
 
                 break;
 
             case TypeNature.Array:
                 retVal = ConvertToArray( valueList, out var arrayResult );
-                result = (object?) arrayResult;
+                result = arrayResult;
 
                 break;
 
             case TypeNature.List:
                 retVal = ConvertToArray( valueList, out var listResult );
-                result = (object?) listResult;
+                result = listResult;
 
                 break;
         }
@@ -131,28 +131,6 @@ public abstract class TextToValue<TBaseType> : ITextToValue
         }
 
         result = retVal.ToArray();
-
-        return true;
-    }
-
-    private bool ConvertToList( List<string> values, out List<TBaseType?>? result )
-    {
-        result = null;
-
-        var retVal = new List<TBaseType?>();
-
-        foreach( var value in values )
-        {
-            if ( ConvertToSingleValue( value, out var temp ) )
-                retVal.Add( temp );
-            else
-            {
-                Logger?.Error( "Could not convert '{0}' to an instance of {1}", value, typeof( TBaseType ) );
-                return false;
-            }
-        }
-
-        result = retVal;
 
         return true;
     }

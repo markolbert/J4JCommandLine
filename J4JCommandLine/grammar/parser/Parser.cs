@@ -16,14 +16,14 @@
 // with J4JCommandLine. If not, see <https://www.gnu.org/licenses/>.
 
 using System;
-using J4JSoftware.Logging;
+using Serilog;
 
 namespace J4JSoftware.Configuration.CommandLine;
 
 public class Parser : IParser
 {
     public static IParser GetWindowsDefault( ITextConverters? converters = null,
-        IJ4JLogger? logger = null,
+        ILogger? logger = null,
         params ICleanupTokens[] cleanupProcessors )
     {
         converters ??= new TextConverters( logger: logger );
@@ -32,8 +32,7 @@ public class Parser : IParser
 
         var parsingTable = new ParsingTable( new OptionsGenerator( options,
                                                                    StringComparison.OrdinalIgnoreCase,
-                                                                   logger ),
-                                             logger );
+                                                                   logger ));
 
         var tokenizer = new Tokenizer( new WindowsLexicalElements( logger ),
                                        logger,
@@ -43,7 +42,7 @@ public class Parser : IParser
     }
 
     public static IParser GetLinuxDefault( ITextConverters? converters = null,
-        IJ4JLogger? logger = null,
+        ILogger? logger = null,
         params ICleanupTokens[] cleanupProcessors )
     {
         converters ??= new TextConverters( logger: logger );
@@ -52,8 +51,7 @@ public class Parser : IParser
 
         var parsingTable = new ParsingTable( new OptionsGenerator( options,
                                                                    StringComparison.Ordinal,
-                                                                   logger ),
-                                             logger );
+                                                                   logger ));
 
         var tokenizer = new Tokenizer( new LinuxLexicalElements( logger ),
                                        logger,
@@ -63,12 +61,12 @@ public class Parser : IParser
     }
 
     private readonly ParsingTable _parsingTable;
-    private readonly IJ4JLogger? _logger;
+    private readonly ILogger? _logger;
 
     public Parser( OptionCollection options,
         ParsingTable parsingTable,
         ITokenizer tokenizer,
-        IJ4JLogger? logger = null )
+        ILogger? logger = null )
     {
         Collection = options;
         _parsingTable = parsingTable;
@@ -82,7 +80,7 @@ public class Parser : IParser
 
     public bool Parse( string cmdLine )
     {
-        var tokenList = Tokenizer!.Tokenize( cmdLine );
+        var tokenList = Tokenizer.Tokenize( cmdLine );
 
         foreach( var tokenPair in tokenList.EnumerateTokenPairs() )
         {

@@ -20,35 +20,34 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Linq.Expressions;
-using J4JSoftware.Logging;
+using Serilog;
 
 namespace J4JSoftware.Configuration.CommandLine;
 
-public partial class OptionCollection
+public class OptionCollection
 {
-    public static OptionCollection GetWindowsDefault( IJ4JLogger? logger = null ) =>
+    public static OptionCollection GetWindowsDefault( ILogger? logger = null ) =>
         new OptionCollection( StringComparison.OrdinalIgnoreCase, new TextConverters( logger: logger ), logger );
 
-    public static OptionCollection GetLinuxDefault( IJ4JLogger? logger = null ) =>
+    public static OptionCollection GetLinuxDefault( ILogger? logger = null ) =>
         new OptionCollection( StringComparison.Ordinal, new TextConverters( logger: logger ), logger );
 
     public event EventHandler? Configured;
 
     private readonly StringComparison _textComparison;
     private readonly ITextConverters _converters;
-    private readonly List<string> _optionKeys = new List<string>();
     private readonly List<Func<BindingInfo, bool>> _bindingTests;
-    private readonly IJ4JLogger? _logger;
+    private readonly ILogger? _logger;
 
     public OptionCollection( StringComparison textComparison,
         ITextConverters converters,
-        IJ4JLogger? logger = null )
+        ILogger? logger = null )
     {
         _textComparison = textComparison;
         _converters = converters;
 
         _logger = logger;
-        _logger?.SetLoggedType( GetType() );
+        _logger?.ForContext<OptionCollection>();
 
         _bindingTests = new List<Func<BindingInfo, bool>>
         {
@@ -105,7 +104,7 @@ public partial class OptionCollection
         var bindingInfo = BindingInfo.Create( selector );
         if( !bindingInfo.IsProperty )
         {
-            _logger?.Error<string>( "Binding target {0} is not a property", bindingInfo.FullName );
+            _logger?.Error( "Binding target {0} is not a property", bindingInfo.FullName );
             return null;
         }
 
@@ -129,7 +128,7 @@ public partial class OptionCollection
 
         if( OptionsInternal.Any( x => x.ContextPath!.Equals( bindingInfo.FullName, _textComparison ) ) )
         {
-            _logger?.Error<string>( "An option with the same ContextPath ('{0}') is already in the collection",
+            _logger?.Error( "An option with the same ContextPath ('{0}') is already in the collection",
                                     bindingInfo.FullName );
             return null;
         }

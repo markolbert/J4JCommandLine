@@ -16,16 +16,16 @@
 // with J4JCommandLine. If not, see <https://www.gnu.org/licenses/>.
 
 using System.Reflection;
-using J4JSoftware.Logging;
+using Serilog;
 
 namespace J4JSoftware.Configuration.CommandLine;
 
-public class BuiltInTextToValue<TBaseType> : TextToValue<TBaseType>, ITextToValue
+public class BuiltInTextToValue<TBaseType> : TextToValue<TBaseType>
 {
     private readonly MethodInfo _convMethod;
 
     public BuiltInTextToValue( MethodInfo convMethod,
-        IJ4JLogger? logger )
+        ILogger? logger )
         : base( logger )
     {
         _convMethod = convMethod;

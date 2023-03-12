@@ -19,7 +19,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using J4JSoftware.Logging;
+using Serilog;
 
 namespace J4JSoftware.Configuration.CommandLine;
 
@@ -28,7 +28,7 @@ public class LexicalElements : ILexicalElements
     private readonly Dictionary<LexicalType, List<Token>> _available = new();
 
     public LexicalElements( StringComparison textComparison,
-        IJ4JLogger? logger = null,
+        ILogger? logger = null,
         bool inclCommon = true )
     {
         TextComparison = textComparison;
@@ -42,7 +42,7 @@ public class LexicalElements : ILexicalElements
         Add( LexicalType.ValuePrefix, "=" );
     }
 
-    protected IJ4JLogger? Logger { get; }
+    protected ILogger? Logger { get; }
 
     public StringComparison TextComparison { get; }
 

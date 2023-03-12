@@ -18,9 +18,9 @@
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
-using J4JSoftware.Logging;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Serilog;
 
 namespace J4JSoftware.Configuration.CommandLine;
 
@@ -75,7 +75,6 @@ public static class J4JCommandLineExtensions
         params ICleanupTokens[] cleanupTokens )
     {
         var source = new J4JCommandLineSource( svcProvider.GetRequiredService<IParser>(),
-                                               svcProvider.GetRequiredService<IJ4JLogger>(),
                                                cleanupTokens );
 
         builder.Add( source );
@@ -89,12 +88,9 @@ public static class J4JCommandLineExtensions
     public static IConfigurationBuilder AddJ4JCommandLine( this IConfigurationBuilder builder,
         IParser parser,
         out CommandLineSource? cmdLineSource,
-        IJ4JLogger? logger = null,
         params ICleanupTokens[] cleanupTokens )
     {
-        var source = new J4JCommandLineSource( parser,
-                                               logger,
-                                               cleanupTokens );
+        var source = new J4JCommandLineSource( parser, cleanupTokens );
 
         builder.Add( source );
 
@@ -107,7 +103,7 @@ public static class J4JCommandLineExtensions
         out OptionCollection? options,
         out CommandLineSource? cmdLineSource,
         ITextConverters? converters = null,
-        IJ4JLogger? logger = null,
+        ILogger? logger = null,
         params ICleanupTokens[] cleanupTokens ) =>
         builder.AddJ4JCommandLineDefault( CommandLineOperatingSystems.Windows,
                                           out options,
@@ -120,7 +116,7 @@ public static class J4JCommandLineExtensions
         out OptionCollection? options,
         out CommandLineSource? cmdLineSource,
         ITextConverters? converters = null,
-        IJ4JLogger? logger = null,
+        ILogger? logger = null,
         params ICleanupTokens[] cleanupTokens ) =>
         builder.AddJ4JCommandLineDefault( CommandLineOperatingSystems.Linux,
                                           out options,
@@ -134,7 +130,7 @@ public static class J4JCommandLineExtensions
         out OptionCollection? options,
         out CommandLineSource? cmdLineSource,
         ITextConverters? converters = null,
-        IJ4JLogger? logger = null,
+        ILogger? logger = null,
         params ICleanupTokens[] cleanupTokens )
     {
         converters ??= new TextConverters();
@@ -149,10 +145,8 @@ public static class J4JCommandLineExtensions
 
         var lexicalElements = opSys switch
         {
-            CommandLineOperatingSystems.Windows =>
-                (ILexicalElements) new WindowsLexicalElements( logger ),
-            CommandLineOperatingSystems.Linux =>
-                (ILexicalElements) new LinuxLexicalElements( logger ),
+            CommandLineOperatingSystems.Windows => (ILexicalElements) new WindowsLexicalElements( logger ),
+            CommandLineOperatingSystems.Linux => new LinuxLexicalElements( logger ),
             _ => throw new
                 InvalidEnumArgumentException( $"Unsupported {nameof( CommandLineOperatingSystems )} value '{opSys}'" )
         };
@@ -160,12 +154,11 @@ public static class J4JCommandLineExtensions
         options = new OptionCollection( textComparison, converters, logger );
 
         var optionsGenerator = new OptionsGenerator( options, textComparison, logger );
-        var parsingTable = new ParsingTable( optionsGenerator, logger );
+        var parsingTable = new ParsingTable( optionsGenerator );
         var tokenizer = new Tokenizer( lexicalElements );
 
-        return builder.AddJ4JCommandLine( new Parser( options, parsingTable, tokenizer, logger ),
+        return builder.AddJ4JCommandLine( new Parser( options, parsingTable, tokenizer),
                                           out cmdLineSource,
-                                          logger,
                                           cleanupTokens );
     }
 }

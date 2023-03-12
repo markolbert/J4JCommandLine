@@ -16,14 +16,14 @@
 // with J4JCommandLine. If not, see <https://www.gnu.org/licenses/>.
 
 using System;
-using J4JSoftware.Logging;
+using Serilog;
 
 namespace J4JSoftware.Configuration.CommandLine;
 
 public class TextToEnum<TEnum> : TextToValue<TEnum>
     where TEnum : Enum
 {
-    public TextToEnum( IJ4JLogger? logger )
+    public TextToEnum( ILogger? logger )
         : base( logger )
     {
     }

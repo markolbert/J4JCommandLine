@@ -17,40 +17,36 @@
 
 using System;
 using System.Collections.Generic;
-using J4JSoftware.Logging;
+using Serilog;
 
 namespace J4JSoftware.Configuration.CommandLine;
 
 public class Tokenizer : ITokenizer
 {
-    public static Tokenizer GetWindowsDefault( IJ4JLogger? logger = null,
+    public static Tokenizer GetWindowsDefault( ILogger? logger = null,
         params ICleanupTokens[] cleanupProcessors ) =>
         new Tokenizer( new WindowsLexicalElements( logger ), logger, cleanupProcessors );
 
-    public static Tokenizer GetLinuxDefault( IJ4JLogger? logger = null,
+    public static Tokenizer GetLinuxDefault( ILogger? logger = null,
         params ICleanupTokens[] cleanupProcessors ) =>
         new Tokenizer( new LinuxLexicalElements( logger ), logger, cleanupProcessors );
 
     private readonly ICleanupTokens[] _cleanupProcessors;
     private readonly ILexicalElements _tokens;
-    private readonly IJ4JLogger? _logger;
 
     public Tokenizer( ILexicalElements tokens,
-        IJ4JLogger? logger = null,
+        ILogger? logger = null,
         params ICleanupTokens[] cleanupProcessors )
     {
         TextComparison = tokens.TextComparison;
         _tokens = tokens;
-
-        _logger = logger;
-        _logger?.SetLoggedType( GetType() );
 
         if( cleanupProcessors.Length > 0 )
             _cleanupProcessors = cleanupProcessors;
         else
             _cleanupProcessors = new ICleanupTokens[]
             {
-                new ConsolidateQuotedText( TextComparison, _logger ),
+                new ConsolidateQuotedText( TextComparison, logger ),
                 new MergeSequentialSeparators()
             };
     }
@@ -61,11 +57,9 @@ public class Tokenizer : ITokenizer
     {
         var retVal = new List<Token>();
 
-        (Token? token, int startChar) firstMatch = ( null, 0 );
-
         while( cmdLine.Length > 0 )
         {
-            firstMatch = ( null, 0 );
+            (Token? token, int startChar) firstMatch = ( null, 0 );
 
             foreach( var token in _tokens )
             {

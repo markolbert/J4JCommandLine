@@ -16,13 +16,13 @@
 // with J4JCommandLine. If not, see <https://www.gnu.org/licenses/>.
 
 using System;
-using J4JSoftware.Logging;
+using Serilog;
 
 namespace J4JSoftware.Configuration.CommandLine;
 
 public sealed class WindowsLexicalElements : LexicalElements
 {
-    public WindowsLexicalElements( IJ4JLogger? logger = null )
+    public WindowsLexicalElements( ILogger? logger = null )
         : base( StringComparison.OrdinalIgnoreCase, logger )
     {
         Add( LexicalType.Quoter, "\"" );

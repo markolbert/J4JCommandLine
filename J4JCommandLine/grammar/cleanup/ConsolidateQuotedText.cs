@@ -19,7 +19,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using J4JSoftware.Logging;
+using Serilog;
 
 #pragma warning disable 8618
 
@@ -27,11 +27,12 @@ namespace J4JSoftware.Configuration.CommandLine;
 
 public class ConsolidateQuotedText : ICleanupTokens
 {
-    private readonly IJ4JLogger? _logger;
+    private readonly ILogger? _logger;
     private readonly StringComparison _textComparison;
 
-    public ConsolidateQuotedText( StringComparison textComparison,
-        IJ4JLogger? logger )
+    public ConsolidateQuotedText( 
+        StringComparison textComparison,
+        ILogger? logger )
     {
         _textComparison = textComparison;
         _logger = logger;
@@ -64,7 +65,7 @@ public class ConsolidateQuotedText : ICleanupTokens
 
             for( var idx = curPair.Start.Index + 1; idx < curPair.End.Index; idx++ )
             {
-                sb.Append( tokens[ idx ]!.Text );
+                sb.Append( tokens[ idx ].Text );
 
                 // keep track of the tokens we'll need to delete
                 toRemove.Add( idx );
@@ -107,13 +108,13 @@ public class ConsolidateQuotedText : ICleanupTokens
 
     private class QuoterLocation
     {
-        public Token Token { get; set; }
-        public int Index { get; set; }
+        public Token Token { get; init; }
+        public int Index { get; init; }
     }
 
     private class QuoterPair
     {
-        public QuoterLocation? Start { get; set; }
-        public QuoterLocation? End { get; set; }
+        public QuoterLocation? Start { get; init; }
+        public QuoterLocation? End { get; init; }
     }
 }

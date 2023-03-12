@@ -18,7 +18,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using J4JSoftware.Logging;
+using Serilog;
 
 namespace J4JSoftware.Configuration.CommandLine;
 
@@ -26,25 +26,20 @@ public delegate bool ParsingAction( TokenPair tokenPair );
 
 public class ParsingTable : IParsingTable
 {
-    public static ParsingTable GetWindowsDefault( IJ4JLogger? logger = null ) =>
-        new ParsingTable( OptionsGenerator.GetWindowsDefault( logger ), logger );
+    public static ParsingTable GetWindowsDefault( ILogger? logger = null ) =>
+        new ParsingTable( OptionsGenerator.GetWindowsDefault( logger ) );
 
-    public static ParsingTable GetLinuxDefault( IJ4JLogger? logger = null ) =>
-        new ParsingTable( OptionsGenerator.GetLinuxDefault( logger ), logger );
+    public static ParsingTable GetLinuxDefault( ILogger? logger = null ) =>
+        new ParsingTable( OptionsGenerator.GetLinuxDefault( logger ) );
 
     private readonly Dictionary<LexicalType, Dictionary<LexicalType, ParsingAction?>> _table =
         new();
 
     private readonly ParsingAction _endParsing;
-    private readonly IJ4JLogger? _logger;
 
-    public ParsingTable( IOptionsGenerator generator,
-        IJ4JLogger? logger = null )
+    public ParsingTable( IOptionsGenerator generator)
     {
         _endParsing = generator.EndParsing;
-
-        _logger = logger;
-        _logger?.SetLoggedType( GetType() );
 
         foreach( var row in Enum.GetValues<LexicalType>() )
         {

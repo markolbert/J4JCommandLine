@@ -16,7 +16,6 @@
 // with J4JCommandLine. If not, see <https://www.gnu.org/licenses/>.
 
 using System;
-using J4JSoftware.Logging;
 using Microsoft.Extensions.Configuration;
 
 namespace J4JSoftware.Configuration.CommandLine;
@@ -25,28 +24,21 @@ public class J4JCommandLineSource : IConfigurationSource
 {
     public event EventHandler? SourceChanged;
 
-    private readonly IJ4JLogger? _logger;
-
-    public J4JCommandLineSource( IParser parser,
-        IJ4JLogger? logger,
-        params ICleanupTokens[] cleanupTokens )
+    ///TODO: cleanupTokens not used
+    public J4JCommandLineSource(
+        IParser parser,
+        params ICleanupTokens[] cleanupTokens
+        )
     {
         Parser = parser;
-
-        _logger = logger;
-        _logger?.SetLoggedType( GetType() );
-
         CommandLineSource = Initialize();
     }
 
-    public J4JCommandLineSource( IParser parser,
-        IJ4JLogger? logger )
+    public J4JCommandLineSource( 
+        IParser parser
+        )
     {
         Parser = parser;
-
-        _logger = logger;
-        _logger?.SetLoggedType( GetType() );
-
         CommandLineSource = Initialize();
     }
 

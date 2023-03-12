@@ -20,7 +20,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
-using J4JSoftware.Logging;
+using Serilog;
 
 namespace J4JSoftware.Configuration.CommandLine;
 
@@ -29,11 +29,11 @@ public class TextConverters : ITextConverters
     private readonly Dictionary<Type, ITextToValue> _converters = new();
     private readonly BuiltInConverters _builtInConv;
     private readonly List<BuiltInConverter>? _builtInTargets;
-    private readonly IJ4JLogger? _logger;
+    private readonly ILogger? _logger;
 
     private record BuiltInConverter( Type ReturnType, MethodInfo MethodInfo );
 
-    private static List<ITextToValue> GetBuiltInConverters( IJ4JLogger? logger )
+    private static List<ITextToValue> GetBuiltInConverters( ILogger? logger )
     {
         var retVal = new List<ITextToValue>();
 
@@ -65,11 +65,11 @@ public class TextConverters : ITextConverters
            .ToList();
 
     public TextConverters( BuiltInConverters builtInConv = BuiltInConverters.AddDynamically,
-        IJ4JLogger? logger = null,
+        ILogger? logger = null,
         params ITextToValue[] converters )
     {
         _logger = logger;
-        _logger?.SetLoggedType( GetType() );
+        _logger?.ForContext<TextConverters>();
 
         // add the text to text "converter"
         AddConverter( new TextToTextConverter( logger ), true );
@@ -169,12 +169,6 @@ public class TextConverters : ITextConverters
             BuiltInConverters.AddDynamically => AddGetConverter( simpleType ),
             _ => null
         };
-
-        ITextToValue? ReportFailure()
-        {
-            _logger?.Warning( "Could not find a text to {0} converter", simpleType );
-            return null;
-        }
     }
 
     private ITextToValue? AddGetConverter( Type simpleType )
