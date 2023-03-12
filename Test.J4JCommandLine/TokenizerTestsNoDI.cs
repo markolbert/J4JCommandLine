@@ -6,7 +6,7 @@ using Xunit;
 
 namespace J4JSoftware.Binder.Tests
 {
-    public class TokenizerTestsNoDI : TestBaseNoDI
+    public class TokenizerTestsNoDI : TestBaseNoDi
     {
         private IParser? _parser;
 

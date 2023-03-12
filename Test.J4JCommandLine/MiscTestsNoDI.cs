@@ -24,7 +24,7 @@ using Xunit;
 namespace J4JSoftware.Binder.Tests
 {
     //[UseAutofacTestFramework]
-    public class MiscTestsNoDI : TestBaseNoDI
+    public class MiscTestsNoDI : TestBaseNoDi
     {
         [ Theory ]
         [ InlineData( "-x abc", "abc" ) ]

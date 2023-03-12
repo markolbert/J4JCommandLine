@@ -1,123 +1,86 @@
 ﻿using System;
-using System.IO;
-using System.Linq;
-using System.Runtime.CompilerServices;
-using Autofac;
 using J4JSoftware.Configuration.CommandLine;
 using J4JSoftware.Configuration.J4JCommandLine;
 using J4JSoftware.DependencyInjection;
-using J4JSoftware.Logging;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Hosting;
 
 #pragma warning disable 8618
 
-namespace J4JSoftware.CommandLine.Examples
+namespace J4JSoftware.CommandLine.Examples;
+
+public class Program
 {
-    public class Program
+    static void Main( string[] args )
     {
-        static void Main( string[] args )
+        var hostConfig = new J4JHostConfiguration(AppEnvironment.Console)
+            .Publisher( "J4JSoftware" )
+            .ApplicationName( "StaticPropertyExample" );
+
+        hostConfig.AddCommandLineProcessing( CommandLineOperatingSystems.Windows )
+            .OptionsInitializer( SetupOptions );
+
+        if( hostConfig.MissingRequirements != J4JHostRequirements.AllMet )
         {
-            var hostConfig = new J4JHostConfiguration(AppEnvironment.Console)
-                             .Publisher( "J4JSoftware" )
-                             .ApplicationName( "StaticPropertyExample" )
-                             .FilePathTrimmer( FilePathTrimmer );
+            Console.WriteLine( $"Missing J4JHostConfiguration items: {hostConfig.MissingRequirements}" );
+            Environment.ExitCode = 1;
 
-            hostConfig.AddCommandLineProcessing( CommandLineOperatingSystems.Windows )
-                      .OptionsInitializer( SetupOptions );
-
-            if( hostConfig.MissingRequirements != J4JHostRequirements.AllMet )
-            {
-                Console.WriteLine( $"Missing J4JHostConfiguration items: {hostConfig.MissingRequirements}" );
-                Environment.ExitCode = 1;
-
-                return;
-            }
-
-            var host = hostConfig.Build();
-            if( host == null )
-            {
-                Console.WriteLine( "Could not create IHost" );
-                Environment.ExitCode = 1;
-
-                return;
-            }
-
-            var config = host.Services.GetRequiredService<IConfiguration>();
-            if( config == null )
-                throw new NullReferenceException( "Undefined IConfiguration" );
-
-            var help = new ColorHelpDisplay( host.CommandLineLexicalElements!, host.Options! );
-            help.Display();
-
-            var parsed = config.Get<Program>();
-
-            if( parsed == null )
-            {
-                Console.WriteLine( "Parsing failed" );
-
-                Environment.ExitCode = -1;
-                return;
-            }
-
-            Console.WriteLine( "Parsing succeeded" );
-
-            Console.WriteLine( $"IntValue is {IntValue}" );
-            Console.WriteLine( $"TextValue is {TextValue}" );
-            Console.WriteLine( $"SwitchValue is {SwitchValue}" );
-
-            Console.WriteLine( host.Options!.SpuriousValues.Count == 0
-                                   ? "No unkeyed parameters"
-                                   : $"Unkeyed parameters: {string.Join( ", ", host.Options.SpuriousValues )}" );
+            return;
         }
 
-        public static int IntValue { get; set; }
-        public static string TextValue { get; set; }
-        public static bool SwitchValue { get; set; }
-
-        private static void SetupOptions( OptionCollection options )
+        var host = hostConfig.Build();
+        if( host == null )
         {
-            options.Bind<Program, int>( x => Program.IntValue, "i" )!
-                   .SetDefaultValue( 75 )
-                   .SetDescription( "An integer value" );
+            Console.WriteLine( "Could not create IHost" );
+            Environment.ExitCode = 1;
 
-            options.Bind<Program, string>( x => Program.TextValue, "t" )!
-                   .SetDefaultValue( "a cool default" )
-                   .SetDescription( "A string value" );
-
-            options.Bind<Program, bool>(x => Program.SwitchValue, "s")!
-                   .SetDefaultValue(false)
-                   .SetDescription("A switch");
+            return;
         }
 
-        // these next two methods serve to strip the project path off of source code
-        // file paths
-        private static string FilePathTrimmer( Type? loggedType,
-                                               string callerName,
-                                               int lineNum,
-                                               string srcFilePath )
+        var config = host.Services.GetRequiredService<IConfiguration>();
+        if( config == null )
+            throw new NullReferenceException( "Undefined IConfiguration" );
+
+        var help = new ColorHelpDisplay( host.CommandLineLexicalElements!, host.Options! );
+        help.Display();
+
+        var parsed = config.Get<Program>();
+
+        if( parsed == null )
         {
-            return CallingContextEnricher.DefaultFilePathTrimmer( loggedType,
-                                                                 callerName,
-                                                                 lineNum,
-                                                                 CallingContextEnricher.RemoveProjectPath( srcFilePath,
-                                                                  GetProjectPath() ) );
+            Console.WriteLine( "Parsing failed" );
+
+            Environment.ExitCode = -1;
+            return;
         }
 
-        private static string GetProjectPath( [ CallerFilePath ] string filePath = "" )
-        {
-            var dirInfo = new DirectoryInfo( Path.GetDirectoryName( filePath )! );
+        Console.WriteLine( "Parsing succeeded" );
 
-            while ( dirInfo.Parent != null )
-            {
-                if ( dirInfo.EnumerateFiles( "*.csproj" ).Any() )
-                    break;
+        Console.WriteLine( $"IntValue is {IntValue}" );
+        Console.WriteLine( $"TextValue is {TextValue}" );
+        Console.WriteLine( $"SwitchValue is {SwitchValue}" );
 
-                dirInfo = dirInfo.Parent;
-            }
+        Console.WriteLine( host.Options!.SpuriousValues.Count == 0
+            ? "No unkeyed parameters"
+            : $"Unkeyed parameters: {string.Join( ", ", host.Options.SpuriousValues )}" );
+    }
 
-            return dirInfo.FullName;
-        }
+    public static int IntValue { get; set; }
+    public static string TextValue { get; set; }
+    public static bool SwitchValue { get; set; }
+
+    private static void SetupOptions( OptionCollection options )
+    {
+        options.Bind<Program, int>( x => Program.IntValue, "i" )!
+            .SetDefaultValue( 75 )
+            .SetDescription( "An integer value" );
+
+        options.Bind<Program, string>( x => Program.TextValue, "t" )!
+            .SetDefaultValue( "a cool default" )
+            .SetDescription( "A string value" );
+
+        options.Bind<Program, bool>(x => Program.SwitchValue, "s")!
+            .SetDefaultValue(false)
+            .SetDescription("A switch");
     }
 }

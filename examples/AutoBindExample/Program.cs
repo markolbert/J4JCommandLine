@@ -1,15 +1,9 @@
 ﻿using System;
-using System.IO;
-using System.Linq;
-using System.Runtime.CompilerServices;
-using Autofac;
 using J4JSoftware.Configuration.CommandLine;
 using J4JSoftware.Configuration.J4JCommandLine;
 using J4JSoftware.DependencyInjection;
-using J4JSoftware.Logging;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Hosting;
 
 #pragma warning disable 8618
 
@@ -23,8 +17,7 @@ namespace J4JSoftware.CommandLine.Examples
         {
             var hostConfig = new J4JHostConfiguration(AppEnvironment.Console)
                              .Publisher( "J4JSoftware" )
-                             .ApplicationName( "AutoBindExample" )
-                             .FilePathTrimmer( FilePathTrimmer );
+                             .ApplicationName( "AutoBindExample" );
 
             hostConfig.AddCommandLineProcessing( CommandLineOperatingSystems.Windows )
                       .OptionsInitializer( SetupOptions );
@@ -85,35 +78,6 @@ namespace J4JSoftware.CommandLine.Examples
             options.Bind<Program, string>( x => Program.TextValue, "t" )!
                    .SetDefaultValue( "a cool default" )
                    .SetDescription( "A string value" );
-        }
-
-        // these next two methods serve to strip the project path off of source code
-        // file paths
-        private static string FilePathTrimmer( Type? loggedType,
-                                               string callerName,
-                                               int lineNum,
-                                               string srcFilePath )
-        {
-            return CallingContextEnricher.DefaultFilePathTrimmer( loggedType,
-                                                                 callerName,
-                                                                 lineNum,
-                                                                 CallingContextEnricher.RemoveProjectPath( srcFilePath,
-                                                                  GetProjectPath() ) );
-        }
-
-        private static string GetProjectPath( [ CallerFilePath ] string filePath = "" )
-        {
-            var dirInfo = new DirectoryInfo( Path.GetDirectoryName( filePath )! );
-
-            while ( dirInfo.Parent != null )
-            {
-                if ( dirInfo.EnumerateFiles( "*.csproj" ).Any() )
-                    break;
-
-                dirInfo = dirInfo.Parent;
-            }
-
-            return dirInfo.FullName;
         }
     }
 }
