@@ -15,7 +15,10 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\..\J4JLogging\J4JLogging\J4JLogging.csproj" />
+    <PackageReference Include="Microsoft.Extensions.Configuration.Binder" Version="7.0.3" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\..\ColorfulHelp\ColorfulHelp.csproj" />
     <ProjectReference Include="..\..\J4JCommandLine\J4JCommandLine.csproj" />
   </ItemGroup>
