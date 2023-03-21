@@ -56,7 +56,7 @@ public class J4JCommandLineProvider : ConfigurationProvider
             switch( option.Style )
             {
                 case OptionStyle.Switch:
-                    Set( option.ContextPath,
+                    Set( option.ContextPath!,
                          string.IsNullOrEmpty( option.CommandLineKeyProvided )
                              ? "false"
                              : "true" );
@@ -64,7 +64,7 @@ public class J4JCommandLineProvider : ConfigurationProvider
 
                 case OptionStyle.SingleValued:
                     if( option.NumValuesAllocated != 0 )
-                        Set( option.ContextPath, option.Values[ 0 ] );
+                        Set( option.ContextPath!, option.Values[ 0 ] );
                     break;
 
                 case OptionStyle.ConcatenatedSingleValue:
@@ -73,7 +73,7 @@ public class J4JCommandLineProvider : ConfigurationProvider
                     // collections), but they contain multiple string values from
                     // allocating the command line
                     if( option.NumValuesAllocated > 0 )
-                        Set( option.ContextPath, string.Join( ", ", option.Values ) );
+                        Set( option.ContextPath!, string.Join( ", ", option.Values ) );
                     break;
 
                 case OptionStyle.Collection:
