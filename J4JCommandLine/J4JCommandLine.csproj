@@ -12,13 +12,13 @@
 		<Copyright>© Mark A. Olbert all rights reserved</Copyright>
 		<RepositoryUrl>https://github.com/markolbert/J4JCommandLine</RepositoryUrl>
 		<RepositoryType>git</RepositoryType>
-		<Version>4.2.0.0</Version>
-		<AssemblyVersion>4.2.0.0</AssemblyVersion>
+		<Version>4.3.0.0</Version>
+		<AssemblyVersion>4.3.0.0</AssemblyVersion>
 		<GeneratePackageOnBuild>true</GeneratePackageOnBuild>
 		<PackageIcon>Diego nuspec.png</PackageIcon>
 		<PackageLicenseExpression>GPL-3.0-or-later</PackageLicenseExpression>
 		<PackageDescription>command line processing for the Net IConfiguration system</PackageDescription>
-		<PackageReleaseNotes>updated to net7</PackageReleaseNotes>
+		<PackageReleaseNotes>migrated logging to Microsoft from Serilog</PackageReleaseNotes>
 		<PackageReadmeFile>readme.md</PackageReadmeFile>
 	</PropertyGroup>
 
