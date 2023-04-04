@@ -3,7 +3,9 @@ using System.Linq;
 using System.Linq.Expressions;
 using FluentAssertions;
 using J4JSoftware.Configuration.CommandLine;
+using Microsoft.Extensions.Logging;
 using Serilog;
+using ILogger = Serilog.ILogger;
 
 namespace J4JSoftware.Binder.Tests;
 
@@ -19,6 +21,7 @@ public class TestBaseNoDi
     }
 
     protected ILogger Logger { get; }
+    protected ILoggerFactory LoggerFactory { get; }
 
     protected IOption Bind<TTarget, TProp>( OptionCollection options,
         Expression<Func<TTarget, TProp>> propSelector,

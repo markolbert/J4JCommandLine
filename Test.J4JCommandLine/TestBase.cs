@@ -4,7 +4,9 @@ using System.Linq.Expressions;
 using Autofac;
 using FluentAssertions;
 using J4JSoftware.Configuration.CommandLine;
+using Microsoft.Extensions.Logging;
 using Serilog;
+using ILogger = Serilog.ILogger;
 
 namespace J4JSoftware.Binder.Tests;
 
@@ -22,6 +24,7 @@ public class TestBase
 
     protected IContainer Container { get; }
     protected ILogger Logger { get; }
+    protected ILoggerFactory LoggerFactory { get; }
 
     private IContainer Configure()
     {

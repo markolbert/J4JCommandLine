@@ -23,7 +23,6 @@ using Xunit;
 
 namespace J4JSoftware.Binder.Tests
 {
-    //[UseAutofacTestFramework]
     public class MiscTests : TestBase
     {
         [ Theory ]
@@ -31,9 +30,9 @@ namespace J4JSoftware.Binder.Tests
         [ InlineData( "-x \"abc\"", "abc" ) ]
         public void LinuxStringHandling( string cmdLine, params string[] result )
         {
-            var parser = Parser.GetLinuxDefault( logger: Logger );
+            var parser = Parser.GetLinuxDefault( loggerFactory: LoggerFactory );
 
-            var option = parser!.Collection.Bind<MiscTarget, string?>( x => x.AStringValue, "x" );
+            var option = parser.Collection.Bind<MiscTarget, string?>( x => x.AStringValue, "x" );
             option.Should().NotBeNull();
 
             parser.Parse( cmdLine ).Should().BeTrue();

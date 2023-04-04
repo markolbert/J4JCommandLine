@@ -53,8 +53,8 @@ public class ConfigurationTestsNoDi : TestBaseNoDi
     private void CreateConfigurationRootAndParser( TestConfig testConfig )
     {
         var parser = testConfig.OperatingSystem.Equals( "windows", StringComparison.OrdinalIgnoreCase )
-            ? Parser.GetWindowsDefault( logger: Logger )
-            : Parser.GetLinuxDefault( logger: Logger );
+            ? Parser.GetWindowsDefault( loggerFactory: LoggerFactory )
+            : Parser.GetLinuxDefault( loggerFactory: LoggerFactory );
 
         _options = parser.Collection;
 
