@@ -20,17 +20,17 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Linq.Expressions;
-using Serilog;
+using Microsoft.Extensions.Logging;
 
 namespace J4JSoftware.Configuration.CommandLine;
 
 public class OptionCollection
 {
-    public static OptionCollection GetWindowsDefault( ILogger? logger = null ) =>
-        new OptionCollection( StringComparison.OrdinalIgnoreCase, new TextConverters( logger: logger ), logger );
+    public static OptionCollection GetWindowsDefault( ILoggerFactory? loggerFactory = null ) =>
+        new OptionCollection( StringComparison.OrdinalIgnoreCase, new TextConverters( loggerFactory: loggerFactory ), loggerFactory );
 
-    public static OptionCollection GetLinuxDefault( ILogger? logger = null ) =>
-        new OptionCollection( StringComparison.Ordinal, new TextConverters( logger: logger ), logger );
+    public static OptionCollection GetLinuxDefault( ILoggerFactory? logger = null ) =>
+        new OptionCollection( StringComparison.Ordinal, new TextConverters( loggerFactory: logger ), logger );
 
     public event EventHandler? Configured;
 
@@ -39,15 +39,16 @@ public class OptionCollection
     private readonly List<Func<BindingInfo, bool>> _bindingTests;
     private readonly ILogger? _logger;
 
-    public OptionCollection( StringComparison textComparison,
+    public OptionCollection( 
+        StringComparison textComparison,
         ITextConverters converters,
-        ILogger? logger = null )
+        ILoggerFactory? loggerFactory = null 
+        )
     {
         _textComparison = textComparison;
         _converters = converters;
 
-        _logger = logger;
-        _logger?.ForContext<OptionCollection>();
+        _logger = loggerFactory?.CreateLogger<OptionCollection>();
 
         _bindingTests = new List<Func<BindingInfo, bool>>
         {
@@ -104,7 +105,7 @@ public class OptionCollection
         var bindingInfo = BindingInfo.Create( selector );
         if( !bindingInfo.IsProperty )
         {
-            _logger?.Error( "Binding target {0} is not a property", bindingInfo.FullName );
+            _logger?.LogError( "Binding target {0} is not a property", bindingInfo.FullName );
             return null;
         }
 
@@ -119,7 +120,7 @@ public class OptionCollection
                 if( test( bindingInfo ) )
                     continue;
 
-                _logger?.Error( "{0} failed {1}", curBindingInfo.FullName, test );
+                _logger?.LogError( "{0} failed {1}", curBindingInfo.FullName, test );
                 return null;
             }
 
@@ -128,7 +129,7 @@ public class OptionCollection
 
         if( OptionsInternal.Any( x => x.ContextPath!.Equals( bindingInfo.FullName, _textComparison ) ) )
         {
-            _logger?.Error( "An option with the same ContextPath ('{0}') is already in the collection",
+            _logger?.LogError( "An option with the same ContextPath ('{0}') is already in the collection",
                                     bindingInfo.FullName );
             return null;
         }

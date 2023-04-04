@@ -19,7 +19,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using Serilog;
+using Microsoft.Extensions.Logging;
 
 namespace J4JSoftware.Configuration.CommandLine;
 
@@ -27,12 +27,14 @@ public class LexicalElements : ILexicalElements
 {
     private readonly Dictionary<LexicalType, List<Token>> _available = new();
 
-    public LexicalElements( StringComparison textComparison,
-        ILogger? logger = null,
-        bool inclCommon = true )
+    public LexicalElements( 
+        StringComparison textComparison,
+        ILoggerFactory? loggerFactory = null,
+        bool inclCommon = true 
+        )
     {
         TextComparison = textComparison;
-        Logger = logger;
+        Logger = loggerFactory?.CreateLogger( GetType() );
 
         if( !inclCommon )
             return;
@@ -52,14 +54,14 @@ public class LexicalElements : ILexicalElements
     {
         if( type == LexicalType.Text || type == LexicalType.StartOfInput )
         {
-            Logger?.Error( "Cannot include {0} tokens", type );
+            Logger?.LogError( "Cannot include {0} tokens", type );
             return false;
         }
 
         if( _available.SelectMany( kvp => kvp.Value )
                       .Any( t => t.Text.Equals( text, TextComparison ) ) )
         {
-            Logger?.Error( "Duplicate token text '{0}' ({1})", text, type );
+            Logger?.LogError( "Duplicate token text '{0}' ({1})", text, type );
             return false;
         }
 

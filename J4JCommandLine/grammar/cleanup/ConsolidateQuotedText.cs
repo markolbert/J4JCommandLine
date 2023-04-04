@@ -19,7 +19,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using Serilog;
+using Microsoft.Extensions.Logging;
 
 #pragma warning disable 8618
 
@@ -32,10 +32,10 @@ public class ConsolidateQuotedText : ICleanupTokens
 
     public ConsolidateQuotedText( 
         StringComparison textComparison,
-        ILogger? logger )
+        ILoggerFactory? loggerFactory = null )
     {
         _textComparison = textComparison;
-        _logger = logger;
+        _logger = loggerFactory?.CreateLogger<ConsolidateQuotedText>();
     }
 
     public void Process( List<Token> tokens )
@@ -51,7 +51,7 @@ public class ConsolidateQuotedText : ICleanupTokens
             // "quoted" tokens
             if( curPair.End == null )
             {
-                _logger?.Error( "Unclosed quoter encountered, command line truncated at token #{0}",
+                _logger?.LogError( "Unclosed quoter encountered, command line truncated at token #{0}",
                                 curPair.Start.Index );
 
                 tokens.RemoveFrom( curPair.Start.Index );

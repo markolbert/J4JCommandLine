@@ -20,7 +20,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Serilog;
+using Microsoft.Extensions.Logging;
 
 namespace J4JSoftware.Configuration.CommandLine;
 
@@ -103,26 +103,26 @@ public static class J4JCommandLineExtensions
         out OptionCollection? options,
         out CommandLineSource? cmdLineSource,
         ITextConverters? converters = null,
-        ILogger? logger = null,
+        ILoggerFactory? loggerFactory = null,
         params ICleanupTokens[] cleanupTokens ) =>
         builder.AddJ4JCommandLineDefault( CommandLineOperatingSystems.Windows,
                                           out options,
                                           out cmdLineSource,
-                                          converters ?? new TextConverters( logger: logger ),
-                                          logger,
+                                          converters ?? new TextConverters( loggerFactory: loggerFactory ),
+                                          loggerFactory,
                                           cleanupTokens );
 
     public static IConfigurationBuilder AddJ4JCommandLineForLinux( this IConfigurationBuilder builder,
         out OptionCollection? options,
         out CommandLineSource? cmdLineSource,
         ITextConverters? converters = null,
-        ILogger? logger = null,
+        ILoggerFactory? loggerFactory = null,
         params ICleanupTokens[] cleanupTokens ) =>
         builder.AddJ4JCommandLineDefault( CommandLineOperatingSystems.Linux,
                                           out options,
                                           out cmdLineSource,
-                                          converters ?? new TextConverters( logger: logger ),
-                                          logger,
+                                          converters ?? new TextConverters( loggerFactory: loggerFactory ),
+                                          loggerFactory,
                                           cleanupTokens );
 
     private static IConfigurationBuilder AddJ4JCommandLineDefault( this IConfigurationBuilder builder,
@@ -130,7 +130,7 @@ public static class J4JCommandLineExtensions
         out OptionCollection? options,
         out CommandLineSource? cmdLineSource,
         ITextConverters? converters = null,
-        ILogger? logger = null,
+        ILoggerFactory? loggerFactory = null,
         params ICleanupTokens[] cleanupTokens )
     {
         converters ??= new TextConverters();
@@ -145,15 +145,15 @@ public static class J4JCommandLineExtensions
 
         var lexicalElements = opSys switch
         {
-            CommandLineOperatingSystems.Windows => (ILexicalElements) new WindowsLexicalElements( logger ),
-            CommandLineOperatingSystems.Linux => new LinuxLexicalElements( logger ),
+            CommandLineOperatingSystems.Windows => (ILexicalElements) new WindowsLexicalElements( loggerFactory ),
+            CommandLineOperatingSystems.Linux => new LinuxLexicalElements( loggerFactory ),
             _ => throw new
                 InvalidEnumArgumentException( $"Unsupported {nameof( CommandLineOperatingSystems )} value '{opSys}'" )
         };
 
-        options = new OptionCollection( textComparison, converters, logger );
+        options = new OptionCollection( textComparison, converters, loggerFactory );
 
-        var optionsGenerator = new OptionsGenerator( options, textComparison, logger );
+        var optionsGenerator = new OptionsGenerator( options, textComparison, loggerFactory );
         var parsingTable = new ParsingTable( optionsGenerator );
         var tokenizer = new Tokenizer( lexicalElements );
 

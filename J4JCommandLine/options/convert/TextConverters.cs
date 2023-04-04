@@ -20,7 +20,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
-using Serilog;
+using Microsoft.Extensions.Logging;
 
 namespace J4JSoftware.Configuration.CommandLine;
 
@@ -33,7 +33,7 @@ public class TextConverters : ITextConverters
 
     private record BuiltInConverter( Type ReturnType, MethodInfo MethodInfo );
 
-    private static List<ITextToValue> GetBuiltInConverters( ILogger? logger )
+    private static List<ITextToValue> GetBuiltInConverters( ILoggerFactory? loggerFactory = null )
     {
         var retVal = new List<ITextToValue>();
 
@@ -44,7 +44,7 @@ public class TextConverters : ITextConverters
             retVal.Add( (ITextToValue) Activator.CreateInstance( builtInType,
                                                                  new object?[]
                                                                  {
-                                                                     builtInConverter.MethodInfo, logger
+                                                                     builtInConverter.MethodInfo, loggerFactory
                                                                  } )! );
         }
 
@@ -64,15 +64,16 @@ public class TextConverters : ITextConverters
            .Select( x => new BuiltInConverter( x.ReturnType, x ) )
            .ToList();
 
-    public TextConverters( BuiltInConverters builtInConv = BuiltInConverters.AddDynamically,
-        ILogger? logger = null,
-        params ITextToValue[] converters )
+    public TextConverters( 
+        BuiltInConverters builtInConv = BuiltInConverters.AddDynamically,
+        ILoggerFactory? loggerFactory = null,
+        params ITextToValue[] converters 
+        )
     {
-        _logger = logger;
-        _logger?.ForContext<TextConverters>();
+        _logger = loggerFactory?.CreateLogger<TextConverters>();
 
         // add the text to text "converter"
-        AddConverter( new TextToTextConverter( logger ), true );
+        AddConverter( new TextToTextConverter( loggerFactory ), true );
 
         AddConverters( converters );
         _builtInConv = builtInConv;
@@ -80,7 +81,7 @@ public class TextConverters : ITextConverters
         switch ( builtInConv )
         {
             case BuiltInConverters.AddAtInitialization:
-                AddConverters( GetBuiltInConverters( logger ) );
+                AddConverters( GetBuiltInConverters( loggerFactory ) );
                 break;
 
             case BuiltInConverters.AddDynamically:
@@ -101,7 +102,7 @@ public class TextConverters : ITextConverters
         {
             if ( !replaceExisting )
             {
-                _logger?.Error( "There is already a converter defined for {0}", converter.TargetType );
+                _logger?.LogError( "There is already a converter defined for {0}", converter.TargetType );
                 return false;
             }
 
@@ -152,7 +153,7 @@ public class TextConverters : ITextConverters
         if( CanConvertSimple( toCheck ) )
             return true;
 
-        _logger?.Error( "No ITextToValue converter is defined for {0}", toCheck );
+        _logger?.LogError( "No ITextToValue converter is defined for {0}", toCheck );
 
         return false;
     }
@@ -175,14 +176,14 @@ public class TextConverters : ITextConverters
     {
         if( _builtInTargets == null )
         {
-            _logger?.Warning("No built-in text converter targets are defined");
+            _logger?.LogWarning("No built-in text converter targets are defined");
             return null;
         }
 
         var builtIn = _builtInTargets.FirstOrDefault( x => x.ReturnType == simpleType );
         if( builtIn == null )
         {
-            _logger?.Warning("No built-in text converter for type {0} is defined", simpleType);
+            _logger?.LogWarning("No built-in text converter for type {0} is defined", simpleType);
             return null;
         }
 
@@ -193,7 +194,7 @@ public class TextConverters : ITextConverters
 
         if( retVal != null )
             _converters.Add( simpleType, retVal );
-        else _logger?.Warning( "Could not create an instance of ITextToValue converter '{0}'", builtInType );
+        else _logger?.LogWarning( "Could not create an instance of ITextToValue converter '{0}'", builtInType );
 
         return retVal;
     }
@@ -262,7 +263,7 @@ public class TextConverters : ITextConverters
             return converter!.Convert( textValues, out result );
         }
 
-        _logger?.Error( "Cannot convert text to '{0}'", targetType );
+        _logger?.LogError( "Cannot convert text to '{0}'", targetType );
 
         return false;
     }
@@ -290,7 +291,7 @@ public class TextConverters : ITextConverters
             if( converter != null )
                 return converter;
 
-            _logger?.Warning( "No ITextToValue converter found for type '{0}'", key );
+            _logger?.LogWarning( "No ITextToValue converter found for type '{0}'", key );
             return new UndefinedTextToValue();
         }
     }

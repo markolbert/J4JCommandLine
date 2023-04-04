@@ -18,22 +18,21 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using Serilog;
-using Serilog.Events;
+using Microsoft.Extensions.Logging;
 
 namespace J4JSoftware.Configuration.CommandLine;
 
 public class OptionsGenerator : IOptionsGenerator
 {
-    public static OptionsGenerator GetWindowsDefault( ILogger? logger = null ) =>
-        new OptionsGenerator( OptionCollection.GetWindowsDefault( logger ),
+    public static OptionsGenerator GetWindowsDefault( ILoggerFactory? loggerFactory = null ) =>
+        new OptionsGenerator( OptionCollection.GetWindowsDefault( loggerFactory ),
                               StringComparison.OrdinalIgnoreCase,
-                              logger );
+                              loggerFactory );
 
-    public static OptionsGenerator GetLinuxDefault( ILogger? logger = null ) =>
-        new OptionsGenerator( OptionCollection.GetWindowsDefault( logger ),
+    public static OptionsGenerator GetLinuxDefault( ILoggerFactory? loggerFactory = null ) =>
+        new OptionsGenerator( OptionCollection.GetWindowsDefault( loggerFactory ),
                               StringComparison.Ordinal,
-                              logger );
+                              loggerFactory );
 
     private readonly OptionCollection? _options;
     private readonly StringComparison _textComparison;
@@ -41,13 +40,15 @@ public class OptionsGenerator : IOptionsGenerator
 
     private CommandLineArgument? _current;
 
-    public OptionsGenerator( OptionCollection options,
+    public OptionsGenerator( 
+        OptionCollection options,
         StringComparison textComparison,
-        ILogger? logger = null )
+        ILoggerFactory? loggerFactory = null 
+        )
     {
         _options = options;
         _textComparison = textComparison;
-        _logger = logger;
+        _logger = loggerFactory?.CreateLogger<OptionsGenerator>();
     }
 
     public bool Create( TokenPair tokenPair )
@@ -62,7 +63,7 @@ public class OptionsGenerator : IOptionsGenerator
         {
             LogTokenPair( tokenPair,
                           $"{nameof( EndParsing )} called before end of command line text",
-                          LogEventLevel.Error );
+                          LogLevel.Error );
             return false;
         }
 
@@ -79,7 +80,7 @@ public class OptionsGenerator : IOptionsGenerator
     {
         _current = null;
 
-        LogTokenPair( tokenPair, "terminated with prejudice", LogEventLevel.Error );
+        LogTokenPair( tokenPair, "terminated with prejudice", LogLevel.Error );
 
         return false;
     }
@@ -100,7 +101,7 @@ public class OptionsGenerator : IOptionsGenerator
                     return Create( tokenPair );
 
                 default:
-                    LogTokenPair( tokenPair, "invalid token sequence", LogEventLevel.Error );
+                    LogTokenPair( tokenPair, "invalid token sequence", LogLevel.Error );
                     return false;
             }
         }
@@ -124,7 +125,7 @@ public class OptionsGenerator : IOptionsGenerator
 
         _options!.UnknownKeys.Add( _current );
 
-        LogTokenPair( tokenPair, $"unexpected key '{_current.Key}'", LogEventLevel.Error );
+        LogTokenPair( tokenPair, $"unexpected key '{_current.Key}'", LogLevel.Error );
 
         return true;
     }
@@ -150,7 +151,7 @@ public class OptionsGenerator : IOptionsGenerator
     {
         if( _current?.Option?.Style != OptionStyle.Switch )
         {
-            _logger?.Error( "Trying to commit a value to a switch value to a non-switch option" );
+            _logger?.LogError( "Trying to commit a value to a switch value to a non-switch option" );
             return false;
         }
 
@@ -173,7 +174,7 @@ public class OptionsGenerator : IOptionsGenerator
     {
         if( _current?.Option == null || _current.Option.Style == OptionStyle.Switch )
         {
-            _logger?.Error( "Trying to commit a non-switch value to a switch option" );
+            _logger?.LogError( "Trying to commit a non-switch value to a switch option" );
             return false;
         }
 
@@ -211,22 +212,23 @@ public class OptionsGenerator : IOptionsGenerator
             if( validValues.Any( x => x.Equals( value, _textComparison ) ) )
                 continue;
 
-            _logger?.Error( "Invalid {0} option value '{1}'", propertyType.Name, value );
+            _logger?.LogError( "Invalid {0} option value '{1}'", propertyType.Name, value );
             return false;
         }
 
         return true;
     }
 
-    protected void LogTokenPair( TokenPair tokenPair, string text, LogEventLevel level )
+    protected void LogTokenPair( TokenPair tokenPair, string text, LogLevel level )
     {
         if( _logger == null )
             return;
 
-        _logger.Write(level, "{0} *undefined* => {1} ('{2}')",
-            text,
-            tokenPair.Current.Type,
-            tokenPair.Current.Text);
+        _logger.Log( level,
+                     "{0} *undefined* => {1} ('{2}')",
+                     text,
+                     tokenPair.Current.Type,
+                     tokenPair.Current.Text );
 
         //else
         //    _logger.Write( level,

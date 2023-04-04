@@ -16,14 +16,14 @@
 // with J4JCommandLine. If not, see <https://www.gnu.org/licenses/>.
 
 using System;
-using Serilog;
+using Microsoft.Extensions.Logging;
 
 namespace J4JSoftware.Configuration.CommandLine;
 
 public sealed class LinuxLexicalElements : LexicalElements
 {
-    public LinuxLexicalElements( ILogger? logger = null )
-        : base( StringComparison.Ordinal, logger )
+    public LinuxLexicalElements( ILoggerFactory? loggerFactory = null )
+        : base( StringComparison.Ordinal, loggerFactory )
     {
         Add( LexicalType.Quoter, "\"" );
         Add( LexicalType.Quoter, "'" );

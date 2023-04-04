@@ -15,14 +15,14 @@
 // You should have received a copy of the GNU General Public License along 
 // with J4JCommandLine. If not, see <https://www.gnu.org/licenses/>.
 
-using Serilog;
+using Microsoft.Extensions.Logging;
 
 namespace J4JSoftware.Configuration.CommandLine;
 
 public class TextToTextConverter : TextToValue<string>
 {
-    public TextToTextConverter( ILogger? logger )
-        : base( logger )
+    public TextToTextConverter( ILoggerFactory? loggerFactory = null )
+        : base( loggerFactory )
     {
     }
 

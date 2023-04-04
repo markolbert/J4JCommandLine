@@ -16,7 +16,7 @@
 // with J4JCommandLine. If not, see <https://www.gnu.org/licenses/>.
 
 using System.Reflection;
-using Serilog;
+using Microsoft.Extensions.Logging;
 
 namespace J4JSoftware.Configuration.CommandLine;
 
@@ -25,8 +25,8 @@ public class BuiltInTextToValue<TBaseType> : TextToValue<TBaseType>
     private readonly MethodInfo _convMethod;
 
     public BuiltInTextToValue( MethodInfo convMethod,
-        ILogger? logger )
-        : base( logger )
+        ILoggerFactory? loggerFactory )
+        : base( loggerFactory )
     {
         _convMethod = convMethod;
     }
@@ -42,7 +42,7 @@ public class BuiltInTextToValue<TBaseType> : TextToValue<TBaseType>
         }
         catch
         {
-            Logger?.Error( "Could not convert '{0}' to a {1}", text, typeof( TBaseType? ) );
+            Logger?.LogError( "Could not convert '{0}' to a {1}", text, typeof( TBaseType? ) );
             return false;
         }
     }

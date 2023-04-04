@@ -17,26 +17,28 @@
 
 using System;
 using System.Collections.Generic;
-using Serilog;
+using Microsoft.Extensions.Logging;
 
 namespace J4JSoftware.Configuration.CommandLine;
 
 public class Tokenizer : ITokenizer
 {
-    public static Tokenizer GetWindowsDefault( ILogger? logger = null,
+    public static Tokenizer GetWindowsDefault( ILoggerFactory? loggerFactory = null,
         params ICleanupTokens[] cleanupProcessors ) =>
-        new Tokenizer( new WindowsLexicalElements( logger ), logger, cleanupProcessors );
+        new Tokenizer( new WindowsLexicalElements( loggerFactory ), loggerFactory, cleanupProcessors );
 
-    public static Tokenizer GetLinuxDefault( ILogger? logger = null,
+    public static Tokenizer GetLinuxDefault( ILoggerFactory? loggerFactory = null,
         params ICleanupTokens[] cleanupProcessors ) =>
-        new Tokenizer( new LinuxLexicalElements( logger ), logger, cleanupProcessors );
+        new Tokenizer( new LinuxLexicalElements( loggerFactory ), loggerFactory, cleanupProcessors );
 
     private readonly ICleanupTokens[] _cleanupProcessors;
     private readonly ILexicalElements _tokens;
 
-    public Tokenizer( ILexicalElements tokens,
-        ILogger? logger = null,
-        params ICleanupTokens[] cleanupProcessors )
+    public Tokenizer( 
+        ILexicalElements tokens,
+        ILoggerFactory? loggerFactory = null,
+        params ICleanupTokens[] cleanupProcessors 
+        )
     {
         TextComparison = tokens.TextComparison;
         _tokens = tokens;
@@ -46,7 +48,7 @@ public class Tokenizer : ITokenizer
         else
             _cleanupProcessors = new ICleanupTokens[]
             {
-                new ConsolidateQuotedText( TextComparison, logger ),
+                new ConsolidateQuotedText( TextComparison, loggerFactory ),
                 new MergeSequentialSeparators()
             };
     }

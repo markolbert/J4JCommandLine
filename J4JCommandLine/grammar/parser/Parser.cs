@@ -16,48 +16,49 @@
 // with J4JCommandLine. If not, see <https://www.gnu.org/licenses/>.
 
 using System;
-using Serilog;
+using Microsoft.Extensions.Logging;
 
 namespace J4JSoftware.Configuration.CommandLine;
 
 public class Parser : IParser
 {
     public static IParser GetWindowsDefault( ITextConverters? converters = null,
-        ILogger? logger = null,
+        ILoggerFactory? loggerFactory = null,
         params ICleanupTokens[] cleanupProcessors )
     {
-        converters ??= new TextConverters( logger: logger );
+        converters ??= new TextConverters( loggerFactory: loggerFactory );
 
-        var options = new OptionCollection( StringComparison.OrdinalIgnoreCase, converters, logger );
+        var options = new OptionCollection( StringComparison.OrdinalIgnoreCase, converters, loggerFactory );
 
         var parsingTable = new ParsingTable( new OptionsGenerator( options,
                                                                    StringComparison.OrdinalIgnoreCase,
-                                                                   logger ));
+                                                                   loggerFactory ));
 
-        var tokenizer = new Tokenizer( new WindowsLexicalElements( logger ),
-                                       logger,
+        var tokenizer = new Tokenizer( new WindowsLexicalElements( loggerFactory ),
+                                       loggerFactory,
                                        cleanupProcessors );
 
-        return new Parser( options, parsingTable, tokenizer, logger );
+        return new Parser( options, parsingTable, tokenizer, loggerFactory );
     }
 
-    public static IParser GetLinuxDefault( ITextConverters? converters = null,
-        ILogger? logger = null,
+    public static IParser GetLinuxDefault( 
+        ITextConverters? converters = null,
+        ILoggerFactory? loggerFactory = null,
         params ICleanupTokens[] cleanupProcessors )
     {
-        converters ??= new TextConverters( logger: logger );
+        converters ??= new TextConverters( loggerFactory: loggerFactory );
 
-        var options = new OptionCollection( StringComparison.Ordinal, converters, logger );
+        var options = new OptionCollection( StringComparison.Ordinal, converters, loggerFactory );
 
         var parsingTable = new ParsingTable( new OptionsGenerator( options,
                                                                    StringComparison.Ordinal,
-                                                                   logger ));
+                                                                   loggerFactory ));
 
-        var tokenizer = new Tokenizer( new LinuxLexicalElements( logger ),
-                                       logger,
+        var tokenizer = new Tokenizer( new LinuxLexicalElements( loggerFactory ),
+                                       loggerFactory,
                                        cleanupProcessors );
 
-        return new Parser( options, parsingTable, tokenizer, logger );
+        return new Parser( options, parsingTable, tokenizer, loggerFactory );
     }
 
     private readonly ParsingTable _parsingTable;
@@ -66,13 +67,13 @@ public class Parser : IParser
     public Parser( OptionCollection options,
         ParsingTable parsingTable,
         ITokenizer tokenizer,
-        ILogger? logger = null )
+        ILoggerFactory? loggerFactory = null )
     {
         Collection = options;
         _parsingTable = parsingTable;
         Tokenizer = tokenizer;
 
-        _logger = logger;
+        _logger = loggerFactory?.CreateLogger<Parser>();
     }
 
     public ITokenizer Tokenizer { get; }
@@ -88,7 +89,7 @@ public class Parser : IParser
 
             if( parsingAction == null )
             {
-                _logger?.Error( "Undefined parsing action for token sequence '{0} => {1}'",
+                _logger?.LogError( "Undefined parsing action for token sequence '{0} => {1}'",
                                 tokenPair.Previous.Type,
                                 tokenPair.Current.Type );
 

@@ -18,16 +18,15 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using Serilog;
+using Microsoft.Extensions.Logging;
 
 namespace J4JSoftware.Configuration.CommandLine;
 
 public abstract class TextToValue<TBaseType> : ITextToValue
 {
-    protected TextToValue( ILogger? logger )
+    protected TextToValue( ILoggerFactory? loggerFactory = null )
     {
-        Logger = logger;
-        Logger?.ForContext<TextToValue<TBaseType>>();
+        Logger = loggerFactory?.CreateLogger<TBaseType>();
     }
 
     protected abstract bool ConvertTextToValue( string text, out TBaseType? result );
@@ -57,7 +56,7 @@ public abstract class TextToValue<TBaseType> : ITextToValue
             case TypeNature.Simple:
                 if ( valueList.Count > 1 )
                 {
-                    Logger?.Error( "Cannot convert multiple text values to a single value of '{0}'",
+                    Logger?.LogError( "Cannot convert multiple text values to a single value of '{0}'",
                                    typeof( TBaseType ) );
 
                     return false;
@@ -125,7 +124,7 @@ public abstract class TextToValue<TBaseType> : ITextToValue
                 retVal.Add( temp );
             else
             {
-                Logger?.Error( "Could not convert '{0}' to an instance of {1}", value, typeof( TBaseType ) );
+                Logger?.LogError( "Could not convert '{0}' to an instance of {1}", value, typeof( TBaseType ) );
                 return false;
             }
         }
