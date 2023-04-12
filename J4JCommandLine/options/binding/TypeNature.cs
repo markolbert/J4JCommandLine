@@ -1,7 +1,10 @@
-﻿// Copyright (c) 2021, 2022 Mark A. Olbert 
-// 
-// This file is part of J4JCommandLine.
+﻿#region copyright
+// Copyright (c) 2021, 2022, 2023 Mark A. Olbert 
+// https://www.JumpForJoySoftware.com
+// TypeNature.cs
 //
+// This file is part of JumpForJoy Software's J4JCommandLine.
+// 
 // J4JCommandLine is free software: you can redistribute it and/or modify it 
 // under the terms of the GNU General Public License as published by the 
 // Free Software Foundation, either version 3 of the License, or 
@@ -14,6 +17,7 @@
 // 
 // You should have received a copy of the GNU General Public License along 
 // with J4JCommandLine. If not, see <https://www.gnu.org/licenses/>.
+#endregion
 
 namespace J4JSoftware.Configuration.CommandLine;
 
