@@ -1,4 +1,5 @@
 ﻿#region copyright
+
 // Copyright (c) 2021, 2022, 2023 Mark A. Olbert 
 // https://www.JumpForJoySoftware.com
 // HelpDisplay.cs
@@ -17,6 +18,7 @@
 // 
 // You should have received a copy of the GNU General Public License along 
 // with J4JCommandLine. If not, see <https://www.gnu.org/licenses/>.
+
 #endregion
 
 using System.Collections.Generic;
@@ -26,17 +28,13 @@ using System.Text;
 
 namespace J4JSoftware.Configuration.CommandLine;
 
-public abstract class HelpDisplay : IHelpDisplay
+public abstract class HelpDisplay(
+    ILexicalElements tokens,
+    OptionCollection collection
+) : IHelpDisplay
 {
-    protected HelpDisplay( ILexicalElements tokens,
-        OptionCollection collection )
-    {
-        Tokens = tokens;
-        Collection = collection;
-    }
-
-    protected ILexicalElements Tokens { get; }
-    protected OptionCollection Collection { get; }
+    protected ILexicalElements Tokens { get; } = tokens;
+    protected OptionCollection Collection { get; } = collection;
 
     public abstract void Display();
 
@@ -44,7 +42,7 @@ public abstract class HelpDisplay : IHelpDisplay
     {
         var retVal = new List<string>();
 
-        foreach( var prefix in Tokens.Where( x => x.Type == LexicalType.KeyPrefix  ) )
+        foreach( var prefix in Tokens.Where( x => x.Type == LexicalType.KeyPrefix ) )
         {
             foreach( var key in option.Keys )
             {

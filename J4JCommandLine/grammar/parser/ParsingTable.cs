@@ -1,4 +1,5 @@
 ﻿#region copyright
+
 // Copyright (c) 2021, 2022, 2023 Mark A. Olbert 
 // https://www.JumpForJoySoftware.com
 // ParsingTable.cs
@@ -17,6 +18,7 @@
 // 
 // You should have received a copy of the GNU General Public License along 
 // with J4JCommandLine. If not, see <https://www.gnu.org/licenses/>.
+
 #endregion
 
 using System;
@@ -31,17 +33,17 @@ public delegate bool ParsingAction( TokenPair tokenPair );
 public class ParsingTable : IParsingTable
 {
     public static ParsingTable GetWindowsDefault( ILoggerFactory? loggerFactory = null ) =>
-        new ParsingTable( OptionsGenerator.GetWindowsDefault( loggerFactory ) );
+        new( OptionsGenerator.GetWindowsDefault( loggerFactory ) );
 
     public static ParsingTable GetLinuxDefault( ILoggerFactory? loggerFactory = null ) =>
-        new ParsingTable( OptionsGenerator.GetLinuxDefault( loggerFactory ) );
+        new( OptionsGenerator.GetLinuxDefault( loggerFactory ) );
 
     private readonly Dictionary<LexicalType, Dictionary<LexicalType, ParsingAction?>> _table =
         new();
 
     private readonly ParsingAction _endParsing;
 
-    public ParsingTable( IOptionsGenerator generator)
+    public ParsingTable( IOptionsGenerator generator )
     {
         _endParsing = generator.EndParsing;
 
@@ -64,9 +66,9 @@ public class ParsingTable : IParsingTable
                 if( col switch
                    {
                        LexicalType.StartOfInput => true,
-                       LexicalType.Quoter       => true,
-                       LexicalType.EndOfInput   => true,
-                       _                        => false
+                       LexicalType.Quoter => true,
+                       LexicalType.EndOfInput => true,
+                       _ => false
                    } )
                     continue;
 

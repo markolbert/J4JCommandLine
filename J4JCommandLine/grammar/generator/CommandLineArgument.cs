@@ -1,4 +1,5 @@
 ﻿#region copyright
+
 // Copyright (c) 2021, 2022, 2023 Mark A. Olbert 
 // https://www.JumpForJoySoftware.com
 // CommandLineArgument.cs
@@ -17,6 +18,7 @@
 // 
 // You should have received a copy of the GNU General Public License along 
 // with J4JCommandLine. If not, see <https://www.gnu.org/licenses/>.
+
 #endregion
 
 using System;
@@ -30,15 +32,17 @@ public class CommandLineArgument
     private readonly OptionCollection _options;
     private readonly StringComparison _textComparison;
 
-    internal CommandLineArgument( OptionCollection options,
-        StringComparison textComparison )
+    internal CommandLineArgument(
+        OptionCollection options,
+        StringComparison textComparison
+    )
     {
         _options = options;
         _textComparison = textComparison;
     }
 
     public string? Key { get; set; }
-    public List<string> Values { get; } = new();
+    public List<string> Values { get; } = [];
 
     internal IOptionInternal? Option =>
         _options.OptionsInternal.FirstOrDefault( x =>

@@ -1,4 +1,5 @@
 ﻿#region copyright
+
 // Copyright (c) 2021, 2022, 2023 Mark A. Olbert 
 // https://www.JumpForJoySoftware.com
 // DefaultHelpDisplay.cs
@@ -17,20 +18,18 @@
 // 
 // You should have received a copy of the GNU General Public License along 
 // with J4JCommandLine. If not, see <https://www.gnu.org/licenses/>.
+
 #endregion
 
 using System;
 
 namespace J4JSoftware.Configuration.CommandLine;
 
-public class DefaultHelpDisplay : HelpDisplay
+public class DefaultHelpDisplay(
+    ILexicalElements tokens,
+    OptionCollection collection
+) : HelpDisplay( tokens, collection )
 {
-    public DefaultHelpDisplay( ILexicalElements tokens,
-        OptionCollection collection )
-        : base( tokens, collection )
-    {
-    }
-
     public override void Display()
     {
         Console.WriteLine( "Command line help\n" );

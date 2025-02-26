@@ -19,7 +19,7 @@ public class TestBase
         Container = Configure();
 
         Logger = Container.Resolve<ILogger>();
-        Logger.ForContext(GetType());
+        Logger.ForContext( GetType() );
     }
 
     protected IContainer Container { get; }
@@ -36,57 +36,33 @@ public class TestBase
     protected virtual void ConfigureContainer( ContainerBuilder builder )
     {
         builder.Register( _ => new LoggerConfiguration()
-                .WriteTo.Debug()
-                .CreateLogger())
-            .AsImplementedInterfaces()
-            .SingleInstance();
+                              .WriteTo.Debug()
+                              .CreateLogger() )
+               .AsImplementedInterfaces()
+               .SingleInstance();
     }
 
-    //private void RegisterBuiltInTextToValue( ContainerBuilder builder )
-    //{
-    //    foreach ( var convMethod in typeof( Convert )
-    //                 .GetMethods( BindingFlags.Static | BindingFlags.Public )
-    //                 .Where( m =>
-    //                 {
-    //                     var parameters = m.GetParameters();
-
-    //                     return parameters.Length == 1
-    //                            && !typeof( string ).IsAssignableFrom( parameters[ 0 ]
-    //                                .ParameterType );
-    //                 } ) )
-    //    {
-    //        builder.Register( c =>
-    //        {
-    //            var logger = c.IsRegistered<ILogger>() ? c.Resolve<ILogger>() : null;
-
-    //            var builtInType =
-    //                typeof( BuiltInTextToValue<> ).MakeGenericType( convMethod.ReturnType );
-
-    //            return (ITextToValue) Activator.CreateInstance( builtInType,
-    //                new object?[] { convMethod, logger } )!;
-    //        } );
-    //    }
-    //}
-
-    protected IOption Bind<TTarget, TProp>( OptionCollection options,
+    protected IOption Bind<TTarget, TProp>(
+        OptionCollection options,
         Expression<Func<TTarget, TProp>> propSelector,
-        TestConfig testConfig )
+        TestConfig testConfig
+    )
         where TTarget : class, new()
     {
         var option = options.Bind( propSelector );
         option.Should().NotBeNull();
 
         var optConfig = testConfig.OptionConfigurations
-            .FirstOrDefault( x =>
-                option!.ContextPath!.Equals( x.ContextPath,
-                    StringComparison.OrdinalIgnoreCase ) );
+                                  .FirstOrDefault( x =>
+                                                       option.ContextPath!.Equals( x.ContextPath,
+                                                           StringComparison.OrdinalIgnoreCase ) );
 
         optConfig.Should().NotBeNull();
 
-        option!.AddCommandLineKey( optConfig!.CommandLineKey )
-            .SetStyle( optConfig.Style );
+        option.AddCommandLineKey( optConfig.CommandLineKey )
+              .SetStyle( optConfig.Style );
 
-        if ( optConfig.Required ) option.IsRequired();
+        if( optConfig.Required ) option.IsRequired();
         else option.IsOptional();
 
         optConfig.Option = option;

@@ -1,4 +1,5 @@
 ﻿#region copyright
+
 // Copyright (c) 2021, 2022, 2023 Mark A. Olbert 
 // https://www.JumpForJoySoftware.com
 // OptionsGenerator.cs
@@ -17,6 +18,7 @@
 // 
 // You should have received a copy of the GNU General Public License along 
 // with J4JCommandLine. If not, see <https://www.gnu.org/licenses/>.
+
 #endregion
 
 using System;
@@ -26,38 +28,31 @@ using Microsoft.Extensions.Logging;
 
 namespace J4JSoftware.Configuration.CommandLine;
 
-public class OptionsGenerator : IOptionsGenerator
+public class OptionsGenerator(
+    OptionCollection options,
+    StringComparison textComparison,
+    ILoggerFactory? loggerFactory = null
+)
+    : IOptionsGenerator
 {
     public static OptionsGenerator GetWindowsDefault( ILoggerFactory? loggerFactory = null ) =>
-        new OptionsGenerator( OptionCollection.GetWindowsDefault( loggerFactory ),
-                              StringComparison.OrdinalIgnoreCase,
-                              loggerFactory );
+        new( OptionCollection.GetWindowsDefault( loggerFactory ),
+             StringComparison.OrdinalIgnoreCase,
+             loggerFactory );
 
     public static OptionsGenerator GetLinuxDefault( ILoggerFactory? loggerFactory = null ) =>
-        new OptionsGenerator( OptionCollection.GetWindowsDefault( loggerFactory ),
-                              StringComparison.Ordinal,
-                              loggerFactory );
+        new( OptionCollection.GetWindowsDefault( loggerFactory ),
+             StringComparison.Ordinal,
+             loggerFactory );
 
-    private readonly OptionCollection? _options;
-    private readonly StringComparison _textComparison;
-    private readonly ILogger? _logger;
+    private readonly OptionCollection? _options = options;
+    private readonly ILogger? _logger = loggerFactory?.CreateLogger<OptionsGenerator>();
 
     private CommandLineArgument? _current;
 
-    public OptionsGenerator( 
-        OptionCollection options,
-        StringComparison textComparison,
-        ILoggerFactory? loggerFactory = null 
-        )
-    {
-        _options = options;
-        _textComparison = textComparison;
-        _logger = loggerFactory?.CreateLogger<OptionsGenerator>();
-    }
-
     public bool Create( TokenPair tokenPair )
     {
-        _current = new CommandLineArgument( _options!, _textComparison );
+        _current = new CommandLineArgument( _options!, textComparison );
         return true;
     }
 
@@ -91,11 +86,11 @@ public class OptionsGenerator : IOptionsGenerator
 
     public bool Commit( TokenPair tokenPair )
     {
-        if ( _current == null )
+        if( _current == null )
         {
             switch( tokenPair.Current.Type )
             {
-                // if we're not yet building an entry but we received a KeyPrefix token we must be
+                // if we're not yet building an entry, but we received a KeyPrefix token we must be
                 // about to start building one
                 case LexicalType.Separator
                     when tokenPair.Previous.Type == LexicalType.Separator:
@@ -122,10 +117,12 @@ public class OptionsGenerator : IOptionsGenerator
         // by the option and what kind of option it is
         // Switch options should've been committed by this point -- so 
         // the "switch" branch should never run -- but just to be safe...
-        if ( _current.Option != null )
+        if( _current.Option != null )
+        {
             return _current.Option.Style == OptionStyle.Switch
                 ? CommitSwitch()
                 : CommitNonSwitch();
+        }
 
         _options!.UnknownKeys.Add( _current );
 
@@ -139,7 +136,7 @@ public class OptionsGenerator : IOptionsGenerator
 
     public bool ProcessText( TokenPair tokenPair )
     {
-        if ( _current == null )
+        if( _current == null )
             _options!.SpuriousValues.Add( tokenPair.Current.Text );
         else
         {
@@ -213,7 +210,7 @@ public class OptionsGenerator : IOptionsGenerator
 
         foreach( var value in values )
         {
-            if( validValues.Any( x => x.Equals( value, _textComparison ) ) )
+            if( validValues.Any( x => x.Equals( value, textComparison ) ) )
                 continue;
 
             _logger?.LogError( "Invalid {0} option value '{1}'", propertyType.Name, value );

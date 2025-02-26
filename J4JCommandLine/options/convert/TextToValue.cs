@@ -1,4 +1,5 @@
 ﻿#region copyright
+
 // Copyright (c) 2021, 2022, 2023 Mark A. Olbert 
 // https://www.JumpForJoySoftware.com
 // TextToValue.cs
@@ -17,6 +18,7 @@
 // 
 // You should have received a copy of the GNU General Public License along 
 // with J4JCommandLine. If not, see <https://www.gnu.org/licenses/>.
+
 #endregion
 
 using System;
@@ -26,16 +28,11 @@ using Microsoft.Extensions.Logging;
 
 namespace J4JSoftware.Configuration.CommandLine;
 
-public abstract class TextToValue<TBaseType> : ITextToValue
+public abstract class TextToValue<TBaseType>( ILoggerFactory? loggerFactory = null ) : ITextToValue
 {
-    protected TextToValue( ILoggerFactory? loggerFactory = null )
-    {
-        Logger = loggerFactory?.CreateLogger<TBaseType>();
-    }
-
     protected abstract bool ConvertTextToValue( string text, out TBaseType? result );
 
-    protected ILogger? Logger { get; }
+    protected ILogger? Logger { get; } = loggerFactory?.CreateLogger<TBaseType>();
 
     public Type TargetType => typeof( TBaseType );
 
@@ -50,18 +47,18 @@ public abstract class TextToValue<TBaseType> : ITextToValue
     // anything else will cause a conversion failure
     public bool Convert( Type targetType, IEnumerable<string> values, out object? result )
     {
-        result = default;
+        result = null;
         var retVal = false;
 
         var valueList = values.ToList();
 
-        switch ( targetType.GetTypeNature() )
+        switch( targetType.GetTypeNature() )
         {
             case TypeNature.Simple:
-                if ( valueList.Count > 1 )
+                if( valueList.Count > 1 )
                 {
                     Logger?.LogError( "Cannot convert multiple text values to a single value of '{0}'",
-                                   typeof( TBaseType ) );
+                                      typeof( TBaseType ) );
 
                     return false;
                 }

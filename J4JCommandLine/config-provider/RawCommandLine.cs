@@ -1,4 +1,5 @@
 ﻿#region copyright
+
 // Copyright (c) 2021, 2022, 2023 Mark A. Olbert 
 // https://www.JumpForJoySoftware.com
 // RawCommandLine.cs
@@ -17,6 +18,7 @@
 // 
 // You should have received a copy of the GNU General Public License along 
 // with J4JCommandLine. If not, see <https://www.gnu.org/licenses/>.
+
 #endregion
 
 using System;
@@ -26,19 +28,14 @@ namespace J4JSoftware.Configuration.CommandLine.Deprecate;
 
 public class RawCommandLine
 {
-    private readonly bool _useKernel32;
-
-    public RawCommandLine()
+    private readonly bool _useKernel32 = Environment.OSVersion.Platform switch
     {
-        _useKernel32 = Environment.OSVersion.Platform switch
-        {
-            PlatformID.Win32NT      => true,
-            PlatformID.Win32S       => true,
-            PlatformID.Win32Windows => true,
-            PlatformID.WinCE        => true,
-            _                       => false
-        };
-    }
+        PlatformID.Win32NT => true,
+        PlatformID.Win32S => true,
+        PlatformID.Win32Windows => true,
+        PlatformID.WinCE => true,
+        _ => false
+    };
 
     [ DllImport( "kernel32.dll", CharSet = CharSet.Auto ) ]
     private static extern IntPtr GetCommandLine();

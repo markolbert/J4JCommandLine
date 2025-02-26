@@ -21,11 +21,10 @@ using J4JSoftware.Configuration.CommandLine;
 
 #pragma warning disable 8618
 
-namespace J4JSoftware.Binder.Tests
+namespace J4JSoftware.Binder.Tests;
+
+public class TokenizerData
 {
-    public class TokenizerData
-    {
-        public LexicalType Type { get; set; }
-        public string Text { get; set; }
-    }
+    public LexicalType Type { get; set; }
+    public string Text { get; set; }
 }

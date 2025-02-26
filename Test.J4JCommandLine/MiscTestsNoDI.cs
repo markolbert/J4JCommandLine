@@ -21,33 +21,32 @@ using FluentAssertions;
 using J4JSoftware.Configuration.CommandLine;
 using Xunit;
 
-namespace J4JSoftware.Binder.Tests
+namespace J4JSoftware.Binder.Tests;
+
+public class MiscTestsNoDi : TestBaseNoDi
 {
-    public class MiscTestsNoDi : TestBaseNoDi
+    [ Theory ]
+    [ InlineData( "-x abc", "abc" ) ]
+    [ InlineData( "-x \"abc\"", "abc" ) ]
+    public void LinuxStringHandling( string cmdLine, params string[] result )
     {
-        [ Theory ]
-        [ InlineData( "-x abc", "abc" ) ]
-        [ InlineData( "-x \"abc\"", "abc" ) ]
-        public void LinuxStringHandling( string cmdLine, params string[] result )
+        var parser = Parser.GetLinuxDefault( loggerFactory: LoggerFactory );
+
+        var option = parser.Collection.Bind<MiscTarget, string?>( x => x.AStringValue, "x" );
+        option.Should().NotBeNull();
+
+        parser.Collection.FinishConfiguration();
+
+        parser.Parse( cmdLine ).Should().BeTrue();
+
+        parser.Collection.UnknownKeys.Should().BeEmpty();
+        parser.Collection.SpuriousValues.Should().BeEmpty();
+
+        option.Values.Count.Should().Be( result.Length );
+
+        for( var idx = 0; idx < result.Length; idx++ )
         {
-            var parser = Parser.GetLinuxDefault( loggerFactory: LoggerFactory );
-
-            var option = parser.Collection.Bind<MiscTarget, string?>( x => x.AStringValue, "x" );
-            option.Should().NotBeNull();
-
-            parser.Collection.FinishConfiguration();
-
-            parser.Parse( cmdLine ).Should().BeTrue();
-
-            parser.Collection.UnknownKeys.Should().BeEmpty();
-            parser.Collection.SpuriousValues.Should().BeEmpty();
-
-            option!.Values.Count.Should().Be( result.Length );
-
-            for( var idx = 0; idx < result.Length; idx++ )
-            {
-                option.Values[ idx ].Should().Be( result[ idx ] );
-            }
+            option.Values[ idx ].Should().Be( result[ idx ] );
         }
     }
 }

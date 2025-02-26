@@ -1,4 +1,5 @@
 ﻿#region copyright
+
 // Copyright (c) 2021, 2022, 2023 Mark A. Olbert 
 // https://www.JumpForJoySoftware.com
 // BindingInfo.cs
@@ -17,6 +18,7 @@
 // 
 // You should have received a copy of the GNU General Public License along 
 // with J4JCommandLine. If not, see <https://www.gnu.org/licenses/>.
+
 #endregion
 
 using System;
@@ -31,8 +33,10 @@ internal partial class BindingInfo
     {
     }
 
-    private BindingInfo( PropertyInfo propInfo,
-        BindingInfo? child )
+    private BindingInfo(
+        PropertyInfo propInfo,
+        BindingInfo? child
+    )
     {
         TypeNature = propInfo.PropertyType.GetTypeNature();
         OptionStyle = GetOptionStyle( propInfo.PropertyType );
@@ -63,7 +67,7 @@ internal partial class BindingInfo
         return getMethod != null && getMethod.IsPublic;
     }
 
-    private CommandLine.OptionStyle GetOptionStyle( Type propertyType )
+    private OptionStyle GetOptionStyle( Type propertyType )
     {
         if( propertyType.IsEnum )
             return propertyType.IsFlaggedEnum() ? OptionStyle.ConcatenatedSingleValue : OptionStyle.SingleValued;
@@ -83,23 +87,23 @@ internal partial class BindingInfo
 
     public Type? ConversionType { get; private set; }
     public ITextToValue? Converter { get; internal set; }
-    public string Name { get; private set; } = string.Empty;
+    public string Name { get; } = string.Empty;
 
     public string FullName
     {
         get
         {
-            var curBI = Root;
+            var curBi = Root;
             var sb = new StringBuilder();
 
-            while( curBI != null )
+            while( curBi != null )
             {
                 if( sb.Length > 0 )
                     sb.Append( ":" );
 
-                sb.Append( curBI.Name );
+                sb.Append( curBi.Name );
 
-                curBI = curBI.Child;
+                curBi = curBi.Child;
             }
 
             return sb.ToString();
@@ -114,10 +118,10 @@ internal partial class BindingInfo
     public bool MeetsGetRequirements { get; private set; }
 
     public BindingInfo? Parent { get; private set; }
-    public BindingInfo? Child { get; private set; }
+    public BindingInfo? Child { get; }
 
     public bool IsRoot => Parent == null;
-    public bool IsOutermostLeaf => ( Parent != null && Child == null );
+    public bool IsOutermostLeaf => Parent != null && Child == null;
 
     public BindingInfo Root => Parent == null ? this : Parent.Root;
     public BindingInfo OutermostLeaf => Child == null ? this : Child.OutermostLeaf;

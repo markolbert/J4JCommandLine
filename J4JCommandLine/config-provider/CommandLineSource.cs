@@ -1,4 +1,5 @@
 ﻿#region copyright
+
 // Copyright (c) 2021, 2022, 2023 Mark A. Olbert 
 // https://www.JumpForJoySoftware.com
 // CommandLineSource.cs
@@ -17,6 +18,7 @@
 // 
 // You should have received a copy of the GNU General Public License along 
 // with J4JCommandLine. If not, see <https://www.gnu.org/licenses/>.
+
 #endregion
 
 using System;
@@ -30,7 +32,7 @@ public class CommandLineSource
 
     public CommandLineSource( StringComparison textComparison )
     {
-        // we don't want the name of the executable so we need to remove it
+        // we don't want the name of the executable so we need to remove it.
         // it's the first argument in what gets returned by Environment.GetCommandLineArgs()
         var temp = Environment.GetCommandLineArgs();
 

@@ -1,4 +1,5 @@
 ﻿#region copyright
+
 // Copyright (c) 2021, 2022, 2023 Mark A. Olbert 
 // https://www.JumpForJoySoftware.com
 // J4JCommandLineProvider.cs
@@ -17,6 +18,7 @@
 // 
 // You should have received a copy of the GNU General Public License along 
 // with J4JCommandLine. If not, see <https://www.gnu.org/licenses/>.
+
 #endregion
 
 using System;
@@ -82,7 +84,10 @@ public class J4JCommandLineProvider : ConfigurationProvider
 
                 case OptionStyle.Collection:
                     for( var idx = 0; idx < option.NumValuesAllocated; idx++ )
+                    {
                         Set( $"{option.ContextPath}:{idx}", option.Values[ idx ] );
+                    }
+
                     break;
 
                 default:

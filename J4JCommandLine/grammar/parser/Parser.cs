@@ -1,4 +1,5 @@
 ﻿#region copyright
+
 // Copyright (c) 2021, 2022, 2023 Mark A. Olbert 
 // https://www.JumpForJoySoftware.com
 // Parser.cs
@@ -17,6 +18,7 @@
 // 
 // You should have received a copy of the GNU General Public License along 
 // with J4JCommandLine. If not, see <https://www.gnu.org/licenses/>.
+
 #endregion
 
 using System;
@@ -24,11 +26,19 @@ using Microsoft.Extensions.Logging;
 
 namespace J4JSoftware.Configuration.CommandLine;
 
-public class Parser : IParser
+public class Parser(
+    OptionCollection options,
+    ParsingTable parsingTable,
+    ITokenizer tokenizer,
+    ILoggerFactory? loggerFactory = null
+)
+    : IParser
 {
-    public static IParser GetWindowsDefault( ITextConverters? converters = null,
+    public static IParser GetWindowsDefault(
+        ITextConverters? converters = null,
         ILoggerFactory? loggerFactory = null,
-        params ICleanupTokens[] cleanupProcessors )
+        params ICleanupTokens[] cleanupProcessors
+    )
     {
         converters ??= new TextConverters( loggerFactory: loggerFactory );
 
@@ -36,7 +46,7 @@ public class Parser : IParser
 
         var parsingTable = new ParsingTable( new OptionsGenerator( options,
                                                                    StringComparison.OrdinalIgnoreCase,
-                                                                   loggerFactory ));
+                                                                   loggerFactory ) );
 
         var tokenizer = new Tokenizer( new WindowsLexicalElements( loggerFactory ),
                                        loggerFactory,
@@ -45,10 +55,11 @@ public class Parser : IParser
         return new Parser( options, parsingTable, tokenizer, loggerFactory );
     }
 
-    public static IParser GetLinuxDefault( 
+    public static IParser GetLinuxDefault(
         ITextConverters? converters = null,
         ILoggerFactory? loggerFactory = null,
-        params ICleanupTokens[] cleanupProcessors )
+        params ICleanupTokens[] cleanupProcessors
+    )
     {
         converters ??= new TextConverters( loggerFactory: loggerFactory );
 
@@ -56,7 +67,7 @@ public class Parser : IParser
 
         var parsingTable = new ParsingTable( new OptionsGenerator( options,
                                                                    StringComparison.Ordinal,
-                                                                   loggerFactory ));
+                                                                   loggerFactory ) );
 
         var tokenizer = new Tokenizer( new LinuxLexicalElements( loggerFactory ),
                                        loggerFactory,
@@ -65,23 +76,10 @@ public class Parser : IParser
         return new Parser( options, parsingTable, tokenizer, loggerFactory );
     }
 
-    private readonly ParsingTable _parsingTable;
-    private readonly ILogger? _logger;
+    private readonly ILogger? _logger = loggerFactory?.CreateLogger<Parser>();
 
-    public Parser( OptionCollection options,
-        ParsingTable parsingTable,
-        ITokenizer tokenizer,
-        ILoggerFactory? loggerFactory = null )
-    {
-        Collection = options;
-        _parsingTable = parsingTable;
-        Tokenizer = tokenizer;
-
-        _logger = loggerFactory?.CreateLogger<Parser>();
-    }
-
-    public ITokenizer Tokenizer { get; }
-    public OptionCollection Collection { get; }
+    public ITokenizer Tokenizer { get; } = tokenizer;
+    public OptionCollection Collection { get; } = options;
 
     public bool Parse( string cmdLine )
     {
@@ -89,13 +87,13 @@ public class Parser : IParser
 
         foreach( var tokenPair in tokenList.EnumerateTokenPairs() )
         {
-            var parsingAction = _parsingTable[ tokenPair.LexicalPair ];
+            var parsingAction = parsingTable[ tokenPair.LexicalPair ];
 
             if( parsingAction == null )
             {
                 _logger?.LogError( "Undefined parsing action for token sequence '{0} => {1}'",
-                                tokenPair.Previous.Type,
-                                tokenPair.Current.Type );
+                                   tokenPair.Previous.Type,
+                                   tokenPair.Current.Type );
 
                 return false;
             }

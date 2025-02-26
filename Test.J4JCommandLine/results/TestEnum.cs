@@ -17,11 +17,10 @@
 
 #endregion
 
-namespace J4JSoftware.Binder.Tests
+namespace J4JSoftware.Binder.Tests;
+
+public enum TestEnum
 {
-    public enum TestEnum
-    {
-        EnumValue1,
-        EnumValue2
-    }
+    EnumValue1,
+    EnumValue2
 }

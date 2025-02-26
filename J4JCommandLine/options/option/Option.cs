@@ -1,4 +1,5 @@
 ﻿#region copyright
+
 // Copyright (c) 2021, 2022, 2023 Mark A. Olbert 
 // https://www.JumpForJoySoftware.com
 // Option.cs
@@ -17,6 +18,7 @@
 // 
 // You should have received a copy of the GNU General Public License along 
 // with J4JCommandLine. If not, see <https://www.gnu.org/licenses/>.
+
 #endregion
 
 using System;
@@ -26,15 +28,17 @@ using System.ComponentModel;
 
 namespace J4JSoftware.Configuration.CommandLine;
 
-public class Option<TContainer, TProp> : IOption, IOptionInternal
+public class Option<TContainer, TProp> : IOptionInternal
 {
-    private readonly List<string> _cmdLineKeys = new();
+    private readonly List<string> _cmdLineKeys = [];
     private readonly ITextToValue _converter;
-    private readonly List<string> _values = new();
+    private readonly List<string> _values = [];
 
-    internal Option( OptionCollection container,
+    internal Option(
+        OptionCollection container,
         string contextPath,
-        ITextToValue converter )
+        ITextToValue converter
+    )
     {
         Collection = container;
         ContextPath = contextPath;
@@ -60,7 +64,10 @@ public class Option<TContainer, TProp> : IOption, IOptionInternal
 
     public Option<TContainer, TProp> AddCommandLineKeys( IEnumerable<string> cmdLineKeys )
     {
-        foreach( var cmdLineKey in cmdLineKeys ) AddCommandLineKey( cmdLineKey );
+        foreach( var cmdLineKey in cmdLineKeys )
+        {
+            AddCommandLineKey( cmdLineKey );
+        }
 
         return this;
     }

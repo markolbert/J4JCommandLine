@@ -1,4 +1,5 @@
 ﻿#region copyright
+
 // Copyright (c) 2021, 2022, 2023 Mark A. Olbert 
 // https://www.JumpForJoySoftware.com
 // ConsolidateQuotedText.cs
@@ -17,6 +18,7 @@
 // 
 // You should have received a copy of the GNU General Public License along 
 // with J4JCommandLine. If not, see <https://www.gnu.org/licenses/>.
+
 #endregion
 
 using System;
@@ -29,18 +31,13 @@ using Microsoft.Extensions.Logging;
 
 namespace J4JSoftware.Configuration.CommandLine;
 
-public class ConsolidateQuotedText : ICleanupTokens
+public class ConsolidateQuotedText(
+    StringComparison textComparison,
+    ILoggerFactory? loggerFactory = null
+)
+    : ICleanupTokens
 {
-    private readonly ILogger? _logger;
-    private readonly StringComparison _textComparison;
-
-    public ConsolidateQuotedText( 
-        StringComparison textComparison,
-        ILoggerFactory? loggerFactory = null )
-    {
-        _textComparison = textComparison;
-        _logger = loggerFactory?.CreateLogger<ConsolidateQuotedText>();
-    }
+    private readonly ILogger? _logger = loggerFactory?.CreateLogger<ConsolidateQuotedText>();
 
     public void Process( List<Token> tokens )
     {
@@ -56,7 +53,7 @@ public class ConsolidateQuotedText : ICleanupTokens
             if( curPair.End == null )
             {
                 _logger?.LogError( "Unclosed quoter encountered, command line truncated at token #{0}",
-                                curPair.Start.Index );
+                                   curPair.Start.Index );
 
                 tokens.RemoveFrom( curPair.Start.Index );
 
@@ -106,7 +103,7 @@ public class ConsolidateQuotedText : ICleanupTokens
                                              t.Index > firstQuoter.Index
                                           && t.Token.Type == LexicalType.Quoter
                                           && t.Token.Text.Equals( firstQuoter.Token.Text,
-                                                                  _textComparison ) )
+                                                                  textComparison ) )
         };
     }
 

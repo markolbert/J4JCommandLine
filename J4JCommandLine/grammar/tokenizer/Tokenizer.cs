@@ -1,4 +1,5 @@
 ﻿#region copyright
+
 // Copyright (c) 2021, 2022, 2023 Mark A. Olbert 
 // https://www.JumpForJoySoftware.com
 // Tokenizer.cs
@@ -17,6 +18,7 @@
 // 
 // You should have received a copy of the GNU General Public License along 
 // with J4JCommandLine. If not, see <https://www.gnu.org/licenses/>.
+
 #endregion
 
 using System;
@@ -27,22 +29,26 @@ namespace J4JSoftware.Configuration.CommandLine;
 
 public class Tokenizer : ITokenizer
 {
-    public static Tokenizer GetWindowsDefault( ILoggerFactory? loggerFactory = null,
-        params ICleanupTokens[] cleanupProcessors ) =>
-        new Tokenizer( new WindowsLexicalElements( loggerFactory ), loggerFactory, cleanupProcessors );
+    public static Tokenizer GetWindowsDefault(
+        ILoggerFactory? loggerFactory = null,
+        params ICleanupTokens[] cleanupProcessors
+    ) =>
+        new( new WindowsLexicalElements( loggerFactory ), loggerFactory, cleanupProcessors );
 
-    public static Tokenizer GetLinuxDefault( ILoggerFactory? loggerFactory = null,
-        params ICleanupTokens[] cleanupProcessors ) =>
-        new Tokenizer( new LinuxLexicalElements( loggerFactory ), loggerFactory, cleanupProcessors );
+    public static Tokenizer GetLinuxDefault(
+        ILoggerFactory? loggerFactory = null,
+        params ICleanupTokens[] cleanupProcessors
+    ) =>
+        new( new LinuxLexicalElements( loggerFactory ), loggerFactory, cleanupProcessors );
 
     private readonly ICleanupTokens[] _cleanupProcessors;
     private readonly ILexicalElements _tokens;
 
-    public Tokenizer( 
+    public Tokenizer(
         ILexicalElements tokens,
         ILoggerFactory? loggerFactory = null,
-        params ICleanupTokens[] cleanupProcessors 
-        )
+        params ICleanupTokens[] cleanupProcessors
+    )
     {
         TextComparison = tokens.TextComparison;
         _tokens = tokens;
@@ -50,11 +56,13 @@ public class Tokenizer : ITokenizer
         if( cleanupProcessors.Length > 0 )
             _cleanupProcessors = cleanupProcessors;
         else
-            _cleanupProcessors = new ICleanupTokens[]
-            {
+        {
+            _cleanupProcessors =
+            [
                 new ConsolidateQuotedText( TextComparison, loggerFactory ),
                 new MergeSequentialSeparators()
-            };
+            ];
+        }
     }
 
     public StringComparison TextComparison { get; }

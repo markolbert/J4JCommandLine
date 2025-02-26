@@ -1,4 +1,5 @@
 ﻿#region copyright
+
 // Copyright (c) 2021, 2022, 2023 Mark A. Olbert 
 // https://www.JumpForJoySoftware.com
 // TextConverters.cs
@@ -17,6 +18,7 @@
 // 
 // You should have received a copy of the GNU General Public License along 
 // with J4JCommandLine. If not, see <https://www.gnu.org/licenses/>.
+
 #endregion
 
 using System;
@@ -41,15 +43,13 @@ public class TextConverters : ITextConverters
     {
         var retVal = new List<ITextToValue>();
 
-        foreach ( var builtInConverter in GetBuiltInTargetTypes() )
+        foreach( var builtInConverter in GetBuiltInTargetTypes() )
         {
             var builtInType = typeof( BuiltInTextToValue<> ).MakeGenericType( builtInConverter.ReturnType );
 
             retVal.Add( (ITextToValue) Activator.CreateInstance( builtInType,
-                                                                 new object?[]
-                                                                 {
-                                                                     builtInConverter.MethodInfo, loggerFactory
-                                                                 } )! );
+                                                                 builtInConverter.MethodInfo,
+                                                                 loggerFactory )! );
         }
 
         return retVal;
@@ -68,11 +68,11 @@ public class TextConverters : ITextConverters
            .Select( x => new BuiltInConverter( x.ReturnType, x ) )
            .ToList();
 
-    public TextConverters( 
+    public TextConverters(
         BuiltInConverters builtInConv = BuiltInConverters.AddDynamically,
         ILoggerFactory? loggerFactory = null,
-        params ITextToValue[] converters 
-        )
+        params ITextToValue[] converters
+    )
     {
         _logger = loggerFactory?.CreateLogger<TextConverters>();
 
@@ -82,7 +82,7 @@ public class TextConverters : ITextConverters
         AddConverters( converters );
         _builtInConv = builtInConv;
 
-        switch ( builtInConv )
+        switch( builtInConv )
         {
             case BuiltInConverters.AddAtInitialization:
                 AddConverters( GetBuiltInConverters( loggerFactory ) );
@@ -102,20 +102,16 @@ public class TextConverters : ITextConverters
 
     public bool AddConverter( ITextToValue converter, bool replaceExisting = false )
     {
-        if ( _converters.ContainsKey( converter.TargetType ) )
-        {
-            if ( !replaceExisting )
-            {
-                _logger?.LogError( "There is already a converter defined for {0}", converter.TargetType );
-                return false;
-            }
-
-            _converters[ converter.TargetType ] = converter;
-
+        if( _converters.TryAdd( converter.TargetType, converter ) )
             return true;
+
+        if( !replaceExisting )
+        {
+            _logger?.LogError( "There is already a converter defined for {0}", converter.TargetType );
+            return false;
         }
 
-        _converters.Add( converter.TargetType, converter );
+        _converters[ converter.TargetType ] = converter;
 
         return true;
     }
@@ -124,7 +120,7 @@ public class TextConverters : ITextConverters
     {
         var retVal = true;
 
-        foreach ( var converter in converters )
+        foreach( var converter in converters )
         {
             retVal &= AddConverter( converter, replaceExisting );
         }
@@ -150,8 +146,8 @@ public class TextConverters : ITextConverters
             if( !CanConvertSimple( genArgs[ 0 ] ) )
                 return false;
 
-            return ( typeof( List<> ).MakeGenericType( genArgs[ 0 ] )
-                                     .IsAssignableFrom( toCheck ) );
+            return typeof( List<> ).MakeGenericType( genArgs[ 0 ] )
+                                   .IsAssignableFrom( toCheck );
         }
 
         if( CanConvertSimple( toCheck ) )
@@ -165,8 +161,8 @@ public class TextConverters : ITextConverters
     public ITextToValue? GetConverter( Type simpleType )
     {
         // first see if a converter exists in the converters collection
-        if( _converters.ContainsKey(simpleType))
-            return _converters[simpleType];
+        if( _converters.TryGetValue( simpleType, out var converter ) )
+            return converter;
 
         // next, see if we may need to add a built-in converter dynamically
         return _builtInConv switch
@@ -180,21 +176,22 @@ public class TextConverters : ITextConverters
     {
         if( _builtInTargets == null )
         {
-            _logger?.LogWarning("No built-in text converter targets are defined");
+            _logger?.LogWarning( "No built-in text converter targets are defined" );
             return null;
         }
 
         var builtIn = _builtInTargets.FirstOrDefault( x => x.ReturnType == simpleType );
         if( builtIn == null )
         {
-            _logger?.LogWarning("No built-in text converter for type {0} is defined", simpleType);
+            _logger?.LogWarning( "No built-in text converter for type {0} is defined", simpleType );
             return null;
         }
 
-        var builtInType = typeof(BuiltInTextToValue<>).MakeGenericType(builtIn.ReturnType);
+        var builtInType = typeof( BuiltInTextToValue<> ).MakeGenericType( builtIn.ReturnType );
 
         var retVal = (ITextToValue?) Activator.CreateInstance( builtInType,
-                                                               new object?[] { builtIn.MethodInfo, _logger } );
+                                                               builtIn.MethodInfo,
+                                                               _logger );
 
         if( retVal != null )
             _converters.Add( simpleType, retVal );
@@ -205,63 +202,28 @@ public class TextConverters : ITextConverters
 
     private bool CanConvertSimple( Type simpleType )
     {
-        if ( simpleType.IsArray || simpleType.IsGenericType )
+        if( simpleType.IsArray || simpleType.IsGenericType )
             return false;
 
-        if ( simpleType.IsEnum )
+        if( simpleType.IsEnum )
             return true;
 
         return GetConverter( simpleType ) != null;
-
-        //switch ( _builtInConv )
-        //{
-        //    case BuiltInConverters.AddAtInitialization:
-        //        return _converters.Any( x => x.Value.TargetType == simpleType );
-
-        //    case BuiltInConverters.AddDynamically:
-        //        if ( _converters.Any( x => x.Value.TargetType == simpleType ) )
-        //            return true;
-
-        //        break;
-
-        //    case BuiltInConverters.DoNotAdd:
-        //        return false;
-        //}
-
-        //// try to add a built-in converter dynamically
-        //var builtInConverter = _builtInTargets!.FirstOrDefault( x => x.ReturnType == simpleType );
-        //if ( builtInConverter == null )
-        //    return false;
-
-        //var builtInType = typeof( BuiltInTextToValue<> ).MakeGenericType( builtInConverter.ReturnType );
-
-        //_converters.Add( simpleType,
-        //                 (ITextToValue) Activator.CreateInstance( builtInType,
-        //                                                          new object?[]
-        //                                                          {
-        //                                                              builtInConverter.MethodInfo, _logger
-        //                                                          } )! );
-
-        //return true;
     }
 
     public bool Convert( Type targetType, IEnumerable<string> textValues, out object? result )
     {
         result = null;
 
-        //var converter = _converters.Where( x => x.Value.CanConvert( targetType ) )
-        //                           .Select( x => x.Value )
-        //                           .FirstOrDefault();
-
         var converter = GetConverter( targetType );
 
-        if ( converter != null )
+        if( converter != null )
             return converter.Convert( textValues, out result );
 
-        if ( targetType.IsEnum )
+        if( targetType.IsEnum )
         {
             var enumConverterType = typeof( TextToEnum<> ).MakeGenericType( targetType );
-            converter = Activator.CreateInstance( enumConverterType, new object?[] { _logger } ) as ITextToValue;
+            converter = Activator.CreateInstance( enumConverterType, _logger ) as ITextToValue;
             _converters.Add( targetType, converter! );
 
             return converter!.Convert( textValues, out result );
@@ -278,7 +240,7 @@ public class TextConverters : ITextConverters
 
         var converter = GetConverter( key );
 
-        if ( converter == null )
+        if( converter == null )
             return false;
 
         result = converter;
@@ -308,8 +270,5 @@ public class TextConverters : ITextConverters
         }
     }
 
-    IEnumerator IEnumerable.GetEnumerator()
-    {
-        return GetEnumerator();
-    }
+    IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
 }

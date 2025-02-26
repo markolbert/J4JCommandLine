@@ -1,4 +1,5 @@
 ﻿#region copyright
+
 // Copyright (c) 2021, 2022, 2023 Mark A. Olbert 
 // https://www.JumpForJoySoftware.com
 // OptionCollection.cs
@@ -17,6 +18,7 @@
 // 
 // You should have received a copy of the GNU General Public License along 
 // with J4JCommandLine. If not, see <https://www.gnu.org/licenses/>.
+
 #endregion
 
 using System;
@@ -31,10 +33,10 @@ namespace J4JSoftware.Configuration.CommandLine;
 public class OptionCollection
 {
     public static OptionCollection GetWindowsDefault( ILoggerFactory? loggerFactory = null ) =>
-        new OptionCollection( StringComparison.OrdinalIgnoreCase, new TextConverters( loggerFactory: loggerFactory ), loggerFactory );
+        new( StringComparison.OrdinalIgnoreCase, new TextConverters( loggerFactory: loggerFactory ), loggerFactory );
 
     public static OptionCollection GetLinuxDefault( ILoggerFactory? logger = null ) =>
-        new OptionCollection( StringComparison.Ordinal, new TextConverters( loggerFactory: logger ), logger );
+        new( StringComparison.Ordinal, new TextConverters( loggerFactory: logger ), logger );
 
     public event EventHandler? Configured;
 
@@ -43,28 +45,28 @@ public class OptionCollection
     private readonly List<Func<BindingInfo, bool>> _bindingTests;
     private readonly ILogger? _logger;
 
-    public OptionCollection( 
+    public OptionCollection(
         StringComparison textComparison,
         ITextConverters converters,
-        ILoggerFactory? loggerFactory = null 
-        )
+        ILoggerFactory? loggerFactory = null
+    )
     {
         _textComparison = textComparison;
         _converters = converters;
 
         _logger = loggerFactory?.CreateLogger<OptionCollection>();
 
-        _bindingTests = new List<Func<BindingInfo, bool>>
-        {
+        _bindingTests =
+        [
             BindingSupported,
             CanConvert,
             HasParameterlessConstructor,
             HasAccessibleGetter,
             HasAccessibleSetter
-        };
+        ];
     }
 
-    internal List<IOptionInternal> OptionsInternal { get; } = new();
+    internal List<IOptionInternal> OptionsInternal { get; } = [];
 
     public bool IsConfigured { get; private set; }
 
@@ -92,9 +94,11 @@ public class OptionCollection
     // of IOptionCollection)
     public List<CommandLineArgument> UnknownKeys { get; } = new();
 
-    public bool TryBind<TContainer, TTarget>( Expression<Func<TContainer, TTarget>> selector,
+    public bool TryBind<TContainer, TTarget>(
+        Expression<Func<TContainer, TTarget>> selector,
         out Option<TContainer, TTarget>? option,
-        params string[] cmdLineKeys )
+        params string[] cmdLineKeys
+    )
         where TContainer : class, new()
     {
         option = Bind( selector, cmdLineKeys );
@@ -102,8 +106,10 @@ public class OptionCollection
         return option != null;
     }
 
-    public Option<TContainer, TTarget>? Bind<TContainer, TTarget>( Expression<Func<TContainer, TTarget>> selector,
-        params string[] cmdLineKeys )
+    public Option<TContainer, TTarget>? Bind<TContainer, TTarget>(
+        Expression<Func<TContainer, TTarget>> selector,
+        params string[] cmdLineKeys
+    )
         where TContainer : class, new()
     {
         var bindingInfo = BindingInfo.Create( selector );
@@ -113,13 +119,13 @@ public class OptionCollection
             return null;
         }
 
-        bindingInfo.Converter = _converters[typeof(TTarget)];
+        bindingInfo.Converter = _converters[ typeof( TTarget ) ];
 
         var curBindingInfo = bindingInfo.Root;
 
         while( curBindingInfo != null )
         {
-            foreach ( var test in _bindingTests )
+            foreach( var test in _bindingTests )
             {
                 if( test( bindingInfo ) )
                     continue;
@@ -134,7 +140,7 @@ public class OptionCollection
         if( OptionsInternal.Any( x => x.ContextPath!.Equals( bindingInfo.FullName, _textComparison ) ) )
         {
             _logger?.LogError( "An option with the same ContextPath ('{0}') is already in the collection",
-                                    bindingInfo.FullName );
+                               bindingInfo.FullName );
             return null;
         }
 
@@ -155,15 +161,14 @@ public class OptionCollection
     private bool BindingSupported( BindingInfo toTest ) => toTest.TypeNature != TypeNature.Unsupported;
     private bool HasAccessibleGetter( BindingInfo toTest ) => toTest.MeetsGetRequirements;
 
-    private bool HasAccessibleSetter( BindingInfo toTest ) =>
-        !toTest.IsOutermostLeaf || toTest.MeetsSetRequirements;
+    private bool HasAccessibleSetter( BindingInfo toTest ) => !toTest.IsOutermostLeaf || toTest.MeetsSetRequirements;
 
     private bool CanConvert( BindingInfo toTest )
     {
-        if ( !toTest.IsOutermostLeaf )
+        if( !toTest.IsOutermostLeaf )
             return true;
 
-        if ( toTest.ConversionType == null )
+        if( toTest.ConversionType == null )
             return false;
 
         toTest.Converter = _converters
@@ -178,7 +183,7 @@ public class OptionCollection
      || ( toTest.Parent.ConversionType != null
          && toTest.Parent.ConversionType.GetConstructors().Any( x => x.GetParameters().Length == 0 ) );
 
-    // determines whether or not a key is being used by an existing option, honoring whatever
+    // determines whether a key is being used by an existing option, honoring whatever
     // case sensitivity is in use
     public bool CommandLineKeyInUse( string key )
     {

@@ -1,4 +1,5 @@
 ﻿#region copyright
+
 // Copyright (c) 2021, 2022, 2023 Mark A. Olbert 
 // https://www.JumpForJoySoftware.com
 // TextToTextConverter.cs
@@ -17,19 +18,15 @@
 // 
 // You should have received a copy of the GNU General Public License along 
 // with J4JCommandLine. If not, see <https://www.gnu.org/licenses/>.
+
 #endregion
 
 using Microsoft.Extensions.Logging;
 
 namespace J4JSoftware.Configuration.CommandLine;
 
-public class TextToTextConverter : TextToValue<string>
+public class TextToTextConverter( ILoggerFactory? loggerFactory = null ) : TextToValue<string>( loggerFactory )
 {
-    public TextToTextConverter( ILoggerFactory? loggerFactory = null )
-        : base( loggerFactory )
-    {
-    }
-
     protected override bool ConvertTextToValue( string text, out string? result )
     {
         result = text;

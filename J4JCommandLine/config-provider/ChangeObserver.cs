@@ -1,4 +1,5 @@
 ﻿#region copyright
+
 // Copyright (c) 2021, 2022, 2023 Mark A. Olbert 
 // https://www.JumpForJoySoftware.com
 // ChangeObserver.cs
@@ -17,6 +18,7 @@
 // 
 // You should have received a copy of the GNU General Public License along 
 // with J4JCommandLine. If not, see <https://www.gnu.org/licenses/>.
+
 #endregion
 
 using System;
@@ -31,8 +33,8 @@ public class ChangeObserver
 
     #region singleton
 
-    private static readonly Lazy<ChangeObserver> lazy = new Lazy<ChangeObserver>( () => new ChangeObserver() );
-    public static ChangeObserver Instance => lazy.Value;
+    private static readonly Lazy<ChangeObserver> Lazy = new( () => new ChangeObserver() );
+    public static ChangeObserver Instance => Lazy.Value;
 
     #endregion
 

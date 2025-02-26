@@ -1,4 +1,5 @@
 ﻿#region copyright
+
 // Copyright (c) 2021, 2022, 2023 Mark A. Olbert 
 // https://www.JumpForJoySoftware.com
 // TextToEnum.cs
@@ -17,6 +18,7 @@
 // 
 // You should have received a copy of the GNU General Public License along 
 // with J4JCommandLine. If not, see <https://www.gnu.org/licenses/>.
+
 #endregion
 
 using System;
@@ -24,17 +26,12 @@ using Microsoft.Extensions.Logging;
 
 namespace J4JSoftware.Configuration.CommandLine;
 
-public class TextToEnum<TEnum> : TextToValue<TEnum>
+public class TextToEnum<TEnum>( ILoggerFactory? loggerFactory = null ) : TextToValue<TEnum>( loggerFactory )
     where TEnum : Enum
 {
-    public TextToEnum( ILoggerFactory? loggerFactory = null )
-        : base( loggerFactory )
-    {
-    }
-
     protected override bool ConvertTextToValue( string text, out TEnum? result )
     {
-        result = default( TEnum );
+        result = default;
 
         if( !Enum.TryParse( typeof( TEnum ), text, true, out var tempResult ) )
             return false;

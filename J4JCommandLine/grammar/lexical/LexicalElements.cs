@@ -1,4 +1,5 @@
 ﻿#region copyright
+
 // Copyright (c) 2021, 2022, 2023 Mark A. Olbert 
 // https://www.JumpForJoySoftware.com
 // LexicalElements.cs
@@ -17,6 +18,7 @@
 // 
 // You should have received a copy of the GNU General Public License along 
 // with J4JCommandLine. If not, see <https://www.gnu.org/licenses/>.
+
 #endregion
 
 using System;
@@ -31,11 +33,11 @@ public class LexicalElements : ILexicalElements
 {
     private readonly Dictionary<LexicalType, List<Token>> _available = new();
 
-    public LexicalElements( 
+    public LexicalElements(
         StringComparison textComparison,
         ILoggerFactory? loggerFactory = null,
-        bool inclCommon = true 
-        )
+        bool inclCommon = true
+    )
     {
         TextComparison = textComparison;
         Logger = loggerFactory?.CreateLogger( GetType() );
@@ -71,26 +73,23 @@ public class LexicalElements : ILexicalElements
 
         var newToken = new Token( type, text );
 
-        if( _available.ContainsKey( type ) )
-            _available[ type ].Add( newToken );
-        else _available.Add( type, new List<Token> { newToken } );
+        if( _available.TryGetValue( type, out var value ) )
+            value.Add( newToken );
+        else _available.Add( type, [newToken] );
 
         return true;
     }
 
     public IEnumerator<Token> GetEnumerator()
     {
-        foreach ( var kvp in _available )
+        foreach( var kvp in _available )
         {
-            foreach ( var token in kvp.Value )
+            foreach( var token in kvp.Value )
             {
                 yield return token;
             }
         }
     }
 
-    IEnumerator IEnumerable.GetEnumerator()
-    {
-        return GetEnumerator();
-    }
+    IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
 }

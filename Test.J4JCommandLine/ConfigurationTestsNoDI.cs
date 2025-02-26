@@ -59,9 +59,9 @@ public class ConfigurationTestsNoDi : TestBaseNoDi
         _options = parser.Collection;
 
         _configRoot = new ConfigurationBuilder()
-            .AddJ4JCommandLine( parser,
-                out _cmdLineSrc )
-            .Build();
+                     .AddJ4JCommandLine( parser,
+                                         out _cmdLineSrc )
+                     .Build();
 
         _options.Should().NotBeNull();
     }
@@ -75,7 +75,7 @@ public class ConfigurationTestsNoDi : TestBaseNoDi
         _cmdLineSrc.Should().NotBeNull();
         _cmdLineSrc!.SetCommandLine( testConfig.CommandLine );
 
-        if ( testConfig.OptionConfigurations.Any( x => x.ConversionWillFail ) )
+        if( testConfig.OptionConfigurations.Any( x => x.ConversionWillFail ) )
         {
             // ReSharper disable once UnusedVariable
             var exception = Assert.Throws<InvalidOperationException>( _configRoot!.Get<TParsed> );
@@ -92,8 +92,8 @@ public class ConfigurationTestsNoDi : TestBaseNoDi
         foreach( var optConfig in testConfig.OptionConfigurations )
         {
             GetPropertyValue( parsed, optConfig.ContextPath, out var result, out var resultType )
-                .Should()
-                .BeTrue();
+               .Should()
+               .BeTrue();
 
             if( optConfig.Style == OptionStyle.Collection )
             {
@@ -120,16 +120,18 @@ public class ConfigurationTestsNoDi : TestBaseNoDi
         }
     }
 
-    private bool GetPropertyValue<TParsed>( TParsed parsed,
+    private bool GetPropertyValue<TParsed>(
+        TParsed parsed,
         string contextKey,
         out object? result,
-        out Type? resultType )
+        out Type? resultType
+    )
         where TParsed : class?, new()
     {
         result = null;
         resultType = null;
 
-        Type curType = typeof( TParsed );
+        var curType = typeof( TParsed );
         object? curValue = parsed;
 
         var keys = contextKey.Split( ":", StringSplitOptions.RemoveEmptyEntries );

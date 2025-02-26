@@ -17,10 +17,9 @@
 
 #endregion
 
-namespace J4JSoftware.Binder.Tests
+namespace J4JSoftware.Binder.Tests;
+
+public class MiscTarget
 {
-    public class MiscTarget
-    {
-        public string? AStringValue { get; set; }
-    }
+    public string? AStringValue { get; set; }
 }

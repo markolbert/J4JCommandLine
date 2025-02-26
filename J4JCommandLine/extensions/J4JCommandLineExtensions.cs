@@ -1,4 +1,5 @@
 ﻿#region copyright
+
 // Copyright (c) 2021, 2022, 2023 Mark A. Olbert 
 // https://www.JumpForJoySoftware.com
 // J4JCommandLineExtensions.cs
@@ -17,6 +18,7 @@
 // 
 // You should have received a copy of the GNU General Public License along 
 // with J4JCommandLine. If not, see <https://www.gnu.org/licenses/>.
+
 #endregion
 
 using System;
@@ -32,7 +34,7 @@ public static class J4JCommandLineExtensions
 {
     internal static TypeNature GetTypeNature( this Type toCheck )
     {
-        if ( toCheck.IsArray )
+        if( toCheck.IsArray )
         {
             var elementType = toCheck.GetElementType();
 
@@ -42,10 +44,10 @@ public static class J4JCommandLineExtensions
         }
 
         // if it's not an array and not a generic it's a "simple" type
-        if ( !toCheck.IsGenericType )
+        if( !toCheck.IsGenericType )
             return TypeNature.Simple;
 
-        if ( toCheck.GenericTypeArguments.Length != 1 )
+        if( toCheck.GenericTypeArguments.Length != 1 )
             return TypeNature.Unsupported;
 
         var genType = toCheck.GetGenericArguments()[ 0 ];
@@ -72,11 +74,13 @@ public static class J4JCommandLineExtensions
         return typeof( List<> ).MakeGenericType( genType ).IsAssignableFrom( toCheck ) ? genType : null;
     }
 
-    public static IConfigurationBuilder AddJ4JCommandLine( this IConfigurationBuilder builder,
+    public static IConfigurationBuilder AddJ4JCommandLine(
+        this IConfigurationBuilder builder,
         IServiceProvider svcProvider,
         out OptionCollection? options,
         out CommandLineSource? cmdLineSource,
-        params ICleanupTokens[] cleanupTokens )
+        params ICleanupTokens[] cleanupTokens
+    )
     {
         var source = new J4JCommandLineSource( svcProvider.GetRequiredService<IParser>(),
                                                cleanupTokens );
@@ -89,10 +93,12 @@ public static class J4JCommandLineExtensions
         return builder;
     }
 
-    public static IConfigurationBuilder AddJ4JCommandLine( this IConfigurationBuilder builder,
+    public static IConfigurationBuilder AddJ4JCommandLine(
+        this IConfigurationBuilder builder,
         IParser parser,
         out CommandLineSource? cmdLineSource,
-        params ICleanupTokens[] cleanupTokens )
+        params ICleanupTokens[] cleanupTokens
+    )
     {
         var source = new J4JCommandLineSource( parser, cleanupTokens );
 
@@ -103,12 +109,14 @@ public static class J4JCommandLineExtensions
         return builder;
     }
 
-    public static IConfigurationBuilder AddJ4JCommandLineForWindows( this IConfigurationBuilder builder,
+    public static IConfigurationBuilder AddJ4JCommandLineForWindows(
+        this IConfigurationBuilder builder,
         out OptionCollection? options,
         out CommandLineSource? cmdLineSource,
         ITextConverters? converters = null,
         ILoggerFactory? loggerFactory = null,
-        params ICleanupTokens[] cleanupTokens ) =>
+        params ICleanupTokens[] cleanupTokens
+    ) =>
         builder.AddJ4JCommandLineDefault( CommandLineOperatingSystems.Windows,
                                           out options,
                                           out cmdLineSource,
@@ -116,12 +124,14 @@ public static class J4JCommandLineExtensions
                                           loggerFactory,
                                           cleanupTokens );
 
-    public static IConfigurationBuilder AddJ4JCommandLineForLinux( this IConfigurationBuilder builder,
+    public static IConfigurationBuilder AddJ4JCommandLineForLinux(
+        this IConfigurationBuilder builder,
         out OptionCollection? options,
         out CommandLineSource? cmdLineSource,
         ITextConverters? converters = null,
         ILoggerFactory? loggerFactory = null,
-        params ICleanupTokens[] cleanupTokens ) =>
+        params ICleanupTokens[] cleanupTokens
+    ) =>
         builder.AddJ4JCommandLineDefault( CommandLineOperatingSystems.Linux,
                                           out options,
                                           out cmdLineSource,
@@ -129,20 +139,22 @@ public static class J4JCommandLineExtensions
                                           loggerFactory,
                                           cleanupTokens );
 
-    private static IConfigurationBuilder AddJ4JCommandLineDefault( this IConfigurationBuilder builder,
+    private static IConfigurationBuilder AddJ4JCommandLineDefault(
+        this IConfigurationBuilder builder,
         CommandLineOperatingSystems opSys,
         out OptionCollection? options,
         out CommandLineSource? cmdLineSource,
         ITextConverters? converters = null,
         ILoggerFactory? loggerFactory = null,
-        params ICleanupTokens[] cleanupTokens )
+        params ICleanupTokens[] cleanupTokens
+    )
     {
         converters ??= new TextConverters();
 
         var textComparison = opSys switch
         {
             CommandLineOperatingSystems.Windows => StringComparison.OrdinalIgnoreCase,
-            CommandLineOperatingSystems.Linux   => StringComparison.Ordinal,
+            CommandLineOperatingSystems.Linux => StringComparison.Ordinal,
             _ => throw new
                 InvalidEnumArgumentException( $"Unsupported {nameof( CommandLineOperatingSystems )} value '{opSys}'" )
         };
@@ -161,7 +173,7 @@ public static class J4JCommandLineExtensions
         var parsingTable = new ParsingTable( optionsGenerator );
         var tokenizer = new Tokenizer( lexicalElements );
 
-        return builder.AddJ4JCommandLine( new Parser( options, parsingTable, tokenizer),
+        return builder.AddJ4JCommandLine( new Parser( options, parsingTable, tokenizer ),
                                           out cmdLineSource,
                                           cleanupTokens );
     }

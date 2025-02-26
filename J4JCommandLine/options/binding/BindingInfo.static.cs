@@ -1,4 +1,5 @@
 ﻿#region copyright
+
 // Copyright (c) 2021, 2022, 2023 Mark A. Olbert 
 // https://www.JumpForJoySoftware.com
 // BindingInfo.static.cs
@@ -17,6 +18,7 @@
 // 
 // You should have received a copy of the GNU General Public License along 
 // with J4JCommandLine. If not, see <https://www.gnu.org/licenses/>.
+
 #endregion
 
 using System;
@@ -40,7 +42,7 @@ internal partial class BindingInfo
                     retVal = memExpr.Member switch
                     {
                         PropertyInfo propInfo => new BindingInfo( propInfo, retVal ),
-                        _                     => new BindingInfo()
+                        _ => new BindingInfo()
                     };
 
                     // walk up expression tree

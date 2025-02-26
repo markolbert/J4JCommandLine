@@ -1,4 +1,5 @@
 ﻿#region copyright
+
 // Copyright (c) 2021, 2022, 2023 Mark A. Olbert 
 // https://www.JumpForJoySoftware.com
 // TextToValueComparer.cs
@@ -17,6 +18,7 @@
 // 
 // You should have received a copy of the GNU General Public License along 
 // with J4JCommandLine. If not, see <https://www.gnu.org/licenses/>.
+
 #endregion
 
 using System.Collections.Generic;
@@ -27,16 +29,13 @@ public sealed class TextToValueComparer : IEqualityComparer<ITextToValue>
 {
     public bool Equals( ITextToValue? x, ITextToValue? y )
     {
-        if ( ReferenceEquals( x, y ) ) return true;
-        if ( ReferenceEquals( x, null ) ) return false;
-        if ( ReferenceEquals( y, null ) ) return false;
-        if ( x.GetType() != y.GetType() ) return false;
+        if( ReferenceEquals( x, y ) ) return true;
+        if( ReferenceEquals( x, null ) ) return false;
+        if( ReferenceEquals( y, null ) ) return false;
+        if( x.GetType() != y.GetType() ) return false;
 
-        return x.TargetType.Equals( y.TargetType );
+        return x.TargetType == y.TargetType;
     }
 
-    public int GetHashCode( ITextToValue obj )
-    {
-        return obj.TargetType.GetHashCode();
-    }
+    public int GetHashCode( ITextToValue obj ) => obj.TargetType.GetHashCode();
 }

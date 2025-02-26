@@ -1,4 +1,5 @@
 ﻿#region copyright
+
 // Copyright (c) 2021, 2022, 2023 Mark A. Olbert 
 // https://www.JumpForJoySoftware.com
 // BuiltInTextToValue.cs
@@ -17,6 +18,7 @@
 // 
 // You should have received a copy of the GNU General Public License along 
 // with J4JCommandLine. If not, see <https://www.gnu.org/licenses/>.
+
 #endregion
 
 using System.Reflection;
@@ -24,24 +26,18 @@ using Microsoft.Extensions.Logging;
 
 namespace J4JSoftware.Configuration.CommandLine;
 
-public class BuiltInTextToValue<TBaseType> : TextToValue<TBaseType>
+public class BuiltInTextToValue<TBaseType>(
+    MethodInfo convMethod,
+    ILoggerFactory? loggerFactory
+) : TextToValue<TBaseType>( loggerFactory )
 {
-    private readonly MethodInfo _convMethod;
-
-    public BuiltInTextToValue( MethodInfo convMethod,
-        ILoggerFactory? loggerFactory )
-        : base( loggerFactory )
-    {
-        _convMethod = convMethod;
-    }
-
     protected override bool ConvertTextToValue( string text, out TBaseType? result )
     {
         result = default;
 
         try
         {
-            result = (TBaseType?) _convMethod.Invoke( null, new object?[] { text } );
+            result = (TBaseType?) convMethod.Invoke( null, [text] );
             return true;
         }
         catch

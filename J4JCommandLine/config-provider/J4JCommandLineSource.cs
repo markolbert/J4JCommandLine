@@ -1,4 +1,5 @@
 ﻿#region copyright
+
 // Copyright (c) 2021, 2022, 2023 Mark A. Olbert 
 // https://www.JumpForJoySoftware.com
 // J4JCommandLineSource.cs
@@ -17,6 +18,7 @@
 // 
 // You should have received a copy of the GNU General Public License along 
 // with J4JCommandLine. If not, see <https://www.gnu.org/licenses/>.
+
 #endregion
 
 using System;
@@ -32,15 +34,15 @@ public class J4JCommandLineSource : IConfigurationSource
     public J4JCommandLineSource(
         IParser parser,
         params ICleanupTokens[] cleanupTokens
-        )
+    )
     {
         Parser = parser;
         CommandLineSource = Initialize();
     }
 
-    public J4JCommandLineSource( 
+    public J4JCommandLineSource(
         IParser parser
-        )
+    )
     {
         Parser = parser;
         CommandLineSource = Initialize();
@@ -59,8 +61,7 @@ public class J4JCommandLineSource : IConfigurationSource
         return retVal;
     }
 
-    private void Options_Configured( object? sender, EventArgs e ) =>
-        SourceChanged?.Invoke( this, EventArgs.Empty );
+    private void Options_Configured( object? sender, EventArgs e ) => SourceChanged?.Invoke( this, EventArgs.Empty );
 
     private void OnCommandLineSourceChanged( object? sender, ConfigurationChangedEventArgs e ) =>
         SourceChanged?.Invoke( this, EventArgs.Empty );
@@ -68,8 +69,5 @@ public class J4JCommandLineSource : IConfigurationSource
     public CommandLineSource? CommandLineSource { get; }
     public IParser? Parser { get; }
 
-    public IConfigurationProvider Build( IConfigurationBuilder builder )
-    {
-        return new J4JCommandLineProvider( this );
-    }
+    public IConfigurationProvider Build( IConfigurationBuilder builder ) => new J4JCommandLineProvider( this );
 }

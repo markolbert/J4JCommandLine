@@ -21,12 +21,11 @@ using System.Collections.Generic;
 
 #pragma warning disable 8618
 
-namespace J4JSoftware.Binder.Tests
+namespace J4JSoftware.Binder.Tests;
+
+public class TokenizerConfig
 {
-    public class TokenizerConfig
-    {
-        public string OperatingSystem { get; set; }
-        public string CommandLine { get; set; }
-        public List<TokenizerData> Data { get; set; }
-    }
+    public string OperatingSystem { get; set; }
+    public string CommandLine { get; set; }
+    public List<TokenizerData> Data { get; set; }
 }

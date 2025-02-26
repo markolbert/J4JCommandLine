@@ -1,4 +1,5 @@
 ﻿#region copyright
+
 // Copyright (c) 2021, 2022, 2023 Mark A. Olbert 
 // https://www.JumpForJoySoftware.com
 // InternalExtensions.cs
@@ -17,6 +18,7 @@
 // 
 // You should have received a copy of the GNU General Public License along 
 // with J4JCommandLine. If not, see <https://www.gnu.org/licenses/>.
+
 #endregion
 
 using System.Collections.Generic;
@@ -30,7 +32,9 @@ internal static class InternalExtensions
     {
         foreach( var idx in toRemove.Where( x => x < list.Count && x >= 0 )
                                     .OrderByDescending( x => x ) )
+        {
             list.RemoveAt( idx );
+        }
     }
 
     public static void RemoveFrom<T>( this List<T> list, int startIdx )
