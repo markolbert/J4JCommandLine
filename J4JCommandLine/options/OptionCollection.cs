@@ -26,6 +26,7 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Linq.Expressions;
+using System.Reflection;
 using Microsoft.Extensions.Logging;
 
 namespace J4JSoftware.Configuration.CommandLine;
@@ -112,7 +113,7 @@ public class OptionCollection
         var bindingInfo = BindingInfo.Create( selector );
         if( !bindingInfo.IsProperty )
         {
-            _logger?.LogError( "Binding target {0} is not a property", bindingInfo.FullName );
+            _logger?.InvalidBindingTarget(bindingInfo.FullName );
             return null;
         }
 
@@ -127,7 +128,7 @@ public class OptionCollection
                 if( test( bindingInfo ) )
                     continue;
 
-                _logger?.LogError( "{0} failed {1}", curBindingInfo.FullName, test );
+                _logger?.BindingFailed( curBindingInfo.FullName, test.GetMethodInfo().Name );
                 return null;
             }
 
@@ -136,8 +137,7 @@ public class OptionCollection
 
         if( OptionsInternal.Any( x => x.ContextPath!.Equals( bindingInfo.FullName, _textComparison ) ) )
         {
-            _logger?.LogError( "An option with the same ContextPath ('{0}') is already in the collection",
-                               bindingInfo.FullName );
+            _logger?.DuplicateBinding( bindingInfo.FullName );
             return null;
         }
 

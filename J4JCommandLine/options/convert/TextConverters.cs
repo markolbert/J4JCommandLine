@@ -104,7 +104,7 @@ public class TextConverters : ITextConverters
 
         if( !replaceExisting )
         {
-            _logger?.LogError( "There is already a converter defined for {0}", converter.TargetType );
+            _logger?.DuplicateConverter( converter.TargetType.Name );
             return false;
         }
 
@@ -150,7 +150,7 @@ public class TextConverters : ITextConverters
         if( CanConvertSimple( toCheck ) )
             return true;
 
-        _logger?.LogError( "No ITextToValue converter is defined for {0}", toCheck );
+        _logger?.MissingConverter( toCheck.Name );
 
         return false;
     }
@@ -173,14 +173,14 @@ public class TextConverters : ITextConverters
     {
         if( _builtInTargets == null )
         {
-            _logger?.LogWarning( "No built-in text converter targets are defined" );
+            _logger?.MissingBuiltInConverters();
             return null;
         }
 
         var builtIn = _builtInTargets.FirstOrDefault( x => x.ReturnType == simpleType );
         if( builtIn == null )
         {
-            _logger?.LogWarning( "No built-in text converter for type {0} is defined", simpleType );
+            _logger?.MissingConverter( simpleType.Name );
             return null;
         }
 
@@ -190,7 +190,7 @@ public class TextConverters : ITextConverters
 
         if( retVal != null )
             _converters.Add( simpleType, retVal );
-        else _logger?.LogWarning( "Could not create an instance of ITextToValue converter '{0}'", builtInType );
+        else _logger?.MissingConverter(builtInType.Name);
 
         return retVal;
     }
@@ -224,7 +224,7 @@ public class TextConverters : ITextConverters
             return converter!.Convert( textValues, out result );
         }
 
-        _logger?.LogError( "Cannot convert text to '{0}'", targetType );
+        _logger?.MissingConverter(targetType.Name);
 
         return false;
     }
@@ -252,7 +252,7 @@ public class TextConverters : ITextConverters
             if( converter != null )
                 return converter;
 
-            _logger?.LogWarning( "No ITextToValue converter found for type '{0}'", key );
+            _logger?.MissingConverter(key.Name);
             return new UndefinedTextToValue();
         }
     }

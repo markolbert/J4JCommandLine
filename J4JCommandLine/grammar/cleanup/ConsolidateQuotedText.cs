@@ -51,9 +51,7 @@ public class ConsolidateQuotedText(
             // "quoted" tokens
             if( curPair.End == null )
             {
-                _logger?.LogError( "Unclosed quoter encountered, command line truncated at token #{0}",
-                                   curPair.Start.Index );
-
+                _logger?.UnclosedQuotes( curPair.Start.Index );
                 tokens.RemoveFrom( curPair.Start.Index );
 
                 return;

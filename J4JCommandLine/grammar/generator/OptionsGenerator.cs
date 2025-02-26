@@ -147,7 +147,7 @@ public class OptionsGenerator(
     {
         if( _current?.Option?.Style != OptionStyle.Switch )
         {
-            _logger?.LogError( "Trying to commit a value to a switch value to a non-switch option" );
+            _logger?.InvalidAssignment( "switch", "non-switch" );
             return false;
         }
 
@@ -170,7 +170,7 @@ public class OptionsGenerator(
     {
         if( _current?.Option == null || _current.Option.Style == OptionStyle.Switch )
         {
-            _logger?.LogError( "Trying to commit a non-switch value to a switch option" );
+            _logger?.InvalidAssignment("non-switch", "switch");
             return false;
         }
 
@@ -208,7 +208,7 @@ public class OptionsGenerator(
             if( validValues.Any( x => x.Equals( value, textComparison ) ) )
                 continue;
 
-            _logger?.LogError( "Invalid {0} option value '{1}'", propertyType.Name, value );
+            _logger?.InvalidOptionValue( propertyType.Name, value );
             return false;
         }
 

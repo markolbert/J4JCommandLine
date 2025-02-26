@@ -41,7 +41,7 @@ public class BuiltInTextToValue<TBaseType>(
         }
         catch
         {
-            Logger?.LogError( "Could not convert '{0}' to a {1}", text, typeof( TBaseType? ) );
+            Logger?.ConversionFailed( typeof( TBaseType? ).Name, text );
             return false;
         }
     }

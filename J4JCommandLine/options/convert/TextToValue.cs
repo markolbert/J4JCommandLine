@@ -57,9 +57,7 @@ public abstract class TextToValue<TBaseType> : ITextToValue
             case TypeNature.Simple:
                 if( valueList.Count > 1 )
                 {
-                    Logger?.LogError( "Cannot convert multiple text values to a single value of '{0}'",
-                                      typeof( TBaseType ) );
-
+                    Logger?.TooManyValues( typeof( TBaseType ).Name );
                     return false;
                 }
 
@@ -125,7 +123,7 @@ public abstract class TextToValue<TBaseType> : ITextToValue
                 retVal.Add( temp );
             else
             {
-                Logger?.LogError( "Could not convert '{0}' to an instance of {1}", value, typeof( TBaseType ) );
+                Logger?.ConversionFailed( typeof( TBaseType ).Name, value );
                 return false;
             }
         }

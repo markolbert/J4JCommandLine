@@ -80,9 +80,8 @@ public class Parser(
 
             if( parsingAction == null )
             {
-                _logger?.LogError( "Undefined parsing action for token sequence '{0} => {1}'",
-                                   tokenPair.Previous.Type,
-                                   tokenPair.Current.Type );
+                _logger?.UndefinedParsingAction( tokenPair.Previous.Type.ToString(),
+                                                 tokenPair.Current.Type.ToString() );
 
                 return false;
             }

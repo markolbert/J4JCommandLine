@@ -59,14 +59,14 @@ public class LexicalElements : ILexicalElements
     {
         if( type == LexicalType.Text || type == LexicalType.StartOfInput )
         {
-            Logger?.LogError( "Cannot include {0} tokens", type );
+            Logger?.InvalidTokens( type.ToString() );
             return false;
         }
 
         if( _available.SelectMany( kvp => kvp.Value )
                       .Any( t => t.Text.Equals( text, TextComparison ) ) )
         {
-            Logger?.LogError( "Duplicate token text '{0}' ({1})", text, type );
+            Logger?.DuplicateTokenText( text, type.ToString() );
             return false;
         }
 
