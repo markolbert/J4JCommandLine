@@ -23,30 +23,26 @@
 
 using System;
 using System.Collections.Generic;
-using Microsoft.Extensions.Logging;
 
 namespace J4JSoftware.Configuration.CommandLine;
 
 public class Tokenizer : ITokenizer
 {
     public static Tokenizer GetWindowsDefault(
-        ILoggerFactory? loggerFactory = null,
         params ICleanupTokens[] cleanupProcessors
     ) =>
-        new( new WindowsLexicalElements( loggerFactory ), loggerFactory, cleanupProcessors );
+        new( new WindowsLexicalElements(), cleanupProcessors );
 
     public static Tokenizer GetLinuxDefault(
-        ILoggerFactory? loggerFactory = null,
         params ICleanupTokens[] cleanupProcessors
     ) =>
-        new( new LinuxLexicalElements( loggerFactory ), loggerFactory, cleanupProcessors );
+        new( new LinuxLexicalElements(), cleanupProcessors );
 
     private readonly ICleanupTokens[] _cleanupProcessors;
     private readonly ILexicalElements _tokens;
 
     public Tokenizer(
         ILexicalElements tokens,
-        ILoggerFactory? loggerFactory = null,
         params ICleanupTokens[] cleanupProcessors
     )
     {
@@ -59,7 +55,7 @@ public class Tokenizer : ITokenizer
         {
             _cleanupProcessors =
             [
-                new ConsolidateQuotedText( TextComparison, loggerFactory ),
+                new ConsolidateQuotedText( TextComparison ),
                 new MergeSequentialSeparators()
             ];
         }

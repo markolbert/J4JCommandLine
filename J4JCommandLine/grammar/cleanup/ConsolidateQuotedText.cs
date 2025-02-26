@@ -32,12 +32,11 @@ using Microsoft.Extensions.Logging;
 namespace J4JSoftware.Configuration.CommandLine;
 
 public class ConsolidateQuotedText(
-    StringComparison textComparison,
-    ILoggerFactory? loggerFactory = null
+    StringComparison textComparison
 )
     : ICleanupTokens
 {
-    private readonly ILogger? _logger = loggerFactory?.CreateLogger<ConsolidateQuotedText>();
+    private readonly ILogger? _logger = CommandLineLoggerFactory.Default.Create<ConsolidateQuotedText>();
 
     public void Process( List<Token> tokens )
     {

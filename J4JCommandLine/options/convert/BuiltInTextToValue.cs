@@ -27,9 +27,8 @@ using Microsoft.Extensions.Logging;
 namespace J4JSoftware.Configuration.CommandLine;
 
 public class BuiltInTextToValue<TBaseType>(
-    MethodInfo convMethod,
-    ILoggerFactory? loggerFactory
-) : TextToValue<TBaseType>( loggerFactory )
+    MethodInfo convMethod
+) : TextToValue<TBaseType>
 {
     protected override bool ConvertTextToValue( string text, out TBaseType? result )
     {

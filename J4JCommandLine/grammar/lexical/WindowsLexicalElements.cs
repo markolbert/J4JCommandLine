@@ -22,14 +22,13 @@
 #endregion
 
 using System;
-using Microsoft.Extensions.Logging;
 
 namespace J4JSoftware.Configuration.CommandLine;
 
 public sealed class WindowsLexicalElements : LexicalElements
 {
-    public WindowsLexicalElements( ILoggerFactory? loggerFactory = null )
-        : base( StringComparison.OrdinalIgnoreCase, loggerFactory )
+    public WindowsLexicalElements()
+        : base( StringComparison.OrdinalIgnoreCase )
     {
         Add( LexicalType.Quoter, "\"" );
         Add( LexicalType.Quoter, "'" );

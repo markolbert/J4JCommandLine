@@ -32,29 +32,26 @@ namespace J4JSoftware.Configuration.CommandLine;
 
 public class OptionCollection
 {
-    public static OptionCollection GetWindowsDefault( ILoggerFactory? loggerFactory = null ) =>
-        new( StringComparison.OrdinalIgnoreCase, new TextConverters( loggerFactory: loggerFactory ), loggerFactory );
+    public static OptionCollection GetWindowsDefault() =>
+        new( StringComparison.OrdinalIgnoreCase, new TextConverters() );
 
-    public static OptionCollection GetLinuxDefault( ILoggerFactory? logger = null ) =>
-        new( StringComparison.Ordinal, new TextConverters( loggerFactory: logger ), logger );
+    public static OptionCollection GetLinuxDefault() =>
+        new( StringComparison.Ordinal, new TextConverters() );
 
     public event EventHandler? Configured;
 
     private readonly StringComparison _textComparison;
     private readonly ITextConverters _converters;
     private readonly List<Func<BindingInfo, bool>> _bindingTests;
-    private readonly ILogger? _logger;
+    private readonly ILogger? _logger = CommandLineLoggerFactory.Default.Create<OptionCollection>();
 
     public OptionCollection(
         StringComparison textComparison,
-        ITextConverters converters,
-        ILoggerFactory? loggerFactory = null
+        ITextConverters converters
     )
     {
         _textComparison = textComparison;
         _converters = converters;
-
-        _logger = loggerFactory?.CreateLogger<OptionCollection>();
 
         _bindingTests =
         [

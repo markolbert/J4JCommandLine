@@ -35,12 +35,11 @@ public class LexicalElements : ILexicalElements
 
     public LexicalElements(
         StringComparison textComparison,
-        ILoggerFactory? loggerFactory = null,
         bool inclCommon = true
     )
     {
         TextComparison = textComparison;
-        Logger = loggerFactory?.CreateLogger( GetType() );
+        Logger = CommandLineLoggerFactory.Default.Create( GetType() );
 
         if( !inclCommon )
             return;

@@ -21,11 +21,9 @@
 
 #endregion
 
-using Microsoft.Extensions.Logging;
-
 namespace J4JSoftware.Configuration.CommandLine;
 
-public class TextToTextConverter( ILoggerFactory? loggerFactory = null ) : TextToValue<string>( loggerFactory )
+public class TextToTextConverter() : TextToValue<string>
 {
     protected override bool ConvertTextToValue( string text, out string? result )
     {

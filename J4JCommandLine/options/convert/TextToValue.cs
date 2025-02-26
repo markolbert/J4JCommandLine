@@ -28,11 +28,11 @@ using Microsoft.Extensions.Logging;
 
 namespace J4JSoftware.Configuration.CommandLine;
 
-public abstract class TextToValue<TBaseType>( ILoggerFactory? loggerFactory = null ) : ITextToValue
+public abstract class TextToValue<TBaseType> : ITextToValue
 {
     protected abstract bool ConvertTextToValue( string text, out TBaseType? result );
 
-    protected ILogger? Logger { get; } = loggerFactory?.CreateLogger<TBaseType>();
+    protected ILogger? Logger { get; } = CommandLineLoggerFactory.Default.Create<TextToValue<TBaseType>>();
 
     public Type TargetType => typeof( TBaseType );
 

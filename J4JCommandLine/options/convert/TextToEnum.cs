@@ -22,11 +22,10 @@
 #endregion
 
 using System;
-using Microsoft.Extensions.Logging;
 
 namespace J4JSoftware.Configuration.CommandLine;
 
-public class TextToEnum<TEnum>( ILoggerFactory? loggerFactory = null ) : TextToValue<TEnum>( loggerFactory )
+public class TextToEnum<TEnum>() : TextToValue<TEnum>
     where TEnum : Enum
 {
     protected override bool ConvertTextToValue( string text, out TEnum? result )

@@ -39,7 +39,7 @@ public class TextConverters : ITextConverters
 
     private record BuiltInConverter( Type ReturnType, MethodInfo MethodInfo );
 
-    private static List<ITextToValue> GetBuiltInConverters( ILoggerFactory? loggerFactory = null )
+    private static List<ITextToValue> GetBuiltInConverters()
     {
         var retVal = new List<ITextToValue>();
 
@@ -47,9 +47,7 @@ public class TextConverters : ITextConverters
         {
             var builtInType = typeof( BuiltInTextToValue<> ).MakeGenericType( builtInConverter.ReturnType );
 
-            retVal.Add( (ITextToValue) Activator.CreateInstance( builtInType,
-                                                                 builtInConverter.MethodInfo,
-                                                                 loggerFactory )! );
+            retVal.Add( (ITextToValue) Activator.CreateInstance( builtInType, builtInConverter.MethodInfo)! );
         }
 
         return retVal;
@@ -70,14 +68,13 @@ public class TextConverters : ITextConverters
 
     public TextConverters(
         BuiltInConverters builtInConv = BuiltInConverters.AddDynamically,
-        ILoggerFactory? loggerFactory = null,
         params ITextToValue[] converters
     )
     {
-        _logger = loggerFactory?.CreateLogger<TextConverters>();
+        _logger = CommandLineLoggerFactory.Default.Create<TextConverters>();
 
         // add the text to text "converter"
-        AddConverter( new TextToTextConverter( loggerFactory ), true );
+        AddConverter( new TextToTextConverter(), true );
 
         AddConverters( converters );
         _builtInConv = builtInConv;
@@ -85,7 +82,7 @@ public class TextConverters : ITextConverters
         switch( builtInConv )
         {
             case BuiltInConverters.AddAtInitialization:
-                AddConverters( GetBuiltInConverters( loggerFactory ) );
+                AddConverters( GetBuiltInConverters() );
                 break;
 
             case BuiltInConverters.AddDynamically:
@@ -189,9 +186,7 @@ public class TextConverters : ITextConverters
 
         var builtInType = typeof( BuiltInTextToValue<> ).MakeGenericType( builtIn.ReturnType );
 
-        var retVal = (ITextToValue?) Activator.CreateInstance( builtInType,
-                                                               builtIn.MethodInfo,
-                                                               _logger );
+        var retVal = (ITextToValue?) Activator.CreateInstance( builtInType, builtIn.MethodInfo );
 
         if( retVal != null )
             _converters.Add( simpleType, retVal );

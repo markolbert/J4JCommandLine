@@ -29,54 +29,43 @@ namespace J4JSoftware.Configuration.CommandLine;
 public class Parser(
     OptionCollection options,
     ParsingTable parsingTable,
-    ITokenizer tokenizer,
-    ILoggerFactory? loggerFactory = null
+    ITokenizer tokenizer
 )
     : IParser
 {
     public static IParser GetWindowsDefault(
         ITextConverters? converters = null,
-        ILoggerFactory? loggerFactory = null,
         params ICleanupTokens[] cleanupProcessors
     )
     {
-        converters ??= new TextConverters( loggerFactory: loggerFactory );
+        converters ??= new TextConverters();
 
-        var options = new OptionCollection( StringComparison.OrdinalIgnoreCase, converters, loggerFactory );
+        var options = new OptionCollection( StringComparison.OrdinalIgnoreCase, converters );
 
-        var parsingTable = new ParsingTable( new OptionsGenerator( options,
-                                                                   StringComparison.OrdinalIgnoreCase,
-                                                                   loggerFactory ) );
+        var parsingTable = new ParsingTable( new OptionsGenerator( options, StringComparison.OrdinalIgnoreCase ) );
 
-        var tokenizer = new Tokenizer( new WindowsLexicalElements( loggerFactory ),
-                                       loggerFactory,
-                                       cleanupProcessors );
+        var tokenizer = new Tokenizer( new WindowsLexicalElements(), cleanupProcessors );
 
-        return new Parser( options, parsingTable, tokenizer, loggerFactory );
+        return new Parser( options, parsingTable, tokenizer );
     }
 
     public static IParser GetLinuxDefault(
         ITextConverters? converters = null,
-        ILoggerFactory? loggerFactory = null,
         params ICleanupTokens[] cleanupProcessors
     )
     {
-        converters ??= new TextConverters( loggerFactory: loggerFactory );
+        converters ??= new TextConverters();
 
-        var options = new OptionCollection( StringComparison.Ordinal, converters, loggerFactory );
+        var options = new OptionCollection( StringComparison.Ordinal, converters );
 
-        var parsingTable = new ParsingTable( new OptionsGenerator( options,
-                                                                   StringComparison.Ordinal,
-                                                                   loggerFactory ) );
+        var parsingTable = new ParsingTable( new OptionsGenerator( options, StringComparison.Ordinal ) );
 
-        var tokenizer = new Tokenizer( new LinuxLexicalElements( loggerFactory ),
-                                       loggerFactory,
-                                       cleanupProcessors );
+        var tokenizer = new Tokenizer( new LinuxLexicalElements(), cleanupProcessors );
 
-        return new Parser( options, parsingTable, tokenizer, loggerFactory );
+        return new Parser( options, parsingTable, tokenizer );
     }
 
-    private readonly ILogger? _logger = loggerFactory?.CreateLogger<Parser>();
+    private readonly ILogger? _logger = CommandLineLoggerFactory.Default.Create<Parser>();
 
     public ITokenizer Tokenizer { get; } = tokenizer;
     public OptionCollection Collection { get; } = options;

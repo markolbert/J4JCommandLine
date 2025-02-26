@@ -30,23 +30,18 @@ namespace J4JSoftware.Configuration.CommandLine;
 
 public class OptionsGenerator(
     OptionCollection options,
-    StringComparison textComparison,
-    ILoggerFactory? loggerFactory = null
+    StringComparison textComparison
 )
     : IOptionsGenerator
 {
-    public static OptionsGenerator GetWindowsDefault( ILoggerFactory? loggerFactory = null ) =>
-        new( OptionCollection.GetWindowsDefault( loggerFactory ),
-             StringComparison.OrdinalIgnoreCase,
-             loggerFactory );
+    public static OptionsGenerator GetWindowsDefault() =>
+        new( OptionCollection.GetWindowsDefault(), StringComparison.OrdinalIgnoreCase );
 
-    public static OptionsGenerator GetLinuxDefault( ILoggerFactory? loggerFactory = null ) =>
-        new( OptionCollection.GetWindowsDefault( loggerFactory ),
-             StringComparison.Ordinal,
-             loggerFactory );
+    public static OptionsGenerator GetLinuxDefault() =>
+        new( OptionCollection.GetWindowsDefault(), StringComparison.Ordinal );
 
     private readonly OptionCollection? _options = options;
-    private readonly ILogger? _logger = loggerFactory?.CreateLogger<OptionsGenerator>();
+    private readonly ILogger? _logger = CommandLineLoggerFactory.Default.Create<OptionsGenerator>();
 
     private CommandLineArgument? _current;
 

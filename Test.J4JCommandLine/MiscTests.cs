@@ -30,7 +30,7 @@ public class MiscTests : TestBase
     [ InlineData( "-x \"abc\"", "abc" ) ]
     public void LinuxStringHandling( string cmdLine, params string[] result )
     {
-        var parser = Parser.GetLinuxDefault( loggerFactory: LoggerFactory );
+        var parser = Parser.GetLinuxDefault();
 
         var option = parser.Collection.Bind<MiscTarget, string?>( x => x.AStringValue, "x" );
         option.Should().NotBeNull();

@@ -15,7 +15,7 @@ public class TokenizerTestsNoDi : TestBaseNoDi
     public void Simple( TokenizerConfig config )
     {
         Initialize( config.OperatingSystem,
-                    new ConsolidateQuotedText( StringComparison.OrdinalIgnoreCase, LoggerFactory ),
+                    new ConsolidateQuotedText( StringComparison.OrdinalIgnoreCase ),
                     new MergeSequentialSeparators() );
 
         var tokens = _parser!.Tokenizer.Tokenize( config.CommandLine );
@@ -69,8 +69,8 @@ public class TokenizerTestsNoDi : TestBaseNoDi
     )
     {
         _parser = osName.Equals( "windows", StringComparison.OrdinalIgnoreCase )
-            ? Parser.GetWindowsDefault( loggerFactory: LoggerFactory, cleanupProcessors: cleanupTokens )
-            : Parser.GetLinuxDefault( loggerFactory: LoggerFactory, cleanupProcessors: cleanupTokens );
+            ? Parser.GetWindowsDefault( cleanupProcessors: cleanupTokens )
+            : Parser.GetLinuxDefault( cleanupProcessors: cleanupTokens );
 
         _parser!.Collection.Should().NotBeNull();
     }
