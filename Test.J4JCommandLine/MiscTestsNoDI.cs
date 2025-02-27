@@ -19,29 +19,34 @@
 
 using FluentAssertions;
 using J4JSoftware.Configuration.CommandLine;
+using Microsoft.Extensions.Configuration;
 using Xunit;
 
 namespace J4JSoftware.Binder.Tests;
 
-public class MiscTestsNoDi : TestBaseNoDi
+public class MiscTestsNoDi : TestBase
 {
     [ Theory ]
     [ InlineData( "-x abc", "abc" ) ]
     [ InlineData( "-x \"abc\"", "abc" ) ]
     public void LinuxStringHandling( string cmdLine, params string[] result )
     {
-        var parser = Parser.GetLinuxDefault();
+        var optionBuilder = GetOptionBuilder( "Linux" );
 
-        var option = parser.Collection.Bind<MiscTarget, string?>( x => x.AStringValue, "x" );
+        optionBuilder.Bind<MiscTarget, string?>( x => x.AStringValue, "x" );
+
+        ILexicalElements? tokens = null;
+
+        var configBuilder = new ConfigurationBuilder()
+           .AddJ4JCommandLine( optionBuilder, cmdLine, ref tokens );
+
+        configBuilder.Build();
+
+        optionBuilder.Options.UnknownKeys.Should().BeEmpty();
+        optionBuilder.Options.SpuriousValues.Should().BeEmpty();
+
+        var option = optionBuilder.Options[ "x" ];
         option.Should().NotBeNull();
-
-        parser.Collection.FinishConfiguration();
-
-        parser.Parse( cmdLine ).Should().BeTrue();
-
-        parser.Collection.UnknownKeys.Should().BeEmpty();
-        parser.Collection.SpuriousValues.Should().BeEmpty();
-
         option.Values.Count.Should().Be( result.Length );
 
         for( var idx = 0; idx < result.Length; idx++ )

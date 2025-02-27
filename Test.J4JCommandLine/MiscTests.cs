@@ -30,15 +30,18 @@ public class MiscTests : TestBase
     [ InlineData( "-x \"abc\"", "abc" ) ]
     public void LinuxStringHandling( string cmdLine, params string[] result )
     {
-        var parser = Parser.GetLinuxDefault();
+        var optionBuilder = GetOptionBuilder( "Linux" );
+        var parser = Parser.GetLinuxDefault( optionBuilder );
 
-        var option = parser.Collection.Bind<MiscTarget, string?>( x => x.AStringValue, "x" );
-        option.Should().NotBeNull();
+        optionBuilder.Bind<MiscTarget, string?>( x => x.AStringValue, "x" );
 
         parser.Parse( cmdLine ).Should().BeTrue();
 
         parser.Collection.UnknownKeys.Should().BeEmpty();
         parser.Collection.SpuriousValues.Should().BeEmpty();
+
+        var option = optionBuilder.Options["x"];
+        option.Should().NotBeNull();
 
         option.Values.Count.Should().Be( result.Length );
 
