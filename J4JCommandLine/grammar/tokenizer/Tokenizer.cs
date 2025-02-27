@@ -29,28 +29,27 @@ namespace J4JSoftware.Configuration.CommandLine;
 public class Tokenizer : ITokenizer
 {
     public static Tokenizer GetWindowsDefault(
-        params ICleanupTokens[] cleanupProcessors
+        J4JCommandLineBuilder optionBuilder
     ) =>
-        new( new WindowsLexicalElements(), cleanupProcessors );
+        new( new WindowsLexicalElements( optionBuilder ), optionBuilder );
 
     public static Tokenizer GetLinuxDefault(
-        params ICleanupTokens[] cleanupProcessors
+        J4JCommandLineBuilder optionBuilder
     ) =>
-        new( new LinuxLexicalElements(), cleanupProcessors );
+        new( new LinuxLexicalElements( optionBuilder ), optionBuilder );
 
-    private readonly ICleanupTokens[] _cleanupProcessors;
-    private readonly ILexicalElements _tokens;
+    private readonly List<ICleanupTokens> _cleanupProcessors;
 
     public Tokenizer(
         ILexicalElements tokens,
-        params ICleanupTokens[] cleanupProcessors
+        J4JCommandLineBuilder optionBuilder
     )
     {
         TextComparison = tokens.TextComparison;
-        _tokens = tokens;
+        Tokens = tokens;
 
-        if( cleanupProcessors.Length > 0 )
-            _cleanupProcessors = cleanupProcessors;
+        if( optionBuilder.CleanupTokens.Count > 0 )
+            _cleanupProcessors = optionBuilder.CleanupTokens;
         else
         {
             _cleanupProcessors =
@@ -62,6 +61,7 @@ public class Tokenizer : ITokenizer
     }
 
     public StringComparison TextComparison { get; }
+    public ILexicalElements Tokens { get; }
 
     public List<Token> Tokenize( string cmdLine )
     {
@@ -71,7 +71,7 @@ public class Tokenizer : ITokenizer
         {
             (Token? token, int startChar) firstMatch = ( null, 0 );
 
-            foreach( var token in _tokens )
+            foreach( var token in Tokens )
             {
                 var tokenStart = cmdLine.IndexOf( token.Text, TextComparison );
 

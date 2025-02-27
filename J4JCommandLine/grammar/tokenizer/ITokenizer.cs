@@ -29,5 +29,6 @@ namespace J4JSoftware.Configuration.CommandLine;
 public interface ITokenizer
 {
     StringComparison TextComparison { get; }
+    ILexicalElements Tokens { get; }
     List<Token> Tokenize( string cmdLine );
 }
