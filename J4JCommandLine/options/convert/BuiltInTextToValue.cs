@@ -22,7 +22,6 @@
 #endregion
 
 using System.Reflection;
-using Microsoft.Extensions.Logging;
 
 namespace J4JSoftware.Configuration.CommandLine;
 

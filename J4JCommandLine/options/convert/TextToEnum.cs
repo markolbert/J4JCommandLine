@@ -25,7 +25,7 @@ using System;
 
 namespace J4JSoftware.Configuration.CommandLine;
 
-public class TextToEnum<TEnum>() : TextToValue<TEnum>
+public class TextToEnum<TEnum> : TextToValue<TEnum>
     where TEnum : Enum
 {
     protected override bool ConvertTextToValue( string text, out TEnum? result )

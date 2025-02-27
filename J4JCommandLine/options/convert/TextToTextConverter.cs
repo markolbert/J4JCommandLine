@@ -23,7 +23,7 @@
 
 namespace J4JSoftware.Configuration.CommandLine;
 
-public class TextToTextConverter() : TextToValue<string>
+public class TextToTextConverter : TextToValue<string>
 {
     protected override bool ConvertTextToValue( string text, out string? result )
     {

@@ -50,7 +50,6 @@ public interface IOption
     bool Required { get; }
 
     string? Description { get; }
-    IOption SetStyle( OptionStyle style );
 
     string? GetDefaultValue();
 }

@@ -76,12 +76,6 @@ public class Option<TContainer, TProp> : IOptionInternal
 
     public OptionStyle Style { get; private set; } = OptionStyle.Undefined;
 
-    public IOption SetStyle( OptionStyle style )
-    {
-        Style = style;
-        return this;
-    }
-
     public ReadOnlyCollection<string> Values => _values.AsReadOnly();
 
     void IOptionInternal.ClearValues()
@@ -161,6 +155,12 @@ public class Option<TContainer, TProp> : IOptionInternal
     }
 
     public string? Description { get; private set; }
+
+    public Option<TContainer, TProp> SetStyle( OptionStyle style )
+    {
+        Style = style;
+        return this;
+    }
 
     public Option<TContainer, TProp> SetDescription( string description )
     {

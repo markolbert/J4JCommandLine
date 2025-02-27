@@ -47,7 +47,7 @@ public class TextConverters : ITextConverters
         {
             var builtInType = typeof( BuiltInTextToValue<> ).MakeGenericType( builtInConverter.ReturnType );
 
-            retVal.Add( (ITextToValue) Activator.CreateInstance( builtInType, builtInConverter.MethodInfo)! );
+            retVal.Add( (ITextToValue) Activator.CreateInstance( builtInType, builtInConverter.MethodInfo )! );
         }
 
         return retVal;
@@ -190,7 +190,7 @@ public class TextConverters : ITextConverters
 
         if( retVal != null )
             _converters.Add( simpleType, retVal );
-        else _logger?.MissingConverter(builtInType.Name);
+        else _logger?.MissingConverter( builtInType.Name );
 
         return retVal;
     }
@@ -224,7 +224,7 @@ public class TextConverters : ITextConverters
             return converter!.Convert( textValues, out result );
         }
 
-        _logger?.MissingConverter(targetType.Name);
+        _logger?.MissingConverter( targetType.Name );
 
         return false;
     }
@@ -252,7 +252,7 @@ public class TextConverters : ITextConverters
             if( converter != null )
                 return converter;
 
-            _logger?.MissingConverter(key.Name);
+            _logger?.MissingConverter( key.Name );
             return new UndefinedTextToValue();
         }
     }
