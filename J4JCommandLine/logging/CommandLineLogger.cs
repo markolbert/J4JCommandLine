@@ -4,10 +4,10 @@ using Microsoft.Extensions.Logging;
 
 namespace J4JSoftware.Configuration.CommandLine;
 
-internal class CommandLineLogger<T>(Type loggedType) : ILogger<T>, ICommandLineLogger
+internal class CommandLineLogger<T>( Type loggedType ) : ILogger<T>, ICommandLineLogger
     where T : class
 {
-    public List<LogEntry> Entries { get; }= [];
+    public List<LogEntry> Entries { get; } = [];
 
     public void Log<TState>(
         LogLevel logLevel,

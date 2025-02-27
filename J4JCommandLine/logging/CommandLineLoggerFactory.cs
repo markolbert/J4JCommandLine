@@ -21,7 +21,7 @@ public class CommandLineLoggerFactory
         where T : class =>
         Create( typeof( T ) );
 
-    public ILogger? Create(Type type)
+    public ILogger? Create( Type type )
     {
         if( !EnableLogging )
             return null;
