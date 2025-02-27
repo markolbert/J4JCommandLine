@@ -1,50 +1,45 @@
 ﻿using System;
+using Autofac.Extensions.DependencyInjection;
 using J4JSoftware.Configuration.CommandLine;
 using J4JSoftware.Configuration.J4JCommandLine;
-using J4JSoftware.DependencyInjection;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
 
 namespace J4JSoftware.CommandLine.Examples;
 
 class Program
 {
+    private static J4JCommandLineBuilder? _optionBuilder;
+    private static ILexicalElements? _tokens;
+
     static void Main()
     {
-        var hostConfig = new J4JHostConfiguration(AppEnvironment.Console)
-            .Publisher( "J4JSoftware" )
-            .ApplicationName( "InstancePropertyExample" );
+        var builder = new HostBuilder()
+                     .UseServiceProviderFactory( new AutofacServiceProviderFactory() )
+                     .ConfigureHostConfiguration( SetupConfiguration )
+                     .ConfigureAppConfiguration( SetupConfiguration );
 
-        hostConfig.AddCommandLineProcessing( CommandLineOperatingSystems.Windows )
-            .OptionsInitializer( SetupOptions );
+        var host = builder.Build();
 
-        if ( hostConfig.MissingRequirements != J4JHostRequirements.AllMet )
+        if( _optionBuilder == null || _tokens == null )
         {
-            Console.WriteLine( $"Missing J4JHostConfiguration items: {hostConfig.MissingRequirements}" );
-            Environment.ExitCode = 1;
+            Console.WriteLine( "Option setup failed" );
 
-            return;
-        }
-
-        var host = hostConfig.Build();
-        if ( host == null )
-        {
-            Console.WriteLine( "Could not create IJ4JHost" );
-            Environment.ExitCode = 1;
-
+            Environment.ExitCode = -1;
             return;
         }
 
         var config = host.Services.GetRequiredService<IConfiguration>();
-        if ( config == null )
+        if( config == null )
             throw new NullReferenceException( "Undefined IConfiguration" );
 
-        var help = new ColorHelpDisplay( host.CommandLineLexicalElements!, host.Options! );
+        var help = new ColorHelpDisplay( _tokens, _optionBuilder.Options );
         help.Display();
 
         var parsed = config.Get<Configuration>();
 
-        if ( parsed == null )
+        if( parsed == null )
         {
             Console.WriteLine( "Parsing failed" );
 
@@ -57,19 +52,27 @@ class Program
         Console.WriteLine( $"IntValue is {parsed.IntValue}" );
         Console.WriteLine( $"TextValue is {parsed.TextValue}" );
 
-        Console.WriteLine( host.Options!.SpuriousValues.Count == 0
-            ? "No unkeyed parameters"
-            : $"Unkeyed parameters: {string.Join( ", ", host.Options.SpuriousValues )}" );
+        Console.WriteLine( _optionBuilder.Options.SpuriousValues.Count == 0
+                               ? "No unkeyed parameters"
+                               : $"Unkeyed parameters: {string.Join( ", ", _optionBuilder.Options.SpuriousValues )}" );
     }
 
-    private static void SetupOptions( OptionCollection options )
+    private static void SetupConfiguration( IConfigurationBuilder configBuilder )
     {
-        options.Bind<Configuration, int>( x => x.IntValue, "i" )!
-            .SetDefaultValue( 75 )
-            .SetDescription( "An integer value" );
+        _optionBuilder = new J4JCommandLineBuilder( StringComparison.OrdinalIgnoreCase );
 
-        options.Bind<Configuration, string>( x => x.TextValue, "t" )!
-            .SetDefaultValue( "a cool default" )
-            .SetDescription( "A string value" );
+        _optionBuilder.Bind<Configuration, int>( x => x.IntValue, "i" )!
+                .SetDefaultValue( 75 )
+                .SetStyle(OptionStyle.SingleValued)
+                .SetDescription( "An integer value" );
+
+        _optionBuilder.Bind<Configuration, string>( x => x.TextValue, "t" )!
+                .SetDefaultValue( "a cool default" )
+                .SetStyle(OptionStyle.SingleValued)
+                .SetDescription( "A string value" );
+
+        ILexicalElements? tokens = null;
+        configBuilder.AddJ4JCommandLine( _optionBuilder, ref tokens );
+        _tokens = tokens;
     }
 }

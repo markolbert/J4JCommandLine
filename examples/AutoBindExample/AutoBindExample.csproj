@@ -17,10 +17,10 @@
 	<ItemGroup>
 		<PackageReference Include="Autofac" Version="8.2.0" />
 		<PackageReference Include="Autofac.Extensions.DependencyInjection" Version="10.0.0" />
+		<PackageReference Include="Microsoft.Extensions.Hosting" Version="9.0.2" />
 	</ItemGroup>
 
 	<ItemGroup>
-	  <ProjectReference Include="..\..\..\ProgrammingUtilities\DependencyInjection\DependencyInjection.csproj" />
 	  <ProjectReference Include="..\..\ColorfulHelp\ColorfulHelp.csproj" />
 	  <ProjectReference Include="..\..\J4JCommandLine\J4JCommandLine.csproj" />
 	</ItemGroup>
