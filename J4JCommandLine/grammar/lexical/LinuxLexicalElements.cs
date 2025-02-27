@@ -21,14 +21,12 @@
 
 #endregion
 
-using System;
-
 namespace J4JSoftware.Configuration.CommandLine;
 
 public sealed class LinuxLexicalElements : LexicalElements
 {
-    public LinuxLexicalElements()
-        : base( StringComparison.Ordinal )
+    public LinuxLexicalElements( J4JCommandLineBuilder optionBuilder )
+        : base( optionBuilder )
     {
         Add( LexicalType.Quoter, "\"" );
         Add( LexicalType.Quoter, "'" );

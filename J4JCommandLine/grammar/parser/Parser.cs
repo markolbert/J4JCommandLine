@@ -21,54 +21,43 @@
 
 #endregion
 
-using System;
 using Microsoft.Extensions.Logging;
 
 namespace J4JSoftware.Configuration.CommandLine;
 
 public class Parser(
-    OptionCollection options,
+    J4JCommandLineBuilder optionBuilder,
     ParsingTable parsingTable,
     ITokenizer tokenizer
 )
     : IParser
 {
     public static IParser GetWindowsDefault(
-        ITextConverters? converters = null,
-        params ICleanupTokens[] cleanupProcessors
+        J4JCommandLineBuilder optionBuilder
     )
     {
-        converters ??= new TextConverters();
+        var parsingTable = new ParsingTable( new OptionsGenerator( optionBuilder ) );
 
-        var options = new OptionCollection( StringComparison.OrdinalIgnoreCase, converters );
+        var tokenizer = new Tokenizer( new WindowsLexicalElements( optionBuilder ), optionBuilder );
 
-        var parsingTable = new ParsingTable( new OptionsGenerator( options, StringComparison.OrdinalIgnoreCase ) );
-
-        var tokenizer = new Tokenizer( new WindowsLexicalElements(), cleanupProcessors );
-
-        return new Parser( options, parsingTable, tokenizer );
+        return new Parser( optionBuilder, parsingTable, tokenizer );
     }
 
     public static IParser GetLinuxDefault(
-        ITextConverters? converters = null,
-        params ICleanupTokens[] cleanupProcessors
+        J4JCommandLineBuilder optionBuilder
     )
     {
-        converters ??= new TextConverters();
+        var parsingTable = new ParsingTable( new OptionsGenerator( optionBuilder ) );
 
-        var options = new OptionCollection( StringComparison.Ordinal, converters );
+        var tokenizer = new Tokenizer( new LinuxLexicalElements( optionBuilder ), optionBuilder );
 
-        var parsingTable = new ParsingTable( new OptionsGenerator( options, StringComparison.Ordinal ) );
-
-        var tokenizer = new Tokenizer( new LinuxLexicalElements(), cleanupProcessors );
-
-        return new Parser( options, parsingTable, tokenizer );
+        return new Parser( optionBuilder, parsingTable, tokenizer );
     }
 
     private readonly ILogger? _logger = CommandLineLoggerFactory.Default.Create<Parser>();
 
     public ITokenizer Tokenizer { get; } = tokenizer;
-    public OptionCollection Collection { get; } = options;
+    public OptionCollection Collection => optionBuilder.Options;
 
     public bool Parse( string cmdLine )
     {

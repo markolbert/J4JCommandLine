@@ -33,15 +33,14 @@ public class LexicalElements : ILexicalElements
 {
     private readonly Dictionary<LexicalType, List<Token>> _available = new();
 
-    public LexicalElements(
-        StringComparison textComparison,
-        bool inclCommon = true
+    protected LexicalElements(
+        J4JCommandLineBuilder optionBuilder
     )
     {
-        TextComparison = textComparison;
+        TextComparison = optionBuilder.TextComparison;
         Logger = CommandLineLoggerFactory.Default.Create( GetType() );
 
-        if( !inclCommon )
+        if( !optionBuilder.IncludeCommonLexicalElements )
             return;
 
         Add( LexicalType.Separator, " " );

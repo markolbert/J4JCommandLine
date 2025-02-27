@@ -29,25 +29,18 @@ using Microsoft.Extensions.Logging;
 namespace J4JSoftware.Configuration.CommandLine;
 
 public class OptionsGenerator(
-    OptionCollection options,
-    StringComparison textComparison
+    J4JCommandLineBuilder optionBuilder
 )
     : IOptionsGenerator
 {
-    public static OptionsGenerator GetWindowsDefault() =>
-        new( OptionCollection.GetWindowsDefault(), StringComparison.OrdinalIgnoreCase );
-
-    public static OptionsGenerator GetLinuxDefault() =>
-        new( OptionCollection.GetWindowsDefault(), StringComparison.Ordinal );
-
-    private readonly OptionCollection? _options = options;
+    private readonly OptionCollection? _options = optionBuilder.Options;
     private readonly ILogger? _logger = CommandLineLoggerFactory.Default.Create<OptionsGenerator>();
 
     private CommandLineArgument? _current;
 
     public bool Create( TokenPair tokenPair )
     {
-        _current = new CommandLineArgument( _options!, textComparison );
+        _current = new CommandLineArgument( _options!, optionBuilder.TextComparison );
         return true;
     }
 
@@ -170,7 +163,7 @@ public class OptionsGenerator(
     {
         if( _current?.Option == null || _current.Option.Style == OptionStyle.Switch )
         {
-            _logger?.InvalidAssignment("non-switch", "switch");
+            _logger?.InvalidAssignment( "non-switch", "switch" );
             return false;
         }
 
@@ -205,7 +198,7 @@ public class OptionsGenerator(
 
         foreach( var value in values )
         {
-            if( validValues.Any( x => x.Equals( value, textComparison ) ) )
+            if( validValues.Any( x => x.Equals( value, optionBuilder.TextComparison ) ) )
                 continue;
 
             _logger?.InvalidOptionValue( propertyType.Name, value );
@@ -225,17 +218,5 @@ public class OptionsGenerator(
                      text,
                      tokenPair.Current.Type,
                      tokenPair.Current.Text );
-
-        //else
-        //    _logger.Write( level,
-        //            "{0} {1} ('{2}') => {3} ('{4}')",
-        //            new object[]
-        //            {
-        //                text,
-        //                tokenPair.Previous.Type,
-        //                tokenPair.Previous.Text,
-        //                tokenPair.Current.Type,
-        //                tokenPair.Current.Text
-        //            } );
     }
 }

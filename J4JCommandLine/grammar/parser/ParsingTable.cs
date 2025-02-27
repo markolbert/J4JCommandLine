@@ -31,10 +31,6 @@ public delegate bool ParsingAction( TokenPair tokenPair );
 
 public class ParsingTable : IParsingTable
 {
-    public static ParsingTable GetWindowsDefault() => new( OptionsGenerator.GetWindowsDefault() );
-
-    public static ParsingTable GetLinuxDefault() => new( OptionsGenerator.GetLinuxDefault() );
-
     private readonly Dictionary<LexicalType, Dictionary<LexicalType, ParsingAction?>> _table =
         new();
 
