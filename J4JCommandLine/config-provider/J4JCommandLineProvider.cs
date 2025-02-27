@@ -21,7 +21,6 @@
 
 #endregion
 
-using System;
 using System.ComponentModel;
 using Microsoft.Extensions.Configuration;
 
@@ -29,35 +28,26 @@ namespace J4JSoftware.Configuration.CommandLine;
 
 public class J4JCommandLineProvider : ConfigurationProvider
 {
-    public J4JCommandLineProvider( J4JCommandLineSource source )
+    private readonly IParser _parser;
+    private readonly string _cmdLineText;
+
+    internal J4JCommandLineProvider( J4JCommandLineSource source )
     {
-        Source = source;
-
-        // watch for changes, to the command line text 
-        // and the OptionsCollection
-        Source.SourceChanged += OnSourceChanged;
+        _parser = source.Parser;
+        _cmdLineText = source.CommandLineText;
     }
-
-    private void OnSourceChanged( object? sender, EventArgs e )
-    {
-        Load();
-    }
-
-    public J4JCommandLineSource Source { get; }
 
     public override void Load()
     {
-        if( Source.Parser == null
-        || !Source.Parser.Collection.IsConfigured
-        || Source.CommandLineSource == null )
+        if( string.IsNullOrWhiteSpace( _cmdLineText ) )
             return;
 
-        Source.Parser.Collection.ClearValues();
+        _parser.Collection.ClearValues();
 
-        if( !Source.Parser.Parse( Source.CommandLineSource.CommandLine ) )
+        if( !_parser.Parse( _cmdLineText ) )
             return;
 
-        foreach( var option in Source.Parser.Collection.OptionsInternal )
+        foreach( var option in _parser.Collection.OptionsInternal )
         {
             switch( option.Style )
             {

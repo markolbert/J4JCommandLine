@@ -26,48 +26,35 @@ using Microsoft.Extensions.Configuration;
 
 namespace J4JSoftware.Configuration.CommandLine;
 
-public class J4JCommandLineSource : IConfigurationSource
+internal class J4JCommandLineSource : IConfigurationSource
 {
-    public event EventHandler? SourceChanged;
-
-    ///TODO: cleanupTokens not used
-    public J4JCommandLineSource(
-        IParser parser,
-        params ICleanupTokens[] cleanupTokens
-    )
-    {
-        Parser = parser;
-        CommandLineSource = Initialize();
-    }
-
-    public J4JCommandLineSource(
+    internal J4JCommandLineSource(
         IParser parser
     )
     {
         Parser = parser;
-        CommandLineSource = Initialize();
+
+        // we don't want the name of the executable so we need to remove it.
+        // it's the first argument in what gets returned by Environment.GetCommandLineArgs()
+        var temp = Environment.GetCommandLineArgs();
+
+        var cmdLine = Environment.CommandLine;
+        CommandLineText = cmdLine.IndexOf( temp[ 0 ], parser.Tokenizer.TextComparison ) == 0
+            ? cmdLine.Replace( temp[ 0 ], string.Empty )
+            : cmdLine;
     }
 
-    private CommandLineSource? Initialize()
+    internal J4JCommandLineSource(
+        IParser parser,
+        string cmdLineText
+    )
     {
-        if( Parser == null )
-            return null;
-
-        Parser.Collection.Configured += Options_Configured;
-
-        var retVal = new CommandLineSource( Parser.Tokenizer.TextComparison );
-        retVal.Changed += OnCommandLineSourceChanged;
-
-        return retVal;
+        Parser = parser;
+        CommandLineText = cmdLineText;
     }
 
-    private void Options_Configured( object? sender, EventArgs e ) => SourceChanged?.Invoke( this, EventArgs.Empty );
-
-    private void OnCommandLineSourceChanged( object? sender, ConfigurationChangedEventArgs e ) =>
-        SourceChanged?.Invoke( this, EventArgs.Empty );
-
-    public CommandLineSource? CommandLineSource { get; }
-    public IParser? Parser { get; }
+    public IParser Parser { get; }
+    public string CommandLineText { get; }
 
     public IConfigurationProvider Build( IConfigurationBuilder builder ) => new J4JCommandLineProvider( this );
 }
