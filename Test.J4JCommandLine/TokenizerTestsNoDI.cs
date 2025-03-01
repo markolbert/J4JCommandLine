@@ -13,6 +13,7 @@ public class TokenizerTestsNoDi : TestBase
     public void Simple( TokenizerConfig config )
     {
         var (_, parser) = GetOptionBuilderAndParser( config.OperatingSystem,
+                                                     config.CommandLine,
                                                      new ConsolidateQuotedText(
                                                          StringComparison.OrdinalIgnoreCase ),
                                                      new MergeSequentialSeparators() );
@@ -34,7 +35,7 @@ public class TokenizerTestsNoDi : TestBase
     [ MemberData( nameof( TestDataSource.GetEmbeddedPropertyData ), MemberType = typeof( TestDataSource ) ) ]
     public void Embedded( TestConfig config )
     {
-        var (optionBuilder, parser) = GetOptionBuilderAndParser(config.OperatingSystem);
+        var (optionBuilder, parser) = GetOptionBuilderAndParser(config.OperatingSystem, config.CommandLine);
 
         optionBuilder.Bind<EmbeddedTarget, bool>( x => x.Target1.ASwitch, config );
         optionBuilder.Bind<EmbeddedTarget, string>( x => x.Target1.ASingleValue, config );
@@ -49,7 +50,7 @@ public class TokenizerTestsNoDi : TestBase
     [ MemberData( nameof( TestDataSource.GetEmbeddedPropertyData ), MemberType = typeof( TestDataSource ) ) ]
     public void EmbeddedNoSetters( TestConfig config )
     {
-        var (optionBuilder, parser) = GetOptionBuilderAndParser(config.OperatingSystem);
+        var (optionBuilder, parser) = GetOptionBuilderAndParser(config.OperatingSystem, config.CommandLine);
 
         optionBuilder.Bind<EmbeddedTargetNoSetter, bool>( x => x.Target1.ASwitch, config );
         optionBuilder.Bind<EmbeddedTargetNoSetter, string>( x => x.Target1.ASingleValue, config );

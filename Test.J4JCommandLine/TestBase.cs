@@ -4,7 +4,6 @@ using Autofac;
 using FluentAssertions;
 using J4JSoftware.Configuration.CommandLine;
 using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.Options;
 using Serilog;
 using Xunit;
 using ILogger = Serilog.ILogger;
@@ -27,7 +26,7 @@ public class TestBase
     protected IContainer? Container { get; }
     protected ILogger? Logger { get; }
 
-    protected J4JCommandLineBuilder GetOptionBuilder( string osName, params ICleanupTokens[] cleanupTokens )
+    protected J4JCommandLineBuilder GetOptionBuilder( string osName, string cmdLineText, params ICleanupTokens[] cleanupTokens )
     {
         var os = osName.Equals( "windows", StringComparison.OrdinalIgnoreCase )
             ? CommandLineOperatingSystems.Windows
@@ -37,7 +36,7 @@ public class TestBase
             ? StringComparison.OrdinalIgnoreCase
             : StringComparison.Ordinal;
 
-        var retVal = new J4JCommandLineBuilder( textComparison, os );
+        var retVal = new J4JCommandLineBuilder( textComparison, os ) { CommandLineText = cmdLineText };
         retVal.CleanupTokens.AddRange( cleanupTokens );
 
         return retVal;
@@ -45,10 +44,11 @@ public class TestBase
 
     protected (J4JCommandLineBuilder optionBuilder, IParser parser) GetOptionBuilderAndParser(
         string osName,
+        string cmdLineText,
         params ICleanupTokens[] cleanupTokens
     )
     {
-        var optionBuilder = GetOptionBuilder( osName, cleanupTokens );
+        var optionBuilder = GetOptionBuilder( osName, cmdLineText, cleanupTokens );
 
         var parser = osName.Equals( "windows", StringComparison.OrdinalIgnoreCase )
             ? Parser.GetWindowsDefault( optionBuilder )
@@ -74,13 +74,10 @@ public class TestBase
     protected void ValidateConfiguration<TParsed>(TestConfig config, J4JCommandLineBuilder optionBuilder )
         where TParsed : class, new()
     {
-        ILexicalElements? tokens = null;
-
         var configBuilder = new ConfigurationBuilder()
-           .AddJ4JCommandLine(optionBuilder, config.CommandLine, ref tokens);
+           .AddJ4JCommandLine( optionBuilder );
 
         var configRoot = configBuilder.Build();
-        var junk = configRoot.Get<TParsed>();
 
         if (config.OptionConfigurations.Any(x => x.ConversionWillFail))
         {

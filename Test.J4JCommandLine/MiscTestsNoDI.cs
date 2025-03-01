@@ -31,14 +31,12 @@ public class MiscTestsNoDi : TestBase
     [ InlineData( "-x \"abc\"", "abc" ) ]
     public void LinuxStringHandling( string cmdLine, params string[] result )
     {
-        var optionBuilder = GetOptionBuilder( "Linux" );
+        var optionBuilder = GetOptionBuilder( "Linux", cmdLine );
 
         optionBuilder.Bind<MiscTarget, string?>( x => x.AStringValue, "x" );
 
-        ILexicalElements? tokens = null;
-
         var configBuilder = new ConfigurationBuilder()
-           .AddJ4JCommandLine( optionBuilder, cmdLine, ref tokens );
+           .AddJ4JCommandLine( optionBuilder );
 
         configBuilder.Build();
 

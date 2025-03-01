@@ -30,7 +30,7 @@ public class MiscTests : TestBase
     [ InlineData( "-x \"abc\"", "abc" ) ]
     public void LinuxStringHandling( string cmdLine, params string[] result )
     {
-        var optionBuilder = GetOptionBuilder( "Linux" );
+        var optionBuilder = GetOptionBuilder( "Linux", cmdLine );
         var parser = Parser.GetLinuxDefault( optionBuilder );
 
         optionBuilder.Bind<MiscTarget, string?>( x => x.AStringValue, "x" );

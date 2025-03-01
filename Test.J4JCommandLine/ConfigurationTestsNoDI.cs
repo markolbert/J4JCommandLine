@@ -10,7 +10,7 @@ public class ConfigurationTestsNoDi : TestBase
     [ MemberData( nameof( TestDataSource.GetEmbeddedPropertyData ), MemberType = typeof( TestDataSource ) ) ]
     public void EmbeddedConfiguration( TestConfig config )
     {
-        var optionBuilder = GetOptionBuilder( config.OperatingSystem );
+        var optionBuilder = GetOptionBuilder( config.OperatingSystem, config.CommandLine );
 
         optionBuilder.Bind<EmbeddedTarget, bool>( x => x.Target1.ASwitch, config );
         optionBuilder.Bind<EmbeddedTarget, string>( x => x.Target1.ASingleValue, config );
@@ -27,7 +27,7 @@ public class ConfigurationTestsNoDi : TestBase
     [ MemberData( nameof( TestDataSource.GetEmbeddedPropertyData ), MemberType = typeof( TestDataSource ) ) ]
     public void EmbeddedConfigurationNoSetter( TestConfig config )
     {
-        var optionBuilder = GetOptionBuilder(config.OperatingSystem);
+        var optionBuilder = GetOptionBuilder(config.OperatingSystem, config.CommandLine);
 
         optionBuilder.Bind<EmbeddedTargetNoSetter, bool>( x => x.Target1.ASwitch, config );
         optionBuilder.Bind<EmbeddedTargetNoSetter, string>( x => x.Target1.ASingleValue, config );
