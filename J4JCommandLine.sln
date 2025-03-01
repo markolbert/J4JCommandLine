@@ -21,6 +21,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ColorfulHelp", "ColorfulHel
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NoHostExample", "examples\NoHostExample\NoHostExample.csproj", "{1BA9A459-4ABF-49F6-B910-D264241BC3D1}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GeneralUtilities", "..\ProgrammingUtilities\GeneralUtilities\src\GeneralUtilities.csproj", "{56BA7E52-5C5E-9C2F-8D37-3D5666E6AE9F}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -55,6 +57,10 @@ Global
 		{1BA9A459-4ABF-49F6-B910-D264241BC3D1}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{1BA9A459-4ABF-49F6-B910-D264241BC3D1}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{1BA9A459-4ABF-49F6-B910-D264241BC3D1}.Release|Any CPU.Build.0 = Release|Any CPU
+		{56BA7E52-5C5E-9C2F-8D37-3D5666E6AE9F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{56BA7E52-5C5E-9C2F-8D37-3D5666E6AE9F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{56BA7E52-5C5E-9C2F-8D37-3D5666E6AE9F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{56BA7E52-5C5E-9C2F-8D37-3D5666E6AE9F}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -64,6 +70,7 @@ Global
 		{C5400387-BD0A-4E24-80B7-C532A8D1A216} = {4D3E643D-3FEB-4571-AD1F-8B84313411A2}
 		{7985FAD5-17DC-40AD-90A9-40A7CC903743} = {4D3E643D-3FEB-4571-AD1F-8B84313411A2}
 		{1BA9A459-4ABF-49F6-B910-D264241BC3D1} = {4D3E643D-3FEB-4571-AD1F-8B84313411A2}
+		{56BA7E52-5C5E-9C2F-8D37-3D5666E6AE9F} = {49668F40-3271-4A21-A860-8C6496E00124}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {F40695CC-CF6A-4293-81A1-04D389611E2D}
