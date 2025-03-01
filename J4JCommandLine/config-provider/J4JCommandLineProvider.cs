@@ -22,7 +22,9 @@
 #endregion
 
 using System.ComponentModel;
+using J4JSoftware.Utilities;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Logging;
 
 namespace J4JSoftware.Configuration.CommandLine;
 
@@ -30,6 +32,7 @@ public class J4JCommandLineProvider : ConfigurationProvider
 {
     private readonly IParser _parser;
     private readonly string _cmdLineText;
+    private readonly ILogger? _logger = BuildTimeLoggerFactory.Default.Create<J4JCommandLineProvider>();
 
     internal J4JCommandLineProvider( J4JCommandLineSource source )
     {
@@ -81,7 +84,8 @@ public class J4JCommandLineProvider : ConfigurationProvider
                     break;
 
                 default:
-                    throw new InvalidEnumArgumentException( $"Unsupported OptionStyle '{option.Style}'" );
+                    _logger?.UnsupportedOptionStyle( option.Style.ToString() );
+                    break;
             }
         }
     }

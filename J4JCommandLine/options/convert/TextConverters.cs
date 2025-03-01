@@ -26,6 +26,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+using J4JSoftware.Utilities;
 using Microsoft.Extensions.Logging;
 
 namespace J4JSoftware.Configuration.CommandLine;
@@ -71,7 +72,7 @@ public class TextConverters : ITextConverters
         params ITextToValue[] converters
     )
     {
-        _logger = CommandLineLoggerFactory.Default.Create<TextConverters>();
+        _logger = BuildTimeLoggerFactory.Default.Create<TextConverters>();
 
         // add the text to text "converter"
         AddConverter( new TextToTextConverter(), true );

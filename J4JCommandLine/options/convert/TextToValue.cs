@@ -24,6 +24,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using J4JSoftware.Utilities;
 using Microsoft.Extensions.Logging;
 
 namespace J4JSoftware.Configuration.CommandLine;
@@ -32,7 +33,7 @@ public abstract class TextToValue<TBaseType> : ITextToValue
 {
     protected abstract bool ConvertTextToValue( string text, out TBaseType? result );
 
-    protected ILogger? Logger { get; } = CommandLineLoggerFactory.Default.Create<TextToValue<TBaseType>>();
+    protected ILogger? Logger { get; } = BuildTimeLoggerFactory.Default.Create<TextToValue<TBaseType>>();
 
     public Type TargetType => typeof( TBaseType );
 

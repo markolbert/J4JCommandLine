@@ -25,6 +25,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using J4JSoftware.Utilities;
 using Microsoft.Extensions.Logging;
 
 namespace J4JSoftware.Configuration.CommandLine;
@@ -38,7 +39,7 @@ public class LexicalElements : ILexicalElements
     )
     {
         TextComparison = optionBuilder.TextComparison;
-        Logger = CommandLineLoggerFactory.Default.Create( GetType() );
+        Logger = BuildTimeLoggerFactory.Default.Create( GetType() );
 
         if( !optionBuilder.IncludeCommonLexicalElements )
             return;

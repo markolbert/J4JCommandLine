@@ -25,6 +25,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using J4JSoftware.Utilities;
 using Microsoft.Extensions.Logging;
 
 #pragma warning disable 8618
@@ -36,7 +37,7 @@ public class ConsolidateQuotedText(
 )
     : ICleanupTokens
 {
-    private readonly ILogger? _logger = CommandLineLoggerFactory.Default.Create<ConsolidateQuotedText>();
+    private readonly ILogger? _logger = BuildTimeLoggerFactory.Default.Create<ConsolidateQuotedText>();
 
     public void Process( List<Token> tokens )
     {

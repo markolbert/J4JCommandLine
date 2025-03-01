@@ -24,6 +24,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using J4JSoftware.Utilities;
 using Microsoft.Extensions.Logging;
 
 namespace J4JSoftware.Configuration.CommandLine;
@@ -34,7 +35,7 @@ public class OptionsGenerator(
     : IOptionsGenerator
 {
     private readonly OptionCollection? _options = optionBuilder.Options;
-    private readonly ILogger? _logger = CommandLineLoggerFactory.Default.Create<OptionsGenerator>();
+    private readonly ILogger? _logger = BuildTimeLoggerFactory.Default.Create<OptionsGenerator>();
 
     private CommandLineArgument? _current;
 

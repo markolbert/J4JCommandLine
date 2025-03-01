@@ -25,6 +25,8 @@ using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
+using J4JSoftware.Utilities;
+using Microsoft.Extensions.Logging;
 
 namespace J4JSoftware.Configuration.CommandLine;
 
@@ -33,6 +35,7 @@ public class Option<TContainer, TProp> : IOptionInternal
     private readonly List<string> _cmdLineKeys = [];
     private readonly ITextToValue _converter;
     private readonly List<string> _values = [];
+    private readonly ILogger? _logger = BuildTimeLoggerFactory.Default.Create<Option<TContainer, TProp>>();
 
     internal Option(
         OptionCollection container,
@@ -93,15 +96,25 @@ public class Option<TContainer, TProp> : IOptionInternal
         _values.AddRange( values );
     }
 
-    public int MaxValues =>
-        Style switch
+    public int MaxValues
+    {
+        get
         {
-            OptionStyle.Collection => int.MaxValue,
-            OptionStyle.SingleValued => 1,
-            OptionStyle.ConcatenatedSingleValue => int.MaxValue,
-            OptionStyle.Switch => 0,
-            _ => throw new InvalidEnumArgumentException( $"Unsupported OptionStyle '{Style}'" )
-        };
+            var retVal = Style switch
+            {
+                OptionStyle.Collection => int.MaxValue,
+                OptionStyle.SingleValued => 1,
+                OptionStyle.ConcatenatedSingleValue => int.MaxValue,
+                OptionStyle.Switch => 0,
+                _ => -1
+            };
+
+            if( retVal < 0 )
+                _logger?.UnsupportedOptionStyle( Style.ToString() );
+
+            return retVal < 0 ? 0 : retVal;
+        }
+    }
 
     public int NumValuesAllocated => _values.Count;
 
@@ -114,14 +127,22 @@ public class Option<TContainer, TProp> : IOptionInternal
 
             var numValuesAlloc = _values.Count;
 
-            return Style switch
+            switch( Style )
             {
-                OptionStyle.Switch => numValuesAlloc == 0,
-                OptionStyle.SingleValued => numValuesAlloc == 1,
-                OptionStyle.Collection => numValuesAlloc > 0,
-                OptionStyle.ConcatenatedSingleValue => numValuesAlloc > 0,
-                _ => throw new InvalidEnumArgumentException( $"Unsupported OptionStyle '{Style}'" )
-            };
+                case OptionStyle.Switch:
+                    return numValuesAlloc == 0;
+
+                case OptionStyle.SingleValued:
+                    return numValuesAlloc == 1;
+
+                case OptionStyle.Collection:
+                case OptionStyle.ConcatenatedSingleValue:
+                    return numValuesAlloc > 0;
+
+                default:
+                    _logger?.UnsupportedOptionStyle( Style.ToString() );
+                    return false;
+            }
         }
     }
 

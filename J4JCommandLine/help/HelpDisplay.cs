@@ -25,16 +25,24 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
 using System.Text;
+using J4JSoftware.Utilities;
+using Microsoft.Extensions.Logging;
 
 namespace J4JSoftware.Configuration.CommandLine;
 
-public abstract class HelpDisplay(
-    ILexicalElements tokens,
-    OptionCollection collection
-) : IHelpDisplay
+public abstract class HelpDisplay : IHelpDisplay
 {
-    protected ILexicalElements Tokens { get; } = tokens;
-    protected OptionCollection Collection { get; } = collection;
+    protected HelpDisplay(ILexicalElements tokens,
+        OptionCollection collection)
+    {
+        Tokens = tokens;
+        Collection = collection;
+        Logger = BuildTimeLoggerFactory.Default.Create(GetType());
+    }
+
+    protected ILexicalElements Tokens { get; }
+    protected ILogger? Logger { get; }
+    protected OptionCollection Collection { get; }
 
     public abstract void Display();
 
@@ -77,6 +85,8 @@ public abstract class HelpDisplay(
                 return "any value specified will be ignored";
         }
 
-        throw new InvalidEnumArgumentException( $"Unsupported {typeof( OptionStyle )} '{option.Style}'" );
+        Logger?.UnsupportedOptionStyle(option.Style.ToString());
+
+        return $"unsupported option style!";
     }
 }
