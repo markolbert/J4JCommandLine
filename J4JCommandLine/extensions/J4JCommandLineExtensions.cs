@@ -23,6 +23,7 @@
 
 using System;
 using System.Collections.Generic;
+using J4JSoftware.Utilities;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 
@@ -31,47 +32,34 @@ namespace J4JSoftware.Configuration.CommandLine;
 public static class J4JCommandLineExtensions
 {
     private static readonly ILogger? Logger =
-        CommandLineLoggerFactory.Default.Create( typeof( J4JCommandLineExtensions ) );
+        BuildTimeLoggerFactory.Default.Create( typeof( J4JCommandLineExtensions ) );
 
     public static IConfigurationBuilder AddJ4JCommandLine(
         this IConfigurationBuilder builder,
-        J4JCommandLineBuilder optionBuilder,
-        ref ILexicalElements? tokens
+        J4JCommandLineBuilder optionBuilder
     )
     {
-        var optionsGenerator = new OptionsGenerator( optionBuilder );
-
-        tokens ??= optionBuilder.Os switch
+        var tokens = optionBuilder.Os switch
         {
-            CommandLineOperatingSystems.Windows => new WindowsLexicalElements( optionBuilder ),
-            CommandLineOperatingSystems.Linux => new LinuxLexicalElements( optionBuilder ),
-            _ => null
+            CommandLineOperatingSystems.Windows => new WindowsLexicalElements(optionBuilder),
+            CommandLineOperatingSystems.Linux => new LinuxLexicalElements(optionBuilder),
+            _ => (ILexicalElements?) null
         };
 
-        if( tokens == null )
+        if (tokens == null)
         {
             Logger?.UndefinedLexicalElements();
             return builder;
         }
 
-        var tokenizer = new Tokenizer( tokens, optionBuilder );
-        var parsingTable = new ParsingTable( optionsGenerator );
-        var parser = new Parser( optionBuilder, parsingTable, tokenizer );
-
-        var source = new J4JCommandLineSource( parser );
-
-        builder.Add( source );
+        builder.AddJ4JCommandLine( optionBuilder, ref tokens );
 
         return builder;
     }
 
-    // this method should only be used for testing purposes
-    // as normally the command line is pulled from the 
-    // environment
     public static IConfigurationBuilder AddJ4JCommandLine(
         this IConfigurationBuilder builder,
         J4JCommandLineBuilder optionBuilder,
-        string cmdLineText,
         ref ILexicalElements? tokens
     )
     {
@@ -94,7 +82,7 @@ public static class J4JCommandLineExtensions
         var parsingTable = new ParsingTable( optionsGenerator );
         var parser = new Parser( optionBuilder, parsingTable, tokenizer );
 
-        var source = new J4JCommandLineSource( parser, cmdLineText );
+        var source = new J4JCommandLineSource(parser, optionBuilder.CommandLineText);
 
         builder.Add( source );
 

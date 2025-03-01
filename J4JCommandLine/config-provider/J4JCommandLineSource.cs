@@ -29,28 +29,24 @@ namespace J4JSoftware.Configuration.CommandLine;
 internal class J4JCommandLineSource : IConfigurationSource
 {
     internal J4JCommandLineSource(
-        IParser parser
-    )
-    {
-        Parser = parser;
-
-        // we don't want the name of the executable so we need to remove it.
-        // it's the first argument in what gets returned by Environment.GetCommandLineArgs()
-        var temp = Environment.GetCommandLineArgs();
-
-        var cmdLine = Environment.CommandLine;
-        CommandLineText = cmdLine.IndexOf( temp[ 0 ], parser.Tokenizer.TextComparison ) == 0
-            ? cmdLine.Replace( temp[ 0 ], string.Empty )
-            : cmdLine;
-    }
-
-    internal J4JCommandLineSource(
         IParser parser,
-        string cmdLineText
+        string? cmdLineText
     )
     {
         Parser = parser;
-        CommandLineText = cmdLineText;
+
+        if( string.IsNullOrEmpty( cmdLineText ) )
+        {
+            // we don't want the name of the executable so we need to remove it.
+            // it's the first argument in what gets returned by Environment.GetCommandLineArgs()
+            var temp = Environment.GetCommandLineArgs();
+
+            var cmdLine = Environment.CommandLine;
+            CommandLineText = cmdLine.IndexOf(temp[0], parser.Tokenizer.TextComparison) == 0
+                ? cmdLine.Replace(temp[0], string.Empty)
+                : cmdLine;
+        }
+        else CommandLineText = cmdLineText;
     }
 
     public IParser Parser { get; }
