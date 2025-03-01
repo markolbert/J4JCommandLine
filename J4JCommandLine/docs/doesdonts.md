@@ -46,26 +46,21 @@ When I dug through the `IConfiguration` API I was surprised to find there isn't 
 
 I haven't done much testing of custom converters because it's pretty rare to encounter the need for such. The built-in conversion routines are almost always adequate.
 
-## Declaring When You're Done Configuring Options
+## Incorporating J4JCommandLine into the IConfiguration System
 
 When you look at examples using `J4JCommandLine` you may wonder why the `FinishConfiguration()` call appears after the last option is configured:
 
 ```csharp
-options!.Bind<Program, int>(x => Program.IntValue, "i")!
+var optionBuilder = new J4JCommandLineBuilder( StringComparison.OrdinalIgnoreCase, CommandLineOperatingSystem.Windows, null );
+
+optionBuilder.Bind<Program, int>(x => Program.IntValue, "i")!
     .SetDefaultValue(75)
     .SetDescription("An integer value");
 
-options.Bind<Program, string>(x => Program.TextValue, "t")!
+optionBuilder.Bind<Program, string>(x => Program.TextValue, "t")!
     .SetDefaultValue("a cool default")
     .SetDescription("A string value");
 
-options.FinishConfiguration();
+// adding the option builder to the configuration system triggers parsing of the command line
+configBuilder.AddJ4JCommandLineBuilder( optionBuilder );
 ```
-
-Calling `FinsihConfiguration()` is absolutely essential for `J4JCommandLine` to work. If you don't you'll get one or more errors and, worse yet, your command line will not be translated into property values (unless they can be obtained from another `IConfiguration` source).
-
-The reason for is relates to how the `IConfiguration` system calls the various providers you declare for it. By design the providers are loaded and exercised as soon as they are declared. That's fine for situations (e.g., JSON files) where you don't have an intermediate step mapping things like command line syntax to targets.
-
-But that default load-and-exercise process will bypass the functionality of `J4JCommandLine` because you haven't configured any options at the time you bind the `J4JCommandLine` provider to the `IConfiguration` system.
-
-`FinishConfiguration()` triggers a reload of the provider. Since the options are, at that point, fully declared, this reload will translate and incorporate command line text into the `IConfiguration` system.

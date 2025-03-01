@@ -2,7 +2,7 @@
 
 ## Overview
 
-At a basic level all the `J4JCommandLine` library does is map `IConfiguration` targets to command line options, and then parse a command line to those mappings. The mapping part is what the `Bind<>()` method calls do, by walking the property expressions back up to the root class that defines them. Example:
+At a basic level all the `J4JCommandLine` library does is map `IConfiguration` targets to command line options, and then parse a command line to those mappings. The mapping part is set up by the `Bind<>()` method calls, by walking the property expressions back up to the root class that defines them. Example:
 
 ```csharp
 public class RootClass
@@ -16,8 +16,14 @@ public class SubClass
     public int AnotherProperty { get; set; }
 }
 
-var option1 = optionCollection.Bind<RootClass, int>( x => x.AProperty, "a" );
-var option2 = optionCollection.Bind<RootClass, int>( x => x.SubClass.AnotherProperty, "b" );
+// this next line creates the option builder used to define options
+var optionBuilder = new J4JCommandLineBuilder( StringComparison.OrdinalIgnoreCase, CommandLineOperatingSystem.Windows, null) ;
+
+var option1 = optionBuilder.Bind<RootClass, int>( x => x.AProperty, "a" );
+var option2 = optionBuilder.Bind<RootClass, int>( x => x.SubClass.AnotherProperty, "b" );
+
+// adding the option builder to the IConfiguration builder is what triggers parsing the command line
+configBuilder.AddJ4JCommandLine( optionBuilder, )
 ```
 
 The binding calls create `IConfiguration` mappings like this:

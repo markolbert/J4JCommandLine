@@ -2,6 +2,7 @@
 
 |Version|Description|
 |:-----:|-----------|
+|5.0.0|**major breaking changes**, [see details below](#500)|
 |4.3.0|**breaking changes**, [see details below](#430)|
 |4.2.0|Updated to Net 7, updated packages, [see details below](#420)|
 |4.1.1|fixed problem with parsing invalid enum values|
@@ -10,6 +11,18 @@
 |1.1|added ability to display help in the console [see details below](#110)|
 |1.0|rewritten to align better with the `IConfiguration` system, [see details below](#100)|
 |0.5|initial release|
+
+## 5.0.0
+
+Ever since I'd released `J4JCommandLine` I'd been bothered by how my implementation required you to call a special method (`FinishConfiguration()`) to signal you'd completed defining the options to be parsed. It worked, but it was pretty counter-intuitive. Plus, it's a very different behavior than what you see working with other configuration providers.
+
+After spending some time studying the way the `IConfiguration` subsystem works, I realized the problem: by default, the subsystem only pulls values into itself when you *add* a provider. It doesn't poll the provider when you extract configured classes out of it (e.g., via `Get<>()`).
+
+Looked at that way, the solution was simple: implement a build phase for configuring options, and then add the option provider to the subsystem when you built the option provider.
+
+In addition to making use more intuitive, this significantly simplified and clarified the code base. However, it did introduce a breaking change. Consult the revised docs for how to use the revised API.
+
+The library was also updated to use Net 9.
 
 ## 4.3.0
 
