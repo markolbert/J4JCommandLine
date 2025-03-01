@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
+using J4JSoftware.Utilities;
 using Microsoft.Extensions.Logging;
 
 namespace J4JSoftware.Configuration.CommandLine;
@@ -10,7 +11,7 @@ namespace J4JSoftware.Configuration.CommandLine;
 public class J4JCommandLineBuilder
 {
     private readonly List<Func<BindingInfo, bool>> _bindingTests;
-    private readonly ILogger? _logger = CommandLineLoggerFactory.Default.Create<J4JCommandLineBuilder>();
+    private readonly ILogger? _logger = BuildTimeLoggerFactory.Default.Create<J4JCommandLineBuilder>();
 
     public J4JCommandLineBuilder(
         StringComparison textComparison,
@@ -39,6 +40,8 @@ public class J4JCommandLineBuilder
     public CommandLineOperatingSystems Os { get; }
     public bool IncludeCommonLexicalElements { get; set; } = true;
     public List<ICleanupTokens> CleanupTokens { get; } = [];
+
+    public string? CommandLineText { get; set; }
 
     public bool TryBind<TContainer, TTarget>(
         Expression<Func<TContainer, TTarget>> selector,
