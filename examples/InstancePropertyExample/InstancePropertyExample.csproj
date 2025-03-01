@@ -4,7 +4,7 @@
 		<TargetFramework>net9.0</TargetFramework>
 		<Nullable>enable</Nullable>
 		<RootNamespace>J4JSoftware.CommandLine.Examples</RootNamespace>
-		<Version>0.1.0.0</Version>
+		<Version>1.0.0.0</Version>
 		<Authors>Mark A. Olbert</Authors>
 		<Company>Jump for Joy Software</Company>
 		<Product>J4JSoftware Command Line Processor</Product>
