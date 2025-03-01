@@ -139,4 +139,11 @@ internal static partial class LogExtensions
     [ LoggerMessage( LogLevel.Error,
                      "{caller}: unsupported operating system, lexical elements (i.e., tokens) must be supplied" ) ]
     public static partial void UndefinedLexicalElements( this ILogger logger, [ CallerMemberName ] string caller = "" );
+
+    [LoggerMessage(LogLevel.Error, "{caller}: unsupported option style {style}, ignoring")]
+    public static partial void UnsupportedOptionStyle(
+        this ILogger logger,
+        string style,
+        [ CallerMemberName ] string caller = ""
+    );
 }
