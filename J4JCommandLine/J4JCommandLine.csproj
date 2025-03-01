@@ -12,8 +12,16 @@
 		<Copyright>© Mark A. Olbert all rights reserved</Copyright>
 		<RepositoryUrl>https://github.com/markolbert/J4JCommandLine</RepositoryUrl>
 		<RepositoryType>git</RepositoryType>
-		<Version>4.3.0.0</Version>
-		<AssemblyVersion>4.3.0.0</AssemblyVersion>
+		<Version>5.0.0.0</Version>
+		<AssemblyVersion>5.0.0.0</AssemblyVersion>
+		<EmbedUntrackedSources>true</EmbedUntrackedSources>
+		<AllowedOutputExtensionsInPackageBuildOutputFolder>$(AllowedOutputExtensionsInPackageBuildOutputFolder);.pdb</AllowedOutputExtensionsInPackageBuildOutputFolder>
+		<ContinuousIntegrationBuild>true</ContinuousIntegrationBuild>
+		<PackageReleaseNotes>updated to NET9, simplified usage, added build-time logging</PackageReleaseNotes>
+		<PackageReadmeFile>readme.md</PackageReadmeFile>
+		<PackageLicenseFile>license.md</PackageLicenseFile>
+		<PackageDescription>command line processing for the Net IConfiguration system</PackageDescription>
+		<PackageReleaseNotes>updated to NET9, simplified usage, added build-time logging</PackageReleaseNotes>
 	</PropertyGroup>
 
 	<ItemGroup>

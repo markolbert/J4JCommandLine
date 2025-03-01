@@ -2,9 +2,9 @@
 
 	<PropertyGroup>
 		<TargetFramework>net9.0</TargetFramework>
+		<Nullable>enable</Nullable>
 		<AssemblyName>J4JSoftware.Configuration.J4JCommandLine.ColorfulHelp</AssemblyName>
 		<RootNamespace>J4JSoftware.Configuration.J4JCommandLine</RootNamespace>
-		<Nullable>enable</Nullable>
 		<Authors>Mark A. Olbert</Authors>
 		<Company>Jump for Joy Software</Company>
 		<Product>Colorful Help for J4JSoftware Command Line Processor</Product>
@@ -14,11 +14,18 @@
 		<RepositoryType>git</RepositoryType>
 		<Version>2.0.0.0</Version>
 		<AssemblyVersion>2.0.0.0</AssemblyVersion>
+		<EmbedUntrackedSources>true</EmbedUntrackedSources>
+		<AllowedOutputExtensionsInPackageBuildOutputFolder>$(AllowedOutputExtensionsInPackageBuildOutputFolder);.pdb</AllowedOutputExtensionsInPackageBuildOutputFolder>
+		<ContinuousIntegrationBuild>true</ContinuousIntegrationBuild>
+		<PackageReadmeFile>readme.md</PackageReadmeFile>
+		<PackageLicenseFile>license.md</PackageLicenseFile>
+		<PackageDescription>colorful help formatter for the J4JCommandLine system</PackageDescription>
 		<PackageReleaseNotes>requires NET9 and v5 of J4JCommandLine</PackageReleaseNotes>
 	</PropertyGroup>
 
 	<ItemGroup>
 	  <PackageReference Include="Alba.CsConsoleFormat-NoXaml" Version="1.0.0" />
+	  <PackageReference Include="J4JSoftware.GeneralUtilities" Version="1.0.0" />
 	</ItemGroup>
 
 </Project>
